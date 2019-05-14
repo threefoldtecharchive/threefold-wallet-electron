@@ -6,7 +6,17 @@ import routes from '../constants/routes'
 import styles from './Home.css'
 
 class Home extends Component {
+
   render() {
+    const tfwallet = global.tfwallet;
+    const mnemonic = tfwallet.NewMnemonic();
+    console.log(mnemonic);
+    console.log(tfwallet.EncryptMnemonic(mnemonic, "TeaCup"));
+    const wallet = tfwallet.New(mnemonic, 0);
+    console.log(wallet);
+    console.log(wallet.Address());
+    console.log(wallet.TestJSONTransaction());
+
     return (
       <div className={styles.container} data-tid="container">
         <h2 >TF Wallet</h2>
