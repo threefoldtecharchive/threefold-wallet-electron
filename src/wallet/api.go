@@ -26,6 +26,7 @@ func NewMnemonic() string {
 type Wallet struct {
 	publicKey crypto.PublicKey
 	secretKey crypto.SecretKey
+	name      string
 }
 
 type Account struct {
@@ -34,8 +35,8 @@ type Account struct {
 	name     string
 }
 
-func NewAccount(name string, mnemonic string, index uint64) (*Account, error) {
-	w, err := NewWallet(mnemonic, index)
+func NewAccount(name string, mnemonic string, index uint64, walletName string) (*Account, error) {
+	w, err := NewWallet(mnemonic, index, name)
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +48,7 @@ func NewAccount(name string, mnemonic string, index uint64) (*Account, error) {
 	}, nil
 }
 
-func NewWallet(mnemonic string, index uint64) (*Wallet, error) {
+func NewWallet(mnemonic string, index uint64, name string) (*Wallet, error) {
 	seed, err := bip39.EntropyFromMnemonic(mnemonic)
 	if err != nil {
 		return nil, err
@@ -56,6 +57,7 @@ func NewWallet(mnemonic string, index uint64) (*Wallet, error) {
 	return &Wallet{
 		publicKey: pk,
 		secretKey: sk,
+		name:      name,
 	}, nil
 }
 

@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom'
 import { Form, Checkbox, Button, Message, Icon, TextArea } from 'semantic-ui-react'
 import routes from '../constants/routes'
 import styles from './Home.css'
-import { NewMnemonic, CreateAccount, NewWallet } from '../client/tfchain'
+import { NewMnemonic, CreateAccount, NewWallet, CreateWalletOnAccount } from '../client/tfchain'
 import Account from './Account'
 import { addAccount } from '../actions'
 
@@ -61,7 +61,13 @@ class NewAccount extends Component {
 
     this.setState({ nameError, seedError })
     if (!nameError && !seedError) {
-      const account = CreateAccount(name, seed, 0)
+      let account = CreateAccount(name)
+      console.log(account)
+
+
+    
+      account = CreateWalletOnAccount(account, seed, 0)
+      console.log(account)
       const accountName = account.__internal_object__.name
       const wallets = account.__internal_object__.wallets.$array
       this.props.AddAccount(account)

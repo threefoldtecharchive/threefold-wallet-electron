@@ -5,3 +5,10 @@ export const addAccount = function (account) {
     account
   }
 }
+
+export const selectWallet = function (wallet) {
+  return {
+    type: 'SELECT_WALLET',
+    wallet
+  }
+}
