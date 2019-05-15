@@ -1,13 +1,23 @@
 // @flow
+import { connect } from 'react-redux'
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
-import { Form, Checkbox, Button, Message, Icon } from 'semantic-ui-react'
+import { Form, Checkbox, Button, Message, Icon, TextArea } from 'semantic-ui-react'
 import routes from '../constants/routes'
 import styles from './Home.css'
+import { NewMnemonic, CreateAccount, NewWallet } from '../client/tfchain'
+import Account from './Account'
+import { addAccount } from '../actions'
+
+
+const mapDispatchToProps = (dispatch) => ({
+  AddAccount: (account) => {
+    console.log(account)
+    dispatch(addAccount(account))
+  }
+})
 
 class NewAccount extends Component {
-  props: Props
-
   constructor (props) {
       super(props)
       this.state = {
@@ -31,7 +41,7 @@ class NewAccount extends Component {
       let seed = ""
       const generateSeed = !this.state.generateSeed
       if (generateSeed) {
-          seed = "i am seed"
+          seed = NewMnemonic()
       }
       this.setState({seed, generateSeed})
   }
@@ -50,9 +60,13 @@ class NewAccount extends Component {
     }
 
     this.setState({ nameError, seedError })
-
     if (!nameError && !seedError) {
+      const account = CreateAccount(name, seed, 0)
+      const accountName = account.__internal_object__.name
+      const wallets = account.__internal_object__.wallets.$array
+      this.props.AddAccount(account)
       return this.props.history.push("/account")
+      // return <Account accountName={accountName} wallets={wallets} />
     }
   }
 
@@ -86,12 +100,19 @@ class NewAccount extends Component {
             <div className={styles.container} >
                 <h2 >New Account</h2>
                 <Form error style={{ width: '50%', margin: 'auto', marginTop: 60}}>
-                    <Form.Input label='Wallet name' placeholder='wallet1' value={name} onChange={this.handleNameChange}/>
-                    {nameErrorMessage}
-                    <Form.Input label='Provide seed' placeholder='seed' value={seed} onChange={this.handleSeedChange}/>
-                    {seedErrorMessage}
-                    <Checkbox label="Generate seed" onClick={this.renderSeed} defaultChecked={generateSeed}/>
                     <Form.Field>
+                        <label style={{ float: 'left' }}>Wallet name</label>
+                        <input label='name' placeholder='wallet1' value={name} onChange={this.handleNameChange}/>
+                    </Form.Field>
+                    {nameErrorMessage}
+
+                    <Form.Field>
+                        <label style={{ float: 'left' }}>Seed</label>
+                        <TextArea label='Provide seed' placeholder='seed' value={seed} onChange={this.handleSeedChange} />
+                    </Form.Field>
+                    {seedErrorMessage}
+                    <Form.Field>
+                        <Checkbox label="Generate seed" onClick={this.renderSeed} defaultChecked={generateSeed}/>
                     </Form.Field>
                     <Button type='submit' onClick={this.createAccount}>Submit</Button>
                 </Form>
@@ -100,5 +121,7 @@ class NewAccount extends Component {
     );
   }
 }
-
-export default NewAccount
+export default connect(
+  null,
+  mapDispatchToProps
+)(NewAccount)

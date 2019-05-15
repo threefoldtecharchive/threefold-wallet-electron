@@ -4,18 +4,20 @@ import { Link } from 'react-router-dom'
 import { Button, Grid, Segment, List, GridColumn, Divider } from 'semantic-ui-react'
 import routes from '../constants/routes'
 import styles from './Home.css'
+import { NewMnemonic, EncryptMnemoic, NewWallet, GetWalletAddress } from '../client/tfchain'
 
 class Home extends Component {
 
   render() {
-    const tfwallet = global.tfwallet;
-    const mnemonic = tfwallet.NewMnemonic();
-    console.log(mnemonic);
-    console.log(tfwallet.EncryptMnemonic(mnemonic, "TeaCup"));
-    const wallet = tfwallet.New(mnemonic, 0);
-    console.log(wallet);
-    console.log(wallet.Address());
-    console.log(wallet.TestJSONTransaction());
+    // console.log(mnemonic);
+    // console.log(tfwallet.EncryptMnemonic(mnemonic, "TeaCup"));
+    // const wallet = tfwallet.New(mnemonic, 0);
+    // console.log(wallet);
+    // console.log(wallet.Address());
+    // console.log(wallet.TestJSONTransaction());
+    const m = NewMnemonic()
+    const c = EncryptMnemoic(m);
+    const w = NewWallet(m);
 
     return (
       <div className={styles.container} data-tid="container">

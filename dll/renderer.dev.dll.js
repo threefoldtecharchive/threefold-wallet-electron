@@ -267,6 +267,18 @@ eval("module.exports = redux-thunk;\n\n//# sourceURL=webpack://renderer/external
 
 /***/ }),
 
+/***/ "semantic-ui-react":
+/*!************************************!*\
+  !*** external "semantic-ui-react" ***!
+  \************************************/
+/*! no static exports found */
+/*! all exports used */
+/***/ (function(module, exports) {
+
+eval("module.exports = semantic-ui-react;\n\n//# sourceURL=webpack://renderer/external_%22semantic-ui-react%22?");
+
+/***/ }),
+
 /***/ "source-map-support":
 /*!*************************************!*\
   !*** external "source-map-support" ***!

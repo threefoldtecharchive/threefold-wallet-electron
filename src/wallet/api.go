@@ -28,6 +28,25 @@ type Wallet struct {
 	secretKey crypto.SecretKey
 }
 
+type Account struct {
+	wallets  []*Wallet
+	password string
+	name     string
+}
+
+func NewAccount(name string, mnemonic string, index uint64) (*Account, error) {
+	w, err := NewWallet(mnemonic, index)
+	if err != nil {
+		return nil, err
+	}
+	var wallets []*Wallet
+	wallets = append(wallets, w)
+	return &Account{
+		wallets: wallets,
+		name:    name,
+	}, nil
+}
+
 func NewWallet(mnemonic string, index uint64) (*Wallet, error) {
 	seed, err := bip39.EntropyFromMnemonic(mnemonic)
 	if err != nil {

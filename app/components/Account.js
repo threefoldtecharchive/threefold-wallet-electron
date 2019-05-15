@@ -1,20 +1,60 @@
 // @flow
+import { connect } from 'react-redux'
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import { List, Segment, Grid, GridColumn, Button, Icon } from 'semantic-ui-react'
 import routes from '../constants/routes';
 import styles from './Home.css';
+import { GetWalletBalance } from '../client/tfchain'
+
+const mapStateToProps = state => ({
+    account: state.account
+})
 
 class Account extends Component {
-  props: Props;
-//   constructor (props) {
-//       super(props)
-//       this.state = {
 
-//       }
-//   }
+    componentDidMount () {
+        const { wallets } = this.props.account
+        if (!wallets) {
+            return
+        }
+        wallets.map(w => {
+            GetWalletBalance(w).then(res => {
+                console.log(res)
+            })
+        })
+    }
+
+  renderWallets = () => {
+    const { wallets } = this.props.account
+    if (!wallets) {
+        return
+    }
+    console.log(wallets)
+    if (wallets.length < 1) {
+        return (
+            <p>no wallets</p>
+        )
+    } else {
+        return (
+            <List divided inverted relaxed>
+                {wallets.map(w => {
+                    return (
+                        <List.Item key={1}>
+                            <List.Content>
+                                <List.Header style={{ cursor: "pointer" }}><Link to={routes.WALLET}>Wallet#1</Link></List.Header>
+                                1001.1 TFT
+                            </List.Content>
+                        </List.Item>
+                    )
+                })}
+            </List>
+        )
+    }
+  }
 
   render() {
+      console.log(this.props.account)
     return (
         <div>
             <div className={styles.backButton} data-tid="backButton">
@@ -32,27 +72,8 @@ class Account extends Component {
                 <Grid centered columns={2}>
                     <GridColumn>
                         <Segment style={{ marginTop: 60, marginLeft: 50 }} inverted>
-                            <h3>Wallets</h3>
-                            <List divided inverted relaxed>
-                                <List.Item>
-                                    <List.Content>
-                                    <List.Header style={{ cursor: "pointer" }}><Link to={routes.WALLET}>Wallet#1</Link></List.Header>
-                                    1001.1 TFT
-                                    </List.Content>
-                                </List.Item>
-                                <List.Item>
-                                    <List.Content>
-                                    <List.Header>MultiSigWallet#1</List.Header>
-                                    50.00 TFT
-                                    </List.Content>
-                                </List.Item>
-                                <List.Item>
-                                    <List.Content>
-                                    <List.Header>MultiSigWallet#2</List.Header>
-                                    1000000 TFT
-                                    </List.Content>
-                                </List.Item>
-                            </List>
+                            <h3>Wallets of account: {this.props.account.name}</h3>
+                            {this.renderWallets()}
                         </Segment>
                     </GridColumn>
                     <GridColumn>
@@ -115,4 +136,7 @@ class Account extends Component {
   }
 }
 
-export default Account
+export default connect(
+    mapStateToProps,
+    null
+)(Account)
