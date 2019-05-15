@@ -45,10 +45,10 @@ export default class MenuBuilder {
 
   buildDarwinTemplate() {
     const subMenuAbout = {
-      label: 'Electron',
+      label: 'Tfchain Wallet',
       submenu: [
         {
-          label: 'About ElectronReact',
+          label: 'About TFchain Wallet',
           selector: 'orderFrontStandardAboutPanel:'
         },
         { type: 'separator' },
