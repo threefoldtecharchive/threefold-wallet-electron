@@ -5,8 +5,7 @@ import { Link } from 'react-router-dom'
 import { Form, Checkbox, Button, Message, Icon, TextArea } from 'semantic-ui-react'
 import routes from '../constants/routes'
 import styles from './Home.css'
-import { NewMnemonic, CreateAccount, NewWallet, CreateWalletOnAccount } from '../client/tfchain'
-import Account from './Account'
+import { NewMnemonic, CreateAccount, CreateWalletOnAccount } from '../client/tfchain'
 import { addAccount } from '../actions'
 
 

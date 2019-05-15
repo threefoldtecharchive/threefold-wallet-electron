@@ -21,26 +21,22 @@ class Home extends Component {
     return (
       <div className={styles.container} data-tid='container'>
         <h2 >TF Wallet</h2>
-        <div style={{ marginTop: 100 }}>
+        <div style={{ marginTop: 60 }}>
           <Segment style={{ margin: 'auto', width: '50%' }} inverted>
-            <h3>Accounts</h3>
             <List divided inverted relaxed>
-              <List.Item>
+              <List.Item style={{ padding: 20 }}>
                 <List.Content>
-                  <List.Header style={{ cursor: 'pointer' }}><Link to={routes.ACCOUNT}>Account#1</Link></List.Header>
-                        Personal account
+                  <List.Header style={{ cursor: 'pointer', margin: 'auto' }}><Link to={routes.ACCOUNT}>Account#1</Link></List.Header>
                 </List.Content>
               </List.Item>
-              <List.Item>
+              <List.Item style={{ padding: 20 }}>
                 <List.Content>
                   <List.Header style={{ cursor: 'pointer' }}><Link to={routes.ACCOUNT}>Account#2</Link></List.Header>
-                        Multisig account
                 </List.Content>
               </List.Item>
-              <List.Item>
+              <List.Item style={{ padding: 20 }}>
                 <List.Content>
                   <List.Header style={{ cursor: 'pointer' }}><Link to={routes.ACCOUNT}>Account#3</Link></List.Header>
-                        Multisig account
                 </List.Content>
               </List.Item>
             </List>
