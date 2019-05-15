@@ -2,6 +2,7 @@
   "HOME": "/",
   "NEW": "/new",
   "ACCOUNT": "/account",
+  "ACCOUNT_SETTINGS": "/accountsettings",
   "SETTINGS": "/settings",
   "WALLET": "/wallet",
   "TRANSFER": "/transfer"

@@ -36,7 +36,7 @@ type Account struct {
 }
 
 func NewAccount(name string, mnemonic string, index uint64, walletName string) (*Account, error) {
-	w, err := NewWallet(mnemonic, index, name)
+	w, err := NewWallet(mnemonic, index, walletName)
 	if err != nil {
 		return nil, err
 	}

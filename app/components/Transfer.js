@@ -3,7 +3,7 @@ import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
 import { Form, Checkbox, Button, Message, Icon, Dropdown, Label } from 'semantic-ui-react'
 import routes from '../constants/routes'
-import styles from './Home.css'
+import styles from './home/Home.css'
 
 const wallets = [
     {
