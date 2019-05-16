@@ -57,6 +57,9 @@ export const account = (state = [], action) => {
       })
       state.wallets = newWallets
       return state
+    case 'DELETE_WALLET':
+      state.wallets = state.wallets.filter(w => w.name !== action.wallet.name)
+      return state
     default:
       return state
   }

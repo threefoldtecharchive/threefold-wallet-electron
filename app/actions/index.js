@@ -47,6 +47,13 @@ export const saveWallet = function (wallet) {
   }
 }
 
+export const deleteWallet = function (wallet) {
+  return {
+    type: 'DELETE_WALLET',
+    wallet
+  }
+}
+
 export const setClient = function (client) {
   return {
     type: 'SET_CLIENT',

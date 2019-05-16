@@ -44,18 +44,34 @@ class Home extends Component {
 
   renderAccounts = () => {
     const { accounts } = this.state
+      if (accounts.length == 0) {
+        return (
+          <div style={{ margin: 'auto' }}>
+            <h3>No wallets created yet, create one now</h3>
+            <Link to={routes.NEW}><Button size='big' style={{ width: 180, marginTop: 35 }}>New Account</Button></Link>
+          </div>
+        )
+      }
       return (
-        <List divided inverted relaxed>
-          {accounts.map(account => {
-            return (
-              <List.Item key={account.name} style={{ padding: 20 }}>
-                <List.Content>
-                  <List.Header style={{ cursor: 'pointer', margin: 'auto' }}><Button onClick={() => this.selectAccount(account)}>{account.name}</Button></List.Header>
-                </List.Content>
-              </List.Item>
-            )
-          })}
-        </List>
+        <div>
+          <Segment style={{ margin: 'auto', width: '50%' }} inverted>
+            <List divided inverted relaxed>
+              {accounts.map(account => {
+                return (
+                  <List.Item key={account.name} style={{ padding: 20 }}>
+                    <List.Content>
+                      <List.Header style={{ cursor: 'pointer', margin: 'auto', fontSize: 20 }} onClick={() => this.selectAccount(account)}>{account.name}</List.Header>
+                    </List.Content>
+                  </List.Item>
+                )
+              })}
+            </List>
+          </Segment>
+          <Divider style={{ marginTop: 50 }} horizontal>Or</Divider>
+          <div style={{ margin: 'auto' }}>
+            <Link to={routes.NEW}><Button size='big' style={{ width: 180, marginTop: 35 }}>New Account</Button></Link>
+          </div>
+        </div>
       )
   }
 
@@ -64,14 +80,7 @@ class Home extends Component {
       <div className={styles.container} data-tid='container'>
         <h2 >TF Wallet</h2>
         <div style={{ marginTop: 60 }}>
-          <Segment style={{ margin: 'auto', width: '50%' }} inverted>
-              {this.renderAccounts()}
-          </Segment>
-        </div>
-        <Divider style={{ marginTop: 50 }} horizontal>Or</Divider>
-
-        <div style={{ margin: 'auto' }}>
-          <Link to={routes.NEW}><Button size='big' style={{ width: 180, marginTop: 35 }}>New Account</Button></Link>
+          {this.renderAccounts()}
         </div>
       </div>
     )

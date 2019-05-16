@@ -12,6 +12,8 @@ export const wallet = (state = [], action) => {
         publicKey: action.wallet.publicKey,
         secretKey: action.wallet.secretKey
       })
+    case 'DELETE_WALLET':
+      return null
     default:
       return state
   }

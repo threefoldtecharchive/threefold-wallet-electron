@@ -5,7 +5,8 @@ import { Link } from 'react-router-dom'
 import { Form, Button, Icon } from 'semantic-ui-react'
 import routes from '../../constants/routes'
 import styles from '../home/Home.css'
-import { saveWallet, saveAccount } from '../../actions'
+import { saveWallet, saveAccount, deleteWallet } from '../../actions'
+import DeleteModal from './DeleteWalletModal'
 
 const mapStateToProps = state => ({
   wallet: state.wallet,
@@ -18,6 +19,9 @@ const mapDispatchToProps = (dispatch) => ({
   },
   saveAccount: (account) => {
     dispatch(saveAccount(account))
+  },
+  deleteWallet: (wallet) => {
+    dispatch(deleteWallet(wallet))
   }
 })
 
@@ -25,7 +29,10 @@ class WalletSettings extends Component {
   constructor (props) {
       super(props)
       this.state = {
-        name: this.props.wallet.name
+        name: this.props.wallet.name,
+        openDeleteModal: false,
+        deleteName: '',
+        deleteNameError: false
       }
   }
 
@@ -46,14 +53,47 @@ class WalletSettings extends Component {
     return this.props.history.push("/wallet")
   }
 
+  openDeleteModal = () => {
+    const open = !this.state.openDeleteModal
+    this.setState({ openDeleteModal: open })
+  }
+
+  closeDeleteModal = () => {
+    this.setState({ openDeleteModal: false })
+  }
+
+  handleDeleteWalletNameChange = ({ target }) => {
+    this.setState({ deleteName: target.value })
+  }
+
+  deleteWallet = () => {
+    const { deleteName, name } = this.state
+    if (deleteName != name) {
+      return this.setState({ deleteNameError: true })
+    }
+    this.props.deleteWallet(this.props.wallet)
+    this.props.saveAccount(this.props.account)
+    this.setState({ deleteNameError: false })
+    return this.props.history.push("/account")
+  }
+
   render() {
-    const { name } = this.state
+    const { openDeleteModal, deleteName, deleteNameError } = this.state
     return (
         <div>
+            <DeleteModal 
+              open={openDeleteModal} 
+              closeModal={this.closeDeleteModal} 
+              deleteName={deleteName} 
+              handleDeleteWalletNameChange={this.handleDeleteWalletNameChange}
+              deleteNameError={deleteNameError}
+              deleteWallet={this.deleteWallet}
+            />
             <div className={styles.backButton} data-tid="backButton">
                 <Link to={routes.WALLET}>
                     <Icon style={{ fontSize: 35, position: 'absolute', left: 20, cursor: 'pointer' }} name="chevron circle left"/>
                 </Link>
+                <Icon onClick={this.openDeleteModal} style={{ fontSize: 35, position: 'absolute', right: 70, cursor: 'pointer' }} name="trash"/>
             </div>
             <div className={styles.container} >
                 <h2 >Wallet Settings</h2>
