@@ -74,10 +74,7 @@ class NewAccount extends Component {
     this.setState({ nameError, seedError })
     if (!nameError && !seedError) {
       let account = this.props.client.CreateAccount(name, seed, 0, 'defaultWallet')
-      console.log(account)
 
-      // account = this.props.client.CreateWalletOnAccount(account, seed, 0)
-      // console.log(account)
       const accountName = account.__internal_object__.name
       const wallets = account.__internal_object__.wallets.$array
       this.props.AddAccount(account)

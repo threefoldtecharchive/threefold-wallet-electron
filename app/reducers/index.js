@@ -1,7 +1,7 @@
 // @flow
 import { combineReducers } from 'redux'
 import { connectRouter } from 'connected-react-router'
-import { account, loadAccounts } from './account'
+import { account, accounts } from './account'
 import { wallet } from './wallet'
 import { client } from './client'
 
@@ -11,6 +11,6 @@ export default function createRootReducer (history) {
     account,
     wallet,
     client,
-    loadAccounts
+    accounts
   })
 }

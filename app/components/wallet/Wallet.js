@@ -21,8 +21,7 @@ class Wallet extends Component {
 
   handleWalletAddress = () => {
     const { wallet } = this.props
-    console.log(selectedWallet)
-    console.log(GetWalletAddress(wallet))
+    // console.log(GetWalletAddress(wallet))
   }
 
   render () {

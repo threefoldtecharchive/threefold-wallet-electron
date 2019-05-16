@@ -38,7 +38,6 @@ class Home extends Component {
   }
 
   selectAccount = (account) => {
-    console.log(this.props)
     this.props.SelectAccount(account)
     return this.props.history.push("/account")
   }
@@ -61,17 +60,6 @@ class Home extends Component {
   }
 
   render () {
-    // console.log(mnemonic);
-    // console.log(tfwallet.EncryptMnemonic(mnemonic, "TeaCup"));
-    // const wallet = tfwallet.New(mnemonic, 0);
-    // console.log(wallet);
-    // console.log(wallet.Address());
-    // console.log(wallet.TestJSONTransaction());
-    // const m = NewMnemonic()
-    // const c = EncryptMnemoic(m)
-    // const w = NewWallet(m)
-    // console.log(this.props.client.NewMnemonic())
-
     return (
       <div className={styles.container} data-tid='container'>
         <h2 >TF Wallet</h2>

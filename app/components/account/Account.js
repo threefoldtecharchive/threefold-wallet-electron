@@ -47,7 +47,6 @@ class Account extends Component {
   } 
 
   handleWalletClick = (wallet) => {
-    console.log(wallet)
     this.props.selectWallet(wallet)
     this.props.history.push(routes.WALLET)
   }
@@ -81,7 +80,6 @@ class Account extends Component {
   }
 
   render() {
-      console.log(this.props.account)
     return (
         <div>
             <div data-tid="backButton">

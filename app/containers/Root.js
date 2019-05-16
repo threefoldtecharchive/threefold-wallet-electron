@@ -4,7 +4,7 @@ import React, { Component } from 'react'
 import { ConnectedRouter } from 'connected-react-router'
 import Routes from '../Routes'
 import { Tfchainclient } from '../client/tfchainclient'
-import { setClient } from '../actions'
+import { setClient, loadAccounts } from '../actions'
 
 const os = require('os')
 const storage = require('electron-json-storage')
@@ -15,26 +15,32 @@ storage.setDataPath(os.tmpdir())
 const mapDispatchToProps = (dispatch) => ({
   setClient: (client) => {
     dispatch(setClient(client))
+  },
+  loadAccounts: (accounts) => {
+    dispatch(loadAccounts(accounts))
   }
 })
 
 class Root extends Component {
-  render () {
+  componentWillMount () {
+    // Configure storage
     const dataPath = storage.getDefaultDataPath()
     const newPath = path.join(dataPath, '/tfchain/accounts')
     storage.setDataPath(newPath)
 
-    // const loadAccountsFromStorage = this.props.loadAccounts
-    // storage.getAll(function (err, data) {
-    //   if (err) throw err
-    //   console.log(Object.values(data))
-    //   loadAccountsFromStorage(Object.values(data))
-    // })
+    // Load in accounts and put them in store
+    const loadAccountsFromStorage = this.props.loadAccounts
+    storage.getAll(function (err, data) {
+      if (err) throw err
+      loadAccountsFromStorage(Object.values(data))
+    })
 
-    // create tfchainclient and set in in global store for later usage
+    // Create tfchainclient and put in store for later usage
     const tfchainClient = new Tfchainclient()
     this.props.setClient(tfchainClient)
+  }
 
+  render () {
     const { store, history } = this.props
     return (
       <Provider store={store}>
