@@ -12,6 +12,20 @@ export const saveAccount = function (account) {
   }
 }
 
+export const loadAccounts = function (accounts) {
+  return {
+    type: 'LOAD_ACCOUNTS',
+    accounts
+  }
+}
+
+export const selectAccount = function (account) {
+  return {
+    type: 'SELECT_ACCOUNT',
+    account
+  }
+}
+
 export const selectWallet = function (wallet) {
   return {
     type: 'SELECT_WALLET',

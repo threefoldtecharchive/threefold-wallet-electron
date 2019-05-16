@@ -32,8 +32,9 @@ class AccountSettings extends Component {
   saveAccount = () => {
     const { name } = this.state
 
-    const newAccount = Object.assign(this.props.account, {
-      name: name
+    const newAccount = Object.assign({}, this.props.account, {
+      name: name,
+      previousName: this.props.account.name
     })
 
     this.props.saveAccount(newAccount)

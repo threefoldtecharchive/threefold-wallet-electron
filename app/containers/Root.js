@@ -23,25 +23,17 @@ class Root extends Component {
     const dataPath = storage.getDefaultDataPath()
     const newPath = path.join(dataPath, '/tfchain/accounts')
     storage.setDataPath(newPath)
-    console.log(newPath)
+
+    // const loadAccountsFromStorage = this.props.loadAccounts
+    // storage.getAll(function (err, data) {
+    //   if (err) throw err
+    //   console.log(Object.values(data))
+    //   loadAccountsFromStorage(Object.values(data))
+    // })
 
     // create tfchainclient and set in in global store for later usage
     const tfchainClient = new Tfchainclient()
     this.props.setClient(tfchainClient)
-
-    storage.set('test', { a: 'X' }, function (err) {
-      if (err) {
-        throw err
-      }
-      console.log('test is set')
-    })
-
-    storage.get('test', function (err, data) {
-      if (err) {
-        throw err
-      }
-      console.log(data)
-    })
 
     const { store, history } = this.props
     return (

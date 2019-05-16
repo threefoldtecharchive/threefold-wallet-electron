@@ -31,14 +31,14 @@ class Account extends Component {
     if (!wallets) {
       return
     }
-    wallets.map(w => {
-      GetWalletBalance(w).then(res => {
-        const { data} = res
-        if (data == '') {
-          this.setState({ totalBalance: 0 })
-        }
-      })
-    })
+    // wallets.map(w => {
+    //   GetWalletBalance(w).then(res => {
+    //     const { data} = res
+    //     if (data == '') {
+    //       this.setState({ totalBalance: 0 })
+    //     }
+    //   })
+    // })
   }
 
   // To implement some parsing if i know how to search for a walllet's balance
@@ -84,7 +84,7 @@ class Account extends Component {
       console.log(this.props.account)
     return (
         <div>
-            <div style={{ marginTop: 35 }} data-tid="backButton">
+            <div data-tid="backButton">
                 <Link to={routes.ACCOUNT_SETTINGS}>
                     <Icon style={{ fontSize: 35, position: 'absolute', right: 20, cursor: 'pointer' }} name="setting"/>
                 </Link>

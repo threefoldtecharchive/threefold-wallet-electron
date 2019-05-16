@@ -5,15 +5,19 @@ import { Link } from 'react-router-dom'
 import { Form, Button, Icon } from 'semantic-ui-react'
 import routes from '../../constants/routes'
 import styles from '../home/Home.css'
-import { saveWallet } from '../../actions'
+import { saveWallet, saveAccount } from '../../actions'
 
 const mapStateToProps = state => ({
-  selectedWallet: state.selectedWallet
+  wallet: state.wallet,
+  account: state.account
 })
 
 const mapDispatchToProps = (dispatch) => ({
   saveWallet: (wallet) => {
     dispatch(saveWallet(wallet))
+  },
+  saveAccount: (account) => {
+    dispatch(saveAccount(account))
   }
 })
 
@@ -21,7 +25,7 @@ class WalletSettings extends Component {
   constructor (props) {
       super(props)
       this.state = {
-        name: this.props.selectedWallet.name
+        name: this.props.wallet.name
       }
   }
 
@@ -31,14 +35,14 @@ class WalletSettings extends Component {
   
   saveWallet = () => {
     const { name } = this.state
-    console.log(this.props.selectedWallet)
 
-    const newWallet = Object.assign(this.props.selectedWallet, {
-      name: name
+    const newWallet = Object.assign({}, this.props.wallet, {
+      name: name,
+      previousWalletName: this.props.wallet.name
     })
 
     this.props.saveWallet(newWallet)
-
+    this.props.saveAccount(this.props.account)
     return this.props.history.push("/wallet")
   }
 

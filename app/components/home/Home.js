@@ -5,14 +5,61 @@ import { Link } from 'react-router-dom'
 import { Button, Segment, List, Divider } from 'semantic-ui-react'
 import routes from '../../constants/routes'
 import styles from './Home.css'
+import { selectAccount } from '../../actions'
+const storage = require('electron-json-storage')
 
 // import { NewMnemonic, EncryptMnemoic, NewWallet } from '../client/tfchain'
 
 const mapStateToProps = state => ({
-  client: state.client.client
+  client: state.client.client,
+  loadAccounts: state.loadAccounts
+})
+
+const mapDispatchToProps = (dispatch) => ({
+  SelectAccount: (account) => {
+    dispatch(selectAccount(account))
+  }
 })
 
 class Home extends Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      accounts: []
+    }
+  }
+
+  componentWillMount() {
+    const _this = this
+    storage.getAll(function (err, data) {
+      if (err) throw err
+      _this.setState({ accounts: Object.values(data) })
+    })
+  }
+
+  selectAccount = (account) => {
+    console.log(this.props)
+    this.props.SelectAccount(account)
+    return this.props.history.push("/account")
+  }
+
+  renderAccounts = () => {
+    const { accounts } = this.state
+      return (
+        <List divided inverted relaxed>
+          {accounts.map(account => {
+            return (
+              <List.Item key={account.name} style={{ padding: 20 }}>
+                <List.Content>
+                  <List.Header style={{ cursor: 'pointer', margin: 'auto' }}><Button onClick={() => this.selectAccount(account)}>{account.name}</Button></List.Header>
+                </List.Content>
+              </List.Item>
+            )
+          })}
+        </List>
+      )
+  }
+
   render () {
     // console.log(mnemonic);
     // console.log(tfwallet.EncryptMnemonic(mnemonic, "TeaCup"));
@@ -23,30 +70,14 @@ class Home extends Component {
     // const m = NewMnemonic()
     // const c = EncryptMnemoic(m)
     // const w = NewWallet(m)
-    console.log(this.props.client.NewMnemonic())
+    // console.log(this.props.client.NewMnemonic())
 
     return (
       <div className={styles.container} data-tid='container'>
         <h2 >TF Wallet</h2>
         <div style={{ marginTop: 60 }}>
           <Segment style={{ margin: 'auto', width: '50%' }} inverted>
-            <List divided inverted relaxed>
-              <List.Item style={{ padding: 20 }}>
-                <List.Content>
-                  <List.Header style={{ cursor: 'pointer', margin: 'auto' }}><Link to={routes.ACCOUNT}>Account#1</Link></List.Header>
-                </List.Content>
-              </List.Item>
-              <List.Item style={{ padding: 20 }}>
-                <List.Content>
-                  <List.Header style={{ cursor: 'pointer' }}><Link to={routes.ACCOUNT}>Account#2</Link></List.Header>
-                </List.Content>
-              </List.Item>
-              <List.Item style={{ padding: 20 }}>
-                <List.Content>
-                  <List.Header style={{ cursor: 'pointer' }}><Link to={routes.ACCOUNT}>Account#3</Link></List.Header>
-                </List.Content>
-              </List.Item>
-            </List>
+              {this.renderAccounts()}
           </Segment>
         </div>
         <Divider style={{ marginTop: 50 }} horizontal>Or</Divider>
@@ -61,5 +92,5 @@ class Home extends Component {
 
 export default connect(
   mapStateToProps,
-  null
+  mapDispatchToProps
 )(Home)

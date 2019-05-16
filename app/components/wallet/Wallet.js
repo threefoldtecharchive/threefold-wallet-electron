@@ -8,7 +8,7 @@ import styles from '../home/Home.css'
 import { GetWalletAddress } from '../../client/tfchain'
 
 const mapStateToProps = state => ({
-  selectedWallet: state.selectedWallet
+  wallet: state.wallet
 })
 
 class Wallet extends Component {
@@ -20,9 +20,9 @@ class Wallet extends Component {
   }
 
   handleWalletAddress = () => {
-    const { selectedWallet } = this.props
+    const { wallet } = this.props
     console.log(selectedWallet)
-    console.log(GetWalletAddress(selectedWallet))
+    console.log(GetWalletAddress(wallet))
   }
 
   render () {
@@ -40,11 +40,11 @@ class Wallet extends Component {
           </Link>
         </div>
         <div className={styles.container} >
-          <h2>Wallet</h2>
+          <h2>{this.props.wallet.name}</h2>
         </div>
         <div>
-          <Grid centered columns={2} style={{ marginBottom: 50 }}>
-            <GridColumn>
+          <Grid centered columns={2} style={{ marginBottom: 30 }}>
+            {/* <GridColumn>
               <Segment style={{ marginTop: 60, marginLeft: 50 }} inverted>
                 <h3>Wallets</h3>
                 <List divided inverted relaxed>
@@ -57,15 +57,19 @@ class Wallet extends Component {
                   </List.Item>
                 </List>
               </Segment>
+            </GridColumn> */}
+            <GridColumn>
+              <Segment style={{ marginTop: 60, marginLeft: '10%' }}>
+                <h3 style={{ color: 'black' }}>Total Balance: 1001.1 TFT</h3>
+                <h4 style={{ color: 'black' }}>Locked Balance: 1001.1 TFT</h4>
+                <h4 style={{ color: 'black' }}>Unlocked Balance: 1001.1 TFT</h4>
+              </Segment>
             </GridColumn>
             <GridColumn>
-              <Segment style={{ marginTop: 60, marginRight: 50 }}>
-                <h3 style={{ color: 'black' }}>Total Balance: 1001.1 TFT</h3>
-              </Segment>
-              <Link to={routes.TRANSFER}><Button style={{ marginTop: 20 }} size='huge'>Transfer</Button></Link>
+              <Link to={routes.TRANSFER}><Button style={{ marginTop: 60, float: 'right', marginRight: '10%' }} size='huge'>Transfer</Button></Link>
             </GridColumn>
           </Grid>
-          <Segment style={{ width: '65%', height: '300px', overflow: 'auto', overflowY: 'scroll', margin: 'auto'  }}>
+          <Segment style={{ width: '90%', height: '300px', overflow: 'auto', overflowY: 'scroll', margin: 'auto'  }}>
             <h3 style={{ color: 'black' }}>Transactions</h3>
             <List style={{ marginLeft: 50, overflow: 'auto' }} divided relaxed>
                 <List.Item>
