@@ -2,7 +2,7 @@
 import { connect } from 'react-redux'
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
-import { Form, Button, Icon } from 'semantic-ui-react'
+import { Form, Button, Icon, Header } from 'semantic-ui-react'
 import routes from '../../constants/routes'
 import styles from '../home/Home.css'
 import { saveWallet, saveAccount, deleteWallet } from '../../actions'
@@ -96,10 +96,14 @@ class WalletSettings extends Component {
                 <Icon onClick={this.openDeleteModal} style={{ fontSize: 35, position: 'absolute', right: 70, cursor: 'pointer' }} name="trash"/>
             </div>
             <div className={styles.container} >
-                <h2 >Wallet Settings</h2>
-                <Form error style={{ width: '50%', margin: 'auto', marginTop: 60}}>
+                <Header as='h2' icon style={{ color: 'white', marginTop: 50 }}>
+                  <Icon name='settings' />
+                  Wallet Settings
+                  <Header.Subheader style={{ color: 'white' }}>Manage your wallet settings</Header.Subheader>
+                </Header>
+                <Form error style={{ width: '50%', margin: 'auto', marginTop: 10}}>
                     <Form.Field>
-                        <label style={{ float: 'left' }}>Name</label>
+                        <label style={{ float: 'left', color: 'white' }}>Name</label>
                         <input placeholder='01X.....' value={this.state.name} onChange={this.handleNameChange}/>
                     </Form.Field>
                     {/* <Form.Input label='Destination address' placeholder='01X.....' /> */}

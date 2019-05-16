@@ -2,7 +2,7 @@
 import { connect } from 'react-redux'
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
-import { Button, Segment, List, Divider } from 'semantic-ui-react'
+import { Button, Segment, List, Divider, Icon } from 'semantic-ui-react'
 import routes from '../../constants/routes'
 import styles from './Home.css'
 import { selectAccount } from '../../actions'
@@ -54,13 +54,14 @@ class Home extends Component {
       }
       return (
         <div>
+          <h3>Sign in to one of your accounts</h3>
           <Segment style={{ margin: 'auto', width: '50%' }} inverted>
             <List divided inverted relaxed>
               {accounts.map(account => {
                 return (
                   <List.Item key={account.name} style={{ padding: 20 }}>
                     <List.Content>
-                      <List.Header style={{ cursor: 'pointer', margin: 'auto', fontSize: 20 }} onClick={() => this.selectAccount(account)}>{account.name}</List.Header>
+                      <List.Header style={{ cursor: 'pointer', margin: 'auto', fontSize: 20, textAlign:'left', marginLeft: '42%' }} onClick={() => this.selectAccount(account)}><Icon name='sign in alternate'/> {account.name} </List.Header>
                     </List.Content>
                   </List.Item>
                 )

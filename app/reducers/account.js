@@ -15,7 +15,7 @@ export const account = (state = [], action) => {
       })
       return account
     case 'SELECT_ACCOUNT':
-      let newAccount = Object.assign({}, state.account, {
+      let newAccount = Object.assign({}, state, {
         name: action.account.name,
         password: action.account.password,
         wallets: action.account.wallets

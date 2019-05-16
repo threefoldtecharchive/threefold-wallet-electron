@@ -2,7 +2,7 @@
 import { connect } from 'react-redux'
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
-import { List, Segment, Grid, GridColumn, Button, Icon } from 'semantic-ui-react'
+import { List, Segment, Grid, GridColumn, Button, Icon, Label } from 'semantic-ui-react'
 import routes from '../../constants/routes';
 import { GetWalletBalance } from '../../client/tfchain'
 import { selectWallet } from '../../actions'
@@ -68,6 +68,7 @@ class Account extends Component {
         {wallets.map(w => {
           return (
             <List.Item key={1}>
+              <List.Icon name='folder' />
               <List.Content>
                 <List.Header style={{ cursor: "pointer" }} onClick={() => this.handleWalletClick(w)}>{w.name}</List.Header>
                 1001.1 TFT
@@ -97,8 +98,11 @@ class Account extends Component {
                 <Grid centered columns={2}>
                     <GridColumn>
                         <Segment style={{ marginTop: 60, marginLeft: 50 }} inverted>
-                            <h3>Wallets of account: {this.props.account.name}</h3>
-                            {this.renderWallets()}
+                          <Label as='a' color='red' ribbon>
+                            Overview
+                          </Label>
+                          <span>Wallets of account: {this.props.account.name}</span>
+                          {this.renderWallets()}
                         </Segment>
                     </GridColumn>
                     <GridColumn>

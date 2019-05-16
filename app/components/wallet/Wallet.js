@@ -60,8 +60,8 @@ class Wallet extends Component {
             <GridColumn>
               <Segment style={{ marginTop: 60, marginLeft: '10%' }}>
                 <h3 style={{ color: 'black' }}>Total Balance: 1001.1 TFT</h3>
-                <h4 style={{ color: 'black' }}>Locked Balance: 1001.1 TFT</h4>
-                <h4 style={{ color: 'black' }}>Unlocked Balance: 1001.1 TFT</h4>
+                <h4 style={{ color: 'black' }}><Icon name='lock'/>Locked Balance: 1001.1 TFT</h4>
+                <h4 style={{ color: 'black' }}><Icon name='unlock'/>Unlocked Balance: 1001.1 TFT</h4>
               </Segment>
             </GridColumn>
             <GridColumn>
