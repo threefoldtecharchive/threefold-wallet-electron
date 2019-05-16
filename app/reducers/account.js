@@ -37,4 +37,17 @@ export const selectedWallet = (state = [], action) => {
   }
 }
 
+export const saveWallet = (state = [], action) => {
+  switch (action.type) {
+    case 'SAVE_WALLET':
+      return Object.assign({}, state.selectedWallet, {
+        name: action.name,
+        publicKey: action.publicKey,
+        secretKey: action.secretKey
+      })
+    default:
+      return state
+  }
+}
+
 export default { account, selectedWallet }

@@ -14,7 +14,6 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = (dispatch) => ({
   selectWallet: (wallet) => {
-    console.log(wallet)
     dispatch(selectWallet(wallet))
   }
 })

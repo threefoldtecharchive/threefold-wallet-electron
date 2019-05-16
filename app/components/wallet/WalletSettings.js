@@ -5,23 +5,23 @@ import { Link } from 'react-router-dom'
 import { Form, Button, Icon } from 'semantic-ui-react'
 import routes from '../../constants/routes'
 import styles from '../home/Home.css'
-import { saveAccount } from '../../actions'
+import { saveWallet } from '../../actions'
 
 const mapStateToProps = state => ({
-  account: state.account
+  selectedWallet: state.selectedWallet
 })
 
 const mapDispatchToProps = (dispatch) => ({
-  saveAccount: (account) => {
-    dispatch(saveAccount(account))
+  saveWallet: (wallet) => {
+    dispatch(saveWallet(wallet))
   }
 })
 
-class AccountSettings extends Component {
+class WalletSettings extends Component {
   constructor (props) {
       super(props)
       this.state = {
-        name: this.props.account.name
+        name: this.props.selectedWallet.name
       }
   }
 
@@ -29,16 +29,17 @@ class AccountSettings extends Component {
     this.setState({ name: target.value })
   }
   
-  saveAccount = () => {
+  saveWallet = () => {
     const { name } = this.state
+    console.log(this.props.selectedWallet)
 
-    const newAccount = Object.assign(this.props.account, {
+    const newWallet = Object.assign(this.props.selectedWallet, {
       name: name
     })
 
-    this.props.saveAccount(newAccount)
+    this.props.saveWallet(newWallet)
 
-    return this.props.history.push("/account")
+    return this.props.history.push("/wallet")
   }
 
   render() {
@@ -46,12 +47,12 @@ class AccountSettings extends Component {
     return (
         <div>
             <div className={styles.backButton} data-tid="backButton">
-                <Link to={routes.ACCOUNT}>
+                <Link to={routes.WALLET}>
                     <Icon style={{ fontSize: 35, position: 'absolute', left: 20, cursor: 'pointer' }} name="chevron circle left"/>
                 </Link>
             </div>
             <div className={styles.container} >
-                <h2 >Account Settings</h2>
+                <h2 >Wallet Settings</h2>
                 <Form error style={{ width: '50%', margin: 'auto', marginTop: 60}}>
                     <Form.Field>
                         <label style={{ float: 'left' }}>Name</label>
@@ -66,7 +67,7 @@ class AccountSettings extends Component {
                     {/* <Form.Input label='Description message' placeholder='message' value={description} onChange={this.handleDescriptionChange}/> */}
                     {/* {seedErrorMessage} */}
                     <Link to={routes.ACCOUNT}><Button>Cancel</Button></Link>
-                    <Button type='submit' onClick={this.saveAccount}>Save</Button>
+                    <Button type='submit' onClick={this.saveWallet}>Save</Button>
                 </Form>
             </div>
         </div>
@@ -77,4 +78,4 @@ class AccountSettings extends Component {
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(AccountSettings)
+)(WalletSettings)

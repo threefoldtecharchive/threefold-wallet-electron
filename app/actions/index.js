@@ -19,6 +19,13 @@ export const selectWallet = function (wallet) {
   }
 }
 
+export const saveWallet = function (wallet) {
+  return {
+    type: 'SAVE_WALLET',
+    wallet
+  }
+}
+
 export const setClient = function (client) {
   return {
     type: 'SET_CLIENT',

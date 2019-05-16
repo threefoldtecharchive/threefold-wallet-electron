@@ -14,7 +14,6 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = (dispatch) => ({
   AddAccount: (account) => {
-    console.log(account)
     dispatch(addAccount(account))
   }
 })

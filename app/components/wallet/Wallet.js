@@ -32,7 +32,7 @@ class Wallet extends Component {
           <Link to={routes.ACCOUNT}>
             <Icon style={{ fontSize: 35, position: 'absolute', left: 20, cursor: 'pointer' }} name='chevron circle left' />
           </Link>
-          <Link to={routes.SETTINGS}>
+          <Link to={routes.WALLET_SETTINGS}>
             <Icon style={{ fontSize: 35, position: 'absolute', right: 20, cursor: 'pointer' }} name='setting' />
           </Link>
           <Link to={routes.HOME}>
