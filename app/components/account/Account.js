@@ -91,7 +91,7 @@ class Account extends Component {
                 </Link>
             </div>
             <div className={styles.container} >
-                <h2>Account</h2>
+                <h2>{this.props.account.name}</h2>
             </div>
             <div>
                 <Grid centered columns={2}>

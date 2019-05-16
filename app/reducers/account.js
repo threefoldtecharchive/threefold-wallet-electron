@@ -21,6 +21,12 @@ export const account = (state = [], action) => {
         wallets: action.account.wallets
       })
       return newAccount
+    case 'DELETE_ACCOUNT':
+      // first delete account
+      storage.remove(action.account.name, function (err) {
+        if (err) console.log(err)
+      })
+      return null
     case 'SAVE_ACCOUNT':
       let newSavedAccount = Object.assign({}, state.account, {
         name: action.account.name,
@@ -59,6 +65,8 @@ export const account = (state = [], action) => {
 export const accounts = (state = [], action) => {
   switch (action.type) {
     case 'LOAD_ACCOUNTS':
+      // reset state
+      state = []
       action.accounts.map(a => {
         state.push(a)
       })

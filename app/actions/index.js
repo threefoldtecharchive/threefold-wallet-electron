@@ -12,6 +12,13 @@ export const saveAccount = function (account) {
   }
 }
 
+export const deleteAccount = function (account) {
+  return {
+    type: 'DELETE_ACCOUNT',
+    account
+  }
+}
+
 export const loadAccounts = function (accounts) {
   return {
     type: 'LOAD_ACCOUNTS',
