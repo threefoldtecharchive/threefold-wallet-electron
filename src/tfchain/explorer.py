@@ -1,6 +1,7 @@
 import random
 import tfchain.errors as tferrors
-import tfchain.polyfill as jspolyfill
+import tfchain.polyfill.json as jsjson
+import tfchain.polyfill.http as jshttp
 
 class ExplorerClient:
     """
@@ -39,9 +40,9 @@ class ExplorerClient:
                 headers = {
                     'User-Agent': 'Rivine-Agent',
                 }
-                resp = jspolyfill.http_get(resource, headers=headers)
+                resp = jshttp.http_get(resource, headers=headers)
                 if resp.code == 200:
-                    return jspolyfill.json_loads(resp.data)
+                    return jsjson.json_loads(resp.data)
                 if resp.code == 204 or (resp.code == 400 and ('unrecognized hash' in resp.data or 'not found' in resp.data)):
                     raise tferrors.ExplorerNoContent("GET: no content available (code: 204)", endpoint)
                 raise tferrors.ExplorerServerError("error (code: {}): {}".format(resp.code, resp.data), endpoint)
@@ -71,10 +72,10 @@ class ExplorerClient:
                 }
                 s = data
                 if not isinstance(s, str):
-                    s = jspolyfill.json_dumps(s)
-                resp = jspolyfill.http_post(resource, s, headers=headers)
+                    s = jsjson.json_dumps(s)
+                resp = jshttp.http_post(resource, s, headers=headers)
                 if resp.code == 200:
-                    return jspolyfill.json_loads(resp.data)
+                    return jsjson.json_loads(resp.data)
                 raise tferrors.ExplorerServerPostError("POST: unexpected error (code: {}): {}".format(resp.code, resp.data), endpoint, data=data)
             except Exception as e:
                 print("tfchain explorer get exception at endpoint {} on {}: {}".format(endpoint, address, e))

@@ -1,3 +1,9 @@
+import tfchain.crypto.mnemonic as bip39
+import tfchain.polyfill.crypto as jscrypto
+
+__bip39 = bip39.Mnemonic(jscrypto.sha256, jscrypto.random)
+
+
 class Account:
     @classmethod
     def deserialize(cls, account_name, password, data):
@@ -78,6 +84,7 @@ class Account:
             }
         }
 
+
 class Wallet:
     def __init__(self, wallet_name, start_index, addresses):
         self._wallet_name = wallet_name
@@ -103,6 +110,7 @@ class Wallet:
             'address_count': len(self.addresses),
         }
 
+
 class Balance:
     def __init__(self):
         pass
@@ -120,4 +128,7 @@ class Balance:
         return '2'
 
 def mnemonic_new():
-    return "nature runway endorse exist weird height jar slice fatal thrive mountain book renew sea avocado truck city reveal promote silk cupboard rubber kangaroo idle"
+    return __bip39.generate(strength=256)
+
+def mnemonic_to_entropy(mnemonic):
+    return __bip39.to_entropy(mnemonic)

@@ -9,7 +9,7 @@
     "build-e2e": "cross-env E2E_BUILD=true yarn build",
     "build-main": "cross-env NODE_ENV=production webpack --config ./configs/webpack.config.main.prod.babel.js --colors",
     "build-renderer": "cross-env NODE_ENV=production webpack --config ./configs/webpack.config.renderer.prod.babel.js --colors",
-    "build-py": "rm -rf ./app/tfchain && python3 -m transcrypt -b -n -m ./src/api.py && mv ./src/__target__ ./app/tfchain",
+    "build-py": "rm -rf ./app/tfchain && python3 -m transcrypt -k -b -n -m ./src/api.py && mv ./src/__target__ ./app/tfchain",
     "dev": "cross-env START_HOT=1 node -r @babel/register ./internals/scripts/CheckPortInUse.js && cross-env START_HOT=1 yarn start-renderer-dev",
     "flow": "flow",
     "flow-typed": "rimraf flow-typed/npm && flow-typed install --overwrite || true",
