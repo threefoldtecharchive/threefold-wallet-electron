@@ -1,4 +1,5 @@
 import tfchain.crypto.mnemonic as bip39
+import tfchain.polyfill.encode as jsencode
 
 
 __bip39 = bip39.Mnemonic()
@@ -22,7 +23,7 @@ class Account:
             raise ValueError("account_name {} is unexpected, does not match account data".format(account_name))
         if password != data.password:
             raise ValueError("password is invalid, does not match account data")
-        account = cls(account_name, password, seed=data.data.seed)
+        account = cls(account_name, password, seed=jsencode.hex_to_buffer(data.data.seed))
         for data in data.data.wallets:
             account.wallet_new(data.wallet_name, data.start_index, data.address_count)
         return account
@@ -92,7 +93,7 @@ class Account:
             'account_name': self._account_name,
             'password': self._password,
             'data': {
-                'seed': self._mnemonic,
+                'seed': jsencode.buffer_to_hex(self._seed),
                 'wallets': [wallet.serialize() for wallet in self._wallets],
             }
         }
