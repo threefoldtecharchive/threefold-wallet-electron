@@ -36,12 +36,15 @@ class ExplorerClient:
                     raise TypeError("explorer address expected to be a string, not {}".format(type(address)))
                 # do the request and check the response
                 resource = address+endpoint
-                resp = jspolyfill.http_get(resource)
+                headers = {
+                    'User-Agent': 'Rivine-Agent',
+                }
+                resp = jspolyfill.http_get(resource, headers=headers)
                 if resp.code == 200:
-                    return resp.data
-                if resp.code == 204:
+                    return jspolyfill.json_loads(resp.data)
+                if resp.code == 204 or (resp.code == 400 and ('unrecognized hash' in resp.data or 'not found' in resp.data)):
                     raise tferrors.ExplorerNoContent("GET: no content available (code: 204)", endpoint)
-                raise tferrors.ExplorerServerError("error (code: {})".format(resp.code), endpoint)
+                raise tferrors.ExplorerServerError("error (code: {}): {}".format(resp.code, resp.data), endpoint)
             except Exception as e:
                 print("tfchain explorer get exception at endpoint {} on {}: {}".format(endpoint, address, e))
         raise tferrors.ExplorerNotAvailable("no explorer was available", endpoint, self._addresses)
@@ -62,9 +65,16 @@ class ExplorerClient:
                 if not isinstance(address, str):
                     raise TypeError("explorer address expected to be a string, not {}".format(type(address)))
                 resource = address+endpoint
-                resp = jspolyfill.http_post(resource, data)
+                headers = {
+                    'User-Agent': 'Rivine-Agent',
+                    'Content-Type': 'Application/json;charset=UTF-8',
+                }
+                s = data
+                if not isinstance(s, str):
+                    s = jspolyfill.json_dumps(s)
+                resp = jspolyfill.http_post(resource, s, headers=headers)
                 if resp.code == 200:
-                    return resp.data
+                    return jspolyfill.json_loads(resp.data)
                 raise tferrors.ExplorerServerPostError("POST: unexpected error (code: {}): {}".format(resp.code, resp.data), endpoint, data=data)
             except Exception as e:
                 print("tfchain explorer get exception at endpoint {} on {}: {}".format(endpoint, address, e))
