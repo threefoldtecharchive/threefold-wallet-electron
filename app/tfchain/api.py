@@ -118,3 +118,6 @@ class Balance:
     @property
     def coins_total(self):
         return '2'
+
+def mnemonic_new():
+    return "nature runway endorse exist weird height jar slice fatal thrive mountain book renew sea avocado truck city reveal promote silk cupboard rubber kangaroo idle"

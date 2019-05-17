@@ -19,7 +19,7 @@ class ExplorerClient:
         """
         return self._addresses
 
-    def get_data(self, endpoint):
+    def data_get(self, endpoint):
         """
         get data from an explorer at the endpoint from any explorer that is available
         on one of the given urls. The list of urls is traversed in random order until
@@ -49,7 +49,7 @@ class ExplorerClient:
                 print("tfchain explorer get exception at endpoint {} on {}: {}".format(endpoint, address, e))
         raise tferrors.ExplorerNotAvailable("no explorer was available", endpoint, self._addresses)
 
-    def post_data(self, endpoint, data):
+    def data_post(self, endpoint, data):
         """
         put data to an explorer at the endpoint from any explorer that is available
         on one of the given urls. The list of urls is traversed in random order until
