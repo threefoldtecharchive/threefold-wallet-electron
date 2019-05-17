@@ -1,7 +1,34 @@
 export const addAccount = function (account) {
-  console.log(account)
   return {
     type: 'ADD_ACCOUNT',
+    account
+  }
+}
+
+export const saveAccount = function (account) {
+  return {
+    type: 'SAVE_ACCOUNT',
+    account
+  }
+}
+
+export const deleteAccount = function (account) {
+  return {
+    type: 'DELETE_ACCOUNT',
+    account
+  }
+}
+
+export const loadAccounts = function (accounts) {
+  return {
+    type: 'LOAD_ACCOUNTS',
+    accounts
+  }
+}
+
+export const selectAccount = function (account) {
+  return {
+    type: 'SELECT_ACCOUNT',
     account
   }
 }
@@ -10,5 +37,26 @@ export const selectWallet = function (wallet) {
   return {
     type: 'SELECT_WALLET',
     wallet
+  }
+}
+
+export const saveWallet = function (wallet) {
+  return {
+    type: 'SAVE_WALLET',
+    wallet
+  }
+}
+
+export const deleteWallet = function (wallet) {
+  return {
+    type: 'DELETE_WALLET',
+    wallet
+  }
+}
+
+export const setClient = function (client) {
+  return {
+    type: 'SET_CLIENT',
+    client
   }
 }

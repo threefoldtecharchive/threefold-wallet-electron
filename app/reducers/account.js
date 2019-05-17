@@ -1,28 +1,80 @@
+const storage = require('electron-json-storage')
+
 export const account = (state = [], action) => {
   switch (action.type) {
     case 'ADD_ACCOUNT':
-      console.log(action)
-      return Object.assign({}, state, {
+      const account = Object.assign({}, state, {
         name: action.account.__internal_object__.name,
         password: action.account.__internal_object__.password,
         wallets: action.account.__internal_object__.wallets.$array
       })
-    default:
-      return state
-  }
-}
+      delete account.wallets[0].$val
 
-export const selectedWallet = (state = [], action) => {
-  switch (action.type) {
-    case 'SELECT_WALLET':
-      console.log(action)
-      return Object.assign({}, state, {
-        publicKey: action.wallet.publicKey,
-        secretKey: action.wallet.secretKey
+      storage.set(account.name, account, function (err) {
+        if (err) throw err
       })
+      return account
+    case 'SELECT_ACCOUNT':
+      let newAccount = Object.assign({}, state, {
+        name: action.account.name,
+        password: action.account.password,
+        wallets: action.account.wallets
+      })
+      return newAccount
+    case 'DELETE_ACCOUNT':
+      // first delete account
+      storage.remove(action.account.name, function (err) {
+        if (err) console.log(err)
+      })
+      return null
+    case 'SAVE_ACCOUNT':
+      let newSavedAccount = Object.assign({}, state.account, {
+        name: action.account.name,
+        password: action.account.password,
+        wallets: action.account.wallets
+      })
+
+      // first delete account
+      storage.remove(action.account.previousName, function (err) {
+        if (err) console.log(err)
+      })
+
+      // add the newly saved account
+      storage.set(newSavedAccount.name, newSavedAccount, function (err) {
+        if (err) console.log(err)
+      })
+      return newSavedAccount
+    case 'SAVE_WALLET':
+      const newWallets = state.wallets.map(wal => {
+        if (wal.name === action.wallet.previousWalletName) {
+          return Object.assign(wal, {
+            name: action.wallet.name,
+            publicKey: action.wallet.publicKey,
+            secretKey: action.wallet.secretKey
+          })
+        }
+        return wal
+      })
+      state.wallets = newWallets
+      return state
+    case 'DELETE_WALLET':
+      state.wallets = state.wallets.filter(w => w.name !== action.wallet.name)
+      return state
     default:
       return state
   }
 }
 
-export default { account, selectedWallet }
+export const accounts = (state = [], action) => {
+  switch (action.type) {
+    case 'LOAD_ACCOUNTS':
+      // reset state
+      state = []
+      action.accounts.map(a => {
+        state.push(a)
+      })
+      return state
+    default:
+      return state
+  }
+}

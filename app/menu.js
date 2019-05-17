@@ -55,7 +55,7 @@ export default class MenuBuilder {
         { label: 'Services', submenu: [] },
         { type: 'separator' },
         {
-          label: 'Hide ElectronReact',
+          label: 'Hide Tfchain Wallet',
           accelerator: 'Command+H',
           selector: 'hide:'
         },

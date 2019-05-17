@@ -1,0 +1,23 @@
+.container {
+  text-align: center;
+  margin-top: 35px;
+}
+
+.container h2 {
+  font-size: 2rem;
+  text-transform: uppercase;
+}
+
+.container a {
+  font-size: 1.4rem;
+}
+
+#blue-button {
+  background: '#015DE1';
+  color: 'white';
+  width: 180;
+}
+
+.ui.input input {
+  color: red;
+}
