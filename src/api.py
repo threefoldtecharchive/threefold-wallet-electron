@@ -1,7 +1,7 @@
 import tfchain.crypto.mnemonic as bip39
-import tfchain.polyfill.crypto as jscrypto
 
-__bip39 = bip39.Mnemonic(jscrypto.sha256, jscrypto.random)
+
+__bip39 = bip39.Mnemonic()
 
 
 class Account:
@@ -34,9 +34,18 @@ class Account:
         if not password:
             raise ValueError("no password is given, while it is required")
         self._password = password
+        mnemonic = None
         if seed is None:
-            seed = "teacup"
-        self._mnemonic = seed # support mnemonic and byteArray seed
+            mnemonic = mnemonic_new()
+            seed = mnemonic_to_entropy(mnemonic)
+        else:
+            if isinstance(seed, str):
+                mnemonic = seed
+                seed = mnemonic_to_entropy(mnemonic)
+            else:
+                mnemonic = entropy_to_mnemonic(seed)
+        self._mnemonic = mnemonic
+        self._seed = seed
         self._wallets = []
 
     @property
@@ -46,6 +55,10 @@ class Account:
     @property
     def mnemonic(self):
         return self._mnemonic
+
+    @property
+    def seed(self):
+        return self._seed
 
     @property
     def wallet(self):
@@ -132,3 +145,6 @@ def mnemonic_new():
 
 def mnemonic_to_entropy(mnemonic):
     return __bip39.to_entropy(mnemonic)
+
+def entropy_to_mnemonic(entropy):
+    return __bip39.to_mnemonic(entropy)

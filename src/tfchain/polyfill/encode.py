@@ -1,26 +1,22 @@
 def buffer_to_hex(buffer):
     s = ''
     __pragma__("js", "{}", """
-    const h = '0123456789ABCDEF';
-    (new Uint8Array(buffer)).forEach((v) => { s += h[v >> 4] + h[v & 15]; });
+    s = Array.prototype.map.call(buffer, function(byte) {
+        return ('0' + (byte & 0xFF).toString(16)).slice(-2);
+    }).join('');
     """)
     return s
 
-def int_to_bin(n):
-    s = ''
-    n = int(n)
+def hex_to_buffer(s):
+    b = None
+    n = len(s)
     __pragma__("js", "{}", """
-    s = '0b' + (n >>> 0).toString(2);
+    b = [];
+    for (var i = 0; i < n; i += 2) {
+        b.push(parseInt(s.substr(i, 2), 16));
+    }
     """)
-    return s
-
-def hex_to_int(s):
-    x = 0
-    __pragma__("js", "{}", """
-    x = parseInt(s, 16)
-    """)
-    print(s, type(x), x)
-    return x
+    return bytes(b)
 
 def bin_to_int(s):
     x = 0
@@ -33,12 +29,14 @@ def bin_to_int(s):
 def hex_to_bin(s):
     if not s:
         return ''
-    output = '0b'
-    for c in s:
-        __pragma__("js", "{}", """
-        output += (parseInt(c, 16) >>> 0).toString(2)
-        """)
-    return output
+    output = ''
+    __pragma__("js", "{}", """
+    for (let i = 0, charsLength = s.length; i < charsLength; i += 2) {
+        const chunk = s.substring(i, i + 2);
+        output += ("00000000" + (parseInt(chunk, 16)).toString(2)).substr(-8);
+    }
+    """)
+    return '0b' + output
 
 def str_zfill(s, n):
     if len(s) >= n:

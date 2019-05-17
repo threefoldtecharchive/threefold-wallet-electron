@@ -2535,35 +2535,22 @@ if (typeof define === "function") {
 }
 """)
 
-def int32_to_bytes(num):
-  output = []
-  __pragma__("js", "{}", """
-  output = new Uint8Array([
-        (num & 0xff000000) >> 24,
-        (num & 0x00ff0000) >> 16,
-        (num & 0x0000ff00) >> 8,
-        (num & 0x000000ff)
-  ]);
-  """)
-  output = [int(x) for x in output]
-  return output
-
-def _words_to_list(words):
-  l = []
-  for word in words:
-    if word < -2147483648 or word > 2147483647:
-      raise ValueError("invalid word: {}".format(word))
-    output = int32_to_bytes(word)
-    for n in output:
-      l.append(n)
-  return l
+import tfchain.polyfill.encode as jsencode
 
 def random(n):
-  words = sjcl.random.randomWords(int((n+3)/4))
-  l = _words_to_list(words)
-  return bytes(l[:n])
+  digest = ''
+  __pragma__("js", "{}", """
+  const words = sjcl.random.randomWords((n+3)/4);
+  digest = sjcl.codec.hex.fromBits(words);
+  """)
+  return jsencode.hex_to_buffer(digest)
 
 def sha256(data):
-  words = sjcl.hash.sha256.hash(data)
-  l = _words_to_list(words)
-  return bytes(l)
+  data = jsencode.buffer_to_hex(data)
+  digest = ''
+  __pragma__("js", "{}", """
+  const input = sjcl.codec.hex.toBits(data);
+  const words = sjcl.hash.sha256.hash(input)
+  digest = sjcl.codec.hex.fromBits(words);
+  """)
+  return jsencode.hex_to_buffer(digest)

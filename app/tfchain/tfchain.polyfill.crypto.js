@@ -1,5 +1,6 @@
-// Transcrypt'ed from Python, 2019-05-17 18:12:04
+// Transcrypt'ed from Python, 2019-05-17 19:47:01
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __proxy__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, abs, all, any, assert, bool, bytearray, bytes, callable, chr, copy, deepcopy, delattr, dict, dir, divmod, enumerate, filter, float, getattr, hasattr, input, int, isinstance, issubclass, len, list, map, max, min, object, ord, pow, print, property, py_TypeError, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
+import * as jsencode from './tfchain.polyfill.encode.js';
 var __name__ = 'tfchain.polyfill.crypto';
 
 /** @fileOverview Javascript cryptography implementation.
@@ -2537,66 +2538,6 @@ if (typeof define === "function") {
     });
 }
 
-export var int32_to_bytes = function (num) {
-	if (arguments.length) {
-		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-			var __allkwargs0__ = arguments [__ilastarg0__--];
-			for (var __attrib0__ in __allkwargs0__) {
-				switch (__attrib0__) {
-					case 'num': var num = __allkwargs0__ [__attrib0__]; break;
-				}
-			}
-		}
-	}
-	else {
-	}
-	var output = [];
-	
-	  output = new Uint8Array([
-	        (num & 0xff000000) >> 24,
-	        (num & 0x00ff0000) >> 16,
-	        (num & 0x0000ff00) >> 8,
-	        (num & 0x000000ff)
-	  ]);
-	  
-	var output = (function () {
-		var __accu0__ = [];
-		for (var x of output) {
-			__accu0__.append (int (x));
-		}
-		return __accu0__;
-	}) ();
-	return output;
-};
-export var _words_to_list = function (words) {
-	if (arguments.length) {
-		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-			var __allkwargs0__ = arguments [__ilastarg0__--];
-			for (var __attrib0__ in __allkwargs0__) {
-				switch (__attrib0__) {
-					case 'words': var words = __allkwargs0__ [__attrib0__]; break;
-				}
-			}
-		}
-	}
-	else {
-	}
-	var l = [];
-	for (var word of words) {
-		if (word < -(2147483648) || word > 2147483647) {
-			var __except0__ = ValueError ('invalid word: {}'.format (word));
-			__except0__.__cause__ = null;
-			throw __except0__;
-		}
-		var output = int32_to_bytes (word);
-		for (var n of output) {
-			l.append (n);
-		}
-	}
-	return l;
-};
 export var random = function (n) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -2611,9 +2552,12 @@ export var random = function (n) {
 	}
 	else {
 	}
-	var words = sjcl.random.randomWords (int ((n + 3) / 4));
-	var l = _words_to_list (words);
-	return bytes (l.__getslice__ (0, n, 1));
+	var digest = '';
+	
+	  const words = sjcl.random.randomWords((n+3)/4);
+	  digest = sjcl.codec.hex.fromBits(words);
+	  
+	return jsencode.hex_to_buffer (digest);
 };
 export var sha256 = function (data) {
 	if (arguments.length) {
@@ -2629,9 +2573,14 @@ export var sha256 = function (data) {
 	}
 	else {
 	}
-	var words = sjcl.hash.sha256.hash (data);
-	var l = _words_to_list (words);
-	return bytes (l);
+	var data = jsencode.buffer_to_hex (data);
+	var digest = '';
+	
+	  const input = sjcl.codec.hex.toBits(data);
+	  const words = sjcl.hash.sha256.hash(input)
+	  digest = sjcl.codec.hex.fromBits(words);
+	  
+	return jsencode.hex_to_buffer (digest);
 };
 
 //# sourceMappingURL=tfchain.polyfill.crypto.map
