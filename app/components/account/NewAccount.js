@@ -2,7 +2,7 @@
 import { connect } from 'react-redux'
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
-import { Form, Checkbox, Button, Message, Icon, TextArea, Radio } from 'semantic-ui-react'
+import { Form, Checkbox, Button, Message, Icon, TextArea, Radio, Divider } from 'semantic-ui-react'
 import routes from '../../constants/routes'
 import styles from '../home/Home.css'
 // import { NewMnemonic, CreateAccount, CreateWalletOnAccount } from '../client/tfchain'
@@ -173,61 +173,59 @@ class NewAccount extends Component {
               seedError={seedConfirmationError}
               createAccount={this.createAccount}
             />
-            <div className={styles.backButton} data-tid="backButton">
-                <Link to={routes.HOME}>
-                    <Icon style={{ fontSize: 35, position: 'absolute', left: 20, cursor: 'pointer' }} name="chevron circle left"/>
-                </Link>
-            </div>
             <div className={styles.container} >
                 <h2 >New Account</h2>
-                <Form error style={{ width: '50%', margin: 'auto', marginTop: 60, marginBottom: 50 }}>
-                  <Form.Field>
-                    <label style={{ float: 'left', marginBottom: 10, color: 'black' }}>What network do you want to choose? </label>
-                  </Form.Field>
-                  <Form.Field style={{ marginTop: 10, marginBottom: 40 }}>
-                      <div style={{ position: 'absolute', left: 0 }} >
-                        <Radio style={{ marginRight: 30 }}
-                          label='standard'
-                          name='radioGroup'
-                          value='standard'
-                          checked={this.state.network === 'standard'}
-                          onChange={this.handleNetworkChange}
-                        />
-                        <Radio style={{ marginRight: 30 }}
-                          label='devnet'
-                          name='radioGroup'
-                          value='devnet'
-                          checked={this.state.network === 'devnet'}
-                          onChange={this.handleNetworkChange}
-                        />
-                        <Radio style={{ marginRight: 30 }}
-                          label='testnet'
-                          name='radioGroup'
-                          value='testnet'
-                          checked={this.state.network === 'testnet'}
-                          onChange={this.handleNetworkChange}
-                        />
-                      </div>
-                    </Form.Field>
-                    <Form.Field>
-                        <label style={{ float: 'left' }}>Account name</label>
-                        <input label='name' placeholder='name' value={name} onChange={this.handleNameChange}/>
-                    </Form.Field>
-                    {nameErrorMessage}
-                    <Form.Field>
-                        <label style={{ float: 'left' }}>Seed</label>
-                        {this.renderTextArea()}
-                    </Form.Field>
-                    {seedErrorMessage}
-                    <Form.Field>
-                        <Checkbox style={{ left: 0, position: 'absolute' }} label="Generate seed" onClick={this.renderSeed} defaultChecked={generateSeed}/>
-                    </Form.Field>
-                </Form>
-                {this.renderSeedWarning()}
-                <Button type='submit' onClick={this.openConfirmationModal} style={{ marginTop: 10 }}>Create account</Button>
-                {/* <Button type='submit' onClick={this.createAccount} style={{ marginTop: 10 }}>Create account</Button> */}
             </div>
-        </div>
+            <Divider style={{ background: '#1A253F' }}/>
+            <Form error style={{ width: '50%', margin: 'auto', marginTop: 5, marginBottom: 50, fontSize: 18, padding: 10 }}>
+              <Form.Field error={true}>
+                <label style={{ float: 'left', marginBottom: 10, color: 'white' }}>What network do you want to choose? </label>
+              </Form.Field>
+              <Form.Field style={{ marginTop: 10, marginBottom: 40 }}>
+                  <div style={{ position: 'absolute', left: 0 }} >
+                    <Radio style={{ marginRight: 30, color: 'white' }}
+                    label={<label style={{ color: 'white' }}>standard</label>}
+                      name='radioGroup'
+                      value='standard'
+                      checked={this.state.network === 'standard'}
+                      onChange={this.handleNetworkChange}
+                    />
+                    <Radio style={{ marginRight: 30, color: 'white' }}
+                    label={<label style={{ color: 'white' }}>devnet</label>}
+                      name='radioGroup'
+                      value='devnet'
+                      checked={this.state.network === 'devnet'}
+                      onChange={this.handleNetworkChange}
+                    />
+                    <Radio style={{ marginRight: 30, color: 'white' }}
+                    label={<label style={{ color: 'white' }}>testnet</label>}
+                      name='radioGroup'
+                      value='testnet'
+                      checked={this.state.network === 'testnet'}
+                      onChange={this.handleNetworkChange}
+                    />
+                  </div>
+                </Form.Field>
+                <Form.Field error={nameError}>
+                    <label style={{ float: 'left', color: 'white' }}>Account name</label>
+                    <input  label='name' placeholder='name' value={name} onChange={this.handleNameChange}/>
+                </Form.Field>
+                {/* {nameErrorMessage} */}
+                <Form.Field error={seedError}>
+                    <label style={{ float: 'left', color: 'white' }}>Seed</label>
+                    {this.renderTextArea()}
+                </Form.Field>
+                {/* {seedErrorMessage} */}
+                <Form.Field>
+                    <Checkbox style={{ left: 0, position: 'absolute' }} label={<label style={{ color: 'white' }}>Generate seed</label>} onClick={this.renderSeed} defaultChecked={generateSeed}/>
+                </Form.Field>
+            </Form>
+            {this.renderSeedWarning()}
+            <div className={styles.container} >
+              <Button size='big' type='submit' style={{ marginTop: 10, marginRight: 10, background: '#2B3D72', color: 'white', width: 180 }} onClick={() => this.props.history.push(routes.HOME)}>Cancel</Button>
+              <Button size='big' type='submit' onClick={this.openConfirmationModal} style={{ marginTop: 10, margin: 'auto', background: '#015DE1', color: 'white', width: 180 }}>Create account</Button>
+            </div>
+          </div>
     );
   }
 }

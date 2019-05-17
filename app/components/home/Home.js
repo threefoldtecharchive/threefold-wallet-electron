@@ -55,22 +55,24 @@ class Home extends Component {
       return (
         <div>
           <h3>Sign in to one of your accounts</h3>
-          <Segment style={{ margin: 'auto', width: '50%' }} inverted>
+          <Segment style={{ margin: 'auto', width: '50%', background: '#171F44' }}>
             <List divided inverted relaxed>
               {accounts.map(account => {
                 return (
                   <List.Item key={account.name} style={{ padding: 20 }}>
                     <List.Content>
-                      <List.Header style={{ cursor: 'pointer', margin: 'auto', fontSize: 20, textAlign:'left', marginLeft: '42%' }} onClick={() => this.selectAccount(account)}><Icon name='sign in alternate'/> {account.name} </List.Header>
+                      <List.Header style={{ cursor: 'pointer', margin: 'auto', fontSize: 20, textAlign:'left', marginLeft: '43%' }} onClick={() => this.selectAccount(account)}>
+                        <Icon style={{ color: 'white', fontSize: 15 }} name='user'/> {account.name} 
+                      </List.Header>
                     </List.Content>
                   </List.Item>
                 )
               })}
             </List>
           </Segment>
-          <Divider style={{ marginTop: 50 }} horizontal>Or</Divider>
+          <Divider style={{ marginTop: 50, color: 'white' }} horizontal>Or</Divider>
           <div style={{ margin: 'auto' }}>
-            <Link to={routes.NEW}><Button size='big' style={{ width: 180, marginTop: 35 }}>New Account</Button></Link>
+            <Button onClick={() => this.props.history.push(routes.NEW)} size='big' style={{ width: 180, marginTop: 35, background: '#015DE1', color: 'white' }}>New Account</Button>
           </div>
         </div>
       )

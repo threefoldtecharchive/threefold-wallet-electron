@@ -2,10 +2,11 @@
 import { connect } from 'react-redux'
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
-import { List, Segment, Grid, GridColumn, Button, Icon } from 'semantic-ui-react'
+import { List, Segment, Grid, GridColumn, Button, Icon, Divider } from 'semantic-ui-react'
 import routes from '../../constants/routes'
 import styles from '../home/Home.css'
 import { GetWalletAddress } from '../../client/tfchain'
+import Footer from '../footer'
 
 const mapStateToProps = state => ({
   wallet: state.wallet
@@ -28,9 +29,6 @@ class Wallet extends Component {
     return (
       <div>
         <div className={styles.backButton} data-tid='backButton'>
-          <Link to={routes.ACCOUNT}>
-            <Icon style={{ fontSize: 35, position: 'absolute', left: 20, cursor: 'pointer' }} name='chevron circle left' />
-          </Link>
           <Link to={routes.WALLET_SETTINGS}>
             <Icon style={{ fontSize: 35, position: 'absolute', right: 20, cursor: 'pointer' }} name='setting' />
           </Link>
@@ -41,7 +39,11 @@ class Wallet extends Component {
         <div className={styles.container} >
           <h2>{this.props.wallet.name}</h2>
         </div>
+        <Divider style={{ background: '#1A253F' }}/>
         <div>
+        <Link to={routes.ACCOUNT}>
+        <Icon style={{ fontSize: 25, marginLeft: 15, marginTop: 15, cursor: 'pointer' }} name="chevron circle left"/>
+          </Link>
           <Grid centered columns={2} style={{ marginBottom: 30 }}>
             {/* <GridColumn>
               <Segment style={{ marginTop: 60, marginLeft: 50 }} inverted>
@@ -65,7 +67,10 @@ class Wallet extends Component {
               </Segment>
             </GridColumn>
             <GridColumn>
-              <Link to={routes.TRANSFER}><Button style={{ marginTop: 60, float: 'right', marginRight: '10%' }} size='huge'>Transfer</Button></Link>
+              <div style={{ marginTop: 60, position: 'absolute', right: 60 }}>
+                <Button style={{ float: 'left', background: '#2B3C72', color: 'white', marginRight: 15  }} size='big'>Receive</Button>
+                <Button onClick={() => this.props.history.push(routes.TRANSFER)} style={{  marginRight: 10, float: 'left', background: '#015DE1', color: 'white'  }} size='big'>Transfer</Button>
+              </div>
             </GridColumn>
           </Grid>
           <Segment style={{ width: '90%', height: '300px', overflow: 'auto', overflowY: 'scroll', margin: 'auto'  }}>
@@ -102,6 +107,7 @@ class Wallet extends Component {
             </List>
             </Segment>
         </div>
+        <Footer />
       </div>
     )
   }

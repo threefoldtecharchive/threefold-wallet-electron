@@ -2,11 +2,12 @@
 import { connect } from 'react-redux'
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
-import { List, Segment, Grid, GridColumn, Button, Icon, Label } from 'semantic-ui-react'
+import { List, Segment, Grid, GridColumn, Button, Icon, Label, Divider } from 'semantic-ui-react'
 import routes from '../../constants/routes';
 import { GetWalletBalance } from '../../client/tfchain'
 import { selectWallet } from '../../actions'
 import styles from '../home/Home.css'
+import Footer from '../footer'
 
 const mapStateToProps = state => ({
     account: state.account
@@ -92,12 +93,13 @@ class Account extends Component {
                 </Link>
             </div>
             <div className={styles.container} >
-                <h2>{this.props.account.name}</h2>
+                <h2 >{this.props.account.name}</h2>
             </div>
+            <Divider style={{ background: '#1A253F' }}/>
             <div>
                 <Grid centered columns={2}>
                     <GridColumn>
-                        <Segment style={{ marginTop: 60, marginLeft: 50 }} inverted>
+                        <Segment style={{ marginTop: 60, marginLeft: 50, background: '#171F44' }}>
                           <Label as='a' color='red' ribbon>
                             Overview
                           </Label>
@@ -107,12 +109,18 @@ class Account extends Component {
                     </GridColumn>
                     <GridColumn>
                         <Segment style={{ marginTop: 60, marginRight: 50 }}>
-                            <h3 style={{ color: 'black' }}>Total Balance: {this.state.totalBalance} TFT</h3>
+                          <h3 style={{ color: 'black' }}>Total Balance: 1000 {this.state.totalBalance} TFT</h3>
+                          <h4 style={{ color: 'black' }}><Icon name='lock'/>Locked Balance: 500 TFT</h4>
+                          <h4 style={{ color: 'black' }}><Icon name='unlock'/>Unlocked Balance: 500 TFT</h4>
                         </Segment>
-                        <Link to={routes.TRANSFER}><Button style={{ marginTop: 20, float: 'left' }} size='huge'>Transfer</Button></Link>
                     </GridColumn>
                 </Grid>
             </div>
+            <div style={{ position: 'absolute', bottom: 150, right: 50 }}>
+              <Button style={{ marginTop: 20, float: 'left', background: '#2B3C72', color: 'white', marginRight: 15  }} size='big'>Receive</Button>
+              <Button onClick={() => this.props.history.push(routes.TRANSFER)} style={{ marginTop: 20, marginRight: 10, float: 'left', background: '#015DE1', color: 'white'  }} size='big'>Transfer</Button>
+            </div>
+            <Footer />
         </div>
     );
   }

@@ -7,6 +7,7 @@ import routes from '../../constants/routes'
 import styles from '../home/Home.css'
 import { saveAccount, deleteAccount } from '../../actions'
 import DeleteModal from './DeleteAccountModal'
+import Footer from '../footer'
 
 const mapStateToProps = state => ({
   account: state.account
@@ -105,6 +106,7 @@ class AccountSettings extends Component {
                 <Button type='submit' onClick={this.saveAccount}>Save</Button>
             </Form>
           </div>
+          <Footer />
         </div>
     )
   }

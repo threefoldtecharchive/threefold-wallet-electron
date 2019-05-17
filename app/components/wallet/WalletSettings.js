@@ -7,6 +7,7 @@ import routes from '../../constants/routes'
 import styles from '../home/Home.css'
 import { saveWallet, saveAccount, deleteWallet } from '../../actions'
 import DeleteModal from './DeleteWalletModal'
+import Footer from '../footer'
 
 const mapStateToProps = state => ({
   wallet: state.wallet,
@@ -118,6 +119,7 @@ class WalletSettings extends Component {
                     <Button type='submit' onClick={this.saveWallet}>Save</Button>
                 </Form>
             </div>
+            <Footer />
         </div>
     );
   }

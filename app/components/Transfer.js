@@ -1,22 +1,14 @@
 // @flow
+import { connect } from 'react-redux'
 import React, { Component } from 'react'
-import { Link } from 'react-router-dom'
-import { Form, Checkbox, Button, Message, Icon, Dropdown, Label } from 'semantic-ui-react'
+import { Form, Checkbox, Button, Input, Icon, Dropdown, Divider } from 'semantic-ui-react'
 import routes from '../constants/routes'
 import styles from './home/Home.css'
+import Footer from './footer'
 
-const wallets = [
-    {
-      key: 'Wallet#1',
-      text: '0X1FDF23E13EDFDZ13R34 - 1000 TFT',
-      value: 10000,
-    },
-    {
-      key: 'MultiSigWallet#1',
-      text: '0X3GDF23E13EDFSDQFARE - 500 TFT',
-      value: 500,
-    },
-  ]
+const mapStateToProps = state => ({
+  account: state.account
+})
 
 class Transfer extends Component {
   constructor (props) {
@@ -25,8 +17,11 @@ class Transfer extends Component {
         generateSeed: false,
         destination: '',
         description: '',
+        amount: 0,
         destinationError: false,
         descriptionError: false,
+        amountError: false,
+        wallets: []
       }
   }
 
@@ -38,10 +33,30 @@ class Transfer extends Component {
     this.setState({ description: target.value })
   }
 
+  handleAmountChange = ({ target }) => {
+    this.setState({ amount: target.value })
+  }
+
+  mapWalletsToDropdownOption = () => {
+    const { wallets } = this.props.account
+    return wallets.map(w => {
+      return {
+        key: w.name,
+        text: w.name,
+        value: w.name
+      }
+    })
+  }
+
+  selectWallet = (event, data) => {
+    console.log(data.value)
+  }
+
   submitTransaction = () => {
-    const { description, destination, from } = this.state
+    const { description, destination, from, amount } = this.state
     let destinationError = false
     let descriptionError = false
+    let amountError = false
 
     if (destination == '') {
       destinationError = true
@@ -51,71 +66,60 @@ class Transfer extends Component {
       descriptionError = true
     }
 
-    this.setState({ destinationError, descriptionError })
+    if (amount <= 0) {
+      amountError = true
+    }
 
-    if (!destinationError && !descriptionError) {
+    this.setState({ destinationError, descriptionError, amountError })
+
+    if (!destinationError && !descriptionError && !amountError) {
       return this.props.history.push("/account")
     }
   }
 
   render() {
-    const { description, destination, destinationError, descriptionError } = this.state
-
-    // let nameErrorMessage, seedErrorMessage 
-
-    // if (nameError) {
-    //   nameErrorMessage = <Message
-    //     error
-    //     header='Name cannot be empty'
-    //   />
-    // }
-
-    // if (seedError) {
-    //   seedErrorMessage = <Message
-    //     error
-    //     header='Seed cannot be empty'
-    //   />
-    // }
-
+    const { description, destination, destinationError, descriptionError, amountError, amount } = this.state
+    const walletsOptions = this.mapWalletsToDropdownOption()
+    console.log(walletsOptions)
     return (
         <div>
-            <div className={styles.backButton} data-tid="backButton">
-                <Link to={routes.ACCOUNT}>
-                    <Icon style={{ fontSize: 35, position: 'absolute', left: 20, cursor: 'pointer' }} name="chevron circle left"/>
-                </Link>
-            </div>
             <div className={styles.container} >
                 <h2 >Transfer</h2>
-                <Form error style={{ width: '50%', margin: 'auto', marginTop: 60}}>
-                    <Form.Field>
-                        <label style={{ float: 'left' }}>Destination address</label>
-                        <input placeholder='01X.....' value={destination} onChange={this.handleDestinationChange}/>
-                    </Form.Field>
-                    {/* <Form.Input label='Destination address' placeholder='01X.....' /> */}
-                    {/* {nameErrorMessage} */}
-                    <Form.Field>
-                        <label style={{ float: 'left' }}>Destination message</label>
-                        <input placeholder='message' value={description} onChange={this.handleDescriptionChange}/>
-                    </Form.Field>
-                    {/* <Form.Input label='Description message' placeholder='message' value={description} onChange={this.handleDescriptionChange}/> */}
-                    {/* {seedErrorMessage} */}
-                    <Form.Field>
-                        <Dropdown
-                            style={{ marginTop: 40 }}
-                            placeholder='Select Wallet'
-                            fluid
-                            selection
-                            options={wallets}
-                        />
-                    </Form.Field>
-                    <Link to={routes.ACCOUNT}><Button>Cancel</Button></Link>
-                    <Button type='submit' onClick={this.createAccount}>Submit</Button>
-
-                </Form>
             </div>
+            <Divider style={{ background: '#1A253F' }}/>
+            <Icon onClick={() => this.props.history.push(routes.ACCOUNT)} style={{ fontSize: 25, marginLeft: 15, marginTop: 15, cursor: 'pointer' }} name="chevron circle left"/>
+              <Form error style={{ width: '50%', marginLeft: '20%', marginTop: 20}}>
+                  <h2 style={{ marginBottom: 20 }}>Send funds to:</h2>
+                  <Form.Field style={{ marginTop: 10 }}>
+                      <Input error={destinationError} style={{ background: '#0c111d !important', color: '#7784a9' }}  icon={<Icon name='send' style={{ color: '#0e72f5' }}></Icon>} iconPosition='left' placeholder='destination address' value={destination} onChange={this.handleDestinationChange} />
+                  </Form.Field>
+                  <Form.Field style={{ marginTop: 30 }}>
+                    <Input error={descriptionError} style={{ background: '#0c111d !important', color: '#7784a9' }}  icon={<Icon name='align left' style={{ color: 'green' }}></Icon>} iconPosition='left' placeholder='message' value={description} onChange={this.handleDescriptionChange} />
+                  </Form.Field>
+                  <Form.Field style={{ marginTop: 30 }}>
+                    <Input type='number' error={amountError} label='Amount TFT' style={{ background: '#0c111d !important', color: '#7784a9', width: 150 }} placeholder='amount' value={amount} onChange={this.handleAmountChange} />
+                  </Form.Field>
+                  <Form.Field style={{ marginTop: 30 }}>
+                    <Dropdown
+                        placeholder='Select Wallet'
+                        fluid
+                        selection
+                        options={walletsOptions}
+                        onChange={this.selectWallet}
+                    />
+                  </Form.Field>
+              </Form>
+              <div style={{ position: 'absolute', bottom: 150, right: 80 }}>
+                <Button onClick={() => this.props.history.push(routes.ACCOUNT)} style={{ marginTop: 20, float: 'left', background: '#2B3C72', color: 'white', marginRight: 15  }} size='big'>Cancel</Button>
+                <Button onClick={this.submitTransaction} style={{ marginTop: 20, marginRight: 10, float: 'left', background: '#015DE1', color: 'white'  }} size='big'>Send</Button>
+              </div>
+            <Footer />
         </div>
     );
   }
 }
 
-export default Transfer
+export default connect(
+  mapStateToProps,
+  null
+)(Transfer)
