@@ -27,6 +27,7 @@ class Root extends Component {
     const dataPath = storage.getDefaultDataPath()
     const newPath = path.join(dataPath, '/tfchain/accounts')
     storage.setDataPath(newPath)
+    console.log(newPath)
 
     // Load in accounts and put them in store
     const loadAccountsFromStorage = this.props.loadAccounts

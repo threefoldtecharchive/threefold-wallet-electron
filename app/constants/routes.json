@@ -6,5 +6,6 @@
   "SETTINGS": "/settings",
   "WALLET": "/wallet",
   "WALLET_SETTINGS": "/walletsettings",
-  "TRANSFER": "/transfer"
+  "TRANSFER": "/transfer",
+  "LOGIN": "/login"
 }

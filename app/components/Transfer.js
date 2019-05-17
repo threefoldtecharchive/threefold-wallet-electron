@@ -87,8 +87,7 @@ class Transfer extends Component {
                 <h2 >Transfer</h2>
             </div>
             <Divider style={{ background: '#1A253F' }}/>
-            <Icon onClick={() => this.props.history.push(routes.ACCOUNT)} style={{ fontSize: 25, marginLeft: 15, marginTop: 15, cursor: 'pointer' }} name="chevron circle left"/>
-              <Form error style={{ width: '50%', marginLeft: '20%', marginTop: 20}}>
+              <Form error style={{ width: '50%', marginLeft: '20%', marginTop: 50}}>
                   <h2 style={{ marginBottom: 20 }}>Send funds to:</h2>
                   <Form.Field style={{ marginTop: 10 }}>
                       <Input error={destinationError} style={{ background: '#0c111d !important', color: '#7784a9' }}  icon={<Icon name='send' style={{ color: '#0e72f5' }}></Icon>} iconPosition='left' placeholder='destination address' value={destination} onChange={this.handleDestinationChange} />

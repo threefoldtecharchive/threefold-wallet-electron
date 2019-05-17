@@ -26,6 +26,7 @@ class Wallet extends Component {
   }
 
   render () {
+    const { wallet } = this.props
     return (
       <div>
         <div className={styles.backButton} data-tid='backButton'>
@@ -37,7 +38,7 @@ class Wallet extends Component {
           </Link>
         </div>
         <div className={styles.container} >
-          <h2>{this.props.wallet.name}</h2>
+          <h2>{wallet.wallet_name}</h2>
         </div>
         <Divider style={{ background: '#1A253F' }}/>
         <div>
@@ -61,9 +62,9 @@ class Wallet extends Component {
             </GridColumn> */}
             <GridColumn>
               <Segment style={{ marginTop: 60, marginLeft: '10%' }}>
-                <h3 style={{ color: 'black' }}>Total Balance: 1001.1 TFT</h3>
-                <h4 style={{ color: 'black' }}><Icon name='lock'/>Locked Balance: 1001.1 TFT</h4>
-                <h4 style={{ color: 'black' }}><Icon name='unlock'/>Unlocked Balance: 1001.1 TFT</h4>
+                <h3 style={{ color: 'black' }}>Total Balance: {wallet.balance.coins_total} TFT</h3>
+                <h4 style={{ color: 'black' }}><Icon name='lock'/>Locked Balance: {wallet.balance.coins_locked} TFT</h4>
+                <h4 style={{ color: 'black' }}><Icon name='unlock'/>Unlocked Balance: {wallet.balance.coins_unlocked} TFT</h4>
               </Segment>
             </GridColumn>
             <GridColumn>

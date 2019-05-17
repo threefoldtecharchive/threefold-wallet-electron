@@ -9,6 +9,7 @@ import AccountSettings from './components/account/AccountSettings'
 import Wallet from './components/wallet/Wallet'
 import WalletSettings from './components/wallet/WalletSettings'
 import Transfer from './components/Transfer'
+import Login from './components/home/Login';
 
 export default () => (
   <App>
@@ -19,6 +20,7 @@ export default () => (
       <Route path={routes.WALLET} component={Wallet} />
       <Route path={routes.WALLET_SETTINGS} component={WalletSettings} />
       <Route path={routes.TRANSFER} component={Transfer} />
+      <Route path={routes.LOGIN} component={Login} />
       <Route path={routes.HOME} component={HomePage} />
     </Switch>
   </App>

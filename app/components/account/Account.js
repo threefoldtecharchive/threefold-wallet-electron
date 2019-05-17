@@ -8,6 +8,8 @@ import { GetWalletBalance } from '../../client/tfchain'
 import { selectWallet } from '../../actions'
 import styles from '../home/Home.css'
 import Footer from '../footer'
+import * as tfchain from '../../tfchain/api'
+import { sumBy } from 'lodash'
 
 const mapStateToProps = state => ({
     account: state.account
@@ -23,23 +25,23 @@ class Account extends Component {
   constructor(props) {
       super(props)
       this.state = {
-        totalBalance: 0,
+        totalCoins: 0,
+        totalCoinLocked: 0,
+        totalCoinUnlocked: 0,
       }
   }
 
   componentDidMount () {
-    const { wallets } = this.props.account
+    const wallets = this.props.account.wallets
+
     if (!wallets) {
       return
     }
-    // wallets.map(w => {
-    //   GetWalletBalance(w).then(res => {
-    //     const { data} = res
-    //     if (data == '') {
-    //       this.setState({ totalBalance: 0 })
-    //     }
-    //   })
-    // })
+    const totalCoinLocked = sumBy(wallets, w => w.balance.coins_locked)
+    const totalCoinUnlocked = sumBy(wallets, w => w.balance.coins_unlocked)
+    const totalCoins = sumBy(wallets, w => w.balance.coins_total)
+
+    this.setState({ totalCoinLocked, totalCoinUnlocked, totalCoins })
   }
 
   // To implement some parsing if i know how to search for a walllet's balance
@@ -71,8 +73,8 @@ class Account extends Component {
             <List.Item key={1}>
               <List.Icon name='folder' />
               <List.Content>
-                <List.Header style={{ cursor: "pointer" }} onClick={() => this.handleWalletClick(w)}>{w.name}</List.Header>
-                1001.1 TFT
+                <List.Header style={{ cursor: "pointer" }} onClick={() => this.handleWalletClick(w)}>{w.wallet_name}</List.Header>
+                {w.balance.coins_total}
               </List.Content>
             </List.Item>
           )
@@ -93,7 +95,7 @@ class Account extends Component {
                 </Link>
             </div>
             <div className={styles.container} >
-                <h2 >{this.props.account.name}</h2>
+                <h2 >{this.props.account.account_name}</h2>
             </div>
             <Divider style={{ background: '#1A253F' }}/>
             <div>
@@ -103,15 +105,15 @@ class Account extends Component {
                           <Label as='a' color='red' ribbon>
                             Overview
                           </Label>
-                          <span>Wallets of account: {this.props.account.name}</span>
+                          <span>Wallets of account: {this.props.account.account_name}</span>
                           {this.renderWallets()}
                         </Segment>
                     </GridColumn>
                     <GridColumn>
                         <Segment style={{ marginTop: 60, marginRight: 50 }}>
-                          <h3 style={{ color: 'black' }}>Total Balance: 1000 {this.state.totalBalance} TFT</h3>
-                          <h4 style={{ color: 'black' }}><Icon name='lock'/>Locked Balance: 500 TFT</h4>
-                          <h4 style={{ color: 'black' }}><Icon name='unlock'/>Unlocked Balance: 500 TFT</h4>
+                          <h3 style={{ color: 'black' }}>Total Balance: {this.state.totalCoins} TFT</h3>
+                          <h4 style={{ color: 'black' }}><Icon name='lock'/>Locked Balance: {this.state.totalCoinLocked}  TFT</h4>
+                          <h4 style={{ color: 'black' }}><Icon name='unlock'/>Unlocked Balance: {this.state.totalCoinUnlocked}  TFT</h4>
                         </Segment>
                     </GridColumn>
                 </Grid>

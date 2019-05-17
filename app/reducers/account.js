@@ -4,23 +4,23 @@ export const account = (state = [], action) => {
   switch (action.type) {
     case 'ADD_ACCOUNT':
       const account = Object.assign({}, state, {
-        name: action.account.__internal_object__.name,
-        password: action.account.__internal_object__.password,
-        wallets: action.account.__internal_object__.wallets.$array
+        name: action.account.account_name,
+        password: action.account.password,
+        wallets: action.account.wallets,
+        ...action.account
       })
-      delete account.wallets[0].$val
 
-      storage.set(account.name, account, function (err) {
+      const addedAccount = action.account.serialize()
+
+      storage.set(addedAccount.account_name, addedAccount, function (err) {
         if (err) throw err
       })
       return account
     case 'SELECT_ACCOUNT':
-      let newAccount = Object.assign({}, state, {
-        name: action.account.name,
-        password: action.account.password,
-        wallets: action.account.wallets
-      })
-      return newAccount
+      // let newAccount = Object.assign({}, state, {
+      //   ...action.account
+      // })
+      return action.account
     case 'DELETE_ACCOUNT':
       // first delete account
       storage.remove(action.account.name, function (err) {

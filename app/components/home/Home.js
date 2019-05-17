@@ -8,8 +8,6 @@ import styles from './Home.css'
 import { selectAccount } from '../../actions'
 const storage = require('electron-json-storage')
 
-// import { NewMnemonic, EncryptMnemoic, NewWallet } from '../client/tfchain'
-
 const mapStateToProps = state => ({
   client: state.client.client,
   loadAccounts: state.loadAccounts
@@ -39,7 +37,7 @@ class Home extends Component {
 
   selectAccount = (account) => {
     this.props.SelectAccount(account)
-    return this.props.history.push("/account")
+    return this.props.history.push("/login")
   }
 
   renderAccounts = () => {
@@ -59,10 +57,10 @@ class Home extends Component {
             <List divided inverted relaxed>
               {accounts.map(account => {
                 return (
-                  <List.Item key={account.name} style={{ padding: 20 }}>
+                  <List.Item key={account.account_name} style={{ padding: 20 }}>
                     <List.Content>
                       <List.Header style={{ cursor: 'pointer', margin: 'auto', fontSize: 20, textAlign:'left', marginLeft: '43%' }} onClick={() => this.selectAccount(account)}>
-                        <Icon style={{ color: 'white', fontSize: 15 }} name='user'/> {account.name} 
+                        <Icon style={{ color: 'white', fontSize: 15 }} name='user'/> {account.account_name} 
                       </List.Header>
                     </List.Content>
                   </List.Item>

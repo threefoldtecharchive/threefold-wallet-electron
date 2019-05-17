@@ -9,6 +9,7 @@ import styles from '../home/Home.css'
 import { addAccount } from '../../actions'
 import SeedConfirmationModal from './SeedConfirmationModal'
 import { difference } from 'lodash'
+import * as tfchain from '../../tfchain/api'
 
 const mapStateToProps = state => ({
   client: state.client.client
@@ -27,28 +28,56 @@ class NewAccount extends Component {
         generateSeed: false,
         seed: '',
         name: '',
+        password: '',
+        passwordConfirmation: '',
         seedError: false,
         nameError: false,
         network: 'standard',
         openConfirmationModal: false,
         seedConfirmationError: '',
-        seedConfirmation: ''
+        seedConfirmation: '',
+        passwordError: false,
+        passwordConfirmationError: false
       }
   }
 
   handleSeedChange = ({ target }) => {
+    if (target.value != '') {
+      this.setState({ seedError: false })
+    } 
     this.setState({ seed: target.value })
   }
 
   handleNameChange = ({ target }) => {
+    if (target.value != '') {
+      this.setState({ nameError: false })
+    } 
     this.setState({ name: target.value })
+  }
+
+  handlePasswordChange = ({ target }) => {
+    if (target.value != '') {
+      this.setState({ passwordError: false })
+    } 
+    this.setState({ password: target.value })
+  }
+
+  handlePasswordConfirmationChange = ({ target }) => {
+    const { password } = this.state
+    if (target.value != '') {
+      this.setState({ passwordConfirmationError: false })
+    } 
+    if (password != target.value) {
+      this.setState({ passwordConfirmationError: true })
+    }
+    this.setState({ passwordConfirmation: target.value })
   }
 
   renderSeed = () => {
       let seed = ""
       const generateSeed = !this.state.generateSeed
       if (generateSeed) {
-          seed = this.props.client.NewMnemonic()
+        seed = tfchain.mnemonic_new()
       }
       this.setState({seed, generateSeed})
   }
@@ -81,7 +110,7 @@ class NewAccount extends Component {
   handleNetworkChange = (e, { value }) => this.setState({ network: value })
 
   createAccount = () => {
-    const { seed, name, seedConfirmation, generateSeed } = this.state
+    const { seed, name, seedConfirmation, generateSeed, password, passwordConfirmation } = this.state
     if (generateSeed) {
       if (seedConfirmation == '') {
         return this.setState({ seedConfirmationError: true })
@@ -104,6 +133,8 @@ class NewAccount extends Component {
 
     let seedError = false
     let nameError = false
+    let passwordError = false
+    let passwordConfirmationError = false
 
     if (seed === '') {
       seedError = true
@@ -113,15 +144,24 @@ class NewAccount extends Component {
       nameError = true
     }
 
-    this.setState({ nameError, seedError })
-    if (!nameError && !seedError) {
-      let account = this.props.client.CreateAccount(name, seed, 0, 'defaultWallet')
+    if (password === '') {
+      passwordError = true
+    }
+  
+    if (passwordConfirmation === '') {
+      passwordConfirmationError = true
+    }
 
-      const accountName = account.__internal_object__.name
-      const wallets = account.__internal_object__.wallets.$array
+
+    this.setState({ nameError, seedError, passwordError, passwordConfirmationError })
+    if (!nameError && !seedError && !passwordError && !passwordConfirmationError) {
+      // create account
+      const account = new tfchain.Account(name, password, seed)
+      // create wallet
+      account.wallet_new('defaultWallet', 0, 1)
+
       this.props.AddAccount(account)
       return this.props.history.push("/account")
-      // return <Account accountName={accountName} wallets={wallets} />
     }
   }
 
@@ -144,24 +184,7 @@ class NewAccount extends Component {
   }
 
   render() {
-    const { seed, name, generateSeed, seedError, nameError, seedConfirmation, seedConfirmationError, openConfirmationModal } = this.state
-
-    let nameErrorMessage
-    let seedErrorMessage 
-
-    if (nameError) {
-      nameErrorMessage = <Message
-        error
-        header='Name cannot be empty'
-      />
-    }
-
-    if (seedError) {
-      seedErrorMessage = <Message
-        error
-        header='Seed cannot be empty'
-      />
-    }
+    const { seed, name, generateSeed, seedError, nameError, seedConfirmation, seedConfirmationError, openConfirmationModal, password, confirmationPassword, passwordError, passwordConfirmationError } = this.state
 
     return (
         <div>
@@ -177,45 +200,51 @@ class NewAccount extends Component {
                 <h2 >New Account</h2>
             </div>
             <Divider style={{ background: '#1A253F' }}/>
-            <Form error style={{ width: '50%', margin: 'auto', marginTop: 5, marginBottom: 50, fontSize: 18, padding: 10 }}>
+            <Form error style={{ width: '50%', margin: 'auto', marginTop: 5, marginBottom: 50, fontSize: 18 }}>
               <Form.Field error={true}>
                 <label style={{ float: 'left', marginBottom: 10, color: 'white' }}>What network do you want to choose? </label>
               </Form.Field>
               <Form.Field style={{ marginTop: 10, marginBottom: 40 }}>
-                  <div style={{ position: 'absolute', left: 0 }} >
-                    <Radio style={{ marginRight: 30, color: 'white' }}
-                    label={<label style={{ color: 'white' }}>standard</label>}
-                      name='radioGroup'
-                      value='standard'
-                      checked={this.state.network === 'standard'}
-                      onChange={this.handleNetworkChange}
-                    />
-                    <Radio style={{ marginRight: 30, color: 'white' }}
-                    label={<label style={{ color: 'white' }}>devnet</label>}
-                      name='radioGroup'
-                      value='devnet'
-                      checked={this.state.network === 'devnet'}
-                      onChange={this.handleNetworkChange}
-                    />
-                    <Radio style={{ marginRight: 30, color: 'white' }}
-                    label={<label style={{ color: 'white' }}>testnet</label>}
-                      name='radioGroup'
-                      value='testnet'
-                      checked={this.state.network === 'testnet'}
-                      onChange={this.handleNetworkChange}
-                    />
-                  </div>
+                <div style={{ position: 'absolute', left: 0 }} >
+                  <Radio style={{ marginRight: 30, color: 'white' }}
+                  label={<label style={{ color: 'white' }}>standard</label>}
+                    name='radioGroup'
+                    value='standard'
+                    checked={this.state.network === 'standard'}
+                    onChange={this.handleNetworkChange}
+                  />
+                  <Radio style={{ marginRight: 30, color: 'white' }}
+                  label={<label style={{ color: 'white' }}>devnet</label>}
+                    name='radioGroup'
+                    value='devnet'
+                    checked={this.state.network === 'devnet'}
+                    onChange={this.handleNetworkChange}
+                  />
+                  <Radio style={{ marginRight: 30, color: 'white' }}
+                  label={<label style={{ color: 'white' }}>testnet</label>}
+                    name='radioGroup'
+                    value='testnet'
+                    checked={this.state.network === 'testnet'}
+                    onChange={this.handleNetworkChange}
+                  />
+                </div>
                 </Form.Field>
                 <Form.Field error={nameError}>
                     <label style={{ float: 'left', color: 'white' }}>Account name</label>
                     <input  label='name' placeholder='name' value={name} onChange={this.handleNameChange}/>
                 </Form.Field>
-                {/* {nameErrorMessage} */}
+                <Form.Field error={passwordError}>
+                    <label style={{ float: 'left', color: 'white' }}>Password</label>
+                    <input  label='password' placeholder='password' value={password} onChange={this.handlePasswordChange}/>
+                </Form.Field>
+                <Form.Field error={passwordConfirmationError}>
+                    <label style={{ float: 'left', color: 'white' }}>Confirm password</label>
+                    <input label='confirm password' placeholder='password' value={confirmationPassword} onChange={this.handlePasswordConfirmationChange}/>
+                </Form.Field>
                 <Form.Field error={seedError}>
                     <label style={{ float: 'left', color: 'white' }}>Seed</label>
                     {this.renderTextArea()}
                 </Form.Field>
-                {/* {seedErrorMessage} */}
                 <Form.Field>
                     <Checkbox style={{ left: 0, position: 'absolute' }} label={<label style={{ color: 'white' }}>Generate seed</label>} onClick={this.renderSeed} defaultChecked={generateSeed}/>
                 </Form.Field>
