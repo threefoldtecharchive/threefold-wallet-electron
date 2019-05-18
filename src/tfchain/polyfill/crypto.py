@@ -2416,7 +2416,7 @@ sjcl.random = new sjcl.prng(6);
     }
     var a = str.replace(/^\{|\}$/g, '').split(/,/), out={}, i, m;
     for (i=0; i<a.length; i++) {
-      if (!(m=a[i].match(/^\s*(?:(["']?)([a-z][a-z0-9]*)\1)\s*:\s*(?:(-?\d+)|"([a-z0-9+\/%*_.@=\-]*)"|(true|false))$/i))) {
+      if (!(m=a[i].match(/^\s*(?:(["']?)([a-z][a-z0-9]*)\\1)\s*:\s*(?:(-?\d+)|"([a-z0-9+\/%*_.@=\-]*)"|(true|false))$/i))) {
         throw new sjcl.exception.invalid("json decode: this isn't json!");
       }
       if (m[3] != null) {
@@ -2535,6 +2535,7 @@ if (typeof define === "function") {
 }
 """)
 
+import tfchain.polyfill.json as jsjson 
 import tfchain.polyfill.encode as jsencode
 
 def random(n):
@@ -2554,3 +2555,117 @@ def sha256(data):
   digest = sjcl.codec.hex.fromBits(words);
   """)
   return jsencode.hex_to_buffer(digest)
+
+
+class SymmetricKey:
+  """
+  Used to encrypt and decrypt text using a symmetric AES key.
+  A new key will be generated for each encryption call,
+  always using the callee-defined password to derive a new key using a random salt.
+  The encryption is also protected using a random init vector, also unique per call.
+  """
+
+  def __init__(self, password):
+    if not password:
+      raise ValueError("no password is given, while one is expected")
+    if not isinstance(password, str):
+      raise TypeError("password has to be a str, not be of type {}".format(type(str)))
+    self._password = password
+
+  @property
+  def password(self):
+    """
+    :returns: the callee-chosen password used as input for this key
+    :rtype: str
+    """
+    return self._password
+
+  def encrypt(self, pt):
+    """
+    Encrypt the given plain text.
+    """
+    if not isinstance(pt, str):
+      pt = jsjson.json_dumps(pt)
+    if not pt:
+      raise ValueError("no plain text given to encrypt")
+    password = self._password
+    salt = None
+    iv = None
+    ct = None
+    __pragma__("js", "{}", """
+    const output = sjcl.encrypt(password, pt);
+    const result = JSON.parse(output);
+    salt = result.salt;
+    iv = result.iv;
+    ct = result.ct;
+    """)
+    return (ct, RandomSymmetricEncryptionInput(iv, salt))
+
+  def decrypt(self, ct, rsei):
+    """
+    Decrypt the given cipher text.
+    """
+    # validate parameters
+    if not isinstance(ct, str):
+      raise TypeError("cipher text was expected to be a base64-encoded string, not be of type {}".format(type(ct)))
+    if not ct:
+      raise ValueError("no cipher text given to decrypt")
+    if not isinstance(rsei, RandomSymmetricEncryptionInput):
+      raise TypeError("rsei was expected to be of type RandomSymmetricEncryptionInput, not be of type {}".format(type(rsei)))
+
+    password = self._password
+    # assemble key and decrypt
+    pt = None
+    __pragma__("js", "{}", """
+    const payload = JSON.stringify({
+      "ct": ct,
+      "iv": rsei.init_vector,
+      "salt": rsei.salt,
+    });
+    pt = sjcl.decrypt(password, payload);
+    """)
+    return pt
+
+
+class RandomSymmetricEncryptionInput:
+  """
+  Input that was used to derive a secure one-time Symmetric key (together with a user-defined password),
+  as to be able to encrypt/decrypt given data with an init vector.
+  """
+
+  def __init__(self, iv, salt):
+    """
+    Create a Random Symmetric Encryption Input,
+    as the result for encryption, or in order to decrypt already encrypted text.
+
+    :param iv: init vector (base64-encoded) used once to encrypt a text, as a defensive mechanism
+    :type iv: str
+    :param salt: salt used to derive a key, as a defensive mechanism
+    :type salt: str
+    """
+    # validate input
+    for (label, prop) in [("init vector", iv), ("salt", salt)]:
+      if not prop:
+        raise ValueError("no " + label  + " is given while it is expected")
+      if not isinstance(prop, str):
+        raise TypeError(label + " is expected to be of type str, not be of type {}".format(type(prop)))
+    # assign the props
+    self._iv = iv
+    self._salt = salt
+
+  @property
+  def init_vector(self):
+    """
+    :returns: the init vector used as input for the symmetric encryption
+    :rtype: str
+    """
+    return self._iv
+
+  @property
+  def salt(self):
+    """
+    :returns: the salt used to derive a one-time symmetric key
+    :rtype: str
+    """
+    return self._salt
+

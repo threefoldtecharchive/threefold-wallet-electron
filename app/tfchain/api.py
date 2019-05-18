@@ -5,6 +5,8 @@ converted into Javascript (ES6) using Transcrypt.
 
 import tfchain.crypto.mnemonic as bip39
 import tfchain.polyfill.encode as jsencode
+import tfchain.polyfill.crypto as jscrypto
+import tfchain.polyfill.json as jsjson
 import tfchain.network as tfnetwork
 import tfchain.explorer as tfexplorer
 
@@ -51,23 +53,26 @@ class Account:
             raise ValueError("account data of version {} is not supported".format(data.version))
         data = data.data
 
+        # create the encryption key, so we can (try to) decrypt
+        symmetric_key = jscrypto.SymmetricKey(password)
+        payload = jsjson.json_loads(symmetric_key.decrypt(
+            data.payload, jscrypto.RandomSymmetricEncryptionInput(data.iv, data.salt)))
+
         # ensure the account name matches the name stored in the passed data
-        if account_name != data.account_name:
+        if account_name != payload.account_name:
             raise ValueError("account_name {} is unexpected, does not match account data".format(account_name))
-        # ensure the password matches the stored data # FIXME: remove passphrase from serializsed data and decrypt data payload
-        if password != data.password:
-            raise ValueError("password is invalid, does not match account data")
         # restore the account
         account = cls(
             account_name,
             password,
-            seed=jsencode.hex_to_buffer(data.seed),
-            network_type=data.network_type,
-            explorer_addresses=data.explorer_addresses,
+            seed=jsencode.hex_to_buffer(payload.seed),
+            network_type=payload.network_type,
+            explorer_addresses=payload.explorer_addresses,
         )
         # restore all wallets for the account
-        for data in data.wallets:
+        for data in payload.wallets:
             account.wallet_new(data.wallet_name, data.start_index, data.address_count)
+
         # return the fully restored account
         return account
 
@@ -94,7 +99,7 @@ class Account:
         self._account_name = account_name
         if not password:
             raise ValueError("no password is given, while it is required")
-        self._password = password
+        self._symmetric_key = jscrypto.SymmetricKey(password)
         # define seed and matching mnemonic based on the given information,
         # generating it randomly if it is not given 
         mnemonic = None
@@ -141,7 +146,6 @@ class Account:
         :returns: Returns the account name of this instance, a human-friendly label
         :rtype: str
         """
-        return self._mnemonic
         return self._account_name
 
     @property
@@ -212,6 +216,7 @@ class Account:
 
         :returns: a JS Data Object, that can be JSON stringified
         """
+        # define the payload
         wallets = []
         for wallet in self.wallets:
             wallets.append({
@@ -219,15 +224,21 @@ class Account:
                 'start_index': wallet.start_index,
                 'address_count': len(wallet.addresses),
             })
+        payload = {
+            'account_name': self._account_name,
+            'network_type': str(self._network_type),
+            'explorer_addresses': self._explorer_client.addresses,
+            'seed': jsencode.buffer_to_hex(self._seed),
+            'wallets': wallets,
+        }
+        # encrypt it using the internal symmetric key
+        ct, rsei = self._symmetric_key.encrypt(payload)
         return {
             'version': 1,
             'data': {
-                'account_name': self._account_name,
-                'network_type': str(self._network_type),
-                'explorer_addresses': self._explorer_client.addresses,
-                'password': self._password,
-                'seed': jsencode.buffer_to_hex(self._seed),
-                'wallets': wallets,
+                'payload': ct,
+                'salt': rsei.salt,
+                'iv': rsei.init_vector,
             }
         }
 
@@ -282,6 +293,14 @@ class Wallet:
         :rtype: str
         """
         return self._wallet_name
+
+    @property
+    def start_index(self):
+        """
+        :returns: the start index, used for the generation of the wallet's first address
+        :rtype: int
+        """
+        return self._start_index
 
     @property
     def addresses(self):

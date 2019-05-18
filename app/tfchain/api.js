@@ -1,7 +1,9 @@
-// Transcrypt'ed from Python, 2019-05-18 15:34:04
+// Transcrypt'ed from Python, 2019-05-18 19:22:00
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __proxy__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, abs, all, any, assert, bool, bytearray, bytes, callable, chr, copy, deepcopy, delattr, dict, dir, divmod, enumerate, filter, float, getattr, hasattr, input, int, isinstance, issubclass, len, list, map, max, min, object, ord, pow, print, property, py_TypeError, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
 import * as tfexplorer from './tfchain.explorer.js';
 import * as tfnetwork from './tfchain.network.js';
+import * as jsjson from './tfchain.polyfill.json.js';
+import * as jscrypto from './tfchain.polyfill.crypto.js';
 import * as jsencode from './tfchain.polyfill.encode.js';
 import * as bip39 from './tfchain.crypto.mnemonic.js';
 var __name__ = '__main__';
@@ -56,18 +58,15 @@ export var Account =  __class__ ('Account', [object], {
 			throw __except0__;
 		}
 		var data = data.data;
-		if (account_name != data.account_name) {
+		var symmetric_key = jscrypto.SymmetricKey (password);
+		var payload = jsjson.json_loads (symmetric_key.decrypt (data.payload, jscrypto.RandomSymmetricEncryptionInput (data.iv, data.salt)));
+		if (account_name != payload.account_name) {
 			var __except0__ = ValueError ('account_name {} is unexpected, does not match account data'.format (account_name));
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		if (password != data.password) {
-			var __except0__ = ValueError ('password is invalid, does not match account data');
-			__except0__.__cause__ = null;
-			throw __except0__;
-		}
-		var account = cls (account_name, password, __kwargtrans__ ({seed: jsencode.hex_to_buffer (data.seed), network_type: data.network_type, explorer_addresses: data.explorer_addresses}));
-		for (var data of data.wallets) {
+		var account = cls (account_name, password, __kwargtrans__ ({seed: jsencode.hex_to_buffer (payload.seed), network_type: payload.network_type, explorer_addresses: payload.explorer_addresses}));
+		for (var data of payload.wallets) {
 			account.wallet_new (data.wallet_name, data.start_index, data.address_count);
 		}
 		return account;
@@ -111,7 +110,7 @@ export var Account =  __class__ ('Account', [object], {
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		self._password = password;
+		self._symmetric_key = jscrypto.SymmetricKey (password);
 		var mnemonic = null;
 		if (seed === null) {
 			var mnemonic = mnemonic_new ();
@@ -163,7 +162,6 @@ export var Account =  __class__ ('Account', [object], {
 		}
 		else {
 		}
-		return self._mnemonic;
 		return self._account_name;
 	});},
 	get _get_mnemonic () {return __get__ (this, function (self) {
@@ -312,7 +310,11 @@ export var Account =  __class__ ('Account', [object], {
 		for (var wallet of self.wallets) {
 			wallets.append (dict ({'wallet_name': wallet.wallet_name, 'start_index': wallet.start_index, 'address_count': len (wallet.addresses)}));
 		}
-		return dict ({'version': 1, 'data': dict ({'account_name': self._account_name, 'network_type': str (self._network_type), 'explorer_addresses': self._explorer_client.addresses, 'password': self._password, 'seed': jsencode.buffer_to_hex (self._seed), 'wallets': wallets})});
+		var payload = dict ({'account_name': self._account_name, 'network_type': str (self._network_type), 'explorer_addresses': self._explorer_client.addresses, 'seed': jsencode.buffer_to_hex (self._seed), 'wallets': wallets});
+		var __left0__ = self._symmetric_key.encrypt (payload);
+		var ct = __left0__ [0];
+		var rsei = __left0__ [1];
+		return dict ({'version': 1, 'data': dict ({'payload': ct, 'salt': rsei.salt, 'iv': rsei.init_vector})});
 	});},
 	get chain_info_get () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -381,6 +383,22 @@ export var Wallet =  __class__ ('Wallet', [object], {
 		}
 		return self._wallet_name;
 	});},
+	get _get_start_index () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._start_index;
+	});},
 	get _get_addresses () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -416,6 +434,7 @@ export var Wallet =  __class__ ('Wallet', [object], {
 });
 Object.defineProperty (Wallet, 'balance', property.call (Wallet, Wallet._get_balance));
 Object.defineProperty (Wallet, 'addresses', property.call (Wallet, Wallet._get_addresses));
+Object.defineProperty (Wallet, 'start_index', property.call (Wallet, Wallet._get_start_index));
 Object.defineProperty (Wallet, 'wallet_name', property.call (Wallet, Wallet._get_wallet_name));;
 export var Balance =  __class__ ('Balance', [object], {
 	__module__: __name__,
