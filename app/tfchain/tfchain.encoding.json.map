@@ -1,0 +1,8 @@
+{
+	"version": 3,
+	"file": "tfchain.encoding.json.js",
+	"sources": [
+		"tfchain.encoding.json.py"
+	],
+	"mappings": "AAAA;AAMA;AANA;AAAA;AAAA;AACA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAEA;AAAA;AAAA;AAAA;AAEA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AACA;AAAA;AAAA;AAAA;AAAA;AAAA"
+}

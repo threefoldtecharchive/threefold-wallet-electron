@@ -1,5 +1,7 @@
-// Transcrypt'ed from Python, 2019-05-17 20:06:55
+// Transcrypt'ed from Python, 2019-05-18 15:34:04
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __proxy__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, abs, all, any, assert, bool, bytearray, bytes, callable, chr, copy, deepcopy, delattr, dict, dir, divmod, enumerate, filter, float, getattr, hasattr, input, int, isinstance, issubclass, len, list, map, max, min, object, ord, pow, print, property, py_TypeError, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
+import * as tfexplorer from './tfchain.explorer.js';
+import * as tfnetwork from './tfchain.network.js';
 import * as jsencode from './tfchain.polyfill.encode.js';
 import * as bip39 from './tfchain.crypto.mnemonic.js';
 var __name__ = '__main__';
@@ -64,15 +66,21 @@ export var Account =  __class__ ('Account', [object], {
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		var account = cls (account_name, password, __kwargtrans__ ({seed: jsencode.hex_to_buffer (data.payload.seed)}));
-		for (var data of data.payload.wallets) {
+		var account = cls (account_name, password, __kwargtrans__ ({seed: jsencode.hex_to_buffer (data.seed), network_type: data.network_type, explorer_addresses: data.explorer_addresses}));
+		for (var data of data.wallets) {
 			account.wallet_new (data.wallet_name, data.start_index, data.address_count);
 		}
 		return account;
 	});},
-	get __init__ () {return __get__ (this, function (self, account_name, password, seed) {
+	get __init__ () {return __get__ (this, function (self, account_name, password, seed, network_type, explorer_addresses) {
 		if (typeof seed == 'undefined' || (seed != null && seed.hasOwnProperty ("__kwargtrans__"))) {;
 			var seed = null;
+		};
+		if (typeof network_type == 'undefined' || (network_type != null && network_type.hasOwnProperty ("__kwargtrans__"))) {;
+			var network_type = null;
+		};
+		if (typeof explorer_addresses == 'undefined' || (explorer_addresses != null && explorer_addresses.hasOwnProperty ("__kwargtrans__"))) {;
+			var explorer_addresses = null;
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -84,6 +92,8 @@ export var Account =  __class__ ('Account', [object], {
 						case 'account_name': var account_name = __allkwargs0__ [__attrib0__]; break;
 						case 'password': var password = __allkwargs0__ [__attrib0__]; break;
 						case 'seed': var seed = __allkwargs0__ [__attrib0__]; break;
+						case 'network_type': var network_type = __allkwargs0__ [__attrib0__]; break;
+						case 'explorer_addresses': var explorer_addresses = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
@@ -114,6 +124,27 @@ export var Account =  __class__ ('Account', [object], {
 		else {
 			var mnemonic = entropy_to_mnemonic (seed);
 		}
+		if (explorer_addresses === null) {
+			if (network_type === null) {
+				var network_type = tfnetwork.Type.STANDARD;
+			}
+			var explorer_addresses = network_type.default_explorer_addresses ();
+			self._explorer_client = tfexplorer.Client (explorer_addresses);
+		}
+		else {
+			self._explorer_client = tfexplorer.Client (explorer_addresses);
+			if (network_type === null) {
+				var info = self.chain_info_get ();
+				var network_type = info.chain_network;
+			}
+		}
+		if (isinstance (network_type, str)) {
+			var network_type = tfnetwork.Type.from_str (network_type);
+		}
+		else if (isinstance (network_type, int)) {
+			var network_type = tfnetwork.Type (network_type);
+		}
+		self._network_type = network_type;
 		self._mnemonic = mnemonic;
 		self._seed = seed;
 		self._wallets = [];
@@ -132,6 +163,7 @@ export var Account =  __class__ ('Account', [object], {
 		}
 		else {
 		}
+		return self._mnemonic;
 		return self._account_name;
 	});},
 	get _get_mnemonic () {return __get__ (this, function (self) {
@@ -223,7 +255,7 @@ export var Account =  __class__ ('Account', [object], {
 		var addresses = (function () {
 			var __accu0__ = [];
 			for (var i = 0; i < address_count; i++) {
-				__accu0__.append ('01ADRESS{:03}'.format (start_index + i));
+				__accu0__.append ('01ADRESS' + str (start_index + i));
 			}
 			return __accu0__;
 		}) ();
@@ -276,13 +308,33 @@ export var Account =  __class__ ('Account', [object], {
 		}
 		else {
 		}
-		return dict ({'version': 1, 'data': dict ({'account_name': self._account_name, 'password': self._password, 'payload': dict ({'seed': jsencode.buffer_to_hex (self._seed), 'wallets': (function () {
-			var __accu0__ = [];
-			for (var wallet of self._wallets) {
-				__accu0__.append (wallet.serialize ());
+		var wallets = [];
+		for (var wallet of self.wallets) {
+			wallets.append (dict ({'wallet_name': wallet.wallet_name, 'start_index': wallet.start_index, 'address_count': len (wallet.addresses)}));
+		}
+		return dict ({'version': 1, 'data': dict ({'account_name': self._account_name, 'network_type': str (self._network_type), 'explorer_addresses': self._explorer_client.addresses, 'password': self._password, 'seed': jsencode.buffer_to_hex (self._seed), 'wallets': wallets})});
+	});},
+	get chain_info_get () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
 			}
-			return __accu0__;
-		}) ()})})});
+		}
+		else {
+		}
+		var stats = self._explorer_client.data_get ('/explorer');
+		var chain_height = stats ['height'];
+		var constants = self._explorer_client.data_get ('/explorer/constants');
+		var info = constants ['chaininfo'];
+		var current_block = self._explorer_client.data_get ('/explorer/blocks/{}'.format (chain_height));
+		var chain_timestamp = current_block ['block'] ['rawblock'] ['timestamp'];
+		return ChainInfo (info ['Name'], info ['ChainVersion'], info ['NetworkName'], chain_height, chain_timestamp);
 	});}
 });
 Object.defineProperty (Account, 'wallets', property.call (Account, Account._get_wallets));
@@ -360,22 +412,6 @@ export var Wallet =  __class__ ('Wallet', [object], {
 		else {
 		}
 		return Balance ();
-	});},
-	get serialize () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		return dict ({'wallet_name': self._wallet_name, 'start_index': self._start_index, 'address_count': len (self.addresses)});
 	});}
 });
 Object.defineProperty (Wallet, 'balance', property.call (Wallet, Wallet._get_balance));
@@ -451,6 +487,119 @@ export var Balance =  __class__ ('Balance', [object], {
 Object.defineProperty (Balance, 'coins_total', property.call (Balance, Balance._get_coins_total));
 Object.defineProperty (Balance, 'coins_locked', property.call (Balance, Balance._get_coins_locked));
 Object.defineProperty (Balance, 'coins_unlocked', property.call (Balance, Balance._get_coins_unlocked));;
+export var ChainInfo =  __class__ ('ChainInfo', [object], {
+	__module__: __name__,
+	get __init__ () {return __get__ (this, function (self, chain_name, chain_version, chain_network, chain_height, chain_timestamp) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'chain_name': var chain_name = __allkwargs0__ [__attrib0__]; break;
+						case 'chain_version': var chain_version = __allkwargs0__ [__attrib0__]; break;
+						case 'chain_network': var chain_network = __allkwargs0__ [__attrib0__]; break;
+						case 'chain_height': var chain_height = __allkwargs0__ [__attrib0__]; break;
+						case 'chain_timestamp': var chain_timestamp = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		self._chain_name = chain_name;
+		self._chain_version = chain_version;
+		self._chain_network = chain_network;
+		self._chain_height = chain_height;
+		self._chain_timestamp = chain_timestamp;
+	});},
+	get _get_chain_name () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._chain_name;
+	});},
+	get _get_chain_version () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._chain_version;
+	});},
+	get _get_chain_network () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._chain_network;
+	});},
+	get _get_chain_height () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._chain_height;
+	});},
+	get _get_chain_timestamp () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._chain_timestamp;
+	});}
+});
+Object.defineProperty (ChainInfo, 'chain_timestamp', property.call (ChainInfo, ChainInfo._get_chain_timestamp));
+Object.defineProperty (ChainInfo, 'chain_height', property.call (ChainInfo, ChainInfo._get_chain_height));
+Object.defineProperty (ChainInfo, 'chain_network', property.call (ChainInfo, ChainInfo._get_chain_network));
+Object.defineProperty (ChainInfo, 'chain_version', property.call (ChainInfo, ChainInfo._get_chain_version));
+Object.defineProperty (ChainInfo, 'chain_name', property.call (ChainInfo, ChainInfo._get_chain_name));;
 export var mnemonic_new = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
