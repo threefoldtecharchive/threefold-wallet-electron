@@ -183,40 +183,31 @@ export var str_to_utf8 = function (str) {
 	}
 	else {
 	}
-	var _bytes = null;
+	var bytes = null;
 	
-	    _bytes = [];
-	    for (var i = 0; i < str.length; i++) {
-	        var c = str.charCodeAt(i);
-	        if (c >= 0xd800 && c <= 0xdbff && i + 1 < str.length) {
-	            var cn = str.charCodeAt(i + 1);
-	            if (cn >= 0xdc00 && cn <= 0xdfff) {
-	                var pt = (c - 0xd800) * 0x400 + cn - 0xdc00 + 0x10000;
-	                
-	                _bytes.push(
-	                    0xf0 + Math.floor(pt / 64 / 64 / 64),
-	                    0x80 + Math.floor(pt / 64 / 64) % 64,
-	                    0x80 + Math.floor(pt / 64) % 64,
-	                    0x80 + pt % 64
-	                );
-	                i += 1;
-	                continue;
-	            }
-	        }
-	        if (c >= 2048) {
-	            _bytes.push(
-	                0xe0 + Math.floor(c / 64 / 64),
-	                0x80 + Math.floor(c / 64) % 64,
-	                0x80 + c % 64
-	            );
-	        }
-	        else if (c >= 128) {
-	            _bytes.push(0xc0 + Math.floor(c / 64), 0x80 + c % 64);
-	        }
-	        else _bytes.push(c);
-	    }
+	    bytes = new TextEncoder("utf-8").encode(str);
 	    
-	return bytes (_bytes);
+	return bytes;
+};
+export var utf8_to_str = function (bytes) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'bytes': var bytes = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	var str = null;
+	
+	    str = new TextDecoder().decode(bytes);
+	    
+	return str;
 };
 export var bin_to_int = function (s) {
 	if (arguments.length) {

@@ -3,6 +3,7 @@ import tfchain.polyfill.encode as jsencode
 
 from tfchain.polyfill.jsmods.sjcl import api as sjcl
 from tfchain.polyfill.jsmods.blakejs import api as b2b
+from tfchain.polyfill.jsmods.tweetnacljs import api as nacl
 
 def random(n):
   digest = ''
@@ -166,3 +167,53 @@ def blake2b_hex(input):
   output = b2b.blake2bHex(input, null, 32);
   """)
   return output
+
+
+class AssymetricSignKeyPair:
+  """
+  Used to create and verify ED25519 Signatures.
+  """
+
+  def __init__(self, entropy):
+    if not entropy:
+      raise ValueError("no entropy is given, while it is expected as input for the key pair generation")
+    self._entropy = entropy
+    self._key_pair = nacl.sign.keyPair.fromSeed(entropy)
+
+  @property
+  def entropy(self):
+    """
+    :returns: the callee-chosen entropy used as input for this key pair
+    :rtype: bytes (Uint8Array)
+    """
+    return self._entropy
+
+  @property
+  def key_secret(self):
+    """
+    :returns: the generated secret key
+    """
+    return self._key_pair.secretKey
+
+  @property
+  def key_public(self):
+    """
+    :returns: the generated public key
+    """
+    return self._key_pair.publicKey
+
+  def sign(self, message):
+    """
+    Sign a binary message.
+
+    :returns: a raw binary signature
+    """
+    return nacl.sign.detached(message, self._key_pair.secretKey)
+
+  def verify(self, message, signature):
+    """
+    Verify a signature.
+
+    :returns: True if verification succeeded, False otherwise
+    """
+    return nacl.sign.detached.verify(message, signature, self._key_pair.publicKey)
