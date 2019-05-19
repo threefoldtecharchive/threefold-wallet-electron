@@ -1,7 +1,7 @@
 // @flow
 import { connect } from 'react-redux'
 import React, { Component } from 'react'
-import { Form, Button } from 'semantic-ui-react'
+import { Form, Button, Input, Icon } from 'semantic-ui-react'
 import routes from '../../constants/routes'
 import { selectAccount } from '../../actions'
 import * as tfchain from '../../tfchain/api'
@@ -32,13 +32,24 @@ class Login extends Component {
 
   login = () => {
     const { password } = this.state
+    if (password == '') {
+      return this.setState({ passwordError: true })
+    } 
     try {
       const account = tfchain.Account.deserialize(this.props.account.account_name,  password, this.props.account)
       this.props.SelectAccount(account)
       return this.props.history.push("/account")
     } catch (error) {
       console.log(error)
-      this.setState({ passwordError: true })
+      return this.setState({ passwordError: true })
+    }
+  }
+
+  onKeyDown = (e) => {
+    if (e.key == 'Enter') {
+      e.preventDefault()
+      e.stopPropagation()
+      this.login()
     }
   }
 
@@ -47,15 +58,14 @@ class Login extends Component {
     return (
       <div style={{ margin: 'auto' }}>
           <div style={{ marginTop: 200, textAlign: 'center' }} >
-          <h3>Sign in to account: {this.props.account.account_name}</h3>
-            <Form style={{ width: '50%', margin: 'auto', marginTop: 10 }}>
+          <h2>Sign in to account: {this.props.account.account_name}</h2>
+            <Form style={{ width: '50%', margin: 'auto', marginTop: 40 }} onSubmit={this.login}>
                 <Form.Field error={passwordError}>
-                    <label style={{ float: 'left', color: 'white' }}>Password</label>
-                    <input type='password' placeholder='.....' value={password} onChange={this.handlePasswordChange}/>
+                  <Input onKeyDown={this.onKeyDown} type='password' style={{ width: '50%' }} icon={<Icon name='key' style={{ color: '#0e72f5' }}></Icon>} iconPosition='left' placeholder='password' value={password} onChange={this.handlePasswordChange}/>
                 </Form.Field>
                 <div style={{ marginTop: 50 }}>
-                  <Button onClick={() => this.props.history.push(routes.HOME)} style={{ background: '#2B3D72', color: 'white', marginRight: 15 }}>Cancel</Button>
-                  <Button type='submit' onClick={this.login} style={{ background: '#015DE1', color: 'white' }}>Login</Button>
+                  <Button size='big' onClick={() => this.props.history.push(routes.HOME)} style={{ background: '#2B3D72', color: 'white', marginRight: 15 }}>Cancel</Button>
+                  <Button size='big' type='submit' style={{ background: '#015DE1', color: 'white' }}>Login</Button>
                 </div>
             </Form>
           </div>

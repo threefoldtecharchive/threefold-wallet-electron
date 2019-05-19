@@ -26,7 +26,7 @@
     "postlint-fix": "prettier --ignore-path .eslintignore --single-quote --write '**/*.{*{js,jsx,json},babelrc,eslintrc,prettierrc,stylelintrc}'",
     "postlint-styles-fix": "prettier --ignore-path .eslintignore --single-quote --write '**/*.{css,scss}'",
     "prestart": "yarn build",
-    "start": "cross-env NODE_ENV=production electron ./app/main.prod.js",
+    "start": "cross-env NODE_ENV=production electron ./app/main.prod.js && yarn build-py",
     "start-main-dev": "cross-env HOT=1 NODE_ENV=development electron -r @babel/register ./app/main.dev.js",
     "start-renderer-dev": "cross-env NODE_ENV=development webpack-dev-server --config configs/webpack.config.renderer.dev.babel.js",
     "test": "cross-env NODE_ENV=test BABEL_DISABLE_CACHE=1 jest",
@@ -247,6 +247,7 @@
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.5.0",
     "axios": "^0.18.0",
+    "core-js": "^2.6.5",
     "devtron": "^1.4.0",
     "electron-debug": "^2.0.0",
     "electron-json-storage": "^4.1.6",
