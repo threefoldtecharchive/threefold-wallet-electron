@@ -10,7 +10,6 @@ import tfchain.polyfill.json as jsjson
 import tfchain.network as tfnetwork
 import tfchain.explorer as tfexplorer
 
-
 # BIP39 state object used for all Mnemonic purposes of this API
 __bip39 = bip39.Mnemonic()
 
