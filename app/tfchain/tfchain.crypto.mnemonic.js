@@ -1,6 +1,8 @@
 var itertools = {};
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __proxy__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, abs, all, any, assert, bool, bytearray, bytes, callable, chr, copy, deepcopy, delattr, dict, dir, divmod, enumerate, filter, float, getattr, hasattr, input, int, isinstance, issubclass, len, list, map, max, min, object, ord, pow, print, property, py_TypeError, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
-import * as jsencode from './tfchain.polyfill.encode.js';
+import * as jsbin from './tfchain.polyfill.encoding.bin.js';
+import * as jsstr from './tfchain.polyfill.encoding.str.js';
+import * as jshex from './tfchain.polyfill.encoding.hex.js';
 import * as jscrypto from './tfchain.polyfill.crypto.js';
 import * as __module_itertools__ from './itertools.js';
 __nest__ (itertools, '', __module_itertools__);
@@ -237,11 +239,11 @@ export var Mnemonic =  __class__ ('Mnemonic', [object], {
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		var h = jsencode.buffer_to_hex (self._sha256_func (data));
-		var b = jsencode.str_zfill (jsencode.hex_to_bin (jsencode.buffer_to_hex (data)).__getslice__ (2, null, 1), len (data) * 8) + jsencode.str_zfill (jsencode.hex_to_bin (h).__getslice__ (2, null, 1), 256).__getslice__ (0, Math.floor ((len (data) * 8) / 32), 1);
+		var h = jshex.bytes_to_hex (self._sha256_func (data));
+		var b = jsstr.zfill (jshex.hex_to_bin (jshex.bytes_to_hex (data)).__getslice__ (2, null, 1), len (data) * 8) + jsstr.zfill (jshex.hex_to_bin (h).__getslice__ (2, null, 1), 256).__getslice__ (0, Math.floor ((len (data) * 8) / 32), 1);
 		var result = [];
 		for (var i = 0; i < Math.floor (len (b) / 11); i++) {
-			var idx = jsencode.bin_to_int (b.__getslice__ (i * 11, (i + 1) * 11, 1));
+			var idx = jsbin.bin_str_to_int (b.__getslice__ (i * 11, (i + 1) * 11, 1));
 			result.append (self.wordlist [idx]);
 		}
 		var result_phrase = ' '.join (result);

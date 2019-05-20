@@ -24,7 +24,9 @@
 
 import itertools
 import tfchain.polyfill.crypto as jscrypto
-import tfchain.polyfill.encode as jsencode
+import tfchain.polyfill.encoding.hex as jshex
+import tfchain.polyfill.encoding.str as jsstr
+import tfchain.polyfill.encoding.bin as jsbin
 
 PBKDF2_ROUNDS = 2048
 
@@ -109,12 +111,12 @@ class Mnemonic(object):
     def to_mnemonic(self, data):
         if len(data) not in [16, 20, 24, 28, 32]:
             raise ValueError('Data length should be one of the following: [16, 20, 24, 28, 32], but it is not (%d).' % len(data))
-        h = jsencode.buffer_to_hex(self._sha256_func(data))
-        b = jsencode.str_zfill(jsencode.hex_to_bin(jsencode.buffer_to_hex(data))[2:], len(data) * 8) + \
-            jsencode.str_zfill(jsencode.hex_to_bin(h)[2:], 256)[:len(data) * 8 // 32]
+        h = jshex.bytes_to_hex(self._sha256_func(data))
+        b = jsstr.zfill(jshex.hex_to_bin(jshex.bytes_to_hex(data))[2:], len(data) * 8) + \
+            jsstr.zfill(jshex.hex_to_bin(h)[2:], 256)[:len(data) * 8 // 32]
         result = []
         for i in range(len(b) // 11):
-            idx = jsencode.bin_to_int(b[i * 11:(i + 1) * 11])
+            idx = jsbin.bin_str_to_int(b[i * 11:(i + 1) * 11])
             result.append(self.wordlist[idx])
         result_phrase = ' '.join(result)
         return result_phrase

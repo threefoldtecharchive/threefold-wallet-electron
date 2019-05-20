@@ -1,5 +1,5 @@
-import tfchain.polyfill.json as jsjson 
-import tfchain.polyfill.encode as jsencode
+import tfchain.polyfill.encoding.json as jsjson
+import tfchain.polyfill.encoding.hex as jshex
 
 from tfchain.polyfill.jsmods.sjcl import api as sjcl
 from tfchain.polyfill.jsmods.blakejs import api as b2b
@@ -11,17 +11,17 @@ def random(n):
   const words = sjcl.random.randomWords((n+3)/4);
   digest = sjcl.codec.hex.fromBits(words);
   """)
-  return jsencode.hex_to_buffer(digest)
+  return jshex.bytes_from_hex(digest)
 
 def sha256(data):
-  data = jsencode.buffer_to_hex(data)
+  data = jshex.bytes_to_hex(data)
   digest = ''
   __pragma__("js", "{}", """
   const input = sjcl.codec.hex.toBits(data);
   const words = sjcl.hash.sha256.hash(input)
   digest = sjcl.codec.hex.fromBits(words);
   """)
-  return jsencode.hex_to_buffer(digest)
+  return jshex.bytes_from_hex(digest)
 
 
 class SymmetricKey:

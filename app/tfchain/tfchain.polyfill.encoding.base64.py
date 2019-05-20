@@ -1,4 +1,4 @@
-import tfchain.polyfill.encode as jsencode
+import tfchain.polyfill.encoding.str as jsstr
 
 def bytes_from_b64(e):
     return base64DecToArr(e)
@@ -7,10 +7,10 @@ def bytes_to_b64(e):
     return base64EncArr(e)
 
 def str_to_b64(s):
-    return bytes_to_b64(jsencode.str_to_utf8(s))
+    return bytes_to_b64(jsstr.to_utf8(s))
 
 def str_from_b64(e):
-    return jsencode.utf8_to_str(bytes_from_b64(e))
+    return jsstr.from_utf8(bytes_from_b64(e))
 
 # src https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64/Base64_encoding_and_decoding (solution 1)
 

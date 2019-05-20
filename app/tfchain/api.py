@@ -4,11 +4,16 @@ converted into Javascript (ES6) using Transcrypt.
 """
 
 import tfchain.crypto.mnemonic as bip39
-import tfchain.polyfill.encode as jsencode
+import tfchain.encoding.siabin as tfsiabin
 import tfchain.polyfill.crypto as jscrypto
-import tfchain.polyfill.json as jsjson
+import tfchain.polyfill.encoding.json as jsjson
+import tfchain.polyfill.encoding.hex as jshex
+import tfchain.polyfill.encoding.str as jsstr
 import tfchain.network as tfnetwork
 import tfchain.explorer as tfexplorer
+
+# TODO: remove once we use the actual wallet, as we shouldn't need the inner types anymore if all goes well
+from tfchain.types.ConditionTypes import UnlockHash, UnlockHashType
 
 # BIP39 state object used for all Mnemonic purposes of this API
 __bip39 = bip39.Mnemonic()
@@ -64,7 +69,7 @@ class Account:
         account = cls(
             account_name,
             password,
-            seed=jsencode.hex_to_buffer(payload.seed),
+            seed=jshex.bytes_from_hex(payload.seed),
             network_type=payload.network_type,
             explorer_addresses=payload.explorer_addresses,
         )
@@ -194,19 +199,29 @@ class Account:
         """
         start_index = max(start_index, 0)
         address_count = max(address_count, 1)
-        addresses = ["01ADRESS" + str(start_index+i) for i in range(0, address_count)]
-        self._validate_wallet_state(wallet_name, addresses)
-        wallet = Wallet(wallet_name, start_index, addresses)
+        # generate all key pairs for this wallet
+        pairs = []
+        for i in range(0, address_count):
+            # generate the entropy
+            encoder = tfsiabin.SiaBinaryEncoder()
+            encoder.add_array(self.seed)
+            encoder.add_int(i)
+            entropy = jscrypto.blake2b(encoder.data)
+            # generate key pair and add it to the list of pairs
+            pair = jscrypto.AssymetricSignKeyPair(entropy)
+            pairs.append(pair)
+        wallet = Wallet(wallet_name, start_index, pairs)
+        self._validate_wallet_state(wallet)
         self._wallets.append(wallet)
         return wallet
 
-    def _validate_wallet_state(self, wallet_name, addresses):
-        addresses_set = set(addresses)
+    def _validate_wallet_state(self, candidate):
+        addresses_set = set(candidate.addresses)
         for wallet in self._wallets:
-            if wallet.wallet_name == wallet_name:
-                raise ValueError("a wallet already exists with wallet_name {}".format(wallet_name))
-            if len(addresses_set.intersection(set(wallet.addresses))) != 0:
-                raise ValueError("cannot use addresses for wallet {} as it overlaps with the addresses of wallet {}".format(wallet_name, wallet.wallet_name))
+            if wallet.wallet_name == candidate.wallet_name:
+                raise ValueError("a wallet already exists with wallet_name {}".format(candidate.wallet_name))
+            if addresses_set.union(set(wallet.addresses)):
+                raise ValueError("cannot use addresses for wallet {} as it overlaps with the addresses of wallet {}".format(candidate.wallet_name, wallet.wallet_name))
 
     def serialize(self):
         """
@@ -221,13 +236,13 @@ class Account:
             wallets.append({
                 'wallet_name': wallet.wallet_name,
                 'start_index': wallet.start_index,
-                'address_count': len(wallet.addresses),
+                'address_count': wallet.address_count,
             })
         payload = {
             'account_name': self._account_name,
-            'network_type': str(self._network_type),
+            'network_type': self._network_type.__str__(),
             'explorer_addresses': self._explorer_client.addresses,
-            'seed': jsencode.buffer_to_hex(self._seed),
+            'seed': jshex.bytes_to_hex(self._seed),
             'wallets': wallets,
         }
         # encrypt it using the internal symmetric key
@@ -264,13 +279,13 @@ class Account:
 
 class Wallet:
     """
-    A wallet is identified by one or multiple addresses,
+    A wallet is identified by one or multiple addresses (derived from assymetric key pairs),
     and is recognised by humans using a human-friendly label.
     The addresses of a wallet are unique and are generated using
     the seed (entropy/mnemonic) that identifies the account owning this wallet.
     """
 
-    def __init__(self, wallet_name, start_index, addresses):
+    def __init__(self, wallet_name, start_index, pairs):
         """
         Create a new wallet.
 
@@ -278,12 +293,11 @@ class Wallet:
         :type wallet_name: str
         :param start_index: starting index of the wallet, used to generate the wallet's addresses
         :type start_index: int
-        :param addresses: the addresses as generated using the start_index and account's seed
-        :type addresses: list (of strs)
+        :param pairs: the key pairs as generated using the start_index and account's seed
         """
         self._wallet_name = wallet_name
         self._start_index = start_index
-        self._addresses = addresses
+        self._pairs = pairs
 
     @property
     def wallet_name(self):
@@ -307,7 +321,20 @@ class Wallet:
         :returns: the addresses of this wallet
         :rtype: list (of sts)
         """
-        return self._addresses
+        addresses = []
+        for pair in self._pairs:
+            uh = UnlockHash(uhtype=UnlockHashType.PUBLIC_KEY, uhhash=pair.key_public)
+            address = uh.__str__()
+            addresses.append(address)
+        return addresses
+
+    @property
+    def address_count(self):
+        """
+        :returns: the address count of this wallet
+        :rtype: int
+        """
+        return len(self._pairs)
 
     @property
     def balance(self):

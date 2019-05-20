@@ -2,8 +2,8 @@ import {AssertionError, AttributeError, BaseException, DeprecationWarning, Excep
 import {api as nacl} from './tfchain.polyfill.jsmods.tweetnacljs.js';
 import {api as b2b} from './tfchain.polyfill.jsmods.blakejs.js';
 import {api as sjcl} from './tfchain.polyfill.jsmods.sjcl.js';
-import * as jsencode from './tfchain.polyfill.encode.js';
-import * as jsjson from './tfchain.polyfill.json.js';
+import * as jshex from './tfchain.polyfill.encoding.hex.js';
+import * as jsjson from './tfchain.polyfill.encoding.json.js';
 var __name__ = 'tfchain.polyfill.crypto';
 export var random = function (n) {
 	if (arguments.length) {
@@ -24,7 +24,7 @@ export var random = function (n) {
 	  const words = sjcl.random.randomWords((n+3)/4);
 	  digest = sjcl.codec.hex.fromBits(words);
 	  
-	return jsencode.hex_to_buffer (digest);
+	return jshex.bytes_from_hex (digest);
 };
 export var sha256 = function (data) {
 	if (arguments.length) {
@@ -40,14 +40,14 @@ export var sha256 = function (data) {
 	}
 	else {
 	}
-	var data = jsencode.buffer_to_hex (data);
+	var data = jshex.bytes_to_hex (data);
 	var digest = '';
 	
 	  const input = sjcl.codec.hex.toBits(data);
 	  const words = sjcl.hash.sha256.hash(input)
 	  digest = sjcl.codec.hex.fromBits(words);
 	  
-	return jsencode.hex_to_buffer (digest);
+	return jshex.bytes_from_hex (digest);
 };
 export var SymmetricKey =  __class__ ('SymmetricKey', [object], {
 	__module__: __name__,

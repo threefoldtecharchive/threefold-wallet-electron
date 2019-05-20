@@ -1,6 +1,6 @@
 import random
 import tfchain.errors as tferrors
-import tfchain.polyfill.json as jsjson
+import tfchain.polyfill.encoding.json as jsjson
 import tfchain.polyfill.http as jshttp
 
 class Client:
@@ -37,10 +37,7 @@ class Client:
                     raise TypeError("explorer address expected to be a string, not {}".format(type(address)))
                 # do the request and check the response
                 resource = address+endpoint
-                headers = {
-                    'User-Agent': 'Rivine-Agent',
-                }
-                resp = jshttp.http_get(resource, headers=headers)
+                resp = jshttp.http_get(resource)
                 if resp.code == 200:
                     return jsjson.json_loads(resp.data)
                 if resp.code == 204 or (resp.code == 400 and ('unrecognized hash' in resp.data or 'not found' in resp.data)):
@@ -67,7 +64,6 @@ class Client:
                     raise TypeError("explorer address expected to be a string, not {}".format(type(address)))
                 resource = address+endpoint
                 headers = {
-                    'User-Agent': 'Rivine-Agent',
                     'Content-Type': 'Application/json;charset=UTF-8',
                 }
                 s = data
