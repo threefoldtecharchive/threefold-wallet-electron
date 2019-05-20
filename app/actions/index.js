@@ -60,3 +60,10 @@ export const setClient = function (client) {
     client
   }
 }
+
+export const setChainConstants = function (chainInfo) {
+  return {
+    type: 'SET_CHAIN_CONSTANTS',
+    chainInfo
+  }
+}

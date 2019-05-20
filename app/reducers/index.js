@@ -4,6 +4,7 @@ import { connectRouter } from 'connected-react-router'
 import { account, accounts } from './account'
 import { wallet } from './wallet'
 import { client } from './client'
+import { chainConstants } from './chain'
 
 export default function createRootReducer (history) {
   return combineReducers({
@@ -11,6 +12,7 @@ export default function createRootReducer (history) {
     account,
     wallet,
     client,
-    accounts
+    accounts,
+    chainConstants
   })
 }

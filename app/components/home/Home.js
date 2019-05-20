@@ -23,7 +23,8 @@ class Home extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      accounts: []
+      accounts: [],
+      accountNames: [],
     }
   }
 
@@ -31,18 +32,20 @@ class Home extends Component {
     const _this = this
     storage.getAll(function (err, data) {
       if (err) throw err
-      _this.setState({ accounts: Object.values(data) })
+      _this.setState({ accountNames: Object.keys(data), accounts: data })
     })
   }
 
   selectAccount = (account) => {
-    this.props.SelectAccount(account)
+    const selectedAccount = Object.assign(this.state.accounts[account], { account_name: account })
+
+    this.props.SelectAccount(selectedAccount)
     return this.props.history.push("/login")
   }
 
   renderAccounts = () => {
-    const { accounts } = this.state
-      if (accounts.length == 0) {
+    const { accountNames } = this.state
+      if (accountNames.length == 0) {
         return (
           <div style={{ margin: 'auto' }}>
             <h3>No wallets created yet, create one now</h3>
@@ -55,12 +58,12 @@ class Home extends Component {
           <h3>Sign in to one of your accounts</h3>
           <Segment style={{ margin: 'auto', width: '50%', background: '#171F44' }}>
             <List divided inverted relaxed>
-              {accounts.map(account => {
+              {accountNames.map(account => {
                 return (
-                  <List.Item key={account.account_name} style={{ padding: 20 }}>
+                  <List.Item key={account} style={{ padding: 20 }}>
                     <List.Content>
                       <List.Header style={{ cursor: 'pointer', margin: 'auto', fontSize: 20, textAlign:'left', marginLeft: '43%' }} onClick={() => this.selectAccount(account)}>
-                        <Icon style={{ color: 'white', fontSize: 15 }} name='user'/> {account.account_name} 
+                        <Icon style={{ color: 'white', fontSize: 15 }} name='user'/> {account} 
                       </List.Header>
                     </List.Content>
                   </List.Item>

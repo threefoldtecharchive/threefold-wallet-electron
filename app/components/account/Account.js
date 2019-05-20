@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import { List, Segment, Grid, GridColumn, Button, Icon, Label, Divider } from 'semantic-ui-react'
 import routes from '../../constants/routes';
 import { GetWalletBalance } from '../../client/tfchain'
-import { selectWallet } from '../../actions'
+import { selectWallet, setChainConstants } from '../../actions'
 import styles from '../home/Home.css'
 import Footer from '../footer'
 import * as tfchain from '../../tfchain/api'
@@ -18,6 +18,9 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = (dispatch) => ({
   selectWallet: (wallet) => {
     dispatch(selectWallet(wallet))
+  },
+  setChainConstants: (constants) => {
+    dispatch(setChainConstants(constants))
   }
 })
 
@@ -32,6 +35,15 @@ class Account extends Component {
   }
 
   componentDidMount () {
+    this.getAccountBalance()
+    this.interval = setInterval(() => {this.getAccountBalance()}, 60000)
+  }
+
+  componentWillUnmount () {
+    clearInterval(this.interval)
+  }
+
+  getAccountBalance = () => {
     const wallets = this.props.account.wallets
 
     if (!wallets) {
@@ -43,11 +55,6 @@ class Account extends Component {
 
     this.setState({ totalCoinLocked, totalCoinUnlocked, totalCoins })
   }
-
-  // To implement some parsing if i know how to search for a walllet's balance
-  getWalletBalance = (wallet) => {
-    return GetWalletBalance(wallet)
-  } 
 
   handleWalletClick = (wallet) => {
     this.props.selectWallet(wallet)

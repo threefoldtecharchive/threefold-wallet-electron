@@ -12,7 +12,7 @@ export const account = (state = [], action) => {
 
       const addedAccount = action.account.serialize()
 
-      storage.set(addedAccount.account_name, addedAccount, function (err) {
+      storage.set(account.name, addedAccount, function (err) {
         if (err) throw err
       })
       return account
