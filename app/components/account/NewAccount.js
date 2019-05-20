@@ -2,7 +2,7 @@
 import { connect } from 'react-redux'
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
-import { Form, Checkbox, Button, Message, Icon, TextArea, Radio, Divider } from 'semantic-ui-react'
+import { Form, Checkbox, Button, Message, Icon, TextArea, Radio, Divider, Popup } from 'semantic-ui-react'
 import routes from '../../constants/routes'
 import styles from '../home/Home.css'
 // import { NewMnemonic, CreateAccount, CreateWalletOnAccount } from '../client/tfchain'
@@ -110,7 +110,7 @@ class NewAccount extends Component {
   handleNetworkChange = (e, { value }) => this.setState({ network: value })
 
   createAccount = () => {
-    const { seed, name, seedConfirmation, generateSeed, password, passwordConfirmation } = this.state
+    const { seed, name, seedConfirmation, generateSeed, password, passwordConfirmation, network } = this.state
     if (generateSeed) {
       if (seedConfirmation == '') {
         return this.setState({ seedConfirmationError: true })
@@ -156,7 +156,7 @@ class NewAccount extends Component {
     this.setState({ nameError, seedError, passwordError, passwordConfirmationError })
     if (!nameError && !seedError && !passwordError && !passwordConfirmationError) {
       // create account
-      const account = new tfchain.Account(name, password, seed)
+      const account = new tfchain.Account(name, password, seed, network)
       // create wallet
       account.wallet_new('defaultWallet', 0, 1)
 
@@ -187,7 +187,7 @@ class NewAccount extends Component {
     const { seed, name, generateSeed, seedError, nameError, seedConfirmation, seedConfirmationError, openConfirmationModal, password, confirmationPassword, passwordError, passwordConfirmationError } = this.state
 
     return (
-        <div>
+        <div style={{ height: '100vh', overflowY: 'scroll', paddingBottom: 30 }}>
             <SeedConfirmationModal 
               open={openConfirmationModal} 
               closeModal={this.closeConfirmationModal} 
@@ -201,11 +201,12 @@ class NewAccount extends Component {
             </div>
             <Divider style={{ background: '#1A253F' }}/>
             <Form error style={{ width: '50%', margin: 'auto', marginTop: 5, marginBottom: 50, fontSize: 18 }}>
-              <Form.Field error={true}>
-                <label style={{ float: 'left', marginBottom: 10, color: 'white' }}>What network do you want to choose? </label>
+              <Form.Field>
+                <label style={{ float: 'left', color: 'white', marginRight: 20 }}>What network do you want to choose? </label>
+                <Popup size='large' position='right center' content='Network type is the network your account will connect to. standard is the production network, others are meant for testing' trigger={<Icon style={{ fontSize: 12 }} name='question circle' />} />
               </Form.Field>
-              <Form.Field style={{ marginTop: 10, marginBottom: 40 }}>
-                <div style={{ position: 'absolute', left: 0 }} >
+              <Form.Field style={{ marginBottom: 20 }}>
+                <div>
                   <Radio style={{ marginRight: 30, color: 'white' }}
                   label={<label style={{ color: 'white' }}>standard</label>}
                     name='radioGroup'
@@ -214,17 +215,17 @@ class NewAccount extends Component {
                     onChange={this.handleNetworkChange}
                   />
                   <Radio style={{ marginRight: 30, color: 'white' }}
-                  label={<label style={{ color: 'white' }}>devnet</label>}
-                    name='radioGroup'
-                    value='devnet'
-                    checked={this.state.network === 'devnet'}
-                    onChange={this.handleNetworkChange}
-                  />
-                  <Radio style={{ marginRight: 30, color: 'white' }}
                   label={<label style={{ color: 'white' }}>testnet</label>}
                     name='radioGroup'
                     value='testnet'
                     checked={this.state.network === 'testnet'}
+                    onChange={this.handleNetworkChange}
+                  />
+                  <Radio style={{ marginRight: 30, color: 'white' }}
+                  label={<label style={{ color: 'white' }}>devnet</label>}
+                    name='radioGroup'
+                    value='devnet'
+                    checked={this.state.network === 'devnet'}
                     onChange={this.handleNetworkChange}
                   />
                 </div>
@@ -242,7 +243,9 @@ class NewAccount extends Component {
                     <input type='password' label='confirm password' placeholder='password' value={confirmationPassword} onChange={this.handlePasswordConfirmationChange}/>
                 </Form.Field>
                 <Form.Field error={seedError}>
-                    <label style={{ float: 'left', color: 'white' }}>Seed</label>
+                    <label style={{ float: 'left', color: 'white', marginRight: 20 }}>Seed</label>
+                    <Popup size='large' style={{ width: 600 }} position='right center' content='Seed phrase or recovery phrase is a list of 24 words which stores all the information needed to recover your wallet. If you provide this phrase we will recover your account. If you wish to create a new account without recovery then click generate seed.' trigger={<Icon style={{ fontSize: 12 }} name='question circle' />} />
+
                     {this.renderTextArea()}
                 </Form.Field>
                 <Form.Field>
