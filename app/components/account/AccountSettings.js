@@ -26,7 +26,7 @@ class AccountSettings extends Component {
   constructor (props) {
       super(props)
       this.state = {
-        name: this.props.account.name,
+        name: this.props.account.account_name,
         openDeleteModal: false,
         deleteName: '',
         deleteNameError: false
@@ -40,12 +40,13 @@ class AccountSettings extends Component {
   saveAccount = () => {
     const { name } = this.state
 
-    const newAccount = Object.assign({}, this.props.account, {
-      name: name,
-      previousName: this.props.account.name
-    })
+    const previousName = this.props.account.account_name
+    let newAccount = this.props.account
 
-    this.props.saveAccount(newAccount)
+    newAccount._account_name = name
+    newAccount._previous_name = previousName
+
+    this.props.saveAccount(newAccount, previousName)
 
     return this.props.history.push("/account")
   }

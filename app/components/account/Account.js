@@ -81,7 +81,7 @@ class Account extends Component {
               <List.Icon name='folder' />
               <List.Content>
                 <List.Header style={{ cursor: "pointer" }} onClick={() => this.handleWalletClick(w)}>{w.wallet_name}</List.Header>
-                {w.balance.coins_total}
+                Total balance: {w.balance.coins_total} TFT
               </List.Content>
             </List.Item>
           )

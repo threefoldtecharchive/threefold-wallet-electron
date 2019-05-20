@@ -16,8 +16,22 @@ class Wallet extends Component {
   constructor (props) {
     super(props)
     this.state = {
-
+      coins_locked: 0,
+      coins_unlocked: 0,
+      coins_total: 0
     }
+  }
+
+  componentDidMount() {
+    this.interval = setInterval(this.getBalance(), 60000)
+  }
+
+  getBalance = () => {
+    this.setState({ 
+      coins_locked: this.props.wallet.balance.coins_locked,
+      coins_unlocked: this.props.wallet.balance.coins_unlocked,
+      coins_total: this.props.wallet.balance.coins_total, 
+    })
   }
 
   handleWalletAddress = () => {
@@ -27,6 +41,8 @@ class Wallet extends Component {
 
   render () {
     const { wallet } = this.props
+    const { coins_locked, coins_unlocked, coins_total } = this.state
+
     return (
       <div>
         <div className={styles.backButton} data-tid='backButton'>
@@ -62,9 +78,9 @@ class Wallet extends Component {
             </GridColumn> */}
             <GridColumn>
               <Segment style={{ marginTop: 60, marginLeft: '10%' }}>
-                <h3 style={{ color: 'black' }}>Total Balance: {wallet.balance.coins_total} TFT</h3>
-                <h4 style={{ color: 'black' }}><Icon name='lock'/>Locked Balance: {wallet.balance.coins_locked} TFT</h4>
-                <h4 style={{ color: 'black' }}><Icon name='unlock'/>Unlocked Balance: {wallet.balance.coins_unlocked} TFT</h4>
+                <h3 style={{ color: 'black' }}>Total Balance: {coins_total} TFT</h3>
+                <h4 style={{ color: 'black' }}><Icon name='lock'/>Locked Balance: {coins_locked} TFT</h4>
+                <h4 style={{ color: 'black' }}><Icon name='unlock'/>Unlocked Balance: {coins_unlocked} TFT</h4>
               </Segment>
             </GridColumn>
             <GridColumn>

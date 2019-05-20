@@ -3,47 +3,29 @@ const storage = require('electron-json-storage')
 export const account = (state = [], action) => {
   switch (action.type) {
     case 'ADD_ACCOUNT':
-      const account = Object.assign({}, state, {
-        name: action.account.account_name,
-        password: action.account.password,
-        wallets: action.account.wallets,
-        ...action.account
-      })
-
       const addedAccount = action.account.serialize()
-
-      storage.set(account.name, addedAccount, function (err) {
+      storage.set(action.account.account_name, addedAccount, function (err) {
         if (err) throw err
       })
-      return account
+      return action.account
     case 'SELECT_ACCOUNT':
-      // let newAccount = Object.assign({}, state, {
-      //   ...action.account
-      // })
       return action.account
     case 'DELETE_ACCOUNT':
       // first delete account
-      storage.remove(action.account.name, function (err) {
+      storage.remove(action.account.account_name, function (err) {
         if (err) console.log(err)
       })
       return null
     case 'SAVE_ACCOUNT':
-      let newSavedAccount = Object.assign({}, state.account, {
-        name: action.account.name,
-        password: action.account.password,
-        wallets: action.account.wallets
-      })
-
       // first delete account
-      storage.remove(action.account.previousName, function (err) {
+      storage.remove(action.account._previous_name, function (err) {
         if (err) console.log(err)
       })
-
       // add the newly saved account
-      storage.set(newSavedAccount.name, newSavedAccount, function (err) {
+      storage.set(action.account.account_name, action.account.serialize(), function (err) {
         if (err) console.log(err)
       })
-      return newSavedAccount
+      return action.account
     case 'SAVE_WALLET':
       const newWallets = state.wallets.map(wal => {
         if (wal.name === action.wallet.previousWalletName) {
