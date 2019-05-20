@@ -5,6 +5,7 @@
   "ACCOUNT_SETTINGS": "/accountsettings",
   "SETTINGS": "/settings",
   "WALLET": "/wallet",
+  "WALLET_NEW": "/walletnew",
   "WALLET_SETTINGS": "/walletsettings",
   "TRANSFER": "/transfer",
   "LOGIN": "/login"

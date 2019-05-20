@@ -205,7 +205,7 @@ class Account:
         for wallet in self._wallets:
             if wallet.wallet_name == wallet_name:
                 raise ValueError("a wallet already exists with wallet_name {}".format(wallet_name))
-            if addresses_set.union(set(wallet.addresses)):
+            if len(addresses_set.intersection(set(wallet.addresses))) != 0:
                 raise ValueError("cannot use addresses for wallet {} as it overlaps with the addresses of wallet {}".format(wallet_name, wallet.wallet_name))
 
     def serialize(self):

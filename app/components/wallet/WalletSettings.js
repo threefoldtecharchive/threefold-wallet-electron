@@ -30,7 +30,7 @@ class WalletSettings extends Component {
   constructor (props) {
       super(props)
       this.state = {
-        name: this.props.wallet.name,
+        name: this.props.wallet._wallet_name,
         openDeleteModal: false,
         deleteName: '',
         deleteNameError: false
@@ -44,10 +44,15 @@ class WalletSettings extends Component {
   saveWallet = () => {
     const { name } = this.state
 
-    const newWallet = Object.assign({}, this.props.wallet, {
-      name: name,
-      previousWalletName: this.props.wallet.name
-    })
+    const previous_wallet_name = this.props.wallet._wallet_name
+
+    let newWallet = this.props.wallet
+    newWallet._wallet_name = name
+    newWallet._previous_wallet_name = previous_wallet_name
+    // const newWallet = Object.assign({}, this.props.wallet, {
+    //   name: name,
+    //   previousWalletName: this.props.wallet.name
+    // })
 
     this.props.saveWallet(newWallet)
     this.props.saveAccount(this.props.account)
@@ -92,9 +97,9 @@ class WalletSettings extends Component {
             />
             <div className={styles.backButton} data-tid="backButton">
                 <Link to={routes.WALLET}>
-                    <Icon style={{ fontSize: 35, position: 'absolute', left: 20, cursor: 'pointer' }} name="chevron circle left"/>
+                    <Icon style={{ fontSize: 25, position: 'absolute', left: 20, top: 50, cursor: 'pointer' }} name="chevron circle left"/>
                 </Link>
-                <Icon onClick={this.openDeleteModal} style={{ fontSize: 35, position: 'absolute', right: 70, cursor: 'pointer' }} name="trash"/>
+                <Icon onClick={this.openDeleteModal} style={{ fontSize: 25, position: 'absolute', right: 70, top: 50, cursor: 'pointer' }} name="trash"/>
             </div>
             <div className={styles.container} >
                 <Header as='h2' icon style={{ color: 'white', marginTop: 50 }}>
@@ -115,8 +120,8 @@ class WalletSettings extends Component {
                     </Form.Field> */}
                     {/* <Form.Input label='Description message' placeholder='message' value={description} onChange={this.handleDescriptionChange}/> */}
                     {/* {seedErrorMessage} */}
-                    <Link to={routes.ACCOUNT}><Button>Cancel</Button></Link>
-                    <Button type='submit' onClick={this.saveWallet}>Save</Button>
+                    <Button size='big' style={{ marginTop: 10, marginRight: 10, background: '#2B3D72', color: 'white', width: 180 }} onClick={() => this.props.history.push(routes.WALLET)}>Cancel</Button>
+                    <Button size='big' type='submit' onClick={this.saveWallet} style={{ marginTop: 10, margin: 'auto', background: '#015DE1', color: 'white', width: 180 }}>Save</Button>
                 </Form>
             </div>
             <Footer />

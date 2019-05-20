@@ -235,11 +235,11 @@ class NewAccount extends Component {
                 </Form.Field>
                 <Form.Field error={passwordError}>
                     <label style={{ float: 'left', color: 'white' }}>Password</label>
-                    <input  label='password' placeholder='password' value={password} onChange={this.handlePasswordChange}/>
+                    <input type='password' label='password' placeholder='password' value={password} onChange={this.handlePasswordChange}/>
                 </Form.Field>
                 <Form.Field error={passwordConfirmationError}>
                     <label style={{ float: 'left', color: 'white' }}>Confirm password</label>
-                    <input label='confirm password' placeholder='password' value={confirmationPassword} onChange={this.handlePasswordConfirmationChange}/>
+                    <input type='password' label='confirm password' placeholder='password' value={confirmationPassword} onChange={this.handlePasswordConfirmationChange}/>
                 </Form.Field>
                 <Form.Field error={seedError}>
                     <label style={{ float: 'left', color: 'white' }}>Seed</label>

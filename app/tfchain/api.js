@@ -284,7 +284,7 @@ export var Account =  __class__ ('Account', [object], {
 				__except0__.__cause__ = null;
 				throw __except0__;
 			}
-			if (addresses_set.union (set (wallet.addresses))) {
+			if (len (addresses_set.intersection (set (wallet.addresses))) != 0) {
 				var __except0__ = ValueError ('cannot use addresses for wallet {} as it overlaps with the addresses of wallet {}'.format (wallet_name, wallet.wallet_name));
 				__except0__.__cause__ = null;
 				throw __except0__;

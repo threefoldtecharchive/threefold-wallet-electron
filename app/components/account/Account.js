@@ -49,9 +49,9 @@ class Account extends Component {
     if (!wallets) {
       return
     }
-    const totalCoinLocked = sumBy(wallets, w => w.balance.coins_locked)
-    const totalCoinUnlocked = sumBy(wallets, w => w.balance.coins_unlocked)
-    const totalCoins = sumBy(wallets, w => w.balance.coins_total)
+    const totalCoinLocked = sumBy(wallets, w => parseInt(w.balance.coins_locked))
+    const totalCoinUnlocked = sumBy(wallets, w => parseInt(w.balance.coins_unlocked))
+    const totalCoins = sumBy(wallets, w => parseInt(w.balance.coins_total))
 
     this.setState({ totalCoinLocked, totalCoinUnlocked, totalCoins })
   }
@@ -77,7 +77,7 @@ class Account extends Component {
       <List divided inverted relaxed>
         {wallets.map(w => {
           return (
-            <List.Item key={1}>
+            <List.Item key={w._wallet_name}>
               <List.Icon name='folder' />
               <List.Content>
                 <List.Header style={{ cursor: "pointer" }} onClick={() => this.handleWalletClick(w)}>{w.wallet_name}</List.Header>
@@ -115,6 +115,9 @@ class Account extends Component {
                           <span>Wallets of account: {this.props.account.account_name}</span>
                           {this.renderWallets()}
                         </Segment>
+                        <div style={{ textAlign: 'center', marginLeft: 50 }}>
+                          <Button onClick={() => this.props.history.push(routes.WALLET_NEW)} style={{  marginRight: 10, float: 'left', background: '#015DE1', color: 'white'  }} size='big'>Create Wallet</Button>
+                        </div>
                     </GridColumn>
                     <GridColumn>
                         <Segment style={{ marginTop: 60, marginRight: 50 }}>

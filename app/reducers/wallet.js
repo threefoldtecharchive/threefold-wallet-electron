@@ -3,11 +3,7 @@ export const wallet = (state = [], action) => {
     case 'SELECT_WALLET':
       return action.wallet
     case 'SAVE_WALLET':
-      return Object.assign({}, state, {
-        name: action.wallet.name,
-        publicKey: action.wallet.publicKey,
-        secretKey: action.wallet.secretKey
-      })
+      return action.wallet
     case 'DELETE_WALLET':
       return null
     default:

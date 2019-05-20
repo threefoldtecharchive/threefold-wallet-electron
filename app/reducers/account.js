@@ -28,11 +28,9 @@ export const account = (state = [], action) => {
       return action.account
     case 'SAVE_WALLET':
       const newWallets = state.wallets.map(wal => {
-        if (wal.name === action.wallet.previousWalletName) {
+        if (wal._wallet_name === action.wallet._previous_wallet_name) {
           return Object.assign(wal, {
-            name: action.wallet.name,
-            publicKey: action.wallet.publicKey,
-            secretKey: action.wallet.secretKey
+            ...action.wallet
           })
         }
         return wal
@@ -40,7 +38,8 @@ export const account = (state = [], action) => {
       state.wallets = newWallets
       return state
     case 'DELETE_WALLET':
-      state.wallets = state.wallets.filter(w => w.name !== action.wallet.name)
+      const filteredWallets = state.wallets.filter(w => w._wallet_name !== action.wallet._wallet_name)
+      state._wallets = filteredWallets
       return state
     default:
       return state

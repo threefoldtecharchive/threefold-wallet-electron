@@ -88,9 +88,9 @@ class AccountSettings extends Component {
           />
           <div className={styles.backButton} data-tid="backButton">
               <Link to={routes.ACCOUNT}>
-                  <Icon style={{ fontSize: 35, position: 'absolute', left: 20, cursor: 'pointer' }} name="chevron circle left"/>
+                  <Icon style={{ fontSize: 25, position: 'absolute', left: 20, top: 50, cursor: 'pointer' }} name="chevron circle left"/>
               </Link>
-              <Icon onClick={this.openDeleteModal} style={{ fontSize: 35, position: 'absolute', right: 70, cursor: 'pointer' }} name="trash"/>
+              <Icon onClick={this.openDeleteModal} style={{ fontSize: 25, position: 'absolute', right: 70, top: 50, cursor: 'pointer' }} name="trash"/>
           </div>
           <div className={styles.container} >
             <Header as='h2' icon style={{ color: 'white', marginTop: 50 }}>
@@ -103,8 +103,8 @@ class AccountSettings extends Component {
                     <label style={{ float: 'left', color: 'white' }}>Name</label>
                     <input placeholder='01X.....' value={name} onChange={this.handleNameChange}/>
                 </Form.Field>
-                <Link to={routes.ACCOUNT}><Button>Cancel</Button></Link>
-                <Button type='submit' onClick={this.saveAccount}>Save</Button>
+                <Button size='big' style={{ marginTop: 10, marginRight: 10, background: '#2B3D72', color: 'white', width: 180 }} onClick={() => this.props.history.push(routes.ACCOUNT)}>Cancel</Button>
+                <Button size='big' type='submit' onClick={this.saveAccount} style={{ marginTop: 10, margin: 'auto', background: '#015DE1', color: 'white', width: 180 }}>Save</Button>
             </Form>
           </div>
           <Footer />

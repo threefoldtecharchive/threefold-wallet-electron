@@ -27,11 +27,13 @@ class Wallet extends Component {
   }
 
   getBalance = () => {
-    this.setState({ 
-      coins_locked: this.props.wallet.balance.coins_locked,
-      coins_unlocked: this.props.wallet.balance.coins_unlocked,
-      coins_total: this.props.wallet.balance.coins_total, 
-    })
+    if (this.props.wallet != null) {
+      this.setState({ 
+        coins_locked: this.props.wallet.balance.coins_locked,
+        coins_unlocked: this.props.wallet.balance.coins_unlocked,
+        coins_total: this.props.wallet.balance.coins_total, 
+      })
+    }
   }
 
   handleWalletAddress = () => {
@@ -41,6 +43,7 @@ class Wallet extends Component {
 
   render () {
     const { wallet } = this.props
+    console.log(this.props)
     const { coins_locked, coins_unlocked, coins_total } = this.state
 
     return (
@@ -60,7 +63,7 @@ class Wallet extends Component {
         <div>
         <Link to={routes.ACCOUNT}>
         <Icon style={{ fontSize: 25, marginLeft: 15, marginTop: 15, cursor: 'pointer' }} name="chevron circle left"/>
-          </Link>
+        </Link>
           <Grid centered columns={2} style={{ marginBottom: 30 }}>
             {/* <GridColumn>
               <Segment style={{ marginTop: 60, marginLeft: 50 }} inverted>
