@@ -121,6 +121,8 @@ class Account:
             # no explorer addresses are given, get the default ones based on the network type
             if network_type is None:
                 network_type = tfnetwork.Type.STANDARD
+
+            network_type = tfnetwork.Type(network_type)
             explorer_addresses = network_type.default_explorer_addresses()
             self._explorer_client = tfexplorer.Client(explorer_addresses)
         else:

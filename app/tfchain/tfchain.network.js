@@ -1,4 +1,5 @@
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __proxy__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, abs, all, any, assert, bool, bytearray, bytes, callable, chr, copy, deepcopy, delattr, dict, dir, divmod, enumerate, filter, float, getattr, hasattr, input, int, isinstance, issubclass, len, list, map, max, min, object, ord, pow, print, property, py_TypeError, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
+import * as jsstr from './tfchain.polyfill.encoding.str.js';
 var __name__ = 'tfchain.network';
 export var Type =  __class__ ('Type', [object], {
 	__module__: __name__,
@@ -19,6 +20,9 @@ export var Type =  __class__ ('Type', [object], {
 		}
 		if (isinstance (value, Type)) {
 			var value = value.value;
+		}
+		else if (isinstance (value, str)) {
+			var value = Type.from_str (value).value;
 		}
 		if (!(isinstance (value, int))) {
 			var __except0__ = py_TypeError ('network type value was expected to be an int, not be of type {}'.format (py_typeof (value)));
@@ -98,13 +102,13 @@ export var Type =  __class__ ('Type', [object], {
 		}
 		else {
 		}
-		if (self == Type.STANDARD) {
+		if (self.__eq__ (Type.STANDARD)) {
 			return 'standard';
 		}
-		if (self == Type.TESTNET) {
+		if (self.__eq__ (Type.TESTNET)) {
 			return 'testnet';
 		}
-		if (self == Type.DEVNET) {
+		if (self.__eq__ (Type.DEVNET)) {
 			return 'devnet';
 		}
 	});},
@@ -128,7 +132,7 @@ export var Type =  __class__ ('Type', [object], {
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		var s = s.lower ();
+		var s = jsstr.lower (s);
 		if (__in__ (s, tuple (['standard', 'std']))) {
 			return Type.STANDARD;
 		}
@@ -153,10 +157,10 @@ export var Type =  __class__ ('Type', [object], {
 		}
 		else {
 		}
-		if (self == Type.STANDARD) {
+		if (self.__eq__ (Type.STANDARD)) {
 			return ['https://explorer.threefoldtoken.com', 'https://explorer2.threefoldtoken.com', 'https://explorer3.threefoldtoken.com', 'https://explorer4.threefoldtoken.com'];
 		}
-		if (self == Type.TESTNET) {
+		if (self.__eq__ (Type.TESTNET)) {
 			return ['https://explorer.testnet.threefoldtoken.com', 'https://explorer2.testnet.threefoldtoken.com'];
 		}
 		return ['http://localhost:23110'];

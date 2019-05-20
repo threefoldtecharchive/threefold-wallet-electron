@@ -1,7 +1,11 @@
+import tfchain.polyfill.encoding.str as jsstr
+
 class Type:
     def __init__(self, value):
         if isinstance(value, Type):
             value = value.value
+        elif isinstance(value, str):
+            value = Type.from_str(value).value
         if not isinstance(value, int):
             raise TypeError("network type value was expected to be an int, not be of type {}".format(type(value)))
         if value < 0 or value > 2:
@@ -21,18 +25,18 @@ class Type:
         return self.value
 
     def __str__(self):
-        if self == Type.STANDARD:
+        if self.__eq__(Type.STANDARD):
             return "standard"
-        if self == Type.TESTNET:
+        if self.__eq__(Type.TESTNET):
             return "testnet"
-        if self == Type.DEVNET:
+        if self.__eq__(Type.DEVNET):
             return "devnet"
 
     @classmethod
     def from_str(cls, s):
         if not isinstance(s, str):
             raise TypeError("can only convert from a string")
-        s = s.lower()
+        s = jsstr.lower(s)
         if s in ("standard", "std"):
             return Type.STANDARD
         if s in ("Type", "test"):
@@ -47,14 +51,14 @@ class Type:
     #     return Currency('0.1')
 
     def default_explorer_addresses(self):
-        if self == Type.STANDARD:
+        if self.__eq__(Type.STANDARD):
             return [
                 'https://explorer.threefoldtoken.com',
                 'https://explorer2.threefoldtoken.com',
                 'https://explorer3.threefoldtoken.com',
                 'https://explorer4.threefoldtoken.com',
             ]
-        if self == Type.TESTNET:
+        if self.__eq__(Type.TESTNET):
             return [
                 'https://explorer.testnet.threefoldtoken.com',
                 'https://explorer2.testnet.threefoldtoken.com',

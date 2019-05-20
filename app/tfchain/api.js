@@ -129,6 +129,7 @@ export var Account =  __class__ ('Account', [object], {
 			if (network_type === null) {
 				var network_type = tfnetwork.Type.STANDARD;
 			}
+			var network_type = tfnetwork.Type (network_type);
 			var explorer_addresses = network_type.default_explorer_addresses ();
 			self._explorer_client = tfexplorer.Client (explorer_addresses);
 		}
