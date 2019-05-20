@@ -140,12 +140,7 @@ export var Account =  __class__ ('Account', [object], {
 				var network_type = info.chain_network;
 			}
 		}
-		if (isinstance (network_type, str)) {
-			var network_type = tfnetwork.Type.from_str (network_type);
-		}
-		else if (isinstance (network_type, int)) {
-			var network_type = tfnetwork.Type (network_type);
-		}
+		var network_type = tfnetwork.Type (network_type);
 		self._network_type = network_type;
 		self._mnemonic = mnemonic;
 		self._seed = seed;

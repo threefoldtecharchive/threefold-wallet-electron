@@ -121,7 +121,6 @@ class Account:
             # no explorer addresses are given, get the default ones based on the network type
             if network_type is None:
                 network_type = tfnetwork.Type.STANDARD
-
             network_type = tfnetwork.Type(network_type)
             explorer_addresses = network_type.default_explorer_addresses()
             self._explorer_client = tfexplorer.Client(explorer_addresses)
@@ -135,10 +134,7 @@ class Account:
                 info = self.chain_info_get()
                 network_type = info.chain_network
         # ensure the network type is using the internal network type
-        if isinstance(network_type, str):
-            network_type = tfnetwork.Type.from_str(network_type)
-        elif isinstance(network_type, int):
-            network_type = tfnetwork.Type(network_type)
+        network_type = tfnetwork.Type(network_type)
 
         # assign all remaining properties
         self._network_type = network_type
