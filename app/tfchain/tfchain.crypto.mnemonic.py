@@ -24,9 +24,11 @@
 
 import itertools
 import tfchain.polyfill.crypto as jscrypto
+import tfchain.polyfill.array as jsarr
 import tfchain.polyfill.encoding.hex as jshex
 import tfchain.polyfill.encoding.str as jsstr
 import tfchain.polyfill.encoding.bin as jsbin
+import tfchain.polyfill.encoding.int as jsint
 
 PBKDF2_ROUNDS = 2048
 
@@ -120,3 +122,22 @@ class Mnemonic(object):
             result.append(self.wordlist[idx])
         result_phrase = ' '.join(result)
         return result_phrase
+
+    def check(self, mnemonic):
+        if not isinstance(mnemonic, str):
+            return False
+        mnemonic = mnemonic.split(' ')
+        # list of valid mnemonic lengths
+        if len(mnemonic) not in [12, 15, 18, 21, 24]:
+            return False
+        try:
+            idx = map(lambda x: jsstr.zfill(jsint.to_bin_str(jsarr.index_of(self.wordlist, x))[2:], 11), mnemonic)
+            b = ''.join(idx)
+        except ValueError:
+            return False
+        l = len(b)  # noqa: E741
+        d = b[:l // 33 * 32]
+        h = b[-l // 33:]
+        nd = jshex.bytes_from_hex(jsstr.zfill(jsstr.rstrip(jshex.hex_from_bin(jsint.to_bin_str(d)[2:]), 'L'), l // 33 * 8))
+        nh = jsstr.zfill(jshex.hex_to_bin(jshex.bytes_to_hex(self._sha256_func(nd)))[2:], 256)[:l // 33]
+        return h == nh

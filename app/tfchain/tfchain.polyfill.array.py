@@ -55,3 +55,10 @@ def reverse(a):
     out = a.slice().reverse()
     """)
     return out
+
+def index_of(arr, x):
+    i = None
+    __pragma__("js", "{}", """
+    i = arr.indexOf(x);
+    """)
+    return i

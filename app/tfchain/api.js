@@ -716,5 +716,33 @@ export var entropy_to_mnemonic = function (entropy) {
 	}
 	return __bip39.to_mnemonic (entropy);
 };
+export var mnemonic_is_valid = function (mnemonic) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'mnemonic': var mnemonic = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	try {
+		return __bip39.check (mnemonic);
+	}
+	catch (__except0__) {
+		if (isinstance (__except0__, Exception)) {
+			var e = __except0__;
+			print (e);
+			return false;
+		}
+		else {
+			throw __except0__;
+		}
+	}
+};
 
 //# sourceMappingURL=api.map

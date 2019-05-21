@@ -468,3 +468,15 @@ def entropy_to_mnemonic(entropy):
     :rtype: str
     """
     return __bip39.to_mnemonic(entropy)
+
+def mnemonic_is_valid(mnemonic):
+    """
+    Validate a mnemonic sentence (24 word phrase).
+    :returns: True if the mnemonic is valid, False otherwise
+    :rtype: bool
+    """
+    try:
+        return __bip39.check(mnemonic)
+    except Exception as e:
+        print(e)
+        return False

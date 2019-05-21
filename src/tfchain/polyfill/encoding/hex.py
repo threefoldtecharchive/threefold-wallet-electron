@@ -30,6 +30,18 @@ def hex_to_bin(s):
     """)
     return '0b' + output
 
+def hex_from_bin(s):
+    if not s:
+        return ''
+    output = ''
+    __pragma__("js", "{}", """
+    output = s.match(/.{4}/g).reduce(function(acc, i) {
+        return acc + parseInt(i, 2).toString(16);
+    }, '');
+    """)
+    return output
+
+
 def hex_to_int(s):
     x = None
     __pragma__("js", "{}", """

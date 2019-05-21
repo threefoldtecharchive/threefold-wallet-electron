@@ -21,3 +21,10 @@ def to_bytes(x, nbytes, order=None):
     if nbytes == 8:
         return jsbin.from_int64(x, order)
     raise ValueError("unsupported nbytes: {}".format(nbytes))
+
+def to_bin_str(x):
+    s = ''
+    __pragma__("js", "{}", """
+    s = (x).toString(2);
+    """)
+    return '0b' + s
