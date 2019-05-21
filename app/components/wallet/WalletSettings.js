@@ -8,6 +8,7 @@ import styles from '../home/Home.css'
 import { saveWallet, saveAccount, deleteWallet } from '../../actions'
 import DeleteModal from './DeleteWalletModal'
 import Footer from '../footer'
+import { toast } from 'react-toastify';
 
 const mapStateToProps = state => ({
   wallet: state.wallet,
@@ -56,6 +57,7 @@ class WalletSettings extends Component {
 
     this.props.saveWallet(newWallet)
     this.props.saveAccount(this.props.account)
+    toast("Wallet saved")
     return this.props.history.push("/wallet")
   }
 
@@ -80,6 +82,7 @@ class WalletSettings extends Component {
     this.props.deleteWallet(this.props.wallet)
     this.props.saveAccount(this.props.account)
     this.setState({ deleteNameError: false })
+    toast("Wallet deleted")
     return this.props.history.push("/account")
   }
 

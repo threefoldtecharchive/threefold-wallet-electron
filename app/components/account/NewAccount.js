@@ -10,6 +10,7 @@ import { addAccount } from '../../actions'
 import SeedConfirmationModal from './SeedConfirmationModal'
 import { difference } from 'lodash'
 import * as tfchain from '../../tfchain/api'
+import { toast } from 'react-toastify';
 
 const mapStateToProps = state => ({
   client: state.client.client
@@ -166,6 +167,8 @@ class NewAccount extends Component {
       this.props.AddAccount(account)
       // account creation succeeded so remove error if there was one
       this.setState({ accountCreationError: false })
+      
+      toast("Account created")
       return this.props.history.push("/account")
     } catch (error) {
       // show error from api if account creation failed

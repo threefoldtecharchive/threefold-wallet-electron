@@ -10,7 +10,7 @@ import Footer from '../footer'
 import QRCode from 'qrcode.react'
 import { flatten, find } from 'lodash'
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import { toast, ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const mapStateToProps = state => ({

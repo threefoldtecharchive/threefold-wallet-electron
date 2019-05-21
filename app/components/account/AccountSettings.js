@@ -8,6 +8,7 @@ import styles from '../home/Home.css'
 import { saveAccount, deleteAccount } from '../../actions'
 import DeleteModal from './DeleteAccountModal'
 import Footer from '../footer'
+import { toast } from 'react-toastify';
 
 const mapStateToProps = state => ({
   account: state.account
@@ -47,7 +48,7 @@ class AccountSettings extends Component {
     newAccount._previous_name = previousName
 
     this.props.saveAccount(newAccount, previousName)
-
+    toast("Account saved")
     return this.props.history.push("/account")
   }
 
@@ -71,6 +72,7 @@ class AccountSettings extends Component {
     }
     this.props.deleteAccount(this.props.account)
     this.setState({ deleteNameError: false })
+    toast("Account deleted")
     return this.props.history.push("/home")
   }
   

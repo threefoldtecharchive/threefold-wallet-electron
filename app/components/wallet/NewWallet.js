@@ -7,6 +7,7 @@ import routes from '../../constants/routes'
 import styles from '../home/Home.css'
 import { saveAccount } from '../../actions'
 import Footer from '../footer'
+import { toast } from 'react-toastify';
 
 const mapStateToProps = state => ({
   wallet: state.wallet,
@@ -57,6 +58,7 @@ class WalletSettings extends Component {
     try {
       this.props.account.wallet_new(name, start_index, address_length)
       this.props.saveAccount(this.props.account)
+      toast("Wallet created")
       return this.props.history.push("/account")
     } catch (error) {
       this.setState({ errorMessage: error.__args__[0], showError: true })
