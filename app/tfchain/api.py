@@ -356,6 +356,17 @@ class Wallet:
         return self._start_index
 
     @property
+    def address(self):
+        """
+        :returns: the first (default) address of this wallet
+        :rtype: str
+        """
+        addresses = self.addresses
+        if not addresses:
+            return ''
+        return addresses[0]
+
+    @property
     def addresses(self):
         """
         :returns: the addresses of this wallet
@@ -514,3 +525,9 @@ def mnemonic_is_valid(mnemonic):
     except Exception as e:
         print(e)
         return False
+
+import tfchain.types.ERC20 as tferc20
+erc20 = tferc20
+
+import tfchain.types.ConditionTypes as tfct
+ct = tfct

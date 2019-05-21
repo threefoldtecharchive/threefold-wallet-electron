@@ -1,4 +1,4 @@
-import tfchain.polyfill.array as jsarray
+import tfchain.polyfill.array as jsarr
 import tfchain.polyfill.encoding.hex as jshex
 import tfchain.polyfill.encoding.str as jsstr
 import tfchain.polyfill.crypto as jscrypto 
@@ -63,17 +63,17 @@ class UnlockHash(BaseDataTypeClass):
         if len(obj) != UnlockHash._TOTAL_SIZE_HEX:
             raise ValueError("UnlockHash is expexcted to be of length {} when stringified, not of length {}".format(UnlockHash._TOTAL_SIZE_HEX, len(obj)))
 
-        t = UnlockHashType(int(jsarray.slice_array(obj, 0, UnlockHash._TYPE_SIZE_HEX)))
+        t = UnlockHashType(int(jsarr.slice_array(obj, 0, UnlockHash._TYPE_SIZE_HEX)))
         h = Hash(value=obj[UnlockHash._TYPE_SIZE_HEX:UnlockHash._TYPE_SIZE_HEX+UnlockHash._HASH_SIZE_HEX])
         uh = cls(uhtype=t, uhhash=h)
         
         if t.__eq__(UnlockHashType.NIL):
-            expectedNH = bytes(jsarray.new_array(UnlockHash._HASH_SIZE))
+            expectedNH = bytes(jsarr.new_array(UnlockHash._HASH_SIZE))
             if h.value != expectedNH:
                 raise ValueError("unexpected nil hash {}".format(jshex.bytes_to_hex(h.value)))
         else:
-            expected_checksum = jshex.bytes_to_hex(jsarray.slice_array(uh._checksum(), 0, UnlockHash._CHECKSUM_SIZE))
-            checksum = jsarray.slice_array(obj, 0, -UnlockHash._CHECKSUM_SIZE_HEX)
+            expected_checksum = jshex.bytes_to_hex(jsarr.slice_array(uh._checksum(), 0, UnlockHash._CHECKSUM_SIZE))
+            checksum = jsarr.slice_array(obj, UnlockHash._TOTAL_SIZE_HEX-UnlockHash._CHECKSUM_SIZE_HEX)
             if expected_checksum != checksum:
                 raise ValueError("unexpected checksum {}, expected {}".format(checksum, expected_checksum))
 
@@ -102,12 +102,12 @@ class UnlockHash(BaseDataTypeClass):
         self._hash.value = value
 
     def __str__(self):
-        checksum = jshex.bytes_to_hex(jsarray.slice_array(self._checksum(), 0, UnlockHash._CHECKSUM_SIZE))
+        checksum = jshex.bytes_to_hex(jsarr.slice_array(self._checksum(), 0, UnlockHash._CHECKSUM_SIZE))
         return "{}{}{}".format(jshex.bytes_to_hex(bytes([self._type.__int__()])), self._hash.__str__(), checksum)
 
     def _checksum(self):
         if self._type.__eq__(UnlockHashType.NIL):
-            return bytes(jsarray.new_array(UnlockHash._CHECKSUM_SIZE))
+            return bytes(jsarr.new_array(UnlockHash._CHECKSUM_SIZE))
         e = RivineBinaryEncoder()
         e.add_int8(self._type.__int__())
         e.add(self._hash)

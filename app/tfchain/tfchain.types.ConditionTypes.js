@@ -5,7 +5,7 @@ import {Hash} from './tfchain.types.PrimitiveTypes.js';
 import * as jscrypto from './tfchain.polyfill.crypto.js';
 import * as jsstr from './tfchain.polyfill.encoding.str.js';
 import * as jshex from './tfchain.polyfill.encoding.hex.js';
-import * as jsarray from './tfchain.polyfill.array.js';
+import * as jsarr from './tfchain.polyfill.array.js';
 var __name__ = 'tfchain.types.ConditionTypes';
 export var UnlockHashType =  __class__ ('UnlockHashType', [object], {
 	__module__: __name__,
@@ -187,11 +187,11 @@ export var UnlockHash =  __class__ ('UnlockHash', [BaseDataTypeClass], {
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		var t = UnlockHashType (int (jsarray.slice_array (obj, 0, UnlockHash._TYPE_SIZE_HEX)));
+		var t = UnlockHashType (int (jsarr.slice_array (obj, 0, UnlockHash._TYPE_SIZE_HEX)));
 		var h = Hash (__kwargtrans__ ({value: obj.__getslice__ (UnlockHash._TYPE_SIZE_HEX, UnlockHash._TYPE_SIZE_HEX + UnlockHash._HASH_SIZE_HEX, 1)}));
 		var uh = cls (__kwargtrans__ ({uhtype: t, uhhash: h}));
 		if (t.__eq__ (UnlockHashType.NIL)) {
-			var expectedNH = bytes (jsarray.new_array (UnlockHash._HASH_SIZE));
+			var expectedNH = bytes (jsarr.new_array (UnlockHash._HASH_SIZE));
 			if (h.value != expectedNH) {
 				var __except0__ = ValueError ('unexpected nil hash {}'.format (jshex.bytes_to_hex (h.value)));
 				__except0__.__cause__ = null;
@@ -199,8 +199,8 @@ export var UnlockHash =  __class__ ('UnlockHash', [BaseDataTypeClass], {
 			}
 		}
 		else {
-			var expected_checksum = jshex.bytes_to_hex (jsarray.slice_array (uh._checksum (), 0, UnlockHash._CHECKSUM_SIZE));
-			var checksum = jsarray.slice_array (obj, 0, -(UnlockHash._CHECKSUM_SIZE_HEX));
+			var expected_checksum = jshex.bytes_to_hex (jsarr.slice_array (uh._checksum (), 0, UnlockHash._CHECKSUM_SIZE));
+			var checksum = jsarr.slice_array (obj, UnlockHash._TOTAL_SIZE_HEX - UnlockHash._CHECKSUM_SIZE_HEX);
 			if (expected_checksum != checksum) {
 				var __except0__ = ValueError ('unexpected checksum {}, expected {}'.format (checksum, expected_checksum));
 				__except0__.__cause__ = null;
@@ -314,7 +314,7 @@ export var UnlockHash =  __class__ ('UnlockHash', [BaseDataTypeClass], {
 		}
 		else {
 		}
-		var checksum = jshex.bytes_to_hex (jsarray.slice_array (self._checksum (), 0, UnlockHash._CHECKSUM_SIZE));
+		var checksum = jshex.bytes_to_hex (jsarr.slice_array (self._checksum (), 0, UnlockHash._CHECKSUM_SIZE));
 		return '{}{}{}'.format (jshex.bytes_to_hex (bytes ([self._type.__int__ ()])), self._hash.__str__ (), checksum);
 	});},
 	get _checksum () {return __get__ (this, function (self) {
@@ -332,7 +332,7 @@ export var UnlockHash =  __class__ ('UnlockHash', [BaseDataTypeClass], {
 		else {
 		}
 		if (self._type.__eq__ (UnlockHashType.NIL)) {
-			return bytes (jsarray.new_array (UnlockHash._CHECKSUM_SIZE));
+			return bytes (jsarr.new_array (UnlockHash._CHECKSUM_SIZE));
 		}
 		var e = RivineBinaryEncoder ();
 		e.add_int8 (self._type.__int__ ());

@@ -123,9 +123,16 @@ export var slice_array = function (arr, begin, end) {
 	else {
 	}
 	var out = null;
-	
-	    out = arr.slice(begin, end);
-	    
+	if (end === null) {
+		
+		        out = arr.slice(begin);
+		        
+	}
+	else {
+		
+		        out = arr.slice(begin, end);
+		        
+	}
 	return out;
 };
 export var reverse = function (a) {

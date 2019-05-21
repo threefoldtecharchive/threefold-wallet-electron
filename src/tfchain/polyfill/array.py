@@ -44,9 +44,14 @@ def concat(a, b):
 
 def slice_array(arr, begin, end=None):
     out = None
-    __pragma__("js", "{}", """
-    out = arr.slice(begin, end);
-    """)
+    if end is None:
+        __pragma__("js", "{}", """
+        out = arr.slice(begin);
+        """)
+    else:
+        __pragma__("js", "{}", """
+        out = arr.slice(begin, end);
+        """)
     return out
 
 def reverse(a):
