@@ -3,7 +3,6 @@ ERC20 Types.
 """
 
 from tfchain.types.PrimitiveTypes import BinaryData, Hash
-from tfchain.types.ConditionTypes import UnlockHash
 from tfchain.encoding.siabin import SiaBinaryEncoder
 
 import tfchain.polyfill.crypto as jscrypto
@@ -50,7 +49,7 @@ class ERC20Address(BinaryData):
         Create an ERC20 Address from a TFT Address (type: UnlockHash).
         """
         if isinstance(unlockhash, str):
-            unlockhash = UnlockHash.from_str(unlockhash)
+            raise TypeError("unlockhash has to be already decoded from str before calling this func")
         e = SiaBinaryEncoder()
         unlockhash.sia_binary_encode(e)
         hash = jscrypto.blake2b(e.data)

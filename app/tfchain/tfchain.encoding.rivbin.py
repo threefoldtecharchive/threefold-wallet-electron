@@ -1,4 +1,4 @@
-import tfchain.polyfill.array as jsarray
+import tfchain.polyfill.array as jsarr
 import tfchain.polyfill.encoding.bin as jsbin
 import tfchain.polyfill.encoding.str as jsstr
 
@@ -9,6 +9,11 @@ _INT_2BYTE_UPPERLIMIT = pow(2, 16) - 1
 _INT_3BYTE_UPPERLIMIT = pow(2, 24) - 1
 _INT_4BYTE_UPPERLIMIT = pow(2, 32) - 1
 _INT_8BYTE_UPPERLIMIT = pow(2, 64) - 1
+
+def encode_all(*values):
+    enc = RivineBinaryEncoder()
+    enc.add_all(*values)
+    return enc.data
 
 class RivineBinaryObjectEncoderBase:
     def rivine_binary_encode(self, encoder):
@@ -66,9 +71,9 @@ class RivineBinaryEncoder:
         # try to rivbin-encode the value based on its python type
         if isinstance(value, bool):
             if value:
-                self._data = jsarray.concat(self._data, bytes([1]))
+                self._data = jsarr.concat(self._data, bytes([1]))
             else:
-                self._data = jsarray.concat(self._data, bytes([0]))
+                self._data = jsarr.concat(self._data, bytes([0]))
         elif isinstance(value, int):
             self.add_int64(value)
         else:
@@ -96,7 +101,7 @@ class RivineBinaryEncoder:
         @param value: int value that fits in a single byte
         """
         self._check_int_type(value, _INT_1BYTE_UPPERLIMIT)
-        self._data = jsarray.concat(self._data, jsbin.from_int8(value))
+        self._data = jsarr.concat(self._data, jsbin.from_int8(value))
 
     def add_int16(self,value):
         """
@@ -106,7 +111,7 @@ class RivineBinaryEncoder:
         @param value: int value that fits in two bytes
         """
         self._check_int_type(value, _INT_2BYTE_UPPERLIMIT)
-        self._data = jsarray.concat(self._data, jsbin.from_int16(value))
+        self._data = jsarr.concat(self._data, jsbin.from_int16(value))
 
     def add_int24(self,value):
         """
@@ -116,7 +121,7 @@ class RivineBinaryEncoder:
         @param value: int value that fits in three bytes
         """
         self._check_int_type(value, _INT_3BYTE_UPPERLIMIT)
-        self._data = jsarray.concat(self._data, jsbin.from_int24(value))
+        self._data = jsarr.concat(self._data, jsbin.from_int24(value))
 
     def add_int32(self,value):
         """
@@ -126,7 +131,7 @@ class RivineBinaryEncoder:
         @param value: int value that fits in four bytes
         """
         self._check_int_type(value, _INT_4BYTE_UPPERLIMIT)
-        self._data = jsarray.concat(self._data, jsbin.from_int32(value))
+        self._data = jsarr.concat(self._data, jsbin.from_int32(value))
 
     def add_int64(self,value):
         """
@@ -136,7 +141,7 @@ class RivineBinaryEncoder:
         @param value: int value that fits in eight bytes
         """
         self._check_int_type(value, _INT_8BYTE_UPPERLIMIT)
-        self._data = jsarray.concat(self._data, jsbin.from_int64(value))
+        self._data = jsarr.concat(self._data, jsbin.from_int64(value))
 
     def add_array(self,value):
         """
@@ -146,9 +151,9 @@ class RivineBinaryEncoder:
         @param value: the iterateble object to be rivbin-encoded as an array
         """
         if isinstance(value, str):
-            self._data = jsarray.concat(self._data, jsstr.to_utf8(value))
+            self._data = jsarr.concat(self._data, jsstr.to_utf8(value))
         elif isinstance(value, (bytes, bytearray)):
-            self._data = jsarray.concat(self._data, bytes(value))
+            self._data = jsarr.concat(self._data, bytes(value))
         else:
             try:
                 for element in value:
@@ -166,10 +171,10 @@ class RivineBinaryEncoder:
         """
         if isinstance(value, str):
             self._add_slice_length(len(value))
-            self._data = jsarray.concat(self._data, jsstr.to_utf8(value))
+            self._data = jsarr.concat(self._data, jsstr.to_utf8(value))
         elif isinstance(value, (bytes, bytearray)):
             self._add_slice_length(len(value))
-            self._data = jsarray.concat(self._data, bytes(value))
+            self._data = jsarr.concat(self._data, bytes(value))
         else:
             length = 0
             for _ in value:
@@ -207,7 +212,7 @@ class RivineBinaryEncoder:
                 raise ValueError("value of type {} cannot be added as a single byte".format(type(value)))
             if len(value) != 1:
                 raise ValueError("a single byte has to be accepted, amount of bytes given: {}".format(len(value)))
-            self._data = jsarray.concat(self._data, value)
+            self._data = jsarr.concat(self._data, value)
 
     def add_all(self,*values):
         """

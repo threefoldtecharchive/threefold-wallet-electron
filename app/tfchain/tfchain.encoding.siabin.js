@@ -2,9 +2,26 @@ import {AssertionError, AttributeError, BaseException, DeprecationWarning, Excep
 import * as encerrors from './tfchain.encoding.errors.js';
 import * as jsstr from './tfchain.polyfill.encoding.str.js';
 import * as jsbin from './tfchain.polyfill.encoding.bin.js';
-import * as jsarray from './tfchain.polyfill.array.js';
+import * as jsarr from './tfchain.polyfill.array.js';
 var __name__ = 'tfchain.encoding.siabin';
 export var _INT_UPPERLIMIT = pow (2, 64) - 1;
+export var encode_all = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var py_values = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var py_values = tuple ();
+	}
+	var enc = SiaBinaryEncoder ();
+	enc.add_all (...py_values);
+	return enc.data;
+};
 export var SiaBinaryObjectEncoderBase =  __class__ ('SiaBinaryObjectEncoderBase', [object], {
 	__module__: __name__,
 	get sia_binary_encode () {return __get__ (this, function (self, encoder) {
@@ -107,7 +124,7 @@ export var SiaBinaryEncoder =  __class__ ('SiaBinaryEncoder', [object], {
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		self._data = jsarray.concat (self._data, jsbin.from_int64 (value));
+		self._data = jsarr.concat (self._data, jsbin.from_int64 (value));
 	});},
 	get add_array () {return __get__ (this, function (self, value) {
 		if (arguments.length) {
@@ -125,10 +142,10 @@ export var SiaBinaryEncoder =  __class__ ('SiaBinaryEncoder', [object], {
 		else {
 		}
 		if (isinstance (value, str)) {
-			self._data = jsarray.concat (self._data, jsstr.to_utf8 (value));
+			self._data = jsarr.concat (self._data, jsstr.to_utf8 (value));
 		}
 		else if (isinstance (value, tuple ([bytes, bytearray]))) {
-			self._data = jsarray.concat (self._data, bytes (value));
+			self._data = jsarr.concat (self._data, bytes (value));
 		}
 		else {
 			try {
@@ -167,11 +184,11 @@ export var SiaBinaryEncoder =  __class__ ('SiaBinaryEncoder', [object], {
 		}
 		if (isinstance (value, str)) {
 			self.add_int (len (value));
-			self._data = jsarray.concat (self._data, jsstr.to_utf8 (value));
+			self._data = jsarr.concat (self._data, jsstr.to_utf8 (value));
 		}
 		else if (isinstance (value, tuple ([bytes, bytearray]))) {
 			self.add_int (len (value));
-			self._data = jsarray.concat (self._data, bytes (value));
+			self._data = jsarr.concat (self._data, bytes (value));
 		}
 		else {
 			var length = 0;
@@ -203,7 +220,7 @@ export var SiaBinaryEncoder =  __class__ ('SiaBinaryEncoder', [object], {
 				__except0__.__cause__ = null;
 				throw __except0__;
 			}
-			self._data = jsarray.concat (self._data, jsbin.from_int8 (value));
+			self._data = jsarr.concat (self._data, jsbin.from_int8 (value));
 		}
 		else {
 			if (isinstance (value, str)) {
@@ -219,7 +236,7 @@ export var SiaBinaryEncoder =  __class__ ('SiaBinaryEncoder', [object], {
 				__except0__.__cause__ = null;
 				throw __except0__;
 			}
-			self._data = jsarray.concat (self._data, bytes (value));
+			self._data = jsarr.concat (self._data, bytes (value));
 		}
 	});},
 	get add () {return __get__ (this, function (self, value) {
@@ -242,7 +259,7 @@ export var SiaBinaryEncoder =  __class__ ('SiaBinaryEncoder', [object], {
 			return ;
 		}
 		if (isinstance (value, bool)) {
-			self._data = jsarray.concat (self._data, (value ? bytes ([1]) : bytes ([0])));
+			self._data = jsarr.concat (self._data, (value ? bytes ([1]) : bytes ([0])));
 		}
 		else if (isinstance (value, int)) {
 			self.add_int (value);

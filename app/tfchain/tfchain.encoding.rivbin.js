@@ -2,13 +2,30 @@ import {AssertionError, AttributeError, BaseException, DeprecationWarning, Excep
 import * as encerrors from './tfchain.encoding.errors.js';
 import * as jsstr from './tfchain.polyfill.encoding.str.js';
 import * as jsbin from './tfchain.polyfill.encoding.bin.js';
-import * as jsarray from './tfchain.polyfill.array.js';
+import * as jsarr from './tfchain.polyfill.array.js';
 var __name__ = 'tfchain.encoding.rivbin';
 export var _INT_1BYTE_UPPERLIMIT = pow (2, 8) - 1;
 export var _INT_2BYTE_UPPERLIMIT = pow (2, 16) - 1;
 export var _INT_3BYTE_UPPERLIMIT = pow (2, 24) - 1;
 export var _INT_4BYTE_UPPERLIMIT = pow (2, 32) - 1;
 export var _INT_8BYTE_UPPERLIMIT = pow (2, 64) - 1;
+export var encode_all = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var py_values = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var py_values = tuple ();
+	}
+	var enc = RivineBinaryEncoder ();
+	enc.add_all (...py_values);
+	return enc.data;
+};
 export var RivineBinaryObjectEncoderBase =  __class__ ('RivineBinaryObjectEncoderBase', [object], {
 	__module__: __name__,
 	get rivine_binary_encode () {return __get__ (this, function (self, encoder) {
@@ -102,10 +119,10 @@ export var RivineBinaryEncoder =  __class__ ('RivineBinaryEncoder', [object], {
 		}
 		if (isinstance (value, bool)) {
 			if (value) {
-				self._data = jsarray.concat (self._data, bytes ([1]));
+				self._data = jsarr.concat (self._data, bytes ([1]));
 			}
 			else {
-				self._data = jsarray.concat (self._data, bytes ([0]));
+				self._data = jsarr.concat (self._data, bytes ([0]));
 			}
 		}
 		else if (isinstance (value, int)) {
@@ -177,7 +194,7 @@ export var RivineBinaryEncoder =  __class__ ('RivineBinaryEncoder', [object], {
 		else {
 		}
 		self._check_int_type (value, _INT_1BYTE_UPPERLIMIT);
-		self._data = jsarray.concat (self._data, jsbin.from_int8 (value));
+		self._data = jsarr.concat (self._data, jsbin.from_int8 (value));
 	});},
 	get add_int16 () {return __get__ (this, function (self, value) {
 		if (arguments.length) {
@@ -195,7 +212,7 @@ export var RivineBinaryEncoder =  __class__ ('RivineBinaryEncoder', [object], {
 		else {
 		}
 		self._check_int_type (value, _INT_2BYTE_UPPERLIMIT);
-		self._data = jsarray.concat (self._data, jsbin.from_int16 (value));
+		self._data = jsarr.concat (self._data, jsbin.from_int16 (value));
 	});},
 	get add_int24 () {return __get__ (this, function (self, value) {
 		if (arguments.length) {
@@ -213,7 +230,7 @@ export var RivineBinaryEncoder =  __class__ ('RivineBinaryEncoder', [object], {
 		else {
 		}
 		self._check_int_type (value, _INT_3BYTE_UPPERLIMIT);
-		self._data = jsarray.concat (self._data, jsbin.from_int24 (value));
+		self._data = jsarr.concat (self._data, jsbin.from_int24 (value));
 	});},
 	get add_int32 () {return __get__ (this, function (self, value) {
 		if (arguments.length) {
@@ -231,7 +248,7 @@ export var RivineBinaryEncoder =  __class__ ('RivineBinaryEncoder', [object], {
 		else {
 		}
 		self._check_int_type (value, _INT_4BYTE_UPPERLIMIT);
-		self._data = jsarray.concat (self._data, jsbin.from_int32 (value));
+		self._data = jsarr.concat (self._data, jsbin.from_int32 (value));
 	});},
 	get add_int64 () {return __get__ (this, function (self, value) {
 		if (arguments.length) {
@@ -249,7 +266,7 @@ export var RivineBinaryEncoder =  __class__ ('RivineBinaryEncoder', [object], {
 		else {
 		}
 		self._check_int_type (value, _INT_8BYTE_UPPERLIMIT);
-		self._data = jsarray.concat (self._data, jsbin.from_int64 (value));
+		self._data = jsarr.concat (self._data, jsbin.from_int64 (value));
 	});},
 	get add_array () {return __get__ (this, function (self, value) {
 		if (arguments.length) {
@@ -267,10 +284,10 @@ export var RivineBinaryEncoder =  __class__ ('RivineBinaryEncoder', [object], {
 		else {
 		}
 		if (isinstance (value, str)) {
-			self._data = jsarray.concat (self._data, jsstr.to_utf8 (value));
+			self._data = jsarr.concat (self._data, jsstr.to_utf8 (value));
 		}
 		else if (isinstance (value, tuple ([bytes, bytearray]))) {
-			self._data = jsarray.concat (self._data, bytes (value));
+			self._data = jsarr.concat (self._data, bytes (value));
 		}
 		else {
 			try {
@@ -307,11 +324,11 @@ export var RivineBinaryEncoder =  __class__ ('RivineBinaryEncoder', [object], {
 		}
 		if (isinstance (value, str)) {
 			self._add_slice_length (len (value));
-			self._data = jsarray.concat (self._data, jsstr.to_utf8 (value));
+			self._data = jsarr.concat (self._data, jsstr.to_utf8 (value));
 		}
 		else if (isinstance (value, tuple ([bytes, bytearray]))) {
 			self._add_slice_length (len (value));
-			self._data = jsarray.concat (self._data, bytes (value));
+			self._data = jsarr.concat (self._data, bytes (value));
 		}
 		else {
 			var length = 0;
@@ -387,7 +404,7 @@ export var RivineBinaryEncoder =  __class__ ('RivineBinaryEncoder', [object], {
 				__except0__.__cause__ = null;
 				throw __except0__;
 			}
-			self._data = jsarray.concat (self._data, value);
+			self._data = jsarr.concat (self._data, value);
 		}
 	});},
 	get add_all () {return __get__ (this, function (self) {

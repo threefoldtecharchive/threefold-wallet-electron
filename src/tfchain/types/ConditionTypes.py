@@ -6,10 +6,12 @@ import tfchain.polyfill.encoding.hex as jshex
 import tfchain.polyfill.encoding.str as jsstr
 import tfchain.polyfill.crypto as jscrypto 
 
-from tfchain.types.PrimitiveTypes import Hash
+from tfchain.crypto.merkletree import Tree as MerkleTree
+from tfchain.types.PrimitiveTypes import Hash, BinaryData
 from tfchain.types.BaseDataType import BaseDataTypeClass
 from tfchain.encoding.rivbin import RivineBinaryEncoder
 from tfchain.encoding.siabin import SiaBinaryEncoder
+from tfchain.encoding.siabin import encode_all as sia_encode_all
 
 
 _CONDITION_TYPE_NIL = 0
@@ -18,96 +20,97 @@ _CONDITION_TYPE_ATOMIC_SWAP = 2
 _CONDITION_TYPE_LOCKTIME = 3
 _CONDITION_TYPE_MULTI_SIG = 4
 
-# def from_json(obj):
-#     ct = obj.get('type', 0)
-#     if ct == _CONDITION_TYPE_NIL:
-#         return ConditionNil.from_json(obj)
-#     if ct == _CONDITION_TYPE_UNLOCK_HASH:
-#         return ConditionUnlockHash.from_json(obj)
-#     if ct == _CONDITION_TYPE_ATOMIC_SWAP:
-#         return ConditionAtomicSwap.from_json(obj)
-#     if ct == _CONDITION_TYPE_LOCKTIME:
-#         return ConditionLockTime.from_json(obj)
-#     if ct == _CONDITION_TYPE_MULTI_SIG:
-#         return ConditionMultiSignature.from_json(obj)
-#     raise ValueError("unsupport condition type {}".format(ct))
 
-# def from_recipient(recipient, lock=None):
-#     """
-#     Create automatically a recipient condition based on any accepted pythonic value (combo).
-#     """
+def from_json(obj):
+    ct = obj.get('type', 0)
+    if ct == _CONDITION_TYPE_NIL:
+        return ConditionNil.from_json(obj)
+    if ct == _CONDITION_TYPE_UNLOCK_HASH:
+        return ConditionUnlockHash.from_json(obj)
+    if ct == _CONDITION_TYPE_ATOMIC_SWAP:
+        return ConditionAtomicSwap.from_json(obj)
+    if ct == _CONDITION_TYPE_LOCKTIME:
+        return ConditionLockTime.from_json(obj)
+    if ct == _CONDITION_TYPE_MULTI_SIG:
+        return ConditionMultiSignature.from_json(obj)
+    raise ValueError("unsupport condition type {}".format(ct))
 
-#     # define base condition
-#     if isinstance(recipient, ConditionBaseClass):
-#         condition = recipient
-#     else:
-#         condition = None
-#         if recipient is None:
-#             # free-for-all wallet
-#             condition = nil_new()
-#         elif isinstance(recipient, (UnlockHash, str)):
-#             # single sig wallet
-#             condition = unlockhash_new(unlockhash=recipient)
-#         elif isinstance(recipient, (bytes, bytearray)):
-#             # single sig wallet
-#             condition = unlockhash_new(unlockhash=recipient.hex())
-#         elif isinstance(recipient, list):
-#             # multisig to an all-for-all wallet
-#             condition = multi_signature_new(min_nr_sig=len(recipient), unlockhashes=recipient)
-#         elif isinstance(recipient, tuple):
-#             # multisig wallet with custom x-of-n definition
-#             if len(recipient) != 2:
-#                 raise ValueError("recipient is expected to be a tupple of 2 values in the form (sigcount,hashes) or (hashes,sigcount), cannot be of length {}".format(len(recipient)))
-#             # allow (sigs,hashes) as well as (hashes,sigs)
-#             if isinstance(recipient[0], int):
-#                 condition = multi_signature_new(min_nr_sig=recipient[0], unlockhashes=recipient[1])
-#             else:
-#                 condition = multi_signature_new(min_nr_sig=recipient[1], unlockhashes=recipient[0])
-#         else:
-#             raise TypeError("invalid type for recipient parameter: {}", type(recipient))
+def from_recipient(recipient, lock=None):
+    """
+    Create automatically a recipient condition based on any accepted pythonic value (combo).
+    """
+
+    # define base condition
+    if isinstance(recipient, ConditionBaseClass):
+        condition = recipient
+    else:
+        condition = None
+        if recipient is None:
+            # free-for-all wallet
+            condition = nil_new()
+        elif isinstance(recipient, (UnlockHash, str)):
+            # single sig wallet
+            condition = unlockhash_new(unlockhash=recipient)
+        elif isinstance(recipient, (bytes, bytearray)) or jsarr.is_uint8_array(recipient):
+            # single sig wallet
+            condition = unlockhash_new(unlockhash=jshex.bytes_to_hex(recipient))
+        elif isinstance(recipient, list):
+            # multisig to an all-for-all wallet
+            condition = multi_signature_new(min_nr_sig=len(recipient), unlockhashes=recipient)
+        elif isinstance(recipient, tuple):
+            # multisig wallet with custom x-of-n definition
+            if len(recipient) != 2:
+                raise ValueError("recipient is expected to be a tupple of 2 values in the form (sigcount,hashes) or (hashes,sigcount), cannot be of length {}".format(len(recipient)))
+            # allow (sigs,hashes) as well as (hashes,sigs)
+            if isinstance(recipient[0], int):
+                condition = multi_signature_new(min_nr_sig=recipient[0], unlockhashes=recipient[1])
+            else:
+                condition = multi_signature_new(min_nr_sig=recipient[1], unlockhashes=recipient[0])
+        else:
+            raise TypeError("invalid type for recipient parameter: {}", type(recipient))
     
-#     # if lock is defined, define it as a locktime value
-#     if lock is not None:
-#         condition = locktime_new(lock=lock, condition=condition)
+    # if lock is defined, define it as a locktime value
+    if lock is not None:
+        condition = locktime_new(lock=lock, condition=condition)
 
-#     # return condition
-#     return condition
+    # return condition
+    return condition
 
 
-# def nil_new():
-#     """
-#     Create a new Nil Condition, which can be fulfilled by any SingleSig. Fulfillment.
-#     """
-#     return ConditionNil()
+def nil_new():
+    """
+    Create a new Nil Condition, which can be fulfilled by any SingleSig. Fulfillment.
+    """
+    return ConditionNil()
 
-# def unlockhash_new(unlockhash=None):
-#     """
-#     Create a new UnlockHash Condition, which can be
-#     fulfilled by the matching SingleSig. Fulfillment.
-#     """
-#     return ConditionUnlockHash(unlockhash=unlockhash)
+def unlockhash_new(unlockhash=None):
+    """
+    Create a new UnlockHash Condition, which can be
+    fulfilled by the matching SingleSig. Fulfillment.
+    """
+    return ConditionUnlockHash(unlockhash=unlockhash)
 
-# def atomic_swap_new(sender=None, receiver=None, hashed_secret=None, lock_time=None):
-#     """
-#     Create a new AtomicSwap Condition, which can be
-#     fulfilled by the AtomicSwap Fulfillment.
-#     """
-#     return ConditionAtomicSwap(
-#         sender=sender, receiver=receiver,
-#         hashed_secret=hashed_secret, lock_time=lock_time)
+def atomic_swap_new(sender=None, receiver=None, hashed_secret=None, lock_time=None):
+    """
+    Create a new AtomicSwap Condition, which can be
+    fulfilled by the AtomicSwap Fulfillment.
+    """
+    return ConditionAtomicSwap(
+        sender=sender, receiver=receiver,
+        hashed_secret=hashed_secret, lock_time=lock_time)
 
-# def locktime_new(lock=None, condition=None):
-#     """
-#     Create a new LockTime Condition, which can be fulfilled by a fulfillment
-#     when the relevant timestamp/block has been reached as well as the fulfillment fulfills the internal condition.
-#     """
-#     return ConditionLockTime(lock=lock, condition=condition)
+def locktime_new(lock=None, condition=None):
+    """
+    Create a new LockTime Condition, which can be fulfilled by a fulfillment
+    when the relevant timestamp/block has been reached as well as the fulfillment fulfills the internal condition.
+    """
+    return ConditionLockTime(lock=lock, condition=condition)
 
-# def multi_signature_new(min_nr_sig=0, unlockhashes=None):
-#     """
-#     Create a new MultiSignature Condition, which can be fulfilled by a matching MultiSignature Fulfillment.
-#     """
-#     return ConditionMultiSignature(unlockhashes=unlockhashes, min_nr_sig=min_nr_sig)
+def multi_signature_new(min_nr_sig=0, unlockhashes=None):
+    """
+    Create a new MultiSignature Condition, which can be fulfilled by a matching MultiSignature Fulfillment.
+    """
+    return ConditionMultiSignature(unlockhashes=unlockhashes, min_nr_sig=min_nr_sig)
 
 def output_lock_new(value):
     """
@@ -185,25 +188,44 @@ class ConditionBaseClass(BaseDataTypeClass):
     def from_json(cls, obj):
         ff = cls()
         ct = obj.get('type', 0)
-        if not ff.type.__eq__(ct):
-            raise ValueError("condition is expected to be of type {}, not {}".format(ff.type.__int__(), ct.__int__()))
+        if ff.ctype != ct:
+            raise ValueError("condition is expected to be of type {}, not {}".format(ff.ctype, ct))
         ff.from_json_data_object(obj.get('data', {}))
         return ff
 
     @property
-    def type(self):
-        raise NotImplementedError("type property is not yet implemented")
+    def ctype(self):
+        return self._custom_type_getter()
+    def _custom_type_getter(self):
+        raise NotImplementedError("custom type getter is not yet implemented")
+    @ctype.setter
+    def ctype(self, value):
+        return self._custom_type_setter(value)
+    def _custom_type_setter(self, value):
+        raise NotImplementedError("custom type setter is not yet implemented")
 
     @property
     def lock(self):
-        return OutputLock()
+        try:
+            return self._custom_lock_getter()
+        except NotImplementedError:
+            return OutputLock()
+    def _custom_lock_getter(self):
+        raise NotImplementedError("_custom_lock_getter property is not yet implemented")
     
     @property
     def unlockhash(self):
         """
         The unlock hash for this condition.
         """
-        raise NotImplementedError("unlock hash property is not yet implemented")
+        return self._custom_unlockhash_getter()
+    def _custom_unlockhash_getter(self):
+        raise NotImplementedError("unlock hash property getter is not yet implemented")
+    @unlockhash.setter
+    def unlockhash(self, value):
+        raise self._custom_unlockhash_setter(value)
+    def _custom_unlockhash_setter(self, value):
+        raise NotImplementedError("unlock hash property setter is not yet implemented")
 
     def unwrap(self):
         """
@@ -219,7 +241,7 @@ class ConditionBaseClass(BaseDataTypeClass):
         raise NotImplementedError("json_data_object method is not yet implemented")
 
     def json(self):
-        obj = {'type': self.type.__int__()}
+        obj = {'type': self.ctype}
         data = self.json_data_object()
         if data:
             obj['data'] = data
@@ -232,7 +254,7 @@ class ConditionBaseClass(BaseDataTypeClass):
         """
         Encode this Condition according to the Sia Binary Encoding format.
         """
-        encoder.add_array(bytearray([int(self.type)]))
+        encoder.add_array(bytes([self.ctype]))
         data_enc = SiaBinaryEncoder()
         self.sia_binary_encode_data(data_enc)
         encoder.add_slice(data_enc.data)
@@ -244,7 +266,7 @@ class ConditionBaseClass(BaseDataTypeClass):
         """
         Encode this Condition according to the Rivine Binary Encoding format.
         """
-        encoder.add_int8(self.type.__int__())
+        encoder.add_int8(self.ctype)
         data_enc = RivineBinaryEncoder()
         self.rivine_binary_encode_data(data_enc)
         encoder.add_slice(data_enc.data)
@@ -401,3 +423,353 @@ UnlockHash._CHECKSUM_SIZE_HEX = (UnlockHash._CHECKSUM_SIZE*2)
 UnlockHash._HASH_SIZE = 32
 UnlockHash._HASH_SIZE_HEX = (UnlockHash._HASH_SIZE*2)
 UnlockHash._TOTAL_SIZE_HEX = UnlockHash._TYPE_SIZE_HEX + UnlockHash._CHECKSUM_SIZE_HEX + UnlockHash._HASH_SIZE_HEX
+
+
+class ConditionNil(ConditionBaseClass):
+    """
+    ConditionNil class
+    """
+
+    def _custom_type_getter(self):
+        return _CONDITION_TYPE_NIL
+
+    def _custom_unlockhash_getter(self):
+        return UnlockHash(uhtype=UnlockHashType.NIL)
+
+    def from_json_data_object(self, data):
+        if data not in (None, {}):
+            raise ValueError("unexpected JSON-encoded nil condition {} (type: {})".format(data, type(data)))
+
+    def json_data_object(self):
+        return None
+    
+    def sia_binary_encode_data(self, encoder):
+        pass # nothing to do
+
+    def rivine_binary_encode_data(self, encoder):
+        pass # nothing to do
+
+
+class ConditionUnlockHash(ConditionBaseClass):
+    """
+    ConditionUnlockHash class
+    """
+    def __init__(self, unlockhash=None):
+        self._unlockhash = None
+        self.unlockhash = unlockhash
+
+    def _custom_type_getter(self):
+        return _CONDITION_TYPE_UNLOCK_HASH
+
+    def _custom_unlockhash_getter(self):
+        if self._unlockhash is None:
+            return UnlockHash()
+        return self._unlockhash
+    def _custom_unlockhash_setter(self, value):
+        if value is None:
+            self._unlockhash = None
+            return
+        if isinstance(value, UnlockHash):
+            self._unlockhash = value
+            return
+        self._unlockhash = UnlockHash.from_json(value)
+
+    def from_json_data_object(self, data):
+        self.unlockhash = UnlockHash.from_json(data['unlockhash'])
+
+    def json_data_object(self):
+        return {
+            'unlockhash': self.unlockhash.json(),
+        }
+    
+    def sia_binary_encode_data(self, encoder):
+        encoder.add(self.unlockhash)
+
+    def rivine_binary_encode_data(self, encoder):
+        encoder.add(self.unlockhash)
+
+
+class AtomicSwapSecret(BinaryData):
+    SIZE = 32
+
+    """
+    Atomic Swap Secret Object, a special type of BinaryData
+    """
+    def __init__(self, value=None):
+        super().__init__(value, fixed_size=AtomicSwapSecret.SIZE, strencoding='hex')
+
+    @classmethod
+    def from_json(cls, obj):
+        if not isinstance(obj, str):
+            raise TypeError("secret is expected to be an encoded string when part of a JSON object")
+        return cls(value=obj)
+
+    @classmethod
+    def random(cls):
+        return cls(value=jscrypto.random(AtomicSwapSecret.SIZE))
+
+
+class AtomicSwapSecretHash(BinaryData):
+    SIZE = 32
+
+    """
+    Atomic Swap Secret Hash, a special type of BinaryData
+    """
+    def __init__(self, value=None):
+        super().__init__(value, fixed_size=AtomicSwapSecretHash.SIZE, strencoding='hex')
+
+    @classmethod
+    def from_json(cls, obj):
+        if not isinstance(obj, str):
+            raise TypeError("secret hash is expected to be an encoded string when part of a JSON object")
+        return cls(value=obj)
+
+    @classmethod
+    def from_secret(cls, secret):
+        if not isinstance(secret, AtomicSwapSecret):
+            raise TypeError("secret is expected to be of type AtomicSwapSecret, not to be of type {}".format(type(secret)))
+        return cls(value=jscrypto.sha256(secret.value))
+
+
+class ConditionAtomicSwap(ConditionBaseClass):
+    """
+    ConditionAtomicSwap class
+    """
+    def __init__(self, sender=None, receiver=None, hashed_secret=None, lock_time=None):
+        self._sender = None
+        self.sender = sender
+        self._receiver = None
+        self.receiver = receiver
+        self._hashed_secret = None
+        self.hashed_secret = hashed_secret
+        self._lock_time = 0
+        self.lock_time = lock_time
+
+    def _custom_type_getter(self):
+        return _CONDITION_TYPE_ATOMIC_SWAP
+
+    def _custom_unlockhash_getter(self):
+        e = RivineBinaryEncoder()
+        self.sia_binary_encode_data(e)
+        # need to encode again to add the length
+        data = e.data
+        e = SiaBinaryEncoder()
+        e.add_slice(data)
+        hash = jscrypto.blake2b(e.data)
+        return UnlockHash(uhtype=UnlockHashType.ATOMIC_SWAP, uhhash=hash)
+
+    @property
+    def sender(self):
+        if self._sender is None:
+            return UnlockHash()
+        return self._sender
+    @sender.setter
+    def sender(self, value):
+        if value is None:
+            self._sender = None
+        else:
+            if isinstance(value, str):
+                value = UnlockHash.from_json(value)
+            elif not isinstance(value, UnlockHash):
+                raise TypeError("Atomic Swap's sender unlock hash has to be of type UnlockHash, not {}".format(type(value)))
+            if value.uhtype.value not in (UnlockHashType.PUBLIC_KEY.value, UnlockHashType.NIL.value):
+                raise ValueError("Atomic Swap's sender unlock hash type cannot be {} (expected: 0 or 1)".format(value.uhtype.value))
+            self._sender = value
+
+    @property
+    def receiver(self):
+        if self._receiver is None:
+            return UnlockHash()
+        return self._receiver
+    @receiver.setter
+    def receiver(self, value):
+        if value is None:
+            self._receiver = None
+        else:
+            if isinstance(value, str):
+                value = UnlockHash.from_json(value)
+            elif not isinstance(value, UnlockHash):
+                raise TypeError("Atomic Swap's receiver unlock hash has to be of type UnlockHash, not {}".format(type(value)))
+            if value.uhtype.value not in (UnlockHashType.PUBLIC_KEY.value, UnlockHashType.NIL.value):
+                raise ValueError("Atomic Swap's receiver unlock hash type cannot be {} (expected: 0 or 1)".format(value.uhtype.value))
+            self._receiver = value
+    
+    @property
+    def hashed_secret(self):
+        if self._hashed_secret is None:
+            return BinaryData()
+        return self._hashed_secret
+    @hashed_secret.setter
+    def hashed_secret(self, value):
+        if value is None:
+            self._hashed_secret = None
+        else:
+            self._hashed_secret = AtomicSwapSecretHash(value=value)
+
+    @property
+    def lock_time(self):
+        return self._lock_time
+    @lock_time.setter
+    def lock_time(self, value):
+        if value is None:
+            self._lock_time = 0
+        else:
+            lock = OutputLock(value=value)
+            if not lock.is_timestamp:
+                raise TypeError("ConditionAtomicSwap only accepts timestamps as the lock value, not block heights: {} is invalid".format(value))
+            self._lock_time = lock.value
+
+    def from_json_data_object(self, data):
+        self.sender = UnlockHash.from_json(data['sender'])
+        self.receiver = UnlockHash.from_json(data['receiver'])
+        self.hashed_secret = AtomicSwapSecretHash(value=data['hashedsecret'])
+        self.lock_time = int(data['timelock'])
+
+    def json_data_object(self):
+        return {
+            'sender': self.sender.json(),
+            'receiver': self.receiver.json(),
+            'hashedsecret': self.hashed_secret.json(),
+            'timelock': self.lock_time,
+        }
+
+    def sia_binary_encode_data(self, encoder):
+        encoder.add_all(self.sender, self.receiver, self.hashed_secret, self.lock_time)
+
+    def rivine_binary_encode_data(self, encoder):
+        encoder.add_all(self.sender, self.receiver, self.hashed_secret, self.lock_time)
+
+
+class ConditionLockTime(ConditionBaseClass):
+    """
+    ConditionLockTime class
+    """
+    def __init__(self, condition=None, lock=None):
+        self._condition = None
+        self.condition = condition
+        self._lock = None
+        self.lock = lock
+
+    def _custom_type_getter(self):
+        return _CONDITION_TYPE_LOCKTIME
+
+    def _custom_unlockhash_getter(self):
+        return self.condition.unlockhash
+
+    def _custom_lock_getter(self):
+        if self._lock is None:
+            return OutputLock()
+        return self._lock
+    def _custom_lock_setter(self, value):
+        self._lock = OutputLock(value=value)
+
+    @property
+    def condition(self):
+        if self._condition is None:
+            return ConditionUnlockHash()
+        return self._condition
+    @condition.setter
+    def condition(self, value):
+        if value is None:
+            self._condition = None
+            return
+        if not isinstance(value, ConditionBaseClass):
+            raise TypeError("ConditionLockTime's condition is expected to be a subtype of ConditionBaseClass, not of type {}".format(type(value)))
+        self._condition = value
+
+    def unwrap(self):
+        return self.condition
+
+    def from_json_data_object(self, data):
+        self.lock = int(data['locktime'])
+        cond = from_json(obj=data['condition'])
+        if cond.ctype not in(_CONDITION_TYPE_UNLOCK_HASH, _CONDITION_TYPE_MULTI_SIG, _CONDITION_TYPE_NIL):
+            raise ValueError("internal condition of ConditionLockTime cannot be of type {}".format(cond.ctype))
+        self.condition = cond
+
+    def json_data_object(self):
+        return {
+            'locktime': self.lock.value,
+            'condition': self.condition.json(),
+        }
+
+    def sia_binary_encode_data(self, encoder):
+        encoder.add(self.lock.value)
+        encoder.add_array(bytes([self.condition.ctype]))
+        self.condition.sia_binary_encode_data(encoder)
+
+    def rivine_binary_encode_data(self, encoder):
+        encoder.add(self.lock.value)
+        encoder.add_int8(self.condition.ctype)
+        self.condition.rivine_binary_encode_data(encoder)
+
+class ConditionMultiSignature(ConditionBaseClass):
+    """
+    ConditionMultiSignature class
+    """
+    def __init__(self, unlockhashes=None, min_nr_sig=0):
+        self._unlockhashes = []
+        if unlockhashes:
+            for uh in unlockhashes:
+                self.add_unlockhash(uh)
+        self._min_nr_sig = 0
+        self.required_signatures = min_nr_sig
+
+    def _custom_type_getter(self):
+        return _CONDITION_TYPE_MULTI_SIG
+
+    def _custom_unlockhash_getter(self):
+        uhs = sorted(self.unlockhashes, key=lambda uh: str(uh))
+        tree = MerkleTree(hash_func=lambda o: jscrypto.blake2b(o))
+        tree.push(sia_encode_all(len(uhs)))
+        for uh in uhs:
+            tree.push(sia_encode_all(uh))
+        tree.push(sia_encode_all(self.required_signatures))
+        return UnlockHash(uhtype=UnlockHashType.MULTI_SIG, uhhash=tree.root())
+
+    @property
+    def unlockhashes(self):
+        return self._unlockhashes
+        
+    def add_unlockhash(self, uh):
+        if uh is None:
+            self._unlockhashes.append(UnlockHash())
+        elif isinstance(uh, UnlockHash):
+            self._unlockhashes.append(uh)
+        elif isinstance(uh, str):
+            self._unlockhashes.append(UnlockHash.from_json(uh))
+        else:
+            raise TypeError("cannot add UnlockHash with invalid type {}".format(type(uh)))
+
+    @property
+    def required_signatures(self):
+        return self._min_nr_sig
+    @required_signatures.setter
+    def required_signatures(self, value):
+        if value is None:
+            self._min_nr_sig = 0
+            return
+        if not isinstance(value, int):
+            raise TypeError("ConditionMultiSignature's required signatures value is expected to be of type int, not {}".format(type(value)))
+        self._min_nr_sig = value
+
+    def from_json_data_object(self, data):
+        self._min_nr_sig = data['minimumsignaturecount']
+        self._unlockhashes = []
+        for uh in data['unlockhashes']:
+            uh = UnlockHash.from_json(uh)
+            self._unlockhashes.append(uh)
+
+    def json_data_object(self):
+        return {
+            'minimumsignaturecount': self._min_nr_sig,
+            'unlockhashes': [uh.json() for uh in self._unlockhashes],
+        }
+
+    def sia_binary_encode_data(self, encoder):
+        encoder.add(self._min_nr_sig)
+        encoder.add_slice(self._unlockhashes)
+
+    def rivine_binary_encode_data(self, encoder):
+        encoder.add_int64(self._min_nr_sig)
+        encoder.add_slice(self._unlockhashes)

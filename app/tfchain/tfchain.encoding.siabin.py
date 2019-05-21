@@ -1,10 +1,15 @@
-import tfchain.polyfill.array as jsarray
+import tfchain.polyfill.array as jsarr
 import tfchain.polyfill.encoding.bin as jsbin
 import tfchain.polyfill.encoding.str as jsstr
 
 import tfchain.encoding.errors as encerrors
 
 _INT_UPPERLIMIT = pow(2, 64) - 1
+
+def encode_all(*values):
+    enc = SiaBinaryEncoder()
+    enc.add_all(*values)
+    return enc.data
 
 class SiaBinaryObjectEncoderBase:
     def sia_binary_encode(self, encoder):
@@ -51,7 +56,7 @@ class SiaBinaryEncoder:
             raise encerrors.IntegerOutOfRange("integer {} is out of lower range of 0".format(value))
         if value > _INT_UPPERLIMIT:
             raise encerrors.IntegerOutOfRange("integer {} is out of upper range of {}".format(value, _INT_UPPERLIMIT))
-        self._data = jsarray.concat(self._data, jsbin.from_int64(value))
+        self._data = jsarr.concat(self._data, jsbin.from_int64(value))
 
     def add_array(self, value):
         """
@@ -61,9 +66,9 @@ class SiaBinaryEncoder:
         @param value: the iterateble object to be siabin-encoded as an array
         """
         if isinstance(value, str):
-            self._data = jsarray.concat(self._data, jsstr.to_utf8(value))
+            self._data = jsarr.concat(self._data, jsstr.to_utf8(value))
         elif isinstance(value, (bytes, bytearray)):
-            self._data = jsarray.concat(self._data, bytes(value))
+            self._data = jsarr.concat(self._data, bytes(value))
         else:
             try:
                 result = bytes()
@@ -82,10 +87,10 @@ class SiaBinaryEncoder:
         """
         if isinstance(value, str):
             self.add_int(len(value))
-            self._data = jsarray.concat(self._data, jsstr.to_utf8(value))
+            self._data = jsarr.concat(self._data, jsstr.to_utf8(value))
         elif isinstance(value, (bytes, bytearray)):
             self.add_int(len(value))
-            self._data = jsarray.concat(self._data, bytes(value))
+            self._data = jsarr.concat(self._data, bytes(value))
         else:
             length = 0
             for _ in value:
@@ -102,7 +107,7 @@ class SiaBinaryEncoder:
         if isinstance(value, int):
             if value < 0 or value > 255:
                 raise ValueError("byte overflow: invaid value of {}".format(value))
-            self._data = jsarray.concat(self._data, jsbin.from_int8(value))
+            self._data = jsarr.concat(self._data, jsbin.from_int8(value))
         else:
             if isinstance(value, str):
                 value = jsstr.to_utf8(value)
@@ -110,7 +115,7 @@ class SiaBinaryEncoder:
                 raise ValueError("value of type {} cannot be added as a single byte".format(type(value)))
             if len(value) != 1:
                 raise ValueError("a single byte has to be accepted, amount of bytes given: {}".format(len(value)))
-            self._data = jsarray.concat(self._data, bytes(value))
+            self._data = jsarr.concat(self._data, bytes(value))
 
     def add(self,value):
         """
@@ -132,7 +137,7 @@ class SiaBinaryEncoder:
 
         # try to siabin-encode the value based on its python type
         if isinstance(value, bool):
-            self._data = jsarray.concat(self._data, bytes([1]) if value else bytes([0]))
+            self._data = jsarr.concat(self._data, bytes([1]) if value else bytes([0]))
         elif isinstance(value, int):
             self.add_int(value)
         else:
