@@ -2,15 +2,7 @@ import tfchain.polyfill.array as jsarray
 import tfchain.polyfill.encoding.bin as jsbin
 import tfchain.polyfill.encoding.str as jsstr
 
-class IntegerOutOfRange(Exception):
-    """
-    IntegerOutOfRange error
-    """
-
-class SliceLengthOutOfRange(Exception):
-    """
-    SliceLengthOutOfRange error
-    """
+import tfchain.encoding.errors as encerrors
 
 _INT_1BYTE_UPPERLIMIT = pow(2, 8) - 1
 _INT_2BYTE_UPPERLIMIT = pow(2, 16) - 1
@@ -92,9 +84,9 @@ class RivineBinaryEncoder:
         if not isinstance(value, int):
             raise TypeError("value is not an integer")
         if value < 0:
-            raise IntegerOutOfRange("integer {} is out of lower range of 0".format(value))
+            raise encerrors.IntegerOutOfRange("integer {} is out of lower range of 0".format(value))
         if value > limit:
-            raise IntegerOutOfRange("integer {} is out of upper range of {}".format(value, limit))
+            raise encerrors.IntegerOutOfRange("integer {} is out of upper range of {}".format(value, limit))
 
     def add_int8(self,value):
         """
@@ -198,7 +190,7 @@ class RivineBinaryEncoder:
         elif length < pow(2, 29):
             self.add_int32(7 | length << 3)
         else:
-            raise SliceLengthOutOfRange("slice length {} is out of range".format(length))
+            raise encerrors.SliceLengthOutOfRange("slice length {} is out of range".format(length))
     
     def add_byte(self, value):
         """

@@ -2,10 +2,7 @@ import tfchain.polyfill.array as jsarray
 import tfchain.polyfill.encoding.bin as jsbin
 import tfchain.polyfill.encoding.str as jsstr
 
-class IntegerOutOfRange(Exception):
-    """
-    IntegerOutOfRange error
-    """
+import tfchain.encoding.errors as encerrors
 
 _INT_UPPERLIMIT = pow(2, 64) - 1
 
@@ -51,9 +48,9 @@ class SiaBinaryEncoder:
         if not isinstance(value, int):
             raise TypeError("value is not an integer")
         if value < 0:
-            raise IntegerOutOfRange("integer {} is out of lower range of 0".format(value))
+            raise encerrors.IntegerOutOfRange("integer {} is out of lower range of 0".format(value))
         if value > _INT_UPPERLIMIT:
-            raise IntegerOutOfRange("integer {} is out of upper range of {}".format(value, _INT_UPPERLIMIT))
+            raise encerrors.IntegerOutOfRange("integer {} is out of upper range of {}".format(value, _INT_UPPERLIMIT))
         self._data = jsarray.concat(self._data, jsbin.from_int64(value))
 
     def add_array(self, value):
