@@ -307,9 +307,12 @@ export var sprintf = function (fmt) {
 	}
 	return sprintfjs (fmt, ...argv);
 };
-export var py_split = function (s, c) {
+export var py_split = function (s, c, limit) {
 	if (typeof c == 'undefined' || (c != null && c.hasOwnProperty ("__kwargtrans__"))) {;
 		var c = null;
+	};
+	if (typeof limit == 'undefined' || (limit != null && limit.hasOwnProperty ("__kwargtrans__"))) {;
+		var limit = null;
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -319,6 +322,7 @@ export var py_split = function (s, c) {
 				switch (__attrib0__) {
 					case 's': var s = __allkwargs0__ [__attrib0__]; break;
 					case 'c': var c = __allkwargs0__ [__attrib0__]; break;
+					case 'limit': var limit = __allkwargs0__ [__attrib0__]; break;
 				}
 			}
 		}
@@ -327,13 +331,19 @@ export var py_split = function (s, c) {
 	}
 	var c = c || '';
 	if (!(isinstance (c, str))) {
-		var __except0__ = py_TypeError ('c is expected to be a str, not be of type {}'.format (c));
+		var __except0__ = py_TypeError ('c is expected to be a str, not be of type {}'.format (py_typeof (c)));
+		__except0__.__cause__ = null;
+		throw __except0__;
+	}
+	var limit = max (-(1), limit || -(1));
+	if (!(isinstance (limit, int))) {
+		var __except0__ = py_TypeError ('limit is expected to be an int, not be of type {}'.format (py_typeof (limit)));
 		__except0__.__cause__ = null;
 		throw __except0__;
 	}
 	var arr = null;
 	
-	    arr = s.split(c);
+	    arr = s.split(c, limit);
 	    
 	return arr;
 };
@@ -618,9 +628,12 @@ export var String =  __class__ ('String', [object], {
 		}
 		return to_utf8 (self.value);
 	});},
-	get py_split () {return __get__ (this, function (self, c) {
+	get py_split () {return __get__ (this, function (self, c, limit) {
 		if (typeof c == 'undefined' || (c != null && c.hasOwnProperty ("__kwargtrans__"))) {;
 			var c = null;
+		};
+		if (typeof limit == 'undefined' || (limit != null && limit.hasOwnProperty ("__kwargtrans__"))) {;
+			var limit = null;
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -630,13 +643,14 @@ export var String =  __class__ ('String', [object], {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
 						case 'c': var c = __allkwargs0__ [__attrib0__]; break;
+						case 'limit': var limit = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
 		}
 		else {
 		}
-		return py_split (self.value, c);
+		return py_split (self.value, c, limit);
 	});},
 	get contains () {return __get__ (this, function (self, sub) {
 		if (arguments.length) {

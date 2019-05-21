@@ -106,13 +106,16 @@ def replace(s, sub_old, sub_new):
 def sprintf(fmt, *argv):
     return sprintfjs(fmt, *argv)
 
-def split(s, c=None):
+def split(s, c=None, limit=None):
     c = c or ''
     if not isinstance(c, str):
-        raise TypeError("c is expected to be a str, not be of type {}".format(c))
+        raise TypeError("c is expected to be a str, not be of type {}".format(type(c)))
+    limit = max(-1, limit or -1)
+    if not isinstance(limit, int):
+        raise TypeError("limit is expected to be an int, not be of type {}".format(type(limit)))
     arr = None
     __pragma__("js", "{}", """
-    arr = s.split(c);
+    arr = s.split(c, limit);
     """)
     return arr
 
@@ -183,8 +186,8 @@ class String:
     def utf8(self):
         return to_utf8(self.value)
 
-    def split(self, c=None):
-        return split(self.value, c)
+    def split(self, c=None, limit=None):
+        return split(self.value, c, limit)
 
     def contains(self, sub):
         return contains(self.value, sub)
