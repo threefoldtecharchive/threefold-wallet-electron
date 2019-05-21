@@ -185,6 +185,14 @@ class Account:
         """
         return self._wallets
 
+    @property
+    def wallet_count(self):
+        """
+        :returns: the amount of wallets owned by this account
+        :rtype: int
+        """
+        return len(self._wallets)
+
     def wallet_new(self, wallet_name, start_index, address_count):
         """
         Create a new wallet with a unique name, and a unique set of addresses.
@@ -196,6 +204,20 @@ class Account:
         :param address_count: amount of addresses to generate using as input the given start_index
         :type address_acount: int
         """
+        wallet = self._wallet_new(self.wallet_count, wallet_name, start_index, address_count)
+        self._wallets.append(wallet)
+        return wallet
+
+    def wallet_update(self, wallet_index, wallet_name, start_index, address_count):
+        if not isinstance(wallet_index, int):
+            raise TypeError("wallet index has to be an integer, not be of type {}".format(type(wallet_index)))
+        if wallet_index < 0 or wallet_index >= self.wallet_count:
+            raise ValueError("wallet index {} is out of range".format(wallet_index))
+        wallet = self._wallet_new(wallet_index, wallet_name, start_index, address_count)
+        self._wallets[wallet_index] = wallet
+        return wallet
+
+    def _wallet_new(self, wallet_index, wallet_name, start_index, address_count):
         start_index = max(start_index, 0)
         address_count = max(address_count, 1)
         # generate all key pairs for this wallet
@@ -209,14 +231,15 @@ class Account:
             # generate key pair and add it to the list of pairs
             pair = jscrypto.AssymetricSignKeyPair(entropy)
             pairs.append(pair)
-        wallet = Wallet(wallet_name, start_index, pairs)
+        wallet = Wallet(wallet_index, wallet_name, start_index, pairs)
         self._validate_wallet_state(wallet)
-        self._wallets.append(wallet)
         return wallet
 
     def _validate_wallet_state(self, candidate):
         addresses_set = set(candidate.addresses)
         for wallet in self._wallets:
+            if wallet.wallet_index == candidate.wallet_index:
+                continue
             if wallet.wallet_name == candidate.wallet_name:
                 raise ValueError("a wallet already exists with wallet_name {}".format(candidate.wallet_name))
             if len(addresses_set.intersection(set(wallet.addresses))) != 0:
@@ -291,19 +314,30 @@ class Wallet:
     the seed (entropy/mnemonic) that identifies the account owning this wallet.
     """
 
-    def __init__(self, wallet_name, start_index, pairs):
+    def __init__(self, wallet_index, wallet_name, start_index, pairs):
         """
         Create a new wallet.
 
+        :param wallet_index: the index of this wallet within the owning wallet
+        :type wallet_index: int
         :param wallet_name: the name of this wallet, a human-friendly label
         :type wallet_name: str
         :param start_index: starting index of the wallet, used to generate the wallet's addresses
         :type start_index: int
         :param pairs: the key pairs as generated using the start_index and account's seed
         """
+        self._wallet_index = wallet_index
         self._wallet_name = wallet_name
         self._start_index = start_index
         self._pairs = pairs
+
+    @property
+    def wallet_index(self):
+        """
+        :returns: the index of the wallet
+        :rtype: int
+        """
+        return self._wallet_index
 
     @property
     def wallet_name(self):

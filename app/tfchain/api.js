@@ -230,6 +230,22 @@ export var Account =  __class__ ('Account', [object], {
 		}
 		return self._wallets;
 	});},
+	get _get_wallet_count () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return len (self._wallets);
+	});},
 	get wallet_new () {return __get__ (this, function (self, wallet_name, start_index, address_count) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -238,6 +254,60 @@ export var Account =  __class__ ('Account', [object], {
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'wallet_name': var wallet_name = __allkwargs0__ [__attrib0__]; break;
+						case 'start_index': var start_index = __allkwargs0__ [__attrib0__]; break;
+						case 'address_count': var address_count = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var wallet = self._wallet_new (self.wallet_count, wallet_name, start_index, address_count);
+		self._wallets.append (wallet);
+		return wallet;
+	});},
+	get wallet_update () {return __get__ (this, function (self, wallet_index, wallet_name, start_index, address_count) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'wallet_index': var wallet_index = __allkwargs0__ [__attrib0__]; break;
+						case 'wallet_name': var wallet_name = __allkwargs0__ [__attrib0__]; break;
+						case 'start_index': var start_index = __allkwargs0__ [__attrib0__]; break;
+						case 'address_count': var address_count = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (!(isinstance (wallet_index, int))) {
+			var __except0__ = py_TypeError ('wallet index has to be an integer, not be of type {}'.format (py_typeof (wallet_index)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		if (wallet_index < 0 || wallet_index >= self.wallet_count) {
+			var __except0__ = ValueError ('wallet index {} is out of range'.format (wallet_index));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		var wallet = self._wallet_new (wallet_index, wallet_name, start_index, address_count);
+		self._wallets [wallet_index] = wallet;
+		return wallet;
+	});},
+	get _wallet_new () {return __get__ (this, function (self, wallet_index, wallet_name, start_index, address_count) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'wallet_index': var wallet_index = __allkwargs0__ [__attrib0__]; break;
 						case 'wallet_name': var wallet_name = __allkwargs0__ [__attrib0__]; break;
 						case 'start_index': var start_index = __allkwargs0__ [__attrib0__]; break;
 						case 'address_count': var address_count = __allkwargs0__ [__attrib0__]; break;
@@ -258,9 +328,8 @@ export var Account =  __class__ ('Account', [object], {
 			var pair = jscrypto.AssymetricSignKeyPair (entropy);
 			pairs.append (pair);
 		}
-		var wallet = Wallet (wallet_name, start_index, pairs);
+		var wallet = Wallet (wallet_index, wallet_name, start_index, pairs);
 		self._validate_wallet_state (wallet);
-		self._wallets.append (wallet);
 		return wallet;
 	});},
 	get _validate_wallet_state () {return __get__ (this, function (self, candidate) {
@@ -280,6 +349,9 @@ export var Account =  __class__ ('Account', [object], {
 		}
 		var addresses_set = set (candidate.addresses);
 		for (var wallet of self._wallets) {
+			if (wallet.wallet_index == candidate.wallet_index) {
+				continue;
+			}
 			if (wallet.wallet_name == candidate.wallet_name) {
 				var __except0__ = ValueError ('a wallet already exists with wallet_name {}'.format (candidate.wallet_name));
 				__except0__.__cause__ = null;
@@ -368,6 +440,7 @@ export var Account =  __class__ ('Account', [object], {
 		return jsasync.promise_new (cb);
 	});}
 });
+Object.defineProperty (Account, 'wallet_count', property.call (Account, Account._get_wallet_count));
 Object.defineProperty (Account, 'wallets', property.call (Account, Account._get_wallets));
 Object.defineProperty (Account, 'wallet', property.call (Account, Account._get_wallet));
 Object.defineProperty (Account, 'seed', property.call (Account, Account._get_seed));
@@ -375,7 +448,7 @@ Object.defineProperty (Account, 'mnemonic', property.call (Account, Account._get
 Object.defineProperty (Account, 'account_name', property.call (Account, Account._get_account_name));;
 export var Wallet =  __class__ ('Wallet', [object], {
 	__module__: __name__,
-	get __init__ () {return __get__ (this, function (self, wallet_name, start_index, pairs) {
+	get __init__ () {return __get__ (this, function (self, wallet_index, wallet_name, start_index, pairs) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -383,6 +456,7 @@ export var Wallet =  __class__ ('Wallet', [object], {
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'wallet_index': var wallet_index = __allkwargs0__ [__attrib0__]; break;
 						case 'wallet_name': var wallet_name = __allkwargs0__ [__attrib0__]; break;
 						case 'start_index': var start_index = __allkwargs0__ [__attrib0__]; break;
 						case 'pairs': var pairs = __allkwargs0__ [__attrib0__]; break;
@@ -392,9 +466,26 @@ export var Wallet =  __class__ ('Wallet', [object], {
 		}
 		else {
 		}
+		self._wallet_index = wallet_index;
 		self._wallet_name = wallet_name;
 		self._start_index = start_index;
 		self._pairs = pairs;
+	});},
+	get _get_wallet_index () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._wallet_index;
 	});},
 	get _get_wallet_name () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -487,7 +578,8 @@ Object.defineProperty (Wallet, 'balance', property.call (Wallet, Wallet._get_bal
 Object.defineProperty (Wallet, 'address_count', property.call (Wallet, Wallet._get_address_count));
 Object.defineProperty (Wallet, 'addresses', property.call (Wallet, Wallet._get_addresses));
 Object.defineProperty (Wallet, 'start_index', property.call (Wallet, Wallet._get_start_index));
-Object.defineProperty (Wallet, 'wallet_name', property.call (Wallet, Wallet._get_wallet_name));;
+Object.defineProperty (Wallet, 'wallet_name', property.call (Wallet, Wallet._get_wallet_name));
+Object.defineProperty (Wallet, 'wallet_index', property.call (Wallet, Wallet._get_wallet_index));;
 export var Balance =  __class__ ('Balance', [object], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self) {
