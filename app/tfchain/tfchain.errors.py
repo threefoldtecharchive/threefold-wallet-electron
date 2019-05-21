@@ -27,7 +27,7 @@ class CurrencyPrecisionOverflow(Exception):
     CurrencyPrecisionOverflow error, caused when the value is too precise
     """
     def __init__(self, value):
-        super().__init__("value {} is too precise to be a value, can have only 9 numbers after the decimal point".format(str(value)))
+        super().__init__("value {} is too precise to be a value, can have only 9 numbers after the decimal point".format(value))
         self._value = value
 
     @property
@@ -50,7 +50,7 @@ class CurrencyNegativeValue(Exception):
     CurrencyNegativeValue error, caused when the value is negative
     """
     def __init__(self, value):
-        super().__init__("currency has to be at least 0, while value {} is negative".format(str(value)))
+        super().__init__("currency has to be at least 0, while value {} is negative".format(value))
         self._value = value
 
     @property
@@ -154,7 +154,7 @@ class AtomicSwapInsufficientAmountError(Exception):
     def __init__(self, amount, minimum_miner_fee):
         super().__init__(
             "atomic swap contract requires an amount higher than the minimum miner fee ({}): {} is an invalid value".format(
-                str(minimum_miner_fee), str(amount)))
+                minimum_miner_fee, amount))
         self._amount = amount
         self._minimum_miner_fee = minimum_miner_fee
 
@@ -216,7 +216,7 @@ class AtomicSwapContractSpent(AtomicSwapContractError):
     """
     def __init__(self, contract, transaction):
         txid = getattr(transaction, 'id', '')
-        super().__init__(message="atomic swap contract has already been spent in transaction {}".format(str(txid)), contract=contract)
+        super().__init__(message="atomic swap contract has already been spent in transaction {}".format(txid), contract=contract)
         self._transaction = transaction
 
     @property
@@ -232,7 +232,7 @@ class AtomicSwapContractNotFound(Exception):
     a callee tried to get an atomic swap contract that could not be found.
     """
     def __init__(self, outputid):
-        super().__init__("atomic swap contract {} could not be found".format(str(outputid)))
+        super().__init__("atomic swap contract {} could not be found".format(outputid))
         self._outputid = outputid
 
     @property
@@ -265,7 +265,7 @@ class ThreeBotInactive(Exception):
     and the operation to be applied to the 3Bot would not change that fact.
     """
     def __init__(self, identifier, expiration):
-        super().__init__("3Bot {} is inactive since {}".format(str(identifier), str(datetime.utcfromtimestamp(expiration))))
+        super().__init__("3Bot {} is inactive since {}".format(identifier, datetime.utcfromtimestamp(expiration)))
         self._identifier = identifier
         self._expiration = expiration
 
@@ -290,7 +290,7 @@ class AddressNotInWallet(Exception):
     when trying to use an address on a wallet that does not own it
     """
     def __init__(self, address):
-        super().__init__("address {} is not owned by the used wallet".format(str(address)))
+        super().__init__("address {} is not owned by the used wallet".format(address))
         self._address = address
 
     @property
@@ -307,7 +307,7 @@ class ERC20RegistrationForbidden(Exception):
     when trying to register an ERC20 address not owned by the used wallet.
     """
     def __init__(self, address):
-        super().__init__("address {} is not owned by the used wallet".format(str(address)))
+        super().__init__("address {} is not owned by the used wallet".format(address))
         self._address = address
 
     @property

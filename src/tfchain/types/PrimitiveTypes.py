@@ -223,9 +223,9 @@ class Currency(BaseDataTypeClass):
             d = jsdec.Decimal(value)
             sign, _, exp = d.as_tuple()
             if exp < -9:
-                raise tferrors.CurrencyPrecisionOverflow(d)
+                raise tferrors.CurrencyPrecisionOverflow(d.__str__())
             if sign != 0:
-                raise tferrors.CurrencyNegativeValue(d)
+                raise tferrors.CurrencyNegativeValue(d.__str__())
             self._value = d
             return
         raise TypeError(

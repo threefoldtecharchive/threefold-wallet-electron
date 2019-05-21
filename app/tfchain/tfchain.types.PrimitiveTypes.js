@@ -638,12 +638,12 @@ export var Currency =  __class__ ('Currency', [BaseDataTypeClass], {
 			var _ = __left0__ [1];
 			var exp = __left0__ [2];
 			if (exp < -(9)) {
-				var __except0__ = tferrors.CurrencyPrecisionOverflow (d);
+				var __except0__ = tferrors.CurrencyPrecisionOverflow (d.__str__ ());
 				__except0__.__cause__ = null;
 				throw __except0__;
 			}
 			if (sign != 0) {
-				var __except0__ = tferrors.CurrencyNegativeValue (d);
+				var __except0__ = tferrors.CurrencyNegativeValue (d.__str__ ());
 				__except0__.__cause__ = null;
 				throw __except0__;
 			}

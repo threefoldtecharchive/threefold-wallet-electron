@@ -27,7 +27,7 @@ export var CurrencyPrecisionOverflow =  __class__ ('CurrencyPrecisionOverflow', 
 		}
 		else {
 		}
-		__super__ (CurrencyPrecisionOverflow, '__init__') (self, 'value {} is too precise to be a value, can have only 9 numbers after the decimal point'.format (str (value)));
+		__super__ (CurrencyPrecisionOverflow, '__init__') (self, 'value {} is too precise to be a value, can have only 9 numbers after the decimal point'.format (value));
 		self._value = value;
 	});},
 	get _get_precision () {return __get__ (this, function (self) {
@@ -86,7 +86,7 @@ export var CurrencyNegativeValue =  __class__ ('CurrencyNegativeValue', [Excepti
 		}
 		else {
 		}
-		__super__ (CurrencyNegativeValue, '__init__') (self, 'currency has to be at least 0, while value {} is negative'.format (str (value)));
+		__super__ (CurrencyNegativeValue, '__init__') (self, 'currency has to be at least 0, while value {} is negative'.format (value));
 		self._value = value;
 	});},
 	get _get_value () {return __get__ (this, function (self) {
@@ -308,7 +308,7 @@ export var AtomicSwapInsufficientAmountError =  __class__ ('AtomicSwapInsufficie
 		}
 		else {
 		}
-		__super__ (AtomicSwapInsufficientAmountError, '__init__') (self, 'atomic swap contract requires an amount higher than the minimum miner fee ({}): {} is an invalid value'.format (str (minimum_miner_fee), str (amount)));
+		__super__ (AtomicSwapInsufficientAmountError, '__init__') (self, 'atomic swap contract requires an amount higher than the minimum miner fee ({}): {} is an invalid value'.format (minimum_miner_fee, amount));
 		self._amount = amount;
 		self._minimum_miner_fee = minimum_miner_fee;
 	});},
@@ -431,7 +431,7 @@ export var AtomicSwapContractSpent =  __class__ ('AtomicSwapContractSpent', [Ato
 		else {
 		}
 		var txid = getattr (transaction, 'id', '');
-		__super__ (AtomicSwapContractSpent, '__init__') (self, __kwargtrans__ ({message: 'atomic swap contract has already been spent in transaction {}'.format (str (txid)), contract: contract}));
+		__super__ (AtomicSwapContractSpent, '__init__') (self, __kwargtrans__ ({message: 'atomic swap contract has already been spent in transaction {}'.format (txid), contract: contract}));
 		self._transaction = transaction;
 	});},
 	get _get_transaction () {return __get__ (this, function (self) {
@@ -469,7 +469,7 @@ export var AtomicSwapContractNotFound =  __class__ ('AtomicSwapContractNotFound'
 		}
 		else {
 		}
-		__super__ (AtomicSwapContractNotFound, '__init__') (self, 'atomic swap contract {} could not be found'.format (str (outputid)));
+		__super__ (AtomicSwapContractNotFound, '__init__') (self, 'atomic swap contract {} could not be found'.format (outputid));
 		self._outputid = outputid;
 	});},
 	get _get_outputid () {return __get__ (this, function (self) {
@@ -546,7 +546,7 @@ export var ThreeBotInactive =  __class__ ('ThreeBotInactive', [Exception], {
 		}
 		else {
 		}
-		__super__ (ThreeBotInactive, '__init__') (self, '3Bot {} is inactive since {}'.format (str (identifier), str (datetime.utcfromtimestamp (expiration))));
+		__super__ (ThreeBotInactive, '__init__') (self, '3Bot {} is inactive since {}'.format (identifier, datetime.utcfromtimestamp (expiration)));
 		self._identifier = identifier;
 		self._expiration = expiration;
 	});},
@@ -602,7 +602,7 @@ export var AddressNotInWallet =  __class__ ('AddressNotInWallet', [Exception], {
 		}
 		else {
 		}
-		__super__ (AddressNotInWallet, '__init__') (self, 'address {} is not owned by the used wallet'.format (str (address)));
+		__super__ (AddressNotInWallet, '__init__') (self, 'address {} is not owned by the used wallet'.format (address));
 		self._address = address;
 	});},
 	get _get_address () {return __get__ (this, function (self) {
@@ -640,7 +640,7 @@ export var ERC20RegistrationForbidden =  __class__ ('ERC20RegistrationForbidden'
 		}
 		else {
 		}
-		__super__ (ERC20RegistrationForbidden, '__init__') (self, 'address {} is not owned by the used wallet'.format (str (address)));
+		__super__ (ERC20RegistrationForbidden, '__init__') (self, 'address {} is not owned by the used wallet'.format (address));
 		self._address = address;
 	});},
 	get _get_address () {return __get__ (this, function (self) {
