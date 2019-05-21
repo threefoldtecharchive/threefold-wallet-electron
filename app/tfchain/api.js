@@ -253,7 +253,7 @@ export var Account =  __class__ ('Account', [object], {
 		for (var i = 0; i < address_count; i++) {
 			var encoder = tfsiabin.SiaBinaryEncoder ();
 			encoder.add_array (self.seed);
-			encoder.add_int (i);
+			encoder.add_int (start_index + i);
 			var entropy = jscrypto.blake2b (encoder.data);
 			var pair = jscrypto.AssymetricSignKeyPair (entropy);
 			pairs.append (pair);
