@@ -471,6 +471,28 @@ export var Wallet =  __class__ ('Wallet', [object], {
 		self._start_index = start_index;
 		self._pairs = pairs;
 	});},
+	get clone () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return Wallet (self._wallet_index, self._wallet_name, self._start_index, (function () {
+			var __accu0__ = [];
+			for (var pair of self._pairs) {
+				__accu0__.append (pair);
+			}
+			return __accu0__;
+		}) ());
+	});},
 	get _get_wallet_index () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -591,7 +613,26 @@ export var Wallet =  __class__ ('Wallet', [object], {
 		}
 		else {
 		}
-		return Balance ();
+		var wallet = self.clone ();
+		var cb = function (resolve, reject) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'resolve': var resolve = __allkwargs0__ [__attrib0__]; break;
+							case 'reject': var reject = __allkwargs0__ [__attrib0__]; break;
+						}
+					}
+				}
+			}
+			else {
+			}
+			print ('resolving balance of:', wallet.wallet_name);
+			resolve (Balance ());
+		};
+		return jsasync.promise_new (cb);
 	});}
 });
 Object.defineProperty (Wallet, 'balance', property.call (Wallet, Wallet._get_balance));

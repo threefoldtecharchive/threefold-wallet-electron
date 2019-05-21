@@ -331,6 +331,20 @@ class Wallet:
         self._start_index = start_index
         self._pairs = pairs
 
+    def clone(self):
+        """
+        Clone this wallet.
+
+        :returns: a clone of this wallet
+        :rtype: Wallet
+        """
+        return Wallet(
+            self._wallet_index,
+            self._wallet_name,
+            self._start_index,
+            [pair for pair in self._pairs],
+        )
+
     @property
     def wallet_index(self):
         """
@@ -393,7 +407,11 @@ class Wallet:
         :returns: the current balance of this wallet
         :rtype: Balance
         """
-        return Balance()
+        wallet = self.clone()
+        def cb(resolve, reject):
+            print('resolving balance of:', wallet.wallet_name) # TODO: remove this stub code
+            resolve(Balance())
+        return jsasync.promise_new(cb)
 
 
 class Balance:
