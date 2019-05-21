@@ -439,6 +439,194 @@ class Balance:
         UnlockHash.from_str(address)
         return Balance(jshex.hex_to_int(address[3])%9 + 1)
 
+    @property
+    def transactions(self):
+        # TODO: replace with real logic
+        return [
+            TransactionView(
+                '0df49c1ae60352f7fa173e8a10804d125aa23f0ede1a405b59032c29c3d30777',
+                280879,
+                'ff8d3f87c0f86202334631d2ad0959dda6ee56c2c9abcd9833b203ff18a08c34',
+                [
+                    CoinOutputView(
+                        ['01a94cff5aa86508d742051ba743a525331cc9b31ba7152627344902ea79dc8d2c436ceda5bcb4'],
+                        '016c3dabb530029e4503a73ec944024f0d74ca080537972bb658a69f120ab307662f996d9fc85f',
+                        '40000000',
+                        0,
+                    ),
+                ],
+                [],
+            ),
+            TransactionView(
+                'c3b29d74b8f98332d5c976451e15eab94c210fe4c0b4b6d020153f2a6b2c2253',
+                270010,
+                '101277c10b4c975419c2382d8bb06a2c8b0c30110de1844daf4ff8efe8e900bc',
+                [
+                    CoinOutputView(
+                        ['0111429d9967c5c5e52e5aad522d6759e88c6fca8a54fa23ea12917006edf6842631a8a5d847ac'],
+                        '01ef91e8e584484c11850e49265256449a6acc9a75e0a7814e374d0248056d2d5d43fe494d9fd9',
+                        '100',
+                        0,
+                    ),
+                    CoinOutputView(
+                        ['01a94cff5aa86508d742051ba743a525331cc9b31ba7152627344902ea79dc8d2c436ceda5bcb4'],
+                        '01ef91e8e584484c11850e49265256449a6acc9a75e0a7814e374d0248056d2d5d43fe494d9fd9',
+                        '340200',
+                        0,
+                    ),
+                ],
+                [],
+            ),
+            TransactionView(
+                'a0e3f3036e8b7f082307c7747beada0656e1ea205f384ce7abea1401d5881a90',
+                270009,
+                '66d3d46f6a75dcab102baff7016cd518d857c37db0db4151dae45b225408de9d',
+                [
+                    CoinOutputView(
+                        ['0111429d9967c5c5e52e5aad522d6759e88c6fca8a54fa23ea12917006edf6842631a8a5d847ac'],
+                        '01a94cff5aa86508d742051ba743a525331cc9b31ba7152627344902ea79dc8d2c436ceda5bcb4',
+                        '20000',
+                        1558458390,
+                    ),
+                ],
+                [],
+            ),
+            TransactionView(
+                'a3bf595635b3563859a00fedf6a5b435fef9802f1ff6e9d4640a072e0b2f49e4',
+                240000,
+                'a3bf595635b3563859a00fedf6a5b435fef9802f1ff6e9d4640a072e0b2f49e4',
+                [],
+                [
+                    CoinOutputView(
+                        ['01a94cff5aa86508d742051ba743a525331cc9b31ba7152627344902ea79dc8d2c436ceda5bcb4'],
+                        '0111429d9967c5c5e52e5aad522d6759e88c6fca8a54fa23ea12917006edf6842631a8a5d847ac',
+                        '123456789.2003',
+                        0,
+                    ),
+                ],
+            ),
+            TransactionView(
+                '66ccdf3a0bca58025be7fdc71f3f6bfbd6ed6287aa698a131734a947c71a3bbf',
+                240000,
+                'a3bf595635b3563859a00fedf6a5b435fef9802f1ff6e9d4640a072e0b2f49e4',
+                [],
+                [
+                    CoinOutputView(
+                        ['01ef91e8e584484c11850e49265256449a6acc9a75e0a7814e374d0248056d2d5d43fe494d9fd9'],
+                        '0111429d9967c5c5e52e5aad522d6759e88c6fca8a54fa23ea12917006edf6842631a8a5d847ac',
+                        '3000.200',
+                        0,
+                    ),
+                    CoinOutputView(
+                        ['01a94cff5aa86508d742051ba743a525331cc9b31ba7152627344902ea79dc8d2c436ceda5bcb4'],
+                        '0111429d9967c5c5e52e5aad522d6759e88c6fca8a54fa23ea12917006edf6842631a8a5d847ac',
+                        '10000',
+                        250000,
+                    ),
+                ],
+            ),
+        ]
+
+
+class TransactionView:
+    """
+    A human readable view of a transaction as filtered for a specific wallet in mind.
+    """
+
+    def __init__(self, identifier, height, blockid, inputs, outputs):
+        if not isinstance(identifier, str):
+            raise TypeError("identifier is expected to be of type str, not be of type {}".format(type(identifier)))
+        if not isinstance(height, int):
+            raise TypeError("height is expected to be of type int, not be of type {}".format(type(height)))
+        if not isinstance(blockid, str):
+            raise TypeError("blockid is expected to be of type str, not be of type {}".format(type(blockid)))
+        self._identifier = identifier
+        self._height = height
+        self._blockid = blockid
+        self._inputs = inputs
+        self._outputs = outputs
+
+    @property
+    def identifier(self):
+        """
+        :returns: the transaction identifier
+        """
+        return self._identifier
+    @property
+    def height(self):
+        """
+        :returns: the parent block's height
+        """
+        return self._height
+    @property
+    def blockid(self):
+        """
+        :returns: the parent block's identifier
+        """
+        return self._blockid
+    @property
+    def inputs(self):
+        """
+        The incoming coin outputs. If this is defined, outputs will be undefined.
+
+        :returns: the incoming coin outputs
+        :rtype: list of CoinOutputViews
+        """
+        return self._inputs
+    @property
+    def outputs(self):
+        """
+        The outgoing coin outputs. If this is defined, inputs will be undefined.
+
+        :returns: the outgoing coin outputs
+        :rtype: list of CoinOutputViews
+        """
+        return self._outputs
+
+
+class CoinOutputView:
+    """
+    A human readable view of a CoinOutput.
+
+    NOTE: AtomicSwapConditioned outputs are not supported.
+    """
+
+    def __init__(self, senders, recipient, amount, lock):
+        self._senders = senders
+        self._recipient = recipient
+        self._amount = amount
+        self._lock = lock
+
+    @property
+    def senders(self):
+        """
+        :returns: the addresses of the sender (usually a list of 1 address, but could be more)
+        :rtype: list of strs
+        """
+        return self._senders
+    @property
+    def recipient(self):
+        """
+        :returns: the address of the recipient (always 1)
+        :rtype: str
+        """
+        return self._recipient
+    @property
+    def amount(self):
+        """
+        :returns: the amount of money attached to this coin input (in TFT)
+        :rtype: str
+        """
+        return self._amount
+    @property
+    def lock(self):
+        """
+        :returns: the lock value: block height if value < 500000000 else unix epoch seconds timestamp
+        :rtype: int
+        """
+        return self._lock
+
+
 class ChainInfo:
     """
     All high-level information about the blockchain,
