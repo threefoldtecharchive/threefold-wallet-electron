@@ -397,21 +397,29 @@ class Wallet:
 
 
 class Balance:
-    def __init__(self):
-        pass
+    def __init__(self, amount=None):
+        if amount is None:
+            self._amount = 1
+        else:
+            if not isinstance(amount, int):
+                raise TypeError("amount can only be int or None, not be of type {}".format(type(amount)))
+            self._amount = max(amount, 1)
 
     @property
     def coins_unlocked(self):
-        return '1'
+        return jsstr.from_int(self._amount)
 
     @property
     def coins_locked(self):
-        return '1'
+        return jsstr.from_int(self._amount)
 
     @property
     def coins_total(self):
-        return '2'
+        return jsstr.from_int(jsstr.to_int(self.coins_unlocked) + jsstr.to_int(self.coins_locked))
 
+    def address_filter(self, address):
+        UnlockHash.from_str(address)
+        return Balance(jshex.hex_to_int(address[3])%9 + 1)
 
 class ChainInfo:
     """

@@ -603,7 +603,10 @@ Object.defineProperty (Wallet, 'wallet_name', property.call (Wallet, Wallet._get
 Object.defineProperty (Wallet, 'wallet_index', property.call (Wallet, Wallet._get_wallet_index));;
 export var Balance =  __class__ ('Balance', [object], {
 	__module__: __name__,
-	get __init__ () {return __get__ (this, function (self) {
+	get __init__ () {return __get__ (this, function (self, amount) {
+		if (typeof amount == 'undefined' || (amount != null && amount.hasOwnProperty ("__kwargtrans__"))) {;
+			var amount = null;
+		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -611,13 +614,24 @@ export var Balance =  __class__ ('Balance', [object], {
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'amount': var amount = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
 		}
 		else {
 		}
-		// pass;
+		if (amount === null) {
+			self._amount = 1;
+		}
+		else {
+			if (!(isinstance (amount, int))) {
+				var __except0__ = py_TypeError ('amount can only be int or None, not be of type {}'.format (py_typeof (amount)));
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
+			self._amount = max (amount, 1);
+		}
 	});},
 	get _get_coins_unlocked () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -633,7 +647,7 @@ export var Balance =  __class__ ('Balance', [object], {
 		}
 		else {
 		}
-		return '1';
+		return jsstr.from_int (self._amount);
 	});},
 	get _get_coins_locked () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -649,7 +663,7 @@ export var Balance =  __class__ ('Balance', [object], {
 		}
 		else {
 		}
-		return '1';
+		return jsstr.from_int (self._amount);
 	});},
 	get _get_coins_total () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -665,7 +679,25 @@ export var Balance =  __class__ ('Balance', [object], {
 		}
 		else {
 		}
-		return '2';
+		return jsstr.from_int (jsstr.to_int (self.coins_unlocked) + jsstr.to_int (self.coins_locked));
+	});},
+	get address_filter () {return __get__ (this, function (self, address) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'address': var address = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		UnlockHash.from_str (address);
+		return Balance (__mod__ (jshex.hex_to_int (address [3]), 9) + 1);
 	});}
 });
 Object.defineProperty (Balance, 'coins_total', property.call (Balance, Balance._get_coins_total));
