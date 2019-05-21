@@ -629,12 +629,55 @@ export var Wallet =  __class__ ('Wallet', [object], {
 			}
 			else {
 			}
-			print ('resolving balance of:', wallet.wallet_name);
-			resolve (Balance ());
+			try {
+				resolve (wallet.balance_sync);
+			}
+			catch (__except0__) {
+				if (isinstance (__except0__, Exception)) {
+					var e = __except0__;
+					reject (e);
+				}
+				else {
+					throw __except0__;
+				}
+			}
 		};
 		return jsasync.promise_new (cb);
+	});},
+	get _get_balance_sync () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return Balance ();
+	});},
+	get transaction_new () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return CoinTransactionBuilder (self);
 	});}
 });
+Object.defineProperty (Wallet, 'balance_sync', property.call (Wallet, Wallet._get_balance_sync));
 Object.defineProperty (Wallet, 'balance', property.call (Wallet, Wallet._get_balance));
 Object.defineProperty (Wallet, 'address_count', property.call (Wallet, Wallet._get_address_count));
 Object.defineProperty (Wallet, 'addresses', property.call (Wallet, Wallet._get_addresses));
@@ -642,6 +685,133 @@ Object.defineProperty (Wallet, 'address', property.call (Wallet, Wallet._get_add
 Object.defineProperty (Wallet, 'start_index', property.call (Wallet, Wallet._get_start_index));
 Object.defineProperty (Wallet, 'wallet_name', property.call (Wallet, Wallet._get_wallet_name));
 Object.defineProperty (Wallet, 'wallet_index', property.call (Wallet, Wallet._get_wallet_index));;
+export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [object], {
+	__module__: __name__,
+	get __init__ () {return __get__ (this, function (self, wallet) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'wallet': var wallet = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		self._wallet = wallet;
+	});},
+	get output_add () {return __get__ (this, function (self, recipient, amount, lock) {
+		if (typeof lock == 'undefined' || (lock != null && lock.hasOwnProperty ("__kwargtrans__"))) {;
+			var lock = null;
+		};
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'recipient': var recipient = __allkwargs0__ [__attrib0__]; break;
+						case 'amount': var amount = __allkwargs0__ [__attrib0__]; break;
+						case 'lock': var lock = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (!(recipient)) {
+			print ('send {} to free-for-all wallet'.format (amount));
+		}
+		else if (isinstance (recipient, str)) {
+			print ('send {} to personal wallet {}'.format (amount, recipient));
+		}
+		else if (isinstance (recipient, list)) {
+			if (len (recipient) == 2 && (isinstance (recipient [0], int) || isinstance (recipient [1], int))) {
+				var __left0__ = recipient;
+				var a = __left0__ [0];
+				var b = __left0__ [1];
+				if (isinstance (a, int)) {
+					print ('send {} to multisig wallet ({}, {})'.format (amount, a, b));
+				}
+				else {
+					print ('send {} to multisig wallet ({}, {})'.format (amount, b, a));
+				}
+			}
+			else {
+				print ('send {} to multisig wallet ({}, {})'.format (amount, len (recipient), recipient));
+			}
+		}
+		else {
+			var __except0__ = py_TypeError ('recipient is of an unsupported type {}'.format (py_typeof (recipient)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+	});},
+	get send () {return __get__ (this, function (self, source, refund, data) {
+		if (typeof source == 'undefined' || (source != null && source.hasOwnProperty ("__kwargtrans__"))) {;
+			var source = null;
+		};
+		if (typeof refund == 'undefined' || (refund != null && refund.hasOwnProperty ("__kwargtrans__"))) {;
+			var refund = null;
+		};
+		if (typeof data == 'undefined' || (data != null && data.hasOwnProperty ("__kwargtrans__"))) {;
+			var data = null;
+		};
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'source': var source = __allkwargs0__ [__attrib0__]; break;
+						case 'refund': var refund = __allkwargs0__ [__attrib0__]; break;
+						case 'data': var data = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var wallet = self._wallet.clone ();
+		var cb = function (resolve, reject) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'resolve': var resolve = __allkwargs0__ [__attrib0__]; break;
+							case 'reject': var reject = __allkwargs0__ [__attrib0__]; break;
+						}
+					}
+				}
+			}
+			else {
+			}
+			try {
+				var balance = wallet.balance_sync;
+				print ('send from wallet {} with a total balance of {} TFT'.format (wallet.wallet_name, balance.coins_total));
+				resolve ('66ccdf3a0bca58025be7fdc71f3f6bfbd6ed6287aa698a131734a947c71a3bbf');
+			}
+			catch (__except0__) {
+				if (isinstance (__except0__, Exception)) {
+					var e = __except0__;
+					reject (e);
+				}
+				else {
+					throw __except0__;
+				}
+			}
+		};
+		return jsasync.promise_new (cb);
+	});}
+});
 export var Balance =  __class__ ('Balance', [object], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, amount) {

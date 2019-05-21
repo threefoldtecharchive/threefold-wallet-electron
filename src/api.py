@@ -404,13 +404,93 @@ class Wallet:
     @property
     def balance(self):
         """
-        :returns: the current balance of this wallet
+        :returns: the current balance of this wallet (async)
         :rtype: Balance
         """
         wallet = self.clone()
         def cb(resolve, reject):
-            print('resolving balance of:', wallet.wallet_name) # TODO: remove this stub code
-            resolve(Balance())
+            try:
+                resolve(wallet.balance_sync)
+            except Exception as e:
+                reject(e)
+        return jsasync.promise_new(cb)
+
+    @property
+    def balance_sync(self):
+        """
+        :returns: the current balance of this wallet (sync)
+        :rtype: Balance
+        """
+        return Balance()
+
+    def transaction_new(self):
+        """
+        :returns: a transaction builder that allows for the building of transactions
+        """
+        return CoinTransactionBuilder(self)
+
+
+class CoinTransactionBuilder:
+    """
+    A builder of transactions, owned by a non-cloned wallet.
+    Cloning only happens when doing the actual sending.
+    """
+    def __init__(self, wallet):
+        self._wallet = wallet
+
+    def output_add(self, recipient, amount, lock=None):
+        """
+        Add an output to the transaction, returning the transaction
+        itself to allow for chaining.
+
+        The recipient is one of:
+            - None: recipient is the Free-For-All wallet
+            - str: recipient is a personal wallet
+            - list: recipient is a MultiSig wallet where all owners (specified as a list of addresses) have to sign
+            - tuple (addresses, sigcount): recipient is a sigcount-of-addresscount MultiSig wallet
+
+        The amount can be a str or an int:
+            - when it is an int, you are defining the amount in the smallest unit (that is 1 == 0.000000001 TFT)
+            - when defining as a str you can use the following space-stripped and case-insentive formats:
+                - '123456789': same as when defining the amount as an int
+                - '123.456': define the amount in TFT (that is '123.456' == 123.456 TFT == 123456000000)
+                - '123456 TFT': define the amount in TFT (that is '123456 TFT' == 123456 TFT == 123456000000000)
+                - '123.456 TFT': define the amount in TFT (that is '123.456 TFT' == 123.456 TFT == 123456000000)
+
+        @param recipient: see explanation above
+        @param amount: int or str that defines the amount of TFT to set, see explanation above
+        @param lock: optional lock that can be used to lock the sent amount to a specific time or block height, see explation above
+        """
+        if not recipient:
+            print("send {} to free-for-all wallet".format(amount))
+        elif isinstance(recipient, str):
+            print("send {} to personal wallet {}".format(amount, recipient))
+        elif isinstance(recipient, list):
+            if len(recipient) == 2 and (isinstance(recipient[0], int) or isinstance(recipient[1], int)):
+                a, b = recipient
+                if isinstance(a, int):
+                    print("send {} to multisig wallet ({}, {})".format(amount, a, b))
+                else:
+                    print("send {} to multisig wallet ({}, {})".format(amount, b, a))
+            else:
+                print("send {} to multisig wallet ({}, {})".format(amount, len(recipient), recipient))
+        else:
+            raise TypeError("recipient is of an unsupported type {}".format(type(recipient)))
+
+    def send(self, source=None, refund=None, data=None):
+        """
+        Sign and send the transaction.
+
+        :returns: a promise that resolves with a transaction ID or rejects with an Exception
+        """
+        wallet = self._wallet.clone()
+        def cb(resolve, reject):
+            try:
+                balance = wallet.balance_sync
+                print("send from wallet {} with a total balance of {} TFT".format(wallet.wallet_name, balance.coins_total))
+                resolve('66ccdf3a0bca58025be7fdc71f3f6bfbd6ed6287aa698a131734a947c71a3bbf')
+            except Exception as e:
+                reject(e)
         return jsasync.promise_new(cb)
 
 
