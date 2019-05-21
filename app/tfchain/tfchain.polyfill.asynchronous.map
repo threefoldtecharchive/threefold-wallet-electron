@@ -1,0 +1,8 @@
+{
+	"version": 3,
+	"file": "tfchain.polyfill.asynchronous.js",
+	"sources": [
+		"tfchain.polyfill.asynchronous.py"
+	],
+	"mappings": "AAAA;AAKA;AALA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AACA;AACA;AAAA;AAAA;AAGA;AAAA;AAAA"
+}

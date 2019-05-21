@@ -20,6 +20,13 @@ class Client:
         """
         return self._addresses
 
+    def clone(self):
+        """
+        Clone this Client and return the cloned client,
+        a requirement for async usage.
+        """
+        return Client([addr for addr in self.addresses])
+
     def data_get(self, endpoint):
         """
         get data from an explorer at the endpoint from any explorer that is available

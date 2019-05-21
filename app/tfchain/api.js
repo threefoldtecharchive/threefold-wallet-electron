@@ -5,6 +5,7 @@ import * as tfnetwork from './tfchain.network.js';
 import * as jsstr from './tfchain.polyfill.encoding.str.js';
 import * as jshex from './tfchain.polyfill.encoding.hex.js';
 import * as jsjson from './tfchain.polyfill.encoding.json.js';
+import * as jsasync from './tfchain.polyfill.asynchronous.js';
 import * as jscrypto from './tfchain.polyfill.crypto.js';
 import * as tfsiabin from './tfchain.encoding.siabin.js';
 import * as bip39 from './tfchain.crypto.mnemonic.js';
@@ -329,13 +330,42 @@ export var Account =  __class__ ('Account', [object], {
 		}
 		else {
 		}
-		var stats = self._explorer_client.data_get ('/explorer');
-		var chain_height = stats ['height'];
-		var constants = self._explorer_client.data_get ('/explorer/constants');
-		var info = constants ['chaininfo'];
-		var current_block = self._explorer_client.data_get ('/explorer/blocks/{}'.format (chain_height));
-		var chain_timestamp = current_block ['block'] ['rawblock'] ['timestamp'];
-		return ChainInfo (info ['Name'], info ['ChainVersion'], info ['NetworkName'], chain_height, chain_timestamp);
+		var explorer_client = self._explorer_client.clone ();
+		var cb = function (resolve, reject) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'resolve': var resolve = __allkwargs0__ [__attrib0__]; break;
+							case 'reject': var reject = __allkwargs0__ [__attrib0__]; break;
+						}
+					}
+				}
+			}
+			else {
+			}
+			try {
+				var stats = explorer_client.data_get ('/explorer');
+				var chain_height = stats ['height'];
+				var constants = explorer_client.data_get ('/explorer/constants');
+				var info = constants ['chaininfo'];
+				var current_block = explorer_client.data_get ('/explorer/blocks/{}'.format (chain_height));
+				var chain_timestamp = current_block ['block'] ['rawblock'] ['timestamp'];
+				resolve (ChainInfo (info ['Name'], info ['ChainVersion'], info ['NetworkName'], chain_height, chain_timestamp));
+			}
+			catch (__except0__) {
+				if (isinstance (__except0__, Exception)) {
+					var e = __except0__;
+					reject (e);
+				}
+				else {
+					throw __except0__;
+				}
+			}
+		};
+		return jsasync.promise_new (cb);
 	});}
 });
 Object.defineProperty (Account, 'wallets', property.call (Account, Account._get_wallets));

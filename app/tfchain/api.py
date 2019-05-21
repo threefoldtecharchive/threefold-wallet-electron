@@ -6,6 +6,7 @@ converted into Javascript (ES6) using Transcrypt.
 import tfchain.crypto.mnemonic as bip39
 import tfchain.encoding.siabin as tfsiabin
 import tfchain.polyfill.crypto as jscrypto
+import tfchain.polyfill.asynchronous as jsasync
 import tfchain.polyfill.encoding.json as jsjson
 import tfchain.polyfill.encoding.hex as jshex
 import tfchain.polyfill.encoding.str as jsstr
@@ -256,24 +257,31 @@ class Account:
 
     def chain_info_get(self):
         """
-        Get the chain info, as it is known at this account moment by the used explorer.
+        Get the chain info, asynchronously, as it is known at (or right after) the call moment by the used explorer.
 
-        :returns: ChainInfo
+        :returns: a promise that can be resolved in an async manner
         """
-        stats = self._explorer_client.data_get('/explorer')
-        chain_height = stats['height']
-        constants = self._explorer_client.data_get('/explorer/constants')
-        info = constants['chaininfo']
-        # TODO: replace with client block_get call
-        current_block = self._explorer_client.data_get('/explorer/blocks/{}'.format(chain_height))
-        chain_timestamp = current_block['block']['rawblock']['timestamp']
-        return ChainInfo(
-            info['Name'],
-            info['ChainVersion'],
-            info['NetworkName'],
-            chain_height,
-            chain_timestamp,
-        )
+        explorer_client = self._explorer_client.clone()
+        def cb(resolve, reject):
+            try:
+                stats = explorer_client.data_get('/explorer')
+                chain_height = stats['height']
+                constants = explorer_client.data_get('/explorer/constants')
+                info = constants['chaininfo']
+                # TODO: replace with client block_get call
+                current_block = explorer_client.data_get('/explorer/blocks/{}'.format(chain_height))
+                chain_timestamp = current_block['block']['rawblock']['timestamp']
+                resolve(ChainInfo(
+                    info['Name'],
+                    info['ChainVersion'],
+                    info['NetworkName'],
+                    chain_height,
+                    chain_timestamp,
+                ))
+            except Exception as e:
+                reject(e)
+        return jsasync.promise_new(cb)
+
 
 class Wallet:
     """
