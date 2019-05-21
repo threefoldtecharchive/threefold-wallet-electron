@@ -130,7 +130,7 @@ class NewAccount extends Component {
       passwordError = true
     }
   
-    if (passwordConfirmation === '') {
+    if (passwordConfirmation === '' || passwordConfirmation !== password) {
       passwordConfirmationError = true
     }
 
@@ -161,7 +161,7 @@ class NewAccount extends Component {
       // create account
       const account = new tfchain.Account(name, password, seed, network)
       // create wallet
-      account.wallet_new('defaultWallet', 0, 1)
+      account.wallet_new('default', 0, 1)
   
       this.props.AddAccount(account)
       // account creation succeeded so remove error if there was one
@@ -176,6 +176,7 @@ class NewAccount extends Component {
   openConfirmationModal = () => {
     const { nameError, passwordError, passwordConfirmationError, seedError } = this.checkFormValues()
 
+    console.log(passwordConfirmationError)
     if (!nameError && !passwordError && !passwordConfirmationError && !seedError) {
       const open = !this.state.openConfirmationModal
       return this.setState({ openConfirmationModal: open })

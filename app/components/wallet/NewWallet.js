@@ -100,7 +100,7 @@ class WalletSettings extends Component {
               <h2>Create a new wallet</h2>
             </div>
             <Divider style={{ background: '#1A253F' }}/>
-            <Link to={routes.WALLET}>
+            <Link to={routes.ACCOUNT}>
               <Icon style={{ fontSize: 25, marginLeft: 15, marginTop: 15, cursor: 'pointer' }} name="chevron circle left"/>
             </Link>
             <div className={styles.container} >
