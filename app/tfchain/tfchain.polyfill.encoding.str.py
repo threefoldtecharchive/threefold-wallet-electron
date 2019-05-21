@@ -139,6 +139,18 @@ def contains(s, sub):
     """)
     return result
 
+def startswith(s, prefix):
+    if not isinstance(s, str):
+        raise TypeError("s has to be a str, not be of type {}".format(type(s)))
+    if not isinstance(prefix, str):
+        raise TypeError("prefix has to be a str, not be of type {}".format(type(prefix)))
+    result = False
+    __pragma__("js", "{}", """
+    result = s.startsWith(prefix);
+    """)
+    return result
+
+
 class String:
     """
     Utility class to provide pythonic functions on javascript strings.
@@ -191,3 +203,6 @@ class String:
 
     def contains(self, sub):
         return contains(self.value, sub)
+
+    def startswith(self, prefix):
+        return startswith(self.value, prefix)

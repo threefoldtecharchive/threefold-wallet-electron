@@ -171,7 +171,7 @@ export var Mnemonic =  __class__ ('Mnemonic', [object], {
 		for (var word of words) {
 			var ndx = (use_binary_search ? binary_search (self.wordlist, word) : self.wordlist.index (word));
 			if (ndx < 0) {
-				var __except0__ = LookupError (__mod__ ('Unable to find "%s" in word list.', word));
+				var __except0__ = ValueError (__mod__ ('Unable to find "%s" in word list.', word));
 				__except0__.__cause__ = null;
 				throw __except0__;
 			}

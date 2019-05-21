@@ -162,7 +162,7 @@ export var UnlockHash =  __class__ ('UnlockHash', [BaseDataTypeClass], {
 		self._hash = Hash ();
 		self.hash = uhhash;
 	});},
-	get from_json () {return __getcm__ (this, function (cls, obj) {
+	get from_str () {return __getcm__ (this, function (cls, obj) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -178,12 +178,12 @@ export var UnlockHash =  __class__ ('UnlockHash', [BaseDataTypeClass], {
 		else {
 		}
 		if (!(isinstance (obj, str))) {
-			var __except0__ = py_TypeError ('UnlockHash is expected to be JSON-encoded as an str, not {}'.format (py_typeof (obj)));
+			var __except0__ = py_TypeError ('UnlockHash is expected to be a str, not {}'.format (py_typeof (obj)));
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
 		if (len (obj) != UnlockHash._TOTAL_SIZE_HEX) {
-			var __except0__ = ValueError ('UnlockHash is expexcted to be of length {} when JSON-encoded, not of length {}'.format (UnlockHash._TOTAL_SIZE_HEX, len (obj)));
+			var __except0__ = ValueError ('UnlockHash is expexcted to be of length {} when stringified, not of length {}'.format (UnlockHash._TOTAL_SIZE_HEX, len (obj)));
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
@@ -208,6 +208,23 @@ export var UnlockHash =  __class__ ('UnlockHash', [BaseDataTypeClass], {
 			}
 		}
 		return uh;
+	});},
+	get from_json () {return __getcm__ (this, function (cls, obj) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+						case 'obj': var obj = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return UnlockHash.from_str (obj);
 	});},
 	get _get_uhtype () {return __get__ (this, function (self) {
 		if (arguments.length) {

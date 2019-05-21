@@ -72,5 +72,25 @@ export var hex_to_bin = function (s) {
 	    
 	return '0b' + output;
 };
+export var hex_to_int = function (s) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 's': var s = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	var x = null;
+	
+	    x = parseInt(s, 16);
+	    
+	return x;
+};
 
 //# sourceMappingURL=tfchain.polyfill.encoding.hex.map

@@ -404,6 +404,37 @@ export var contains = function (s, sub) {
 	    
 	return result;
 };
+export var startswith = function (s, prefix) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 's': var s = __allkwargs0__ [__attrib0__]; break;
+					case 'prefix': var prefix = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (!(isinstance (s, str))) {
+		var __except0__ = py_TypeError ('s has to be a str, not be of type {}'.format (py_typeof (s)));
+		__except0__.__cause__ = null;
+		throw __except0__;
+	}
+	if (!(isinstance (prefix, str))) {
+		var __except0__ = py_TypeError ('prefix has to be a str, not be of type {}'.format (py_typeof (prefix)));
+		__except0__.__cause__ = null;
+		throw __except0__;
+	}
+	var result = false;
+	
+	    result = s.startsWith(prefix);
+	    
+	return result;
+};
 export var String =  __class__ ('String', [object], {
 	__module__: __name__,
 	get from_utf8 () {return __getcm__ (this, function (cls, b) {
@@ -668,6 +699,23 @@ export var String =  __class__ ('String', [object], {
 		else {
 		}
 		return contains (self.value, sub);
+	});},
+	get startswith () {return __get__ (this, function (self, prefix) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'prefix': var prefix = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return startswith (self.value, prefix);
 	});}
 });
 Object.defineProperty (String, 'value', property.call (String, String._get_value));;

@@ -29,3 +29,10 @@ def hex_to_bin(s):
     }
     """)
     return '0b' + output
+
+def hex_to_int(s):
+    x = None
+    __pragma__("js", "{}", """
+    x = parseInt(s, 16);
+    """)
+    return x

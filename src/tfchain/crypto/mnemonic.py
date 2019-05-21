@@ -86,7 +86,7 @@ class Mnemonic(object):
             # Find the words index in the wordlist
             ndx = binary_search(self.wordlist, word) if use_binary_search else self.wordlist.index(word)
             if ndx < 0:
-                raise LookupError('Unable to find "%s" in word list.' % word)
+                raise ValueError('Unable to find "%s" in word list.' % word)
             # Set the next 11 bits to the value of the index.
             for ii in range(11):
                 concatBits[(wordindex * 11) + ii] = (ndx & (1 << (10 - ii))) != 0

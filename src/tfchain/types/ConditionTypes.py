@@ -57,11 +57,11 @@ class UnlockHash(BaseDataTypeClass):
         self.hash = uhhash
 
     @classmethod
-    def from_json(cls, obj):
+    def from_str(cls, obj):
         if not isinstance(obj, str):
-            raise TypeError("UnlockHash is expected to be JSON-encoded as an str, not {}".format(type(obj)))
+            raise TypeError("UnlockHash is expected to be a str, not {}".format(type(obj)))
         if len(obj) != UnlockHash._TOTAL_SIZE_HEX:
-            raise ValueError("UnlockHash is expexcted to be of length {} when JSON-encoded, not of length {}".format(UnlockHash._TOTAL_SIZE_HEX, len(obj)))
+            raise ValueError("UnlockHash is expexcted to be of length {} when stringified, not of length {}".format(UnlockHash._TOTAL_SIZE_HEX, len(obj)))
 
         t = UnlockHashType(int(jsarray.slice_array(obj, 0, UnlockHash._TYPE_SIZE_HEX)))
         h = Hash(value=obj[UnlockHash._TYPE_SIZE_HEX:UnlockHash._TYPE_SIZE_HEX+UnlockHash._HASH_SIZE_HEX])
@@ -78,6 +78,10 @@ class UnlockHash(BaseDataTypeClass):
                 raise ValueError("unexpected checksum {}, expected {}".format(checksum, expected_checksum))
 
         return uh
+
+    @classmethod
+    def from_json(cls, obj):
+        return UnlockHash.from_str(obj)
     
     @property
     def uhtype(self):
