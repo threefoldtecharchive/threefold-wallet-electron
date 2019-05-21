@@ -1,12 +1,444 @@
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __proxy__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, abs, all, any, assert, bool, bytearray, bytes, callable, chr, copy, deepcopy, delattr, dict, dir, divmod, enumerate, filter, float, getattr, hasattr, input, int, isinstance, issubclass, len, list, map, max, min, object, ord, pow, print, property, py_TypeError, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
+import {SiaBinaryEncoder} from './tfchain.encoding.siabin.js';
 import {RivineBinaryEncoder} from './tfchain.encoding.rivbin.js';
 import {BaseDataTypeClass} from './tfchain.types.BaseDataType.js';
 import {Hash} from './tfchain.types.PrimitiveTypes.js';
 import * as jscrypto from './tfchain.polyfill.crypto.js';
 import * as jsstr from './tfchain.polyfill.encoding.str.js';
 import * as jshex from './tfchain.polyfill.encoding.hex.js';
+import * as jsdate from './tfchain.polyfill.date.js';
 import * as jsarr from './tfchain.polyfill.array.js';
+import {datetime, timedelta} from './datetime.js';
 var __name__ = 'tfchain.types.ConditionTypes';
+export var _CONDITION_TYPE_NIL = 0;
+export var _CONDITION_TYPE_UNLOCK_HASH = 1;
+export var _CONDITION_TYPE_ATOMIC_SWAP = 2;
+export var _CONDITION_TYPE_LOCKTIME = 3;
+export var _CONDITION_TYPE_MULTI_SIG = 4;
+export var output_lock_new = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return OutputLock (__kwargtrans__ ({value: value}));
+};
+export var OutputLock =  __class__ ('OutputLock', [object], {
+	__module__: __name__,
+	_MIN_TIMESTAMP_VALUE: (500 * 1000) * 1000,
+	get __init__ () {return __get__ (this, function (self, value, current_timestamp) {
+		if (typeof value == 'undefined' || (value != null && value.hasOwnProperty ("__kwargtrans__"))) {;
+			var value = null;
+		};
+		if (typeof current_timestamp == 'undefined' || (current_timestamp != null && current_timestamp.hasOwnProperty ("__kwargtrans__"))) {;
+			var current_timestamp = null;
+		};
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+						case 'current_timestamp': var current_timestamp = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (current_timestamp === null) {
+			var current_timestamp = int (datetime.now ().timestamp ());
+		}
+		else if (!(isinstance (current_timestamp, int))) {
+			var __except0__ = py_TypeError ('current timestamp has to be an integer');
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		if (value === null) {
+			self._value = 0;
+		}
+		else if (isinstance (value, OutputLock)) {
+			self._value = value.value;
+		}
+		else if (isinstance (value, int)) {
+			if (value < 0) {
+				var __except0__ = ValueError ('output lock value cannot be negative');
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
+			self._value = int (value);
+		}
+		else if (isinstance (value, str)) {
+			var value = value.lstrip ();
+			if (value [0] == '+') {
+				var offset = jsdate.parse_duration (value.__getslice__ (1, null, 1));
+				self._value = current_timestamp + offset;
+			}
+			else {
+				self._value = jsdate.Date (value).timestamp ();
+			}
+		}
+		else if (isinstance (value, timedelta)) {
+			self._value = current_timestamp + int (value.total_seconds ());
+		}
+		else {
+			var __except0__ = py_TypeError ('cannot set OutputLock using invalid type {}'.format (py_typeof (value)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+	});},
+	get __int__ () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._value;
+	});},
+	get __str__ () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (self.is_timestamp) {
+			return jsdate.Date (self._value).__str__ ();
+		}
+		return str (self._value);
+	});},
+	get __repr__ () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self.__str__ ();
+	});},
+	get _get_value () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._value;
+	});},
+	get _get_is_timestamp () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._value >= OutputLock._MIN_TIMESTAMP_VALUE;
+	});},
+	get locked_check () {return __get__ (this, function (self, height, time) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'height': var height = __allkwargs0__ [__attrib0__]; break;
+						case 'time': var time = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (self.is_timestamp) {
+			return time < self._value;
+		}
+		return height < self._value;
+	});}
+});
+Object.defineProperty (OutputLock, 'is_timestamp', property.call (OutputLock, OutputLock._get_is_timestamp));
+Object.defineProperty (OutputLock, 'value', property.call (OutputLock, OutputLock._get_value));;
+export var ConditionBaseClass =  __class__ ('ConditionBaseClass', [BaseDataTypeClass], {
+	__module__: __name__,
+	get from_json () {return __getcm__ (this, function (cls, obj) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+						case 'obj': var obj = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var ff = cls ();
+		var ct = obj.py_get ('type', 0);
+		if (!(ff.py_metatype.__eq__ (ct))) {
+			var __except0__ = ValueError ('condition is expected to be of type {}, not {}'.format (ff.py_metatype.__int__ (), ct.__int__ ()));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		ff.from_json_data_object (obj.py_get ('data', dict ({})));
+		return ff;
+	});},
+	get _get_type () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var __except0__ = NotImplementedError ('type property is not yet implemented');
+		__except0__.__cause__ = null;
+		throw __except0__;
+	});},
+	get _get_lock () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return OutputLock ();
+	});},
+	get _get_unlockhash () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var __except0__ = NotImplementedError ('unlock hash property is not yet implemented');
+		__except0__.__cause__ = null;
+		throw __except0__;
+	});},
+	get unwrap () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self;
+	});},
+	get from_json_data_object () {return __get__ (this, function (self, data) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'data': var data = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var __except0__ = NotImplementedError ('from_json_data_object method is not yet implemented');
+		__except0__.__cause__ = null;
+		throw __except0__;
+	});},
+	get json_data_object () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var __except0__ = NotImplementedError ('json_data_object method is not yet implemented');
+		__except0__.__cause__ = null;
+		throw __except0__;
+	});},
+	get json () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var obj = dict ({'type': self.py_metatype.__int__ ()});
+		var data = self.json_data_object ();
+		if (data) {
+			obj ['data'] = data;
+		}
+		return obj;
+	});},
+	get sia_binary_encode_data () {return __get__ (this, function (self, encoder) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'encoder': var encoder = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var __except0__ = NotImplementedError ('sia_binary_encode_data method is not yet implemented');
+		__except0__.__cause__ = null;
+		throw __except0__;
+	});},
+	get sia_binary_encode () {return __get__ (this, function (self, encoder) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'encoder': var encoder = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		encoder.add_array (bytearray ([int (self.py_metatype)]));
+		var data_enc = SiaBinaryEncoder ();
+		self.sia_binary_encode_data (data_enc);
+		encoder.add_slice (data_enc.data);
+	});},
+	get rivine_binary_encode_data () {return __get__ (this, function (self, encoder) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'encoder': var encoder = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var __except0__ = NotImplementedError ('rivine_binary_encode_data method is not yet implemented');
+		__except0__.__cause__ = null;
+		throw __except0__;
+	});},
+	get rivine_binary_encode () {return __get__ (this, function (self, encoder) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'encoder': var encoder = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		encoder.add_int8 (self.py_metatype.__int__ ());
+		var data_enc = RivineBinaryEncoder ();
+		self.rivine_binary_encode_data (data_enc);
+		encoder.add_slice (data_enc.data);
+	});}
+});
+Object.defineProperty (ConditionBaseClass, 'unlockhash', property.call (ConditionBaseClass, ConditionBaseClass._get_unlockhash));
+Object.defineProperty (ConditionBaseClass, 'lock', property.call (ConditionBaseClass, ConditionBaseClass._get_lock));
+Object.defineProperty (ConditionBaseClass, 'type', property.call (ConditionBaseClass, ConditionBaseClass._get_type));;
 export var UnlockHashType =  __class__ ('UnlockHashType', [object], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, value) {
@@ -70,6 +502,11 @@ export var UnlockHashType =  __class__ ('UnlockHashType', [object], {
 		}
 		else if (!(isinstance (obj, int))) {
 			var __except0__ = py_TypeError ('UnlockHashType is expected to be JSON-encoded as an int, not {}'.format (py_typeof (obj)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		if (obj < UnlockHashType.NIL.value || obj > UnlockHashType.MULTI_SIG.value) {
+			var __except0__ = ValueError ('UnlockHashType {} is not valid'.format (obj));
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}

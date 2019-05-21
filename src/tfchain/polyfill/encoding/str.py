@@ -150,6 +150,15 @@ def startswith(s, prefix):
     """)
     return result
 
+def isdigit(s):
+    if not isinstance(s, str):
+        raise TypeError("s has to be a str, not be of type {}".format(type(s)))
+    result = False
+    __pragma__("js", "{}", """
+    result = /^-{0,1}\d+$/.test(s);
+    """)
+    return result
+
 
 class String:
     """
@@ -206,3 +215,6 @@ class String:
 
     def startswith(self, prefix):
         return startswith(self.value, prefix)
+
+    def isdigit(self):
+        return isdigit(self.value)
