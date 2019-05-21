@@ -34,6 +34,8 @@ class WalletSettings extends Component {
         name: this.props.wallet._wallet_name,
         openDeleteModal: false,
         deleteName: '',
+        start_index: this.props.wallet._start_index,
+        address_length: this.props.wallet.addresses.length,
         deleteNameError: false
       }
   }
@@ -43,17 +45,14 @@ class WalletSettings extends Component {
   }
   
   saveWallet = () => {
-    const { name } = this.state
+    const { name, start_index, address_length } = this.state
 
     const previous_wallet_name = this.props.wallet._wallet_name
 
-    let newWallet = this.props.wallet
-    newWallet._wallet_name = name
-    newWallet._previous_wallet_name = previous_wallet_name
-    // const newWallet = Object.assign({}, this.props.wallet, {
-    //   name: name,
-    //   previousWalletName: this.props.wallet.name
-    // })
+    const walletIndex = this.props.wallet.wallet_index
+    let newWallet = this.props.account.wallet_update(walletIndex, name, start_index, address_length)
+
+    Object.assign(newWallet, { _previous_wallet_name : previous_wallet_name })
 
     this.props.saveWallet(newWallet)
     this.props.saveAccount(this.props.account)
@@ -74,6 +73,14 @@ class WalletSettings extends Component {
     this.setState({ deleteName: target.value })
   }
 
+  handleAddressLengthChange = ({ target }) => {
+    this.setState({ address_length: target.value })
+  }
+
+  handleIndexChange = ({ target }) => {
+    this.setState({ start_index: target.value })
+  }
+
   deleteWallet = () => {
     const { deleteName, name } = this.state
     if (deleteName != name) {
@@ -87,7 +94,7 @@ class WalletSettings extends Component {
   }
 
   render() {
-    const { openDeleteModal, deleteName, deleteNameError } = this.state
+    const { openDeleteModal, deleteName, deleteNameError, name, start_index, address_length } = this.state
     return (
         <div>
             <DeleteModal 
@@ -113,7 +120,15 @@ class WalletSettings extends Component {
                 <Form error style={{ width: '50%', margin: 'auto', marginTop: 10}}>
                     <Form.Field>
                         <label style={{ float: 'left', color: 'white' }}>Name</label>
-                        <input placeholder='01X.....' value={this.state.name} onChange={this.handleNameChange}/>
+                        <input placeholder='01X.....' value={name} onChange={this.handleNameChange}/>
+                    </Form.Field>
+                    <Form.Field>
+                        <label style={{ float: 'left', color: 'white' }}>Start index</label>
+                        <input type='number' placeholder='0' value={start_index} onChange={this.handleIndexChange}/>
+                    </Form.Field>
+                    <Form.Field>
+                        <label style={{ float: 'left', color: 'white' }}>Address length</label>
+                        <input type='number' placeholder='1' value={address_length} onChange={this.handleAddressLengthChange}/>
                     </Form.Field>
                     {/* <Form.Input label='Destination address' placeholder='01X.....' /> */}
                     {/* {nameErrorMessage} */}

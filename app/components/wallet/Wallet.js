@@ -65,20 +65,6 @@ class Wallet extends Component {
         <Icon style={{ fontSize: 25, marginLeft: 15, marginTop: 15, cursor: 'pointer' }} name="chevron circle left"/>
         </Link>
           <Grid centered columns={2} style={{ marginBottom: 30 }}>
-            {/* <GridColumn>
-              <Segment style={{ marginTop: 60, marginLeft: 50 }} inverted>
-                <h3>Wallets</h3>
-                <List divided inverted relaxed>
-                  <List.Item>
-                    <List.Content>
-                      <List.Header>{this.props.selectedWallet.name}</List.Header>
-                            1001.1 TFT
-                      <Icon style={{ float: 'right' }} onClick={this.handleWalletAddress} name='eye' />
-                    </List.Content>
-                  </List.Item>
-                </List>
-              </Segment>
-            </GridColumn> */}
             <GridColumn>
               <Segment style={{ marginTop: 60, marginLeft: '10%' }}>
                 <h3 style={{ color: 'black' }}>Total Balance: {coins_total} TFT</h3>
@@ -88,7 +74,7 @@ class Wallet extends Component {
             </GridColumn>
             <GridColumn>
               <div style={{ marginTop: 60, position: 'absolute', right: 60 }}>
-                <Button style={{ float: 'left', background: '#2B3C72', color: 'white', marginRight: 15  }} size='big'>Receive</Button>
+                <Button onClick={() => this.props.history.push(routes.WALLET_RECEIVE)} style={{ float: 'left', background: '#2B3C72', color: 'white', marginRight: 15  }} size='big'>Receive</Button>
                 <Button onClick={() => this.props.history.push(routes.TRANSFER)} style={{  marginRight: 10, float: 'left', background: '#015DE1', color: 'white'  }} size='big'>Transfer</Button>
               </div>
             </GridColumn>

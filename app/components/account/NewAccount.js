@@ -2,7 +2,7 @@
 import { connect } from 'react-redux'
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
-import { Form, Checkbox, Button, Message, Icon, TextArea, Radio, Divider, Popup } from 'semantic-ui-react'
+import { Form, Checkbox, Button, Message, Icon, TextArea, Radio, Divider, Popup, Input } from 'semantic-ui-react'
 import routes from '../../constants/routes'
 import styles from '../home/Home.css'
 // import { NewMnemonic, CreateAccount, CreateWalletOnAccount } from '../client/tfchain'
@@ -47,8 +47,22 @@ class NewAccount extends Component {
   handleSeedChange = ({ target }) => {
     if (target.value != '') {
       this.setState({ seedError: false })
-    } 
+    }
+    if (!tfchain.mnemonic_is_valid(target.value)) {
+      this.setState({ seedError: true })
+    }
     this.setState({ seed: target.value })
+  }
+
+  renderSeedError = () => {
+    const { seed } = this.state
+    if (seed != '' && !tfchain.mnemonic_is_valid(seed)) {
+      return (
+        <Message negative>
+          <Message.Header style={{ fontSize: 16, height: '50%' }}>Seed is incorrect, the mnemonic phrase is invalid.</Message.Header>
+        </Message>
+      )
+    }
   }
 
   handleNameChange = ({ target }) => {
@@ -90,11 +104,17 @@ class NewAccount extends Component {
       if (generateSeed) {
         return (
           <div>
-            <TextArea label='Provide seed' placeholder='seed' value={this.state.seed} onChange={this.handleSeedChange} disabled={true}/>
+            <TextArea labelPosition='right corner' value={this.state.seed} onChange={this.handleSeedChange} disabled={true}/>
+            {this.renderSeedError()}
           </div>
         )
       } else {
-        return (<TextArea label='Provide seed' placeholder='seed' value={this.state.seed} onChange={this.handleSeedChange} />)
+        return (
+          <div>
+            <TextArea labelPosition='right corner' value={this.state.seed} onChange={this.handleSeedChange} />
+            {this.renderSeedError()}
+          </div>
+        )
       }
   }
 
@@ -119,7 +139,7 @@ class NewAccount extends Component {
     let passwordError = false
     let passwordConfirmationError = false
 
-    if (seed === '') {
+    if (seed === '' || !tfchain.mnemonic_is_valid(seed)) {
       seedError = true
     }
   
@@ -179,7 +199,6 @@ class NewAccount extends Component {
   openConfirmationModal = () => {
     const { nameError, passwordError, passwordConfirmationError, seedError } = this.checkFormValues()
 
-    console.log(passwordConfirmationError)
     if (!nameError && !passwordError && !passwordConfirmationError && !seedError) {
       const open = !this.state.openConfirmationModal
       return this.setState({ openConfirmationModal: open })
@@ -247,25 +266,25 @@ class NewAccount extends Component {
                 </div>
                 </Form.Field>
                 <Form.Field error={nameError}>
-                    <label style={{ float: 'left', color: 'white' }}>Account name</label>
-                    <input  label='name' placeholder='name' value={name} onChange={this.handleNameChange}/>
+                    <label style={{ float: 'left', color: 'white' }}>* Account name</label>
+                    <Input value={name} onChange={this.handleNameChange}/>
                 </Form.Field>
                 <Form.Field error={passwordError}>
-                    <label style={{ float: 'left', color: 'white' }}>Password</label>
-                    <input type='password' label='password' placeholder='password' value={password} onChange={this.handlePasswordChange}/>
+                    <label style={{ float: 'left', color: 'white' }}>* Password</label>
+                    <Input type='password' value={password} onChange={this.handlePasswordChange}/>
                 </Form.Field>
                 <Form.Field error={passwordConfirmationError}>
-                    <label style={{ float: 'left', color: 'white' }}>Confirm password</label>
-                    <input type='password' label='confirm password' placeholder='password' value={confirmationPassword} onChange={this.handlePasswordConfirmationChange}/>
+                    <label style={{ float: 'left', color: 'white' }}>* Confirm password</label>
+                    <Input type='password' value={confirmationPassword} onChange={this.handlePasswordConfirmationChange}/>
                 </Form.Field>
                 <Form.Field error={seedError}>
-                    <label style={{ float: 'left', color: 'white', marginRight: 20 }}>Seed</label>
+                    <label style={{ float: 'left', color: 'white', marginRight: 20 }}>* Seed</label>
                     <Popup size='large' style={{ width: 600 }} position='right center' content='Seed phrase or recovery phrase is a list of 24 words which stores all the information needed to recover your wallet. If you provide this phrase we will recover your account. If you wish to create a new account without recovery then click generate seed.' trigger={<Icon style={{ fontSize: 12 }} name='question circle' />} />
-
                     {this.renderTextArea()}
                 </Form.Field>
                 <Form.Field>
                     <Checkbox style={{ left: 0, position: 'absolute' }} label={<label style={{ color: 'white' }}>Generate seed</label>} onClick={this.renderSeed} defaultChecked={generateSeed}/>
+                    <span style={{ position: 'absolute', right: 0, fontSize: 14 }}>Fields with * are required</span>
                 </Form.Field>
             </Form>
             {this.renderSeedWarning()}
