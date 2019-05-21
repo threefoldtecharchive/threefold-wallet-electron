@@ -37,7 +37,9 @@ class NewAccount extends Component {
         seedConfirmationError: '',
         seedConfirmation: '',
         passwordError: false,
-        passwordConfirmationError: false
+        passwordConfirmationError: false,
+        accountCreationErrorMessage: '',
+        accountCreationError: false
       }
   }
 
@@ -57,6 +59,10 @@ class NewAccount extends Component {
 
   handlePasswordChange = ({ target }) => {
     if (target.value != '') {
+      this.setState({ password: target.value })
+      if (!target.value.match(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/)) {
+        return this.setState({ passwordError: true })
+      }
       this.setState({ passwordError: false })
     } 
     this.setState({ password: target.value })
@@ -79,7 +85,7 @@ class NewAccount extends Component {
       if (generateSeed) {
         seed = tfchain.mnemonic_new()
       }
-      this.setState({seed, generateSeed})
+      this.setState({ seed, generateSeed, seedError: false })
   }
 
   renderTextArea = () => {
@@ -109,28 +115,8 @@ class NewAccount extends Component {
 
   handleNetworkChange = (e, { value }) => this.setState({ network: value })
 
-  createAccount = () => {
-    const { seed, name, seedConfirmation, generateSeed, password, passwordConfirmation, network } = this.state
-    if (generateSeed) {
-      if (seedConfirmation == '') {
-        return this.setState({ seedConfirmationError: true })
-      }
-  
-      const confirmationWords = seedConfirmation.split(' ')
-      // must contain 3 words
-      if (confirmationWords.length != 3) {
-        return this.setState({ seedConfirmationError: true })
-      }
-  
-      let seedWords = seed.split(' ')
-      const diff = difference(seedWords, confirmationWords)
-      if (diff.length != 21) {
-        return this.setState({ seedConfirmationError: true })
-      }
-  
-      this.setState({ seedConfirmationError: false })
-    }
-
+  checkFormValues = () => {
+    const { name, seed, password, passwordConfirmation } = this.state
     let seedError = false
     let nameError = false
     let passwordError = false
@@ -152,27 +138,53 @@ class NewAccount extends Component {
       passwordConfirmationError = true
     }
 
+    return { nameError, seedError, passwordError, passwordConfirmationError }
+  }
 
-    this.setState({ nameError, seedError, passwordError, passwordConfirmationError })
-    if (!nameError && !seedError && !passwordError && !passwordConfirmationError) {
+  createAccount = () => {
+    const { seed, name, seedConfirmation, password, network } = this.state
+
+    if (seedConfirmation == '') {
+      return this.setState({ seedConfirmationError: true })
+    }
+
+    const confirmationWords = seedConfirmation.split(' ')
+    // must contain 3 words
+    if (confirmationWords.length != 3) {
+      return this.setState({ seedConfirmationError: true })
+    }
+
+    let seedWords = seed.split(' ')
+    const diff = difference(seedWords, confirmationWords)
+    if (diff.length != 21) {
+      return this.setState({ seedConfirmationError: true })
+    }
+
+    this.setState({ seedConfirmationError: false })
+    try {
       // create account
       const account = new tfchain.Account(name, password, seed, network)
       // create wallet
       account.wallet_new('defaultWallet', 0, 1)
-
+  
       this.props.AddAccount(account)
+      // account creation succeeded so remove error if there was one
+      this.setState({ accountCreationError: false })
       return this.props.history.push("/account")
+    } catch (error) {
+      // show error from api if account creation failed
+      this.setState({ accountCreationError: true, accountCreationErrorMessage: error })
     }
   }
 
   openConfirmationModal = () => {
-    const { generateSeed } = this.state
-    if (generateSeed) {
+    const { nameError, passwordError, passwordConfirmationError, seedError } = this.checkFormValues()
+
+    if (!nameError && !passwordError && !passwordConfirmationError && !seedError) {
       const open = !this.state.openConfirmationModal
-      this.setState({ openConfirmationModal: open })
-    } else {
-      this.createAccount()
+      return this.setState({ openConfirmationModal: open })
     }
+    this.setState({ nameError, passwordError, passwordConfirmationError, seedError })
   }
 
   closeConfirmationModal = () => {
@@ -180,11 +192,13 @@ class NewAccount extends Component {
   }
 
   handleSeedWordsChange = ({ target }) => {
-    this.setState({ seedConfirmation: target.value })
+    if (target.value != '') {
+      this.setState({ seedConfirmation: target.value, seedConfirmationError: false })
+    }
   }
 
   render() {
-    const { seed, name, generateSeed, seedError, nameError, seedConfirmation, seedConfirmationError, openConfirmationModal, password, confirmationPassword, passwordError, passwordConfirmationError } = this.state
+    const { name, generateSeed, seedError, nameError, seedConfirmation, seedConfirmationError, openConfirmationModal, password, confirmationPassword, passwordError, passwordConfirmationError, accountCreationError, accountCreationErrorMessage } = this.state
 
     return (
         <div style={{ height: '100vh', overflowY: 'scroll', paddingBottom: 30 }}>
@@ -195,6 +209,8 @@ class NewAccount extends Component {
               handleSeedWordsChange={this.handleSeedWordsChange}
               seedError={seedConfirmationError}
               createAccount={this.createAccount}
+              accountCreationError={accountCreationError}
+              accountCreationErrorMessage={accountCreationErrorMessage}
             />
             <div className={styles.container} >
                 <h2 >New Account</h2>
