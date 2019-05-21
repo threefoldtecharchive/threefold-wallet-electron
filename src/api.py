@@ -525,9 +525,3 @@ def mnemonic_is_valid(mnemonic):
     except Exception as e:
         print(e)
         return False
-
-import tfchain.types.ERC20 as tferc20
-erc20 = tferc20
-
-import tfchain.types.ConditionTypes as tfct
-ct = tfct
