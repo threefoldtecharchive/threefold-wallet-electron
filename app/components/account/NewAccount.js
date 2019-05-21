@@ -59,10 +59,6 @@ class NewAccount extends Component {
 
   handlePasswordChange = ({ target }) => {
     if (target.value != '') {
-      this.setState({ password: target.value })
-      if (!target.value.match(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/)) {
-        return this.setState({ passwordError: true })
-      }
       this.setState({ passwordError: false })
     } 
     this.setState({ password: target.value })
