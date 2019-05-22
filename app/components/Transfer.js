@@ -7,6 +7,7 @@ import styles from './home/Home.css'
 import Footer from './footer'
 import { toast } from 'react-toastify'
 import { selectWallet } from '../actions'
+import * as tfchain from '../tfchain/api'
 
 const mapStateToProps = state => ({
   account: state.account,
@@ -37,6 +38,11 @@ class Transfer extends Component {
   }
 
   handleDestinationChange = ({ target }) => {
+    if (!tfchain.wallet_address_is_valid(target.value) && target.value !== '') {
+      this.setState({ destinationError: true })
+    } else {
+      this.setState({ destinationError: false })
+    }
     this.setState({ destination: target.value })
   }
 
@@ -88,12 +94,9 @@ class Transfer extends Component {
       const builder = selectedWallet.transaction_new()
       builder.output_add(destination, amount.toString())
       builder.send({ data: description }).then(txid => {
-        const _this = this
-        setTimeout(function () {
-          _this.setState({ destinationError, amountError, loader: false })
-          toast('Transaction submitted')
-          return _this.props.history.push('/wallet')
-        }, 2000)
+        this.setState({ destinationError, amountError, loader: false })
+        toast('Transaction submitted')
+        return this.props.history.push('/wallet')
       }).catch(err => {
         toast('transaction failed')
         this.setState({ loader: false, errorMessage: err })
@@ -111,7 +114,19 @@ class Transfer extends Component {
       return (
         <Message
           error
-          header={errorMessage}
+          header={errorMessage}voor
+        />
+      )
+    }
+  }
+
+  renderDestinationError = () => {
+    const { destinationError } = this.state
+    if (destinationError) {
+      return (
+        <Message
+          error
+          header={'Destination address is not a valid format'}
         />
       )
     }
@@ -139,6 +154,7 @@ class Transfer extends Component {
           <h2 style={{ marginBottom: 20 }}>Send funds to:</h2>
           <Form.Field style={{ marginTop: 10 }}>
             <Input error={destinationError} style={{ background: '#0c111d !important', color: '#7784a9' }} icon={<Icon name='send' style={{ color: '#0e72f5' }} />} iconPosition='left' placeholder='destination address' value={destination} onChange={this.handleDestinationChange} />
+            {this.renderDestinationError()}
           </Form.Field>
           {/* <Form.Field style={{ marginTop: 30 }}>
             <Input error={descriptionError} style={{ background: '#0c111d !important', color: '#7784a9' }} icon={<Icon name='align left' style={{ color: 'green' }} />} iconPosition='left' placeholder='message' value={description} onChange={this.handleDescriptionChange} />
