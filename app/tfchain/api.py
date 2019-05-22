@@ -532,7 +532,10 @@ class Balance:
                 None,
                 [
                     CoinOutputView(
-                        ['01a94cff5aa86508d742051ba743a525331cc9b31ba7152627344902ea79dc8d2c436ceda5bcb4'],
+                        [
+                            '01a94cff5aa86508d742051ba743a525331cc9b31ba7152627344902ea79dc8d2c436ceda5bcb4',
+                            '0111429d9967c5c5e52e5aad522d6759e88c6fca8a54fa23ea12917006edf6842631a8a5d847ac',
+                        ],
                         '016c3dabb530029e4503a73ec944024f0d74ca080537972bb658a69f120ab307662f996d9fc85f',
                         '40000000',
                         0,
@@ -566,7 +569,10 @@ class Balance:
                 '66d3d46f6a75dcab102baff7016cd518d857c37db0db4151dae45b225408de9d',
                 [
                     CoinOutputView(
-                        ['0111429d9967c5c5e52e5aad522d6759e88c6fca8a54fa23ea12917006edf6842631a8a5d847ac'],
+                        [
+                            '0111429d9967c5c5e52e5aad522d6759e88c6fca8a54fa23ea12917006edf6842631a8a5d847ac',
+                            '01a94cff5aa86508d742051ba743a525331cc9b31ba7152627344902ea79dc8d2c436ceda5bcb4',
+                        ],
                         '01a94cff5aa86508d742051ba743a525331cc9b31ba7152627344902ea79dc8d2c436ceda5bcb4',
                         '20000',
                         1558458390,
