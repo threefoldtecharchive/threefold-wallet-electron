@@ -12,12 +12,51 @@
   font-size: 1.4rem;
 }
 
-#blue-button {
-  background: '#015DE1';
-  color: 'white';
-  width: 180;
-}
-
 .ui.input input {
   color: red;
+}
+
+.acceptButton {
+  background: linear-gradient(90deg, rgba(82,77,218,1) 0%, rgba(102,71,254,1) 100%) !important;
+  font-family: SF UI Text Regular !important;
+  font-size: 20px !important;
+  color: white !important;
+  border: 1px solid linear-gradient(90deg, rgba(82,77,218,1) 0%, rgba(102,71,254,1) 100%) !important;
+}
+
+.cancelButton {
+  font-family: SF UI Text Regular !important;
+  font-size: 20px !important;
+  border: 1px solid white !important;
+  color: white !important;
+  background: none !important;
+}
+
+.account {
+  background: url("https://mdn.mozillademos.org/files/11987/startransparent.gif") #FFEE99 3em 50% no-repeat;
+
+}
+
+.accountBlockPart {
+  width: 300px!important;
+  height: 45px!important;
+  position: relative!important;
+  background: linear-gradient(90deg, rgba(82,77,218,1) 0%, rgba(102,71,254,1) 100%) !important;
+  padding: 15px!important;
+  text-align: left !important;
+  border-top-left-radius: 5px!important;
+  border-top-right-radius: 5px!important;
+  font-family: SF UI Text Bold !important;
+}
+
+.accountBlockPartLower {
+  width: 300px!important;
+  height: 45px!important;
+  position: relative!important;
+  background: linear-gradient(90deg, rgba(56,51,186,1) 0%, rgba(102,71,254,1) 100%) !important;
+  padding: 15px!important;
+  text-align: left !important;
+  border-bottom-left-radius: 5px!important;
+  border-bottom-right-radius: 5px!important;
+  font-family: SF UI Text Light !important;
 }

@@ -66,49 +66,49 @@ class Wallet extends Component {
         </Link>
           <Grid centered columns={2} style={{ marginBottom: 30 }}>
             <GridColumn>
-              <Segment style={{ marginTop: 60, marginLeft: '10%' }}>
-                <h3 style={{ color: 'black' }}>Total Balance: {coins_total} TFT</h3>
-                <h4 style={{ color: 'black' }}><Icon name='lock'/>Locked Balance: {coins_locked} TFT</h4>
-                <h4 style={{ color: 'black' }}><Icon name='unlock'/>Unlocked Balance: {coins_unlocked} TFT</h4>
+              <Segment style={{ marginTop: 60, marginLeft: '10%', background: '#29272E'  }}>
+                <h3 style={{ color: 'white' }}>Total Balance: {coins_total} TFT</h3>
+                <h4 style={{ color: 'white' }}><Icon name='lock'/>Locked Balance: {coins_locked} TFT</h4>
+                <h4 style={{ color: 'white' }}><Icon name='unlock'/>Unlocked Balance: {coins_unlocked} TFT</h4>
               </Segment>
             </GridColumn>
             <GridColumn>
               <div style={{ marginTop: 60, position: 'absolute', right: 60 }}>
-                <Button onClick={() => this.props.history.push(routes.WALLET_RECEIVE)} style={{ float: 'left', background: '#2B3C72', color: 'white', marginRight: 15  }} size='big'>Receive</Button>
-                <Button onClick={() => this.props.history.push(routes.TRANSFER)} style={{  marginRight: 10, float: 'left', background: '#015DE1', color: 'white'  }} size='big'>Transfer</Button>
+                <Button className={styles.acceptButton} onClick={() => this.props.history.push(routes.WALLET_RECEIVE)} style={{ float: 'left', color: 'white', marginRight: 15  }} size='big'>Receive</Button>
+                <Button className={styles.cancelButton} onClick={() => this.props.history.push(routes.TRANSFER)} style={{  marginRight: 10, float: 'left', color: 'white', background: 'none'  }} size='big'>Transfer</Button>
               </div>
             </GridColumn>
           </Grid>
-          <Segment style={{ width: '90%', height: '300px', overflow: 'auto', overflowY: 'scroll', margin: 'auto'  }}>
-            <h3 style={{ color: 'black' }}>Transactions</h3>
-            <List style={{ marginLeft: 50, overflow: 'auto' }} divided relaxed>
+          <Segment style={{ width: '90%', height: '300px', overflow: 'auto', overflowY: 'scroll', margin: 'auto', background: '#29272E'   }}>
+            <h3 style={{ color: 'white' }}>Transactions</h3>
+            <List style={{ marginLeft: 50, overflow: 'auto', color: 'white' }} divided relaxed>
                 <List.Item>
-                <List.Content>
-                    <List.Header as='a'>TXID: 226a299113934c53048a4c5008016199b40e359b82c898c19e115188a45545ac</List.Header>
-                    <List.Description as='a'>To: 0195de96da59de0bd59c416e96d17df1a5bbc80acb6b02a1db0cde0bcdffca55a4f7f369e955ef</List.Description>
-                    <List.Description as='a'>Amount: 500 TFT</List.Description>
-                </List.Content>
+                  <List.Content>
+                      <List.Header as='a' style={{ color: '#6647fe' }}>TXID: 226a299113934c53048a4c5008016199b40e359b82c898c19e115188a45545ac</List.Header>
+                      <List.Description style={{ color: 'white' }} as='a'>To: 0195de96da59de0bd59c416e96d17df1a5bbc80acb6b02a1db0cde0bcdffca55a4f7f369e955ef</List.Description>
+                      <List.Description style={{ color: 'white' }} as='a'>Amount: 500 TFT</List.Description>
+                  </List.Content>
                 </List.Item>
                 <List.Item>
-                <List.Content>
-                    <List.Header as='a'>TXID: 226a299113934c53048a4c5008016199b40e359b82c898c19e115188a45545ac</List.Header>
-                    <List.Description as='a'>To: 0195de96da59de0bd59c416e96d17df1a5bbc80acb6b02a1db0cde0bcdffca55a4f7f369e955ef</List.Description>
-                    <List.Description as='a'>Amount: 500 TFT</List.Description>
-                </List.Content>
+                  <List.Content>
+                      <List.Header as='a' style={{ color: '#6647fe' }}>TXID: 226a299113934c53048a4c5008016199b40e359b82c898c19e115188a45545ac</List.Header>
+                      <List.Description style={{ color: 'white' }} as='a'>To: 0195de96da59de0bd59c416e96d17df1a5bbc80acb6b02a1db0cde0bcdffca55a4f7f369e955ef</List.Description>
+                      <List.Description style={{ color: 'white' }} as='a'>Amount: 500 TFT</List.Description>
+                  </List.Content>
                 </List.Item>
                 <List.Item>
-                <List.Content>
-                    <List.Header as='a'>TXID: 226a299113934c53048a4c5008016199b40e359b82c898c19e115188a45545ac</List.Header>
-                    <List.Description as='a'>To: 0195de96da59de0bd59c416e96d17df1a5bbc80acb6b02a1db0cde0bcdffca55a4f7f369e955ef</List.Description>
-                    <List.Description as='a'>Amount: 500 TFT</List.Description>
-                </List.Content>
+                  <List.Content>
+                      <List.Header as='a' style={{ color: '#6647fe' }}>TXID: 226a299113934c53048a4c5008016199b40e359b82c898c19e115188a45545ac</List.Header>
+                      <List.Description style={{ color: 'white' }} as='a'>To: 0195de96da59de0bd59c416e96d17df1a5bbc80acb6b02a1db0cde0bcdffca55a4f7f369e955ef</List.Description>
+                      <List.Description style={{ color: 'white' }} as='a'>Amount: 500 TFT</List.Description>
+                  </List.Content>
                 </List.Item>
                 <List.Item>
-                <List.Content>
-                    <List.Header as='a'>TXID: 226a299113934c53048a4c5008016199b40e359b82c898c19e115188a45545ac</List.Header>
-                    <List.Description as='a'>To: 0195de96da59de0bd59c416e96d17df1a5bbc80acb6b02a1db0cde0bcdffca55a4f7f369e955ef</List.Description>
-                    <List.Description as='a'>Amount: 500 TFT</List.Description>
-                </List.Content>
+                  <List.Content>
+                      <List.Header as='a' style={{ color: '#6647fe' }}>TXID: 226a299113934c53048a4c5008016199b40e359b82c898c19e115188a45545ac</List.Header>
+                      <List.Description style={{ color: 'white' }} as='a'>To: 0195de96da59de0bd59c416e96d17df1a5bbc80acb6b02a1db0cde0bcdffca55a4f7f369e955ef</List.Description>
+                      <List.Description style={{ color: 'white' }} as='a'>Amount: 500 TFT</List.Description>
+                  </List.Content>
                 </List.Item>
             </List>
             </Segment>

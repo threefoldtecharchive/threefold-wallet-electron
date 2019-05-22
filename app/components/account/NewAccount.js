@@ -289,8 +289,8 @@ class NewAccount extends Component {
             </Form>
             {this.renderSeedWarning()}
             <div className={styles.container} >
-              <Button size='big' type='submit' style={{ marginTop: 10, marginRight: 10, background: '#2B3D72', color: 'white', width: 180 }} onClick={() => this.props.history.push(routes.HOME)}>Cancel</Button>
-              <Button size='big' type='submit' onClick={this.openConfirmationModal} style={{ marginTop: 10, margin: 'auto', background: '#015DE1', color: 'white', width: 180 }}>Create account</Button>
+              <Button className={styles.cancelButton} size='big' type='submit' style={{ marginTop: 10, marginRight: 10, background: 'none', color: 'white', width: 180 }} onClick={() => this.props.history.push(routes.HOME)}>Cancel</Button>
+              <Button className={styles.acceptButton} size='big' type='submit' onClick={this.openConfirmationModal} style={{ marginTop: 10, margin: 'auto', color: 'white', width: 220 }}>Create account</Button>
             </div>
           </div>
     );

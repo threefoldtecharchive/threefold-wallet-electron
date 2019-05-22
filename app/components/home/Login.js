@@ -5,6 +5,7 @@ import { Form, Button, Input, Icon } from 'semantic-ui-react'
 import routes from '../../constants/routes'
 import { selectAccount } from '../../actions'
 import * as tfchain from '../../tfchain/api'
+import styles from './Home.css'
 
 const mapStateToProps = state => ({
   account: state.account
@@ -64,8 +65,8 @@ class Login extends Component {
                   <Input onKeyDown={this.onKeyDown} type='password' style={{ width: '50%' }} icon={<Icon name='key' style={{ color: '#0e72f5' }}></Icon>} iconPosition='left' placeholder='password' value={password} onChange={this.handlePasswordChange}/>
                 </Form.Field>
                 <div style={{ marginTop: 50 }}>
-                  <Button size='big' onClick={() => this.props.history.push(routes.HOME)} style={{ background: '#2B3D72', color: 'white', marginRight: 15 }}>Cancel</Button>
-                  <Button size='big' type='submit' style={{ background: '#015DE1', color: 'white' }}>Login</Button>
+                  <Button className={styles.cancelButton}  size='big' onClick={() => this.props.history.push(routes.HOME)} style={{ marginRight: 15 }}>Cancel</Button>
+                  <Button className={styles.acceptButton}  size='big' type='submit' >Login</Button>
                 </div>
             </Form>
           </div>

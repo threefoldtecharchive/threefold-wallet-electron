@@ -69,10 +69,6 @@ class WalletSettings extends Component {
     this.setState({ amount: target.value })
   }
 
-  copyAddress = (address) => {
-    console.log(address)
-  }
-
   renderQRCode = () => {
     const { selectedAddress, amount } = this.state
     const qrCodeString = `tft:${selectedAddress}?amount=${amount}`
@@ -123,10 +119,6 @@ class WalletSettings extends Component {
           <div style={{ textAlign: 'center', marginTop: 20 }}>
             <Input style={{ width: 300, marginLeft: 'auto', marginRight: 'auto' }} type='number' label='amount' onChange={this.handleAmountChange} value={amount} />
           </div>
-          {/* <div style={{ textAlign: 'center', marginTop: 50 }}>
-            <Button size='big' style={{ marginTop: 10, marginRight: 10, background: '#2B3D72', color: 'white', width: 180 }} onClick={() => this.props.history.push(routes.ACCOUNT)}>Cancel</Button>
-            <Button size='big' type='submit' style={{ marginTop: 10, margin: 'auto', background: '#015DE1', color: 'white', width: 180 }}>Save</Button>
-          </div> */}
         </div>
         <Footer />
       </div>
