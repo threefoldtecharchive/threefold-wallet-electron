@@ -191,21 +191,47 @@ class Currency(BaseDataTypeClass):
         self.value = value
 
     @classmethod
-    def from_json(cls, obj):
+    def from_str(cls, obj, lowest_unit=False):
         if obj is not None and not isinstance(obj, str):
             raise TypeError(
-                "currency is expected to be a string when part of a JSON object, not type {}".format(type(obj)))
+                "currency is expected to be a string , not type {}".format(type(obj)))
         if obj == '':
             obj = None
         c = cls()
-        c.value = jsdec.Decimal(obj) * jsdec.Decimal('0.000000001')
+        c.value = jsdec.Decimal(obj)
+        if lowest_unit:
+            c.value *= jsdec.Decimal('0.000000001')
         return c
+
+    @classmethod
+    def from_json(_, obj):
+        return Currency.from_str(obj, lowest_unit=True)
 
     @property
     def value(self):
         if self._value is None:
             return jsdec.Decimal()
         return self._value
+
+    def plus(self, other):
+        return self.__add__(other)
+    def minus(self, other):
+        return self.__sub__(other)
+    def times(self, other):
+        return self.__mul__(other)
+
+    def equal_to(self, other):
+        return self.__eq__(other)
+    def not_equal_to(self, other):
+        return self.__ne__(other)
+    def less_than(self, other):
+        return self.__lt__(other)
+    def greater_than(self, other):
+        return self.__gt__(other)
+    def less_than_or_equal_to(self, other):
+        return self.__le__(other)
+    def greater_than_or_equal_to(self, other):
+        return self.__ge__(other)
 
     @value.setter
     def value(self, value):

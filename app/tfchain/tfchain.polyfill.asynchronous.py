@@ -64,7 +64,6 @@ def promise_pool_new(generator, limit=None):
     # wrap generator as producer
     g = generator()
     def producer():
-        print("fetch next...")
         result = None
         __pragma__("js", "{}", """
         result = g.next();
@@ -78,4 +77,11 @@ def promise_pool_new(generator, limit=None):
         return result.value
     # create the pool, start it and return as a promise
     pool = jspromisepool.Pool(producer, limit)
-    return pool.start()
+    # TODO: make this streaming somehow
+    results = []
+    def fulfilled_cb(event):
+        results.append(event.data.result)
+    pool.addEventListener('fulfilled', fulfilled_cb)
+    def pool_then_cb():
+        return results
+    return chain(pool.start(), pool_then_cb)

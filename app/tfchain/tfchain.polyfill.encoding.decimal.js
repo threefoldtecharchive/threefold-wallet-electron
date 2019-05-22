@@ -5,6 +5,9 @@ var __name__ = 'tfchain.polyfill.encoding.decimal';
 export var Decimal =  __class__ ('Decimal', [object], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, value) {
+		if (typeof value == 'undefined' || (value != null && value.hasOwnProperty ("__kwargtrans__"))) {;
+			var value = null;
+		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -19,11 +22,28 @@ export var Decimal =  __class__ ('Decimal', [object], {
 		}
 		else {
 		}
+		if (value === null) {
+			var value = '0';
+		}
 		if (isinstance (value, Decimal)) {
 			self._value = value.value;
 		}
 		else {
-			self._value = jsdec.new_decimal (value);
+			var output = null;
+			var error = null;
+			
+			            try {
+			                output = jsdec.new_decimal(value);
+			            } catch(e) {
+			                error = e;
+			            }
+			            
+			if (error !== null) {
+				var __except0__ = ValueError (error);
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
+			self._value = output;
 		}
 	});},
 	get _get_value () {return __get__ (this, function (self) {

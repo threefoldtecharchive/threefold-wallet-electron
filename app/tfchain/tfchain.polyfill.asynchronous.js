@@ -209,7 +209,6 @@ export var promise_pool_new = function (generator, limit) {
 		}
 		else {
 		}
-		print ('fetch next...');
 		var result = null;
 		
 		        result = g.next();
@@ -224,7 +223,38 @@ export var promise_pool_new = function (generator, limit) {
 		return result.value;
 	};
 	var pool = jspromisepool.Pool (producer, limit);
-	return pool.start ();
+	var results = [];
+	var fulfilled_cb = function (event) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'event': var event = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		results.append (event.data.result);
+	};
+	pool.addEventListener ('fulfilled', fulfilled_cb);
+	var pool_then_cb = function () {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+				}
+			}
+		}
+		else {
+		}
+		return results;
+	};
+	return chain (pool.start (), pool_then_cb);
 };
 
 //# sourceMappingURL=tfchain.polyfill.asynchronous.map

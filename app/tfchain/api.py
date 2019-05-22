@@ -15,6 +15,7 @@ import tfchain.network as tfnetwork
 import tfchain.explorer as tfexplorer
 
 from tfchain.types.ConditionTypes import UnlockHash, UnlockHashType
+from tfchain.types.PrimitiveTypes import Currency
 
 # BIP39 state object used for all Mnemonic purposes of this API
 __bip39 = bip39.Mnemonic()
@@ -231,7 +232,7 @@ class Account:
             # generate key pair and add it to the list of pairs
             pair = jscrypto.AssymetricSignKeyPair(entropy)
             pairs.append(pair)
-        wallet = Wallet(wallet_index, wallet_name, start_index, pairs)
+        wallet = Wallet(self._network_type, self._explorer_client, wallet_index, wallet_name, start_index, pairs)
         self._validate_wallet_state(wallet)
         return wallet
 
@@ -317,6 +318,25 @@ class Account:
             jsasync.as_promise(fetch_constants)
         ), fetch_current_block)
 
+    @property
+    def balance(self):
+        wallets = self.wallets
+        if len(wallets) == 0:
+            def no_balance_cb():
+                return Balance(self._network_type, amount=0)
+            return jsasync.as_promise(no_balance_cb)
+        # create aggregaton cb
+        def aggregate(balances):
+            balance = balances[0]
+            for other in balances[1:]:
+                balance = balance.merge(other)
+            return balance
+        # define generator
+        def generator():
+            for wallet in wallets:
+                yield wallet.balance
+        # return pooled promise
+        return jsasync.chain(jsasync.promise_pool_new(generator), aggregate)
 
 class Wallet:
     """
@@ -326,10 +346,14 @@ class Wallet:
     the seed (entropy/mnemonic) that identifies the account owning this wallet.
     """
 
-    def __init__(self, wallet_index, wallet_name, start_index, pairs):
+    def __init__(self, network_type, explorer_client, wallet_index, wallet_name, start_index, pairs):
         """
         Create a new wallet.
 
+        :param network_type: the network type used by this wallet
+        :type network_type: tfchain.network.Type
+        :param explorer_client: the explorer client to be used
+        :type explorer_client: explorer.Client
         :param wallet_index: the index of this wallet within the owning wallet
         :type wallet_index: int
         :param wallet_name: the name of this wallet, a human-friendly label
@@ -338,6 +362,8 @@ class Wallet:
         :type start_index: int
         :param pairs: the key pairs as generated using the start_index and account's seed
         """
+        self._network_type = network_type
+        self._explorer_client = explorer_client
         self._wallet_index = wallet_index
         self._wallet_name = wallet_name
         self._start_index = start_index
@@ -351,6 +377,8 @@ class Wallet:
         :rtype: Wallet
         """
         return Wallet(
+            self._network_type,
+            self._explorer_client,
             self._wallet_index,
             self._wallet_name,
             self._start_index,
@@ -430,7 +458,7 @@ class Wallet:
         :returns: the current balance of this wallet (sync)
         :rtype: Balance
         """
-        return Balance()
+        return Balance(self._network_type)
 
     def transaction_new(self):
         """
@@ -502,29 +530,48 @@ class CoinTransactionBuilder:
 
 
 class Balance:
-    def __init__(self, amount=None):
+    def __init__(self, network_type, amount=None):
         if amount is None:
             self._amount = 1
         else:
             if not isinstance(amount, int):
                 raise TypeError("amount can only be int or None, not be of type {}".format(type(amount)))
-            self._amount = max(amount, 1)
+            self._amount = max(amount, 0)
+        self._network_type = network_type
+
+    def merge(self, other):
+        if self._network_type.__ne__(other._network_type):
+            raise ValueError("miner fees of to-be-merged balance objects have to be equal")
+        return Balance(network_type=self._network_type, amount=self._amount+other._amount)
+
+    def spend_amount_is_valid(self, amount):
+        # type-check and normalize amount (type)
+        if not isinstance(amount, Currency):
+            try:
+                amount = Currency.from_str(amount)
+            except Exception:
+                return False
+        # ensure amount is strictly positive
+        if amount.less_than_or_equal_to('0'):
+            return False
+        # ensure amount is less or equal to the fee + the amount of unlocked coins
+        return amount.plus(self._network_type.minimum_miner_fee()).less_than_or_equal_to(self.coins_unlocked)
 
     @property
     def coins_unlocked(self):
-        return jsstr.from_int(self._amount)
+        return Currency(jsstr.from_int(self._amount))
 
     @property
     def coins_locked(self):
-        return jsstr.from_int(self._amount)
+        return Currency(jsstr.from_int(self._amount))
 
     @property
     def coins_total(self):
-        return jsstr.from_int(jsstr.to_int(self.coins_unlocked) + jsstr.to_int(self.coins_locked))
+        return self.coins_unlocked.plus(self.coins_locked)
 
     def address_filter(self, address):
         UnlockHash.from_str(address)
-        return Balance(jshex.hex_to_int(address[3])%9 + 1)
+        return Balance(self._network_type, jshex.hex_to_int(address[3])%9 + 1)
 
     @property
     def transactions(self):
@@ -542,7 +589,7 @@ class Balance:
                             '0111429d9967c5c5e52e5aad522d6759e88c6fca8a54fa23ea12917006edf6842631a8a5d847ac',
                         ],
                         '016c3dabb530029e4503a73ec944024f0d74ca080537972bb658a69f120ab307662f996d9fc85f',
-                        '40000000',
+                        Currency('40000000'),
                         0,
                     ),
                 ],
@@ -557,13 +604,13 @@ class Balance:
                     CoinOutputView(
                         ['0111429d9967c5c5e52e5aad522d6759e88c6fca8a54fa23ea12917006edf6842631a8a5d847ac'],
                         '01ef91e8e584484c11850e49265256449a6acc9a75e0a7814e374d0248056d2d5d43fe494d9fd9',
-                        '100',
+                        Currency('100'),
                         0,
                     ),
                     CoinOutputView(
                         ['01a94cff5aa86508d742051ba743a525331cc9b31ba7152627344902ea79dc8d2c436ceda5bcb4'],
                         '01ef91e8e584484c11850e49265256449a6acc9a75e0a7814e374d0248056d2d5d43fe494d9fd9',
-                        '340200',
+                        Currency('340200'),
                         0,
                     ),
                 ],
@@ -581,7 +628,7 @@ class Balance:
                             '01a94cff5aa86508d742051ba743a525331cc9b31ba7152627344902ea79dc8d2c436ceda5bcb4',
                         ],
                         '01a94cff5aa86508d742051ba743a525331cc9b31ba7152627344902ea79dc8d2c436ceda5bcb4',
-                        '20000',
+                        Currency('20000'),
                         1558458390,
                     ),
                 ],
@@ -597,7 +644,7 @@ class Balance:
                     CoinOutputView(
                         ['01a94cff5aa86508d742051ba743a525331cc9b31ba7152627344902ea79dc8d2c436ceda5bcb4'],
                         '0111429d9967c5c5e52e5aad522d6759e88c6fca8a54fa23ea12917006edf6842631a8a5d847ac',
-                        '123456789.2003',
+                        Currency('123456789.2003'),
                         0,
                     ),
                 ],
@@ -612,13 +659,13 @@ class Balance:
                     CoinOutputView(
                         ['01ef91e8e584484c11850e49265256449a6acc9a75e0a7814e374d0248056d2d5d43fe494d9fd9'],
                         '0111429d9967c5c5e52e5aad522d6759e88c6fca8a54fa23ea12917006edf6842631a8a5d847ac',
-                        '3000.200',
+                        Currency('3000.200'),
                         0,
                     ),
                     CoinOutputView(
                         ['01a94cff5aa86508d742051ba743a525331cc9b31ba7152627344902ea79dc8d2c436ceda5bcb4'],
                         '0111429d9967c5c5e52e5aad522d6759e88c6fca8a54fa23ea12917006edf6842631a8a5d847ac',
-                        '10000',
+                        Currency('10000'),
                         250000,
                     ),
                 ],
@@ -728,7 +775,7 @@ class CoinOutputView:
     def amount(self):
         """
         :returns: the amount of money attached to this coin input (in TFT)
-        :rtype: str
+        :rtype: Currency
         """
         return self._amount
     @property
@@ -869,3 +916,16 @@ def wallet_address_is_valid(address, multisig=True):
         return multisig and uh.uhtype.value == UnlockHashType.MULTI_SIG.value
     except Exception:
         return False
+
+# import random
+# def hello_pool(limit=None):
+#     def generator():
+#         for i in range(0, 8):
+#             cb = create_x_cb(i)
+#             yield jsasync.chain(jsasync.sleep(random.randint(1000, 5000)), cb)
+#     return jsasync.promise_pool_new(generator, limit)
+
+# def create_x_cb(x):
+#     def cb():
+#         return x
+#     return cb

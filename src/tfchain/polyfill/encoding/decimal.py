@@ -3,11 +3,24 @@ from tfchain.polyfill.encoding.jsmods.decimaljs import api as jsdec
 import tfchain.polyfill.encoding.str as jsstr
 
 class Decimal:
-    def __init__(self, value):
+    def __init__(self, value=None):
+        if value is None:
+            value = '0'
         if isinstance(value, Decimal):
             self._value = value.value
         else:
-            self._value = jsdec.new_decimal(value)
+            output = None
+            error = None
+            __pragma__("js", "{}", """
+            try {
+                output = jsdec.new_decimal(value);
+            } catch(e) {
+                error = e;
+            }
+            """)
+            if error is not None:
+                raise ValueError(error)
+            self._value = output
 
     @property
     def value(self):

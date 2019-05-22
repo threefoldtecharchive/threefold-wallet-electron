@@ -556,7 +556,10 @@ export var Currency =  __class__ ('Currency', [BaseDataTypeClass], {
 		self._value = null;
 		self.value = value;
 	});},
-	get from_json () {return __getcm__ (this, function (cls, obj) {
+	get from_str () {return __getcm__ (this, function (cls, obj, lowest_unit) {
+		if (typeof lowest_unit == 'undefined' || (lowest_unit != null && lowest_unit.hasOwnProperty ("__kwargtrans__"))) {;
+			var lowest_unit = false;
+		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -565,6 +568,7 @@ export var Currency =  __class__ ('Currency', [BaseDataTypeClass], {
 					switch (__attrib0__) {
 						case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
 						case 'obj': var obj = __allkwargs0__ [__attrib0__]; break;
+						case 'lowest_unit': var lowest_unit = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
@@ -572,7 +576,7 @@ export var Currency =  __class__ ('Currency', [BaseDataTypeClass], {
 		else {
 		}
 		if (obj !== null && !(isinstance (obj, str))) {
-			var __except0__ = py_TypeError ('currency is expected to be a string when part of a JSON object, not type {}'.format (py_typeof (obj)));
+			var __except0__ = py_TypeError ('currency is expected to be a string , not type {}'.format (py_typeof (obj)));
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
@@ -580,8 +584,28 @@ export var Currency =  __class__ ('Currency', [BaseDataTypeClass], {
 			var obj = null;
 		}
 		var c = cls ();
-		c.value = jsdec.Decimal (obj) * jsdec.Decimal ('0.000000001');
+		c.value = jsdec.Decimal (obj);
+		if (lowest_unit) {
+			c.value *= jsdec.Decimal ('0.000000001');
+		}
 		return c;
+	});},
+	get from_json () {return __getcm__ (this, function (_, obj) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case '_': var _ = __allkwargs0__ [__attrib0__]; break;
+						case 'obj': var obj = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return Currency.from_str (obj, __kwargtrans__ ({lowest_unit: true}));
 	});},
 	get _get_value () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -601,6 +625,159 @@ export var Currency =  __class__ ('Currency', [BaseDataTypeClass], {
 			return jsdec.Decimal ();
 		}
 		return self._value;
+	});},
+	get plus () {return __get__ (this, function (self, other) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self.__add__ (other);
+	});},
+	get minus () {return __get__ (this, function (self, other) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self.__sub__ (other);
+	});},
+	get times () {return __get__ (this, function (self, other) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self.__mul__ (other);
+	});},
+	get equal_to () {return __get__ (this, function (self, other) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self.__eq__ (other);
+	});},
+	get not_equal_to () {return __get__ (this, function (self, other) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self.__ne__ (other);
+	});},
+	get less_than () {return __get__ (this, function (self, other) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self.__lt__ (other);
+	});},
+	get greater_than () {return __get__ (this, function (self, other) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self.__gt__ (other);
+	});},
+	get less_than_or_equal_to () {return __get__ (this, function (self, other) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self.__le__ (other);
+	});},
+	get greater_than_or_equal_to () {return __get__ (this, function (self, other) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self.__ge__ (other);
 	});},
 	get _set_value () {return __get__ (this, function (self, value) {
 		if (arguments.length) {

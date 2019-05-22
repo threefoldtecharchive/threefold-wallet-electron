@@ -1,5 +1,7 @@
 import tfchain.polyfill.encoding.str as jsstr
 
+from tfchain.types.PrimitiveTypes import Currency
+
 class Type:
     def __init__(self, value):
         if isinstance(value, Type):
@@ -20,6 +22,8 @@ class Type:
         if isinstance(other, Type):
             return self.value == other.value
         return self.value == other
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
     def __int__(self):
         return self.value
@@ -45,11 +49,10 @@ class Type:
             return Type.DEVNET
         raise ValueError(s + " is not a supported network type str")
 
-    # TODO: ENABLE
-    # def minimum_miner_fee(self):
-    #     if self == Type.DEVNET:
-    #         return Currency('1.0')
-    #     return Currency('0.1')
+    def minimum_miner_fee(self):
+        if self == Type.DEVNET:
+            return Currency('1.0')
+        return Currency('0.1')
 
     def default_explorer_addresses(self):
         if self.__eq__(Type.STANDARD):

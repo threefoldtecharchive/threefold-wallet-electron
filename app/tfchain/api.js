@@ -1,4 +1,5 @@
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __proxy__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, abs, all, any, assert, bool, bytearray, bytes, callable, chr, copy, deepcopy, delattr, dict, dir, divmod, enumerate, filter, float, getattr, hasattr, input, int, isinstance, issubclass, len, list, map, max, min, object, ord, pow, print, property, py_TypeError, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
+import {Currency} from './tfchain.types.PrimitiveTypes.js';
 import {UnlockHash, UnlockHashType} from './tfchain.types.ConditionTypes.js';
 import * as tfexplorer from './tfchain.explorer.js';
 import * as tfnetwork from './tfchain.network.js';
@@ -328,7 +329,7 @@ export var Account =  __class__ ('Account', [object], {
 			var pair = jscrypto.AssymetricSignKeyPair (entropy);
 			pairs.append (pair);
 		}
-		var wallet = Wallet (wallet_index, wallet_name, start_index, pairs);
+		var wallet = Wallet (self._network_type, self._explorer_client, wallet_index, wallet_name, start_index, pairs);
 		self._validate_wallet_state (wallet);
 		return wallet;
 	});},
@@ -503,8 +504,77 @@ export var Account =  __class__ ('Account', [object], {
 			return jsasync.chain (explorer_client.data_get ('/explorer/blocks/{}'.format (chain_height)), cb);
 		};
 		return jsasync.chain (jsasync.wait (jsasync.as_promise (fetch_stats), jsasync.as_promise (fetch_constants)), fetch_current_block);
+	});},
+	get _get_balance () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var wallets = self.wallets;
+		if (len (wallets) == 0) {
+			var no_balance_cb = function () {
+				if (arguments.length) {
+					var __ilastarg0__ = arguments.length - 1;
+					if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+						var __allkwargs0__ = arguments [__ilastarg0__--];
+						for (var __attrib0__ in __allkwargs0__) {
+						}
+					}
+				}
+				else {
+				}
+				return Balance (self._network_type, __kwargtrans__ ({amount: 0}));
+			};
+			return jsasync.as_promise (no_balance_cb);
+		}
+		var aggregate = function (balances) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'balances': var balances = __allkwargs0__ [__attrib0__]; break;
+						}
+					}
+				}
+			}
+			else {
+			}
+			var balance = balances [0];
+			for (var other of balances.__getslice__ (1, null, 1)) {
+				var balance = balance.merge (other);
+			}
+			return balance;
+		};
+		var generator = function* () {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+					}
+				}
+			}
+			else {
+			}
+			for (var wallet of wallets) {
+				yield wallet.balance;
+			}
+			};
+		return jsasync.chain (jsasync.promise_pool_new (generator), aggregate);
 	});}
 });
+Object.defineProperty (Account, 'balance', property.call (Account, Account._get_balance));
 Object.defineProperty (Account, 'wallet_count', property.call (Account, Account._get_wallet_count));
 Object.defineProperty (Account, 'wallets', property.call (Account, Account._get_wallets));
 Object.defineProperty (Account, 'wallet', property.call (Account, Account._get_wallet));
@@ -513,7 +583,7 @@ Object.defineProperty (Account, 'mnemonic', property.call (Account, Account._get
 Object.defineProperty (Account, 'account_name', property.call (Account, Account._get_account_name));;
 export var Wallet =  __class__ ('Wallet', [object], {
 	__module__: __name__,
-	get __init__ () {return __get__ (this, function (self, wallet_index, wallet_name, start_index, pairs) {
+	get __init__ () {return __get__ (this, function (self, network_type, explorer_client, wallet_index, wallet_name, start_index, pairs) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -521,6 +591,8 @@ export var Wallet =  __class__ ('Wallet', [object], {
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'network_type': var network_type = __allkwargs0__ [__attrib0__]; break;
+						case 'explorer_client': var explorer_client = __allkwargs0__ [__attrib0__]; break;
 						case 'wallet_index': var wallet_index = __allkwargs0__ [__attrib0__]; break;
 						case 'wallet_name': var wallet_name = __allkwargs0__ [__attrib0__]; break;
 						case 'start_index': var start_index = __allkwargs0__ [__attrib0__]; break;
@@ -531,6 +603,8 @@ export var Wallet =  __class__ ('Wallet', [object], {
 		}
 		else {
 		}
+		self._network_type = network_type;
+		self._explorer_client = explorer_client;
 		self._wallet_index = wallet_index;
 		self._wallet_name = wallet_name;
 		self._start_index = start_index;
@@ -550,7 +624,7 @@ export var Wallet =  __class__ ('Wallet', [object], {
 		}
 		else {
 		}
-		return Wallet (self._wallet_index, self._wallet_name, self._start_index, (function () {
+		return Wallet (self._network_type, self._explorer_client, self._wallet_index, self._wallet_name, self._start_index, (function () {
 			var __accu0__ = [];
 			for (var pair of self._pairs) {
 				__accu0__.append (pair);
@@ -708,7 +782,7 @@ export var Wallet =  __class__ ('Wallet', [object], {
 		}
 		else {
 		}
-		return Balance ();
+		return Balance (self._network_type);
 	});},
 	get transaction_new () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -850,7 +924,7 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 });
 export var Balance =  __class__ ('Balance', [object], {
 	__module__: __name__,
-	get __init__ () {return __get__ (this, function (self, amount) {
+	get __init__ () {return __get__ (this, function (self, network_type, amount) {
 		if (typeof amount == 'undefined' || (amount != null && amount.hasOwnProperty ("__kwargtrans__"))) {;
 			var amount = null;
 		};
@@ -861,6 +935,7 @@ export var Balance =  __class__ ('Balance', [object], {
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'network_type': var network_type = __allkwargs0__ [__attrib0__]; break;
 						case 'amount': var amount = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
@@ -877,8 +952,64 @@ export var Balance =  __class__ ('Balance', [object], {
 				__except0__.__cause__ = null;
 				throw __except0__;
 			}
-			self._amount = max (amount, 1);
+			self._amount = max (amount, 0);
 		}
+		self._network_type = network_type;
+	});},
+	get merge () {return __get__ (this, function (self, other) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (self._network_type.__ne__ (other._network_type)) {
+			var __except0__ = ValueError ('miner fees of to-be-merged balance objects have to be equal');
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		return Balance (__kwargtrans__ ({network_type: self._network_type, amount: self._amount + other._amount}));
+	});},
+	get spend_amount_is_valid () {return __get__ (this, function (self, amount) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'amount': var amount = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (!(isinstance (amount, Currency))) {
+			try {
+				var amount = Currency.from_str (amount);
+			}
+			catch (__except0__) {
+				if (isinstance (__except0__, Exception)) {
+					return false;
+				}
+				else {
+					throw __except0__;
+				}
+			}
+		}
+		if (amount.less_than_or_equal_to ('0')) {
+			return false;
+		}
+		return amount.plus (self._network_type.minimum_miner_fee ()).less_than_or_equal_to (self.coins_unlocked);
 	});},
 	get _get_coins_unlocked () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -894,7 +1025,7 @@ export var Balance =  __class__ ('Balance', [object], {
 		}
 		else {
 		}
-		return jsstr.from_int (self._amount);
+		return Currency (jsstr.from_int (self._amount));
 	});},
 	get _get_coins_locked () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -910,7 +1041,7 @@ export var Balance =  __class__ ('Balance', [object], {
 		}
 		else {
 		}
-		return jsstr.from_int (self._amount);
+		return Currency (jsstr.from_int (self._amount));
 	});},
 	get _get_coins_total () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -926,7 +1057,7 @@ export var Balance =  __class__ ('Balance', [object], {
 		}
 		else {
 		}
-		return jsstr.from_int (jsstr.to_int (self.coins_unlocked) + jsstr.to_int (self.coins_locked));
+		return self.coins_unlocked.plus (self.coins_locked);
 	});},
 	get address_filter () {return __get__ (this, function (self, address) {
 		if (arguments.length) {
@@ -944,7 +1075,7 @@ export var Balance =  __class__ ('Balance', [object], {
 		else {
 		}
 		UnlockHash.from_str (address);
-		return Balance (__mod__ (jshex.hex_to_int (address [3]), 9) + 1);
+		return Balance (self._network_type, __mod__ (jshex.hex_to_int (address [3]), 9) + 1);
 	});},
 	get _get_transactions () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -960,7 +1091,7 @@ export var Balance =  __class__ ('Balance', [object], {
 		}
 		else {
 		}
-		return [TransactionView ('0df49c1ae60352f7fa173e8a10804d125aa23f0ede1a405b59032c29c3d30777', 0, 0, null, [CoinOutputView (['01a94cff5aa86508d742051ba743a525331cc9b31ba7152627344902ea79dc8d2c436ceda5bcb4', '0111429d9967c5c5e52e5aad522d6759e88c6fca8a54fa23ea12917006edf6842631a8a5d847ac'], '016c3dabb530029e4503a73ec944024f0d74ca080537972bb658a69f120ab307662f996d9fc85f', '40000000', 0)], []), TransactionView ('c3b29d74b8f98332d5c976451e15eab94c210fe4c0b4b6d020153f2a6b2c2253', 270010, 1557083437, '101277c10b4c975419c2382d8bb06a2c8b0c30110de1844daf4ff8efe8e900bc', [CoinOutputView (['0111429d9967c5c5e52e5aad522d6759e88c6fca8a54fa23ea12917006edf6842631a8a5d847ac'], '01ef91e8e584484c11850e49265256449a6acc9a75e0a7814e374d0248056d2d5d43fe494d9fd9', '100', 0), CoinOutputView (['01a94cff5aa86508d742051ba743a525331cc9b31ba7152627344902ea79dc8d2c436ceda5bcb4'], '01ef91e8e584484c11850e49265256449a6acc9a75e0a7814e374d0248056d2d5d43fe494d9fd9', '340200', 0)], []), TransactionView ('a0e3f3036e8b7f082307c7747beada0656e1ea205f384ce7abea1401d5881a90', 270009, 1557083331, '66d3d46f6a75dcab102baff7016cd518d857c37db0db4151dae45b225408de9d', [CoinOutputView (['0111429d9967c5c5e52e5aad522d6759e88c6fca8a54fa23ea12917006edf6842631a8a5d847ac', '01a94cff5aa86508d742051ba743a525331cc9b31ba7152627344902ea79dc8d2c436ceda5bcb4'], '01a94cff5aa86508d742051ba743a525331cc9b31ba7152627344902ea79dc8d2c436ceda5bcb4', '20000', 1558458390)], []), TransactionView ('a3bf595635b3563859a00fedf6a5b435fef9802f1ff6e9d4640a072e0b2f49e4', 240000, 1553463308, 'a3bf595635b3563859a00fedf6a5b435fef9802f1ff6e9d4640a072e0b2f49e4', [], [CoinOutputView (['01a94cff5aa86508d742051ba743a525331cc9b31ba7152627344902ea79dc8d2c436ceda5bcb4'], '0111429d9967c5c5e52e5aad522d6759e88c6fca8a54fa23ea12917006edf6842631a8a5d847ac', '123456789.2003', 0)]), TransactionView ('66ccdf3a0bca58025be7fdc71f3f6bfbd6ed6287aa698a131734a947c71a3bbf', 240000, 1553463308, 'a3bf595635b3563859a00fedf6a5b435fef9802f1ff6e9d4640a072e0b2f49e4', [], [CoinOutputView (['01ef91e8e584484c11850e49265256449a6acc9a75e0a7814e374d0248056d2d5d43fe494d9fd9'], '0111429d9967c5c5e52e5aad522d6759e88c6fca8a54fa23ea12917006edf6842631a8a5d847ac', '3000.200', 0), CoinOutputView (['01a94cff5aa86508d742051ba743a525331cc9b31ba7152627344902ea79dc8d2c436ceda5bcb4'], '0111429d9967c5c5e52e5aad522d6759e88c6fca8a54fa23ea12917006edf6842631a8a5d847ac', '10000', 250000)])];
+		return [TransactionView ('0df49c1ae60352f7fa173e8a10804d125aa23f0ede1a405b59032c29c3d30777', 0, 0, null, [CoinOutputView (['01a94cff5aa86508d742051ba743a525331cc9b31ba7152627344902ea79dc8d2c436ceda5bcb4', '0111429d9967c5c5e52e5aad522d6759e88c6fca8a54fa23ea12917006edf6842631a8a5d847ac'], '016c3dabb530029e4503a73ec944024f0d74ca080537972bb658a69f120ab307662f996d9fc85f', Currency ('40000000'), 0)], []), TransactionView ('c3b29d74b8f98332d5c976451e15eab94c210fe4c0b4b6d020153f2a6b2c2253', 270010, 1557083437, '101277c10b4c975419c2382d8bb06a2c8b0c30110de1844daf4ff8efe8e900bc', [CoinOutputView (['0111429d9967c5c5e52e5aad522d6759e88c6fca8a54fa23ea12917006edf6842631a8a5d847ac'], '01ef91e8e584484c11850e49265256449a6acc9a75e0a7814e374d0248056d2d5d43fe494d9fd9', Currency ('100'), 0), CoinOutputView (['01a94cff5aa86508d742051ba743a525331cc9b31ba7152627344902ea79dc8d2c436ceda5bcb4'], '01ef91e8e584484c11850e49265256449a6acc9a75e0a7814e374d0248056d2d5d43fe494d9fd9', Currency ('340200'), 0)], []), TransactionView ('a0e3f3036e8b7f082307c7747beada0656e1ea205f384ce7abea1401d5881a90', 270009, 1557083331, '66d3d46f6a75dcab102baff7016cd518d857c37db0db4151dae45b225408de9d', [CoinOutputView (['0111429d9967c5c5e52e5aad522d6759e88c6fca8a54fa23ea12917006edf6842631a8a5d847ac', '01a94cff5aa86508d742051ba743a525331cc9b31ba7152627344902ea79dc8d2c436ceda5bcb4'], '01a94cff5aa86508d742051ba743a525331cc9b31ba7152627344902ea79dc8d2c436ceda5bcb4', Currency ('20000'), 1558458390)], []), TransactionView ('a3bf595635b3563859a00fedf6a5b435fef9802f1ff6e9d4640a072e0b2f49e4', 240000, 1553463308, 'a3bf595635b3563859a00fedf6a5b435fef9802f1ff6e9d4640a072e0b2f49e4', [], [CoinOutputView (['01a94cff5aa86508d742051ba743a525331cc9b31ba7152627344902ea79dc8d2c436ceda5bcb4'], '0111429d9967c5c5e52e5aad522d6759e88c6fca8a54fa23ea12917006edf6842631a8a5d847ac', Currency ('123456789.2003'), 0)]), TransactionView ('66ccdf3a0bca58025be7fdc71f3f6bfbd6ed6287aa698a131734a947c71a3bbf', 240000, 1553463308, 'a3bf595635b3563859a00fedf6a5b435fef9802f1ff6e9d4640a072e0b2f49e4', [], [CoinOutputView (['01ef91e8e584484c11850e49265256449a6acc9a75e0a7814e374d0248056d2d5d43fe494d9fd9'], '0111429d9967c5c5e52e5aad522d6759e88c6fca8a54fa23ea12917006edf6842631a8a5d847ac', Currency ('3000.200'), 0), CoinOutputView (['01a94cff5aa86508d742051ba743a525331cc9b31ba7152627344902ea79dc8d2c436ceda5bcb4'], '0111429d9967c5c5e52e5aad522d6759e88c6fca8a54fa23ea12917006edf6842631a8a5d847ac', Currency ('10000'), 250000)])];
 	});}
 });
 Object.defineProperty (Balance, 'transactions', property.call (Balance, Balance._get_transactions));
