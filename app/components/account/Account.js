@@ -1,16 +1,16 @@
 // @flow
 import { connect } from 'react-redux'
-import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
+import React, { Component } from 'react'
+import { Link } from 'react-router-dom'
 import { Segment, Button, Icon, Divider, Card } from 'semantic-ui-react'
-import routes from '../../constants/routes';
+import routes from '../../constants/routes'
 import { selectWallet, setChainConstants } from '../../actions'
 import styles from '../home/Home.css'
 import Footer from '../footer'
-import { sumBy } from 'lodash'
+import { sumBy } from 'lodash'
 
 const mapStateToProps = state => ({
-    account: state.account
+  account: state.account
 })
 
 const mapDispatchToProps = (dispatch) => ({
@@ -23,18 +23,18 @@ const mapDispatchToProps = (dispatch) => ({
 })
 
 class Account extends Component {
-  constructor(props) {
-      super(props)
-      this.state = {
-        totalCoins: 0,
-        totalCoinLocked: 0,
-        totalCoinUnlocked: 0,
-      }
+  constructor (props) {
+    super(props)
+    this.state = {
+      totalCoins: 0,
+      totalCoinLocked: 0,
+      totalCoinUnlocked: 0
+    }
   }
 
   componentDidMount () {
     this.getAccountBalance()
-    this.interval = setInterval(() => {this.getAccountBalance()}, 60000)
+    this.interval = setInterval(() => { this.getAccountBalance() }, 60000)
   }
 
   componentWillUnmount () {
@@ -70,7 +70,7 @@ class Account extends Component {
         <p>no wallets</p>
       )
     }
-  
+
     return (
       <Card.Group style={{ marginTop: 10, marginLeft: 50, padding: 20 }}>
         {wallets.map(w => {
@@ -82,22 +82,16 @@ class Account extends Component {
                 <Card.Description style={{ textAlign: 'center', color: 'white', fontSize: 50, textTransform: 'uppercase', marginTop: 30, marginBottom: 30, fontFamily: 'SF UI Text Light' }}>
                   {w.balance.coins_total}
                 </Card.Description>
-                <Divider/>
+                <Divider />
                 <Card.Header style={{ textAlign: 'center', color: 'white', fontSize: 18, textTransform: 'uppercase', marginTop: 20, fontFamily: 'SF UI Text Light' }}>
                   wallet {w._wallet_name}
                 </Card.Header>
-                {/* <Card.Description style={{ color: 'white', fontSize: 15, marginTop: 20, textTransform: 'uppercase', }}>
-                  <Icon name='lock' style={{ marginRight: 15}} />Locked {w.balance.coins_locked} TFT
-                </Card.Description>
-                <Card.Description style={{ color: 'white', fontSize: 15, marginTop: 20, textTransform: 'uppercase', }}>
-                  <Icon name='unlock' style={{ marginRight: 10}} /> unlocked {w.balance.coins_unlocked} TFT
-                </Card.Description> */}
               </Card.Content>
             </Card>
           )
         })}
         <Card style={{ boxShadow: 'none', height: 180, width: 350, marginBottom: 60, marginTop: 0, background: '#29272E' }} onClick={() => this.props.history.push(routes.WALLET_NEW)}>
-          <Card.Content style={{ textAlign: 'center' }}>
+          <Card.Content style={{ textAlign: 'center' }}>
             <Card.Header style={{ color: 'white', fontSize: 20, textTransform: 'uppercase', position: 'absolute', top: 50, left: 90 }}>
               Create wallet
             </Card.Header>
@@ -108,41 +102,41 @@ class Account extends Component {
     )
   }
 
-  render() {
+  render () {
     return (
-        <div>
-            <div data-tid="backButton">
-                <Link to={routes.ACCOUNT_SETTINGS}>
-                    <Icon style={{ fontSize: 35, position: 'absolute', right: 20, cursor: 'pointer' }} name="setting"/>
-                </Link>
-                <Link to={routes.HOME}>
-                    <Icon style={{ fontSize: 35, position: 'absolute', right: 70, cursor: 'pointer' }} name="sign-out"/>
-                </Link>
-            </div>
-            <div className={styles.container} >
-                <h2 >{this.props.account.account_name}</h2>
-            </div>
-            <Divider style={{ background: '#1A253F' }}/>
-            <div style={{ display: 'flex' }}>
-              <div style={{ width: '70%', overflowY: 'auto', height: '80vh', paddingBottom: 100 }}>
-                {this.renderWallets()}
-              </div>
-              <div style={{ width: '30%', overflowY: 'scroll', height: '100vh' }}>
-                <Segment style={{ marginTop: 30, marginRight: 50, marginLeft: 50, background: '#29272E'  }}>
-                  <h3 style={{ color: 'white' }}>Total Balance: {this.state.totalCoins} TFT</h3>
-                  <h4 style={{ color: 'white' }}><Icon name='lock'/>Locked Balance: {this.state.totalCoinLocked}  TFT</h4>
-                  <h4 style={{ color: 'white' }}><Icon name='unlock'/>Unlocked Balance: {this.state.totalCoinUnlocked}  TFT</h4>
-                </Segment>
-              </div>
-            </div>
-
-            <div style={{ position: 'absolute', bottom: 150, right: 50 }}>
-              <Button className={styles.acceptButton} onClick={() => this.props.history.push(routes.WALLET_RECEIVE)} style={{ marginTop: 20, float: 'left', marginRight: 15, color: 'white'  }} size='big'>Receive</Button>
-              <Button className={styles.cancelButton} onClick={() => this.props.history.push(routes.TRANSFER)} style={{ marginTop: 20, marginRight: 10, float: 'left', background: 'none', color: 'white'  }} size='big'>Transfer</Button>
-            </div>
-            <Footer />
+      <div>
+        <div data-tid='backButton'>
+          <Link to={routes.ACCOUNT_SETTINGS}>
+            <Icon style={{ fontSize: 35, position: 'absolute', right: 20, cursor: 'pointer' }} name='setting' />
+          </Link>
+          <Link to={routes.HOME}>
+            <Icon style={{ fontSize: 35, position: 'absolute', right: 70, cursor: 'pointer' }} name='sign-out' />
+          </Link>
         </div>
-    );
+        <div className={styles.container} >
+          <h2 >{this.props.account.account_name}</h2>
+        </div>
+        <Divider style={{ background: '#1A253F' }} />
+        <div style={{ display: 'flex' }}>
+          <div style={{ width: '70%', overflowY: 'auto', height: '80vh', paddingBottom: 100 }}>
+            {this.renderWallets()}
+          </div>
+          <div style={{ width: '30%', overflowY: 'scroll', height: '100vh' }}>
+            <Segment style={{ marginTop: 30, marginRight: 50, marginLeft: 50, background: '#29272E' }}>
+              <h3 style={{ color: 'white' }}>Total Balance: {this.state.totalCoins} TFT</h3>
+              <h4 style={{ color: 'white' }}><Icon name='lock' />Locked Balance: {this.state.totalCoinLocked}  TFT</h4>
+              <h4 style={{ color: 'white' }}><Icon name='unlock' />Unlocked Balance: {this.state.totalCoinUnlocked}  TFT</h4>
+            </Segment>
+          </div>
+        </div>
+
+        <div style={{ position: 'absolute', bottom: 150, right: 50 }}>
+          <Button className={styles.acceptButton} onClick={() => this.props.history.push(routes.WALLET_RECEIVE)} style={{ marginTop: 20, float: 'left', marginRight: 15, color: 'white' }} size='big'>Receive</Button>
+          <Button className={styles.cancelButton} onClick={() => this.props.history.push(routes.TRANSFER)} style={{ marginTop: 20, marginRight: 10, float: 'left', background: 'none', color: 'white' }} size='big'>Transfer</Button>
+        </div>
+        <Footer />
+      </div>
+    )
   }
 }
 

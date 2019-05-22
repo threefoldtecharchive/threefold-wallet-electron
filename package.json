@@ -55,6 +55,9 @@
       "git add"
     ]
   },
+  "standard": {
+    "parser": "babel-eslint"
+  },
   "main": "./app/main.prod.js",
   "build": {
     "productName": "TFT-Wallet",

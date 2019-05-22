@@ -2,16 +2,15 @@
 import { connect } from 'react-redux'
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
-import { Icon, Input, Divider, Dropdown, Segment, Popup, Button, Label } from 'semantic-ui-react'
+import { Icon, Input, Divider, Dropdown, Segment, Label } from 'semantic-ui-react'
 import routes from '../../constants/routes'
 import styles from '../home/Home.css'
-import { saveWallet, saveAccount, deleteWallet } from '../../actions'
 import Footer from '../footer'
 import QRCode from 'qrcode.react'
-import { flatten, find } from 'lodash'
-import { CopyToClipboard } from 'react-copy-to-clipboard';
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { flatten, find } from 'lodash'
+import { CopyToClipboard } from 'react-copy-to-clipboard'
+import { toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 const mapStateToProps = state => ({
   wallet: state.wallet,
@@ -45,7 +44,7 @@ class WalletSettings extends Component {
   mapAddressesToDropdownOption = () => {
     const { selectedWallet } = this.state
     if (selectedWallet) {
-      const wallet = find(this.props.account.wallets, w => w._wallet_name == selectedWallet._wallet_name)
+      const wallet = find(this.props.account.wallets, w => w._wallet_name === selectedWallet._wallet_name)
       return flatten(wallet.addresses.map(w => {
         return {
           key: w,
@@ -53,12 +52,11 @@ class WalletSettings extends Component {
           value: w
         }
       }))
-
     }
   }
 
   selectWallet = (event, data) => {
-    this.setState({ selectedWallet: data.value, selectedAddress: data.value.addresses[0] })
+    this.setState({ selectedWallet: data.value, selectedAddress: data.value.addresses[0] })
   }
 
   selectAddress = (event, data) => {
@@ -82,7 +80,7 @@ class WalletSettings extends Component {
   render () {
     const walletsOptions = this.mapWalletsToDropdownOption()
     const addressOption = this.mapAddressesToDropdownOption()
-    const { amount, selectedAddress, selectedWallet } = this.state
+    const { amount, selectedAddress, selectedWallet } = this.state
     return (
       <div>
         <div className={styles.container} >
@@ -113,8 +111,8 @@ class WalletSettings extends Component {
           />
           {this.renderQRCode()}
           <CopyToClipboard text={selectedAddress}
-            onCopy={() => this.setState({copied: true})}>
-            <Label onClick={() => toast("Copied to clipboard")} style={{ display: 'block', margin: 'auto', width: 200, cursor: 'pointer' }}><Icon name='clipboard' /> copy address to clipboard</Label>
+            onCopy={() => this.setState({ copied: true })}>
+            <Label onClick={() => toast('Copied to clipboard')} style={{ display: 'block', margin: 'auto', width: 200, cursor: 'pointer' }}><Icon name='clipboard' /> copy address to clipboard</Label>
           </CopyToClipboard>
           <div style={{ textAlign: 'center', marginTop: 20 }}>
             <Input style={{ width: 300, marginLeft: 'auto', marginRight: 'auto' }} type='number' label='amount' onChange={this.handleAmountChange} value={amount} />
