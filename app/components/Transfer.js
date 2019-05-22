@@ -6,9 +6,17 @@ import routes from '../constants/routes'
 import styles from './home/Home.css'
 import Footer from './footer'
 import { toast } from 'react-toastify'
+import { selectWallet } from '../actions'
 
 const mapStateToProps = state => ({
-  account: state.account
+  account: state.account,
+  wallet: state.wallet
+})
+
+const mapDispatchToProps = (dispatch) => ({
+  selectWallet: (wallet) => {
+    dispatch(selectWallet(wallet))
+  }
 })
 
 class Transfer extends Component {
@@ -53,35 +61,38 @@ class Transfer extends Component {
 
   selectWallet = (event, data) => {
     this.setState({ selectedWallet: data.value })
+    this.props.selectWallet(data.value)
   }
 
   submitTransaction = () => {
-    this.renderLoader(true)
     const { description, destination, amount, selectedWallet } = this.state
     let destinationError = false
-    let descriptionError = false
+    // let descriptionError = false
     let amountError = false
 
     if (destination === '') {
       destinationError = true
     }
 
-    if (description === '') {
-      descriptionError = true
-    }
+    // if (description === '') {
+    //   descriptionError = true
+    // }
 
     if (amount <= 0) {
       amountError = true
     }
 
-    if (!destinationError && !descriptionError && !amountError) {
+    if (!destinationError && !amountError && selectedWallet != null) {
+      this.renderLoader(true)
+
       const builder = selectedWallet.transaction_new()
       builder.output_add(destination, amount.toString())
       builder.send({ data: description }).then(txid => {
         const _this = this
         setTimeout(function () {
-          _this.setState({ destinationError, descriptionError, amountError, loader: false })
-          return _this.props.history.push('/account')
+          _this.setState({ destinationError, amountError, loader: false })
+          toast('Transaction submitted')
+          return _this.props.history.push('/wallet')
         }, 2000)
       }).catch(err => {
         toast('transaction failed')
@@ -107,13 +118,13 @@ class Transfer extends Component {
   }
 
   render () {
-    const { description, destination, destinationError, descriptionError, amountError, amount } = this.state
+    const { destination, destinationError, amountError, amount } = this.state
     const walletsOptions = this.mapWalletsToDropdownOption()
 
     if (this.state.loader) {
       return (
         <Dimmer active={this.state.loader}>
-          <Loader content='Loading' />
+          <Loader content='Submitting transaction' />
         </Dimmer>
       )
     }
@@ -129,9 +140,9 @@ class Transfer extends Component {
           <Form.Field style={{ marginTop: 10 }}>
             <Input error={destinationError} style={{ background: '#0c111d !important', color: '#7784a9' }} icon={<Icon name='send' style={{ color: '#0e72f5' }} />} iconPosition='left' placeholder='destination address' value={destination} onChange={this.handleDestinationChange} />
           </Form.Field>
-          <Form.Field style={{ marginTop: 30 }}>
+          {/* <Form.Field style={{ marginTop: 30 }}>
             <Input error={descriptionError} style={{ background: '#0c111d !important', color: '#7784a9' }} icon={<Icon name='align left' style={{ color: 'green' }} />} iconPosition='left' placeholder='message' value={description} onChange={this.handleDescriptionChange} />
-          </Form.Field>
+          </Form.Field> */}
           <Form.Field style={{ marginTop: 30 }}>
             <Input type='number' error={amountError} label='Amount TFT' style={{ background: '#0c111d !important', color: '#7784a9', width: 150 }} placeholder='amount' value={amount} onChange={this.handleAmountChange} />
           </Form.Field>
@@ -147,8 +158,8 @@ class Transfer extends Component {
         </Form>
         {this.renderErrorMessage()}
         <div style={{ position: 'absolute', bottom: 150, right: 80 }}>
-          <Button onClick={() => this.props.history.push(routes.ACCOUNT)} style={{ marginTop: 20, float: 'left', background: '#2B3C72', color: 'white', marginRight: 15 }} size='big'>Cancel</Button>
-          <Button onClick={() => this.submitTransaction()} style={{ marginTop: 20, marginRight: 10, float: 'left', background: '#015DE1', color: 'white' }} size='big'>Send</Button>
+          <Button className={styles.cancelButton} onClick={() => this.props.history.push(routes.ACCOUNT)} style={{ marginTop: 20, float: 'left', background: '#2B3C72', color: 'white', marginRight: 15 }} size='big'>Cancel</Button>
+          <Button className={styles.acceptButton} onClick={() => this.submitTransaction()} style={{ marginTop: 20, marginRight: 10, float: 'left', background: '#015DE1', color: 'white' }} size='big'>Send</Button>
         </div>
         <Footer />
       </div>
@@ -158,5 +169,5 @@ class Transfer extends Component {
 
 export default connect(
   mapStateToProps,
-  null
+  mapDispatchToProps
 )(Transfer)

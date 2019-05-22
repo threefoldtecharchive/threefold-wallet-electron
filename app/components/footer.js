@@ -52,7 +52,7 @@ class Footer extends Component {
 
   render () {
     const { chainConstants } = this.props
-    const { error } = this.state
+    const { error } = this.state
     const date = moment(chainConstants.chain_timestamp).format('MMMM Do , HH:mm')
 
     let chainError = false

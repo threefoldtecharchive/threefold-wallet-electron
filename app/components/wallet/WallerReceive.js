@@ -90,7 +90,7 @@ class WalletSettings extends Component {
         <Link to={routes.ACCOUNT}>
           <Icon style={{ fontSize: 25, marginLeft: 15, marginTop: 15, cursor: 'pointer' }} name='chevron circle left' />
         </Link>
-        <div style={{ width: '50%', margin: 'auto', marginTop: 50 }}>
+        <div style={{ width: '50%', margin: 'auto' }}>
           <Dropdown
             style={{ width: 650, marginLeft: 'auto', marginRight: 'auto', marginBottom: 20 }}
             placeholder='Select Wallet'

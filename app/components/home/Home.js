@@ -62,15 +62,13 @@ class Home extends Component {
               <div className={styles.accountBlockPart}>
                 {account}
               </div>
-              <div className={styles.accountBlockPartLower}>
-                Last login: xx/xx/xx
-              </div>
+              <div className={styles.accountBlockPartLower} />
             </div>
           )
         })}
         <Divider style={{ marginTop: 50, color: 'white' }} horizontal>Or</Divider>
         <div style={{ margin: 'auto' }}>
-          <Button className={styles.acceptButton} onClick={() => this.props.history.push(routes.NEW)} size='big' style={{ width: 200, marginTop: 35, background: '#015DE1', color: 'white' }}>New Account</Button>
+          <Button className={styles.cancelButton} onClick={() => this.props.history.push(routes.NEW)} size='big' style={{ width: 200, marginTop: 35, background: 'none', color: 'white' }}>New Account</Button>
         </div>
       </div>
     )

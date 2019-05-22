@@ -109,25 +109,23 @@ class Wallet extends Component {
         </div>
         <Divider style={{ background: '#1A253F' }} />
         <div>
-          <Link to={routes.ACCOUNT}>
-            <Icon style={{ fontSize: 25, marginLeft: 15, marginTop: 15, cursor: 'pointer' }} name='chevron circle left' />
-          </Link>
-          <Grid centered columns={2} style={{ marginBottom: 30 }}>
-            <GridColumn>
-              <Segment style={{ marginTop: 60, marginLeft: '10%', background: '#29272E' }}>
+          <Icon onClick={() => this.props.history.push(routes.ACCOUNT)} style={{ fontSize: 25, marginLeft: 15, marginTop: 15, cursor: 'pointer', zIndex: 5 }} name='chevron circle left' />
+          <Grid centered columns={2} style={{ marginBottom: 30, marginTop: -50 }}>
+            <GridColumn style={{ height: 200, marginTop: 0, width: '40%' }}>
+              <Segment style={{ marginTop: 20, background: '#29272E' }}>
                 <h3 style={{ color: 'white' }}>Total Balance: {coinsTotal} TFT</h3>
                 <h4 style={{ color: 'white' }}><Icon name='lock' />Locked Balance: {coinsLocked} TFT</h4>
                 <h4 style={{ color: 'white' }}><Icon name='unlock' />Unlocked Balance: {coinsUnlocked} TFT</h4>
               </Segment>
             </GridColumn>
             <GridColumn>
-              <div style={{ marginTop: 60, position: 'absolute', right: 60 }}>
+              <div style={{ marginTop: 20, position: 'absolute', right: 60 }}>
                 <Button className={styles.acceptButton} onClick={() => this.props.history.push(routes.WALLET_RECEIVE)} style={{ float: 'left', color: 'white', marginRight: 15 }} size='big'>Receive</Button>
                 <Button className={styles.cancelButton} onClick={() => this.props.history.push(routes.TRANSFER)} style={{ marginRight: 10, float: 'left', color: 'white', background: 'none' }} size='big'>Transfer</Button>
               </div>
             </GridColumn>
           </Grid>
-          <Segment style={{ width: '90%', height: '300px', overflow: 'auto', overflowY: 'scroll', margin: 'auto', background: '#29272E' }}>
+          <Segment style={{ width: '90%', height: '50vh', overflow: 'auto', overflowY: 'scroll', margin: 'auto', background: '#29272E' }}>
             {this.renderTransactions()}
           </Segment>
         </div>

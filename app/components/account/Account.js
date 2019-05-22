@@ -84,10 +84,13 @@ class Account extends Component {
           return (
             <Card key={w._wallet_name} style={{ boxShadow: 'none', height: 180, width: 350, marginTop: 0, marginRight: 30, marginBottom: 30, background: 'linear-gradient(90deg, rgba(56,51,186,1) 0%, rgba(102,71,254,1) 100%)' }} onClick={() => this.handleWalletClick(w)}>
               <Card.Content>
-                <Icon name='chevron right' style={{ position: 'absolute', right: 20, top: 120, fontSize: 25, opacity: '0.3', color: 'white' }} />
+                <Icon name='chevron right' style={{ position: 'absolute', right: 20, top: 130, fontSize: 25, opacity: '0.3', color: 'white' }} />
                 {/* <Divider /> */}
-                <Card.Description style={{ textAlign: 'center', color: 'white', fontSize: 50, textTransform: 'uppercase', marginTop: 30, marginBottom: 30, fontFamily: 'SF UI Text Light' }}>
-                  {balance.coins_total}
+                <Card.Description style={{ color: 'white', marginTop: 10, marginBottom: 10, fontFamily: 'SF UI Text Light', display: 'flex' }}>
+                  <Icon name='unlock' style={{ fontSize: 16, marginLeft: 20 }} /> <p style={{ marginLeft: 30, marginTop: -8 }}>{balance.coins_unlocked} TFT</p>
+                </Card.Description>
+                <Card.Description style={{ textAlign: 'left', color: 'white', marginTop: 20, marginBottom: 10, fontFamily: 'SF UI Text Light', display: 'flex' }}>
+                  <Icon name='lock' style={{ fontSize: 16, marginLeft: 20 }} /> <p style={{ marginLeft: 33, marginTop: -3, fontFamily: 'SF UI Text Light', fontSize: 18 }}>{balance.coins_locked} TFT</p>
                 </Card.Description>
                 <Divider />
                 <Card.Header style={{ textAlign: 'center', color: 'white', fontSize: 18, textTransform: 'uppercase', marginTop: 20, fontFamily: 'SF UI Text Light' }}>
@@ -102,7 +105,7 @@ class Account extends Component {
             <Card.Header style={{ color: 'white', fontSize: 20, textTransform: 'uppercase', position: 'absolute', top: 50, left: 90 }}>
               Create wallet
             </Card.Header>
-            <Icon name='plus circle' style={{ position: 'absolute', left: 145, top: 100, fontSize: 40, opacity: '0.3', color: 'white' }} />
+            <Icon name='plus circle' style={{ position: 'absolute', left: 145, top: 100, fontSize: 40, opacity: '0.3' }} />
           </Card.Content>
         </Card>
       </Card.Group>
@@ -128,11 +131,16 @@ class Account extends Component {
           <div style={{ width: '70%', overflowY: 'auto', height: '80vh', paddingBottom: 100 }}>
             {this.renderWallets()}
           </div>
-          <div style={{ width: '30%', overflowY: 'scroll', height: '100vh' }}>
-            <Segment style={{ marginTop: 30, marginRight: 50, marginLeft: 50, background: '#29272E' }}>
-              <h3 style={{ color: 'white' }}>Total Balance: {this.state.totalCoins} TFT</h3>
-              <h4 style={{ color: 'white' }}><Icon name='lock' />Locked Balance: {this.state.totalCoinLocked}  TFT</h4>
-              <h4 style={{ color: 'white' }}><Icon name='unlock' />Unlocked Balance: {this.state.totalCoinUnlocked}  TFT</h4>
+          <div style={{ width: '30%', height: '100vh' }}>
+            <Segment style={{ marginTop: 30, marginRight: 20, marginLeft: 0, background: '#29272E', width: '90%' }}>
+              <h3 style={{ color: 'white' }}>Total Balance</h3>
+              <h4 style={{ color: 'white', marginTop: 0 }}>{this.state.totalCoins} TFT</h4>
+              <h4 style={{ color: 'white' }}><Icon name='lock' />Locked Balance</h4>
+              <h4 style={{ color: 'white', marginTop: 0 }}>{this.state.totalCoinLocked}  TFT</h4>
+
+              <h4 style={{ color: 'white' }}><Icon name='unlock' />Unlocked Balance</h4>
+              <h4 style={{ color: 'white', marginTop: 0 }}>{this.state.totalCoinUnlocked}  TFT</h4>
+
             </Segment>
           </div>
         </div>
