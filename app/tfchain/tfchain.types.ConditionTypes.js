@@ -9,6 +9,7 @@ import * as jscrypto from './tfchain.polyfill.crypto.js';
 import * as jsstr from './tfchain.polyfill.encoding.str.js';
 import * as jshex from './tfchain.polyfill.encoding.hex.js';
 import * as jsdate from './tfchain.polyfill.date.js';
+import * as jsdict from './tfchain.polyfill.dict.js';
 import * as jsarr from './tfchain.polyfill.array.js';
 import {datetime, timedelta} from './datetime.js';
 var __name__ = 'tfchain.types.ConditionTypes';
@@ -31,7 +32,7 @@ export var from_json = function (obj) {
 	}
 	else {
 	}
-	var ct = obj.py_get ('type', 0);
+	var ct = jsdict.get_or (obj, 'type', 0);
 	if (ct == _CONDITION_TYPE_NIL) {
 		return ConditionNil.from_json (obj);
 	}
@@ -426,13 +427,13 @@ export var ConditionBaseClass =  __class__ ('ConditionBaseClass', [BaseDataTypeC
 		else {
 		}
 		var ff = cls ();
-		var ct = obj.py_get ('type', 0);
+		var ct = jsdict.get_or (obj, 'type', 0);
 		if (ff.ctype != ct) {
 			var __except0__ = ValueError ('condition is expected to be of type {}, not {}'.format (ff.ctype, ct));
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		ff.from_json_data_object (obj.py_get ('data', dict ({})));
+		ff.from_json_data_object (jsdict.get_or (obj, 'data', dict ({})));
 		return ff;
 	});},
 	get _get_ctype () {return __get__ (this, function (self) {
@@ -598,9 +599,7 @@ export var ConditionBaseClass =  __class__ ('ConditionBaseClass', [BaseDataTypeC
 		}
 		else {
 		}
-		var __except0__ = self._custom_unlockhash_setter (value);
-		__except0__.__cause__ = null;
-		throw __except0__;
+		return self._custom_unlockhash_setter (value);
 	});},
 	get _custom_unlockhash_setter () {return __get__ (this, function (self, value) {
 		if (arguments.length) {
@@ -1317,7 +1316,7 @@ export var ConditionNil =  __class__ ('ConditionNil', [ConditionBaseClass], {
 		}
 		else {
 		}
-		if (!__in__ (data, tuple ([null, dict ({})]))) {
+		if (!(jsdict.is_empty (data))) {
 			var __except0__ = ValueError ('unexpected JSON-encoded nil condition {} (type: {})'.format (data, py_typeof (data)));
 			__except0__.__cause__ = null;
 			throw __except0__;

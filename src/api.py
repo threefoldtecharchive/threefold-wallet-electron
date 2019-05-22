@@ -937,16 +937,3 @@ def wallet_address_is_valid(address, multisig=True):
         return multisig and uh.uhtype.value == UnlockHashType.MULTI_SIG.value
     except Exception:
         return False
-
-# import random
-# def hello_pool(limit=None):
-#     def generator():
-#         for i in range(0, 8):
-#             cb = create_x_cb(i)
-#             yield jsasync.chain(jsasync.sleep(random.randint(1000, 5000)), cb)
-#     return jsasync.promise_pool_new(generator, limit)
-
-# def create_x_cb(x):
-#     def cb():
-#         return x
-#     return cb

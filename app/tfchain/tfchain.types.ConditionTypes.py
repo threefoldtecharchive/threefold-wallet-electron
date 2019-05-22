@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 
 import tfchain.polyfill.array as jsarr
+import tfchain.polyfill.dict as jsdict
 import tfchain.polyfill.date as jsdate
 import tfchain.polyfill.encoding.hex as jshex
 import tfchain.polyfill.encoding.str as jsstr
@@ -22,7 +23,7 @@ _CONDITION_TYPE_MULTI_SIG = 4
 
 
 def from_json(obj):
-    ct = obj.get('type', 0)
+    ct = jsdict.get_or(obj, 'type', 0)
     if ct == _CONDITION_TYPE_NIL:
         return ConditionNil.from_json(obj)
     if ct == _CONDITION_TYPE_UNLOCK_HASH:
@@ -187,10 +188,10 @@ class ConditionBaseClass(BaseDataTypeClass):
     @classmethod
     def from_json(cls, obj):
         ff = cls()
-        ct = obj.get('type', 0)
+        ct = jsdict.get_or(obj, 'type', 0)
         if ff.ctype != ct:
             raise ValueError("condition is expected to be of type {}, not {}".format(ff.ctype, ct))
-        ff.from_json_data_object(obj.get('data', {}))
+        ff.from_json_data_object(jsdict.get_or(obj, 'data', {}))
         return ff
 
     @property
@@ -223,7 +224,7 @@ class ConditionBaseClass(BaseDataTypeClass):
         raise NotImplementedError("unlock hash property getter is not yet implemented")
     @unlockhash.setter
     def unlockhash(self, value):
-        raise self._custom_unlockhash_setter(value)
+        return self._custom_unlockhash_setter(value)
     def _custom_unlockhash_setter(self, value):
         raise NotImplementedError("unlock hash property setter is not yet implemented")
 
@@ -438,7 +439,7 @@ class ConditionNil(ConditionBaseClass):
         return UnlockHash(uhtype=UnlockHashType.NIL)
 
     def from_json_data_object(self, data):
-        if data not in (None, {}):
+        if not jsdict.is_empty(data):
             raise ValueError("unexpected JSON-encoded nil condition {} (type: {})".format(data, type(data)))
 
     def json_data_object(self):
