@@ -834,3 +834,13 @@ def mnemonic_is_valid(mnemonic):
     except Exception as e:
         print(e)
         return False
+
+# def hello_pool(limit=None):
+#     def generator():
+#         for i in range(0, 8):
+#             x = i
+#             def cb():
+#                 jssys.sleep(3)
+#                 return x
+#             yield cb
+#     return jsasync.promise_pool_new(generator, limit)

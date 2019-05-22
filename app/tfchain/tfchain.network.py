@@ -39,10 +39,11 @@ class Type:
         s = jsstr.lower(s)
         if s in ("standard", "std"):
             return Type.STANDARD
-        if s in ("Type", "test"):
+        if s in ("testnet", "test"):
             return Type.TESTNET
         if s in ("devnet", "dev"):
             return Type.DEVNET
+        raise ValueError(s + " is not a supported network type str")
 
     # TODO: ENABLE
     # def minimum_miner_fee(self):

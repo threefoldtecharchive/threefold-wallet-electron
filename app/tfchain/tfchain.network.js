@@ -136,12 +136,15 @@ export var Type =  __class__ ('Type', [object], {
 		if (__in__ (s, tuple (['standard', 'std']))) {
 			return Type.STANDARD;
 		}
-		if (__in__ (s, tuple (['Type', 'test']))) {
+		if (__in__ (s, tuple (['testnet', 'test']))) {
 			return Type.TESTNET;
 		}
 		if (__in__ (s, tuple (['devnet', 'dev']))) {
 			return Type.DEVNET;
 		}
+		var __except0__ = ValueError (s + ' is not a supported network type str');
+		__except0__.__cause__ = null;
+		throw __except0__;
 	});},
 	get default_explorer_addresses () {return __get__ (this, function (self) {
 		if (arguments.length) {
