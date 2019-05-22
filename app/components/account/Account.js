@@ -53,7 +53,6 @@ class Account extends Component {
     })
 
     Promise.all(balancePromisses).then(res => {
-      console.log(res)
       const totalSum = sumBy(res, r => parseInt(r.coins_total))
       const totalUnlockedSum = sumBy(res, r => parseInt(r.coins_unlocked))
       const totalLockedSum = sumBy(res, r => parseInt(r.coins_locked))
@@ -81,13 +80,14 @@ class Account extends Component {
     return (
       <Card.Group style={{ marginTop: 10, marginLeft: 50, padding: 20 }}>
         {wallets.map(w => {
+          const balance = w._get_balance_sync()
           return (
             <Card key={w._wallet_name} style={{ boxShadow: 'none', height: 180, width: 350, marginTop: 0, marginRight: 30, marginBottom: 30, background: 'linear-gradient(90deg, rgba(56,51,186,1) 0%, rgba(102,71,254,1) 100%)' }} onClick={() => this.handleWalletClick(w)}>
               <Card.Content>
                 <Icon name='chevron right' style={{ position: 'absolute', right: 20, top: 120, fontSize: 25, opacity: '0.3', color: 'white' }} />
                 {/* <Divider /> */}
                 <Card.Description style={{ textAlign: 'center', color: 'white', fontSize: 50, textTransform: 'uppercase', marginTop: 30, marginBottom: 30, fontFamily: 'SF UI Text Light' }}>
-                  {w.balance.coins_total}
+                  {balance.coins_total}
                 </Card.Description>
                 <Divider />
                 <Card.Header style={{ textAlign: 'center', color: 'white', fontSize: 18, textTransform: 'uppercase', marginTop: 20, fontFamily: 'SF UI Text Light' }}>
