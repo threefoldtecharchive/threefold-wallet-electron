@@ -9,7 +9,6 @@ import * as jsstr from './tfchain.polyfill.encoding.str.js';
 import * as jshex from './tfchain.polyfill.encoding.hex.js';
 import * as jsjson from './tfchain.polyfill.encoding.json.js';
 import * as jsasync from './tfchain.polyfill.asynchronous.js';
-import * as jssys from './tfchain.polyfill.sys.js';
 import * as jscrypto from './tfchain.polyfill.crypto.js';
 import * as tfsiabin from './tfchain.encoding.siabin.js';
 import * as bip39 from './tfchain.crypto.mnemonic.js';

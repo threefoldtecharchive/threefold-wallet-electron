@@ -6,7 +6,6 @@ converted into Javascript (ES6) using Transcrypt.
 import tfchain.crypto.mnemonic as bip39
 import tfchain.encoding.siabin as tfsiabin
 import tfchain.polyfill.crypto as jscrypto
-import tfchain.polyfill.sys as jssys
 import tfchain.polyfill.asynchronous as jsasync
 import tfchain.polyfill.encoding.json as jsjson
 import tfchain.polyfill.encoding.hex as jshex
