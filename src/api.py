@@ -525,8 +525,8 @@ class Balance:
         return [
             TransactionView(
                 '0df49c1ae60352f7fa173e8a10804d125aa23f0ede1a405b59032c29c3d30777',
-                280879,
-                'ff8d3f87c0f86202334631d2ad0959dda6ee56c2c9abcd9833b203ff18a08c34',
+                0,
+                None,
                 [
                     CoinOutputView(
                         ['01a94cff5aa86508d742051ba743a525331cc9b31ba7152627344902ea79dc8d2c436ceda5bcb4'],
@@ -618,8 +618,8 @@ class TransactionView:
             raise TypeError("identifier is expected to be of type str, not be of type {}".format(type(identifier)))
         if not isinstance(height, int):
             raise TypeError("height is expected to be of type int, not be of type {}".format(type(height)))
-        if not isinstance(blockid, str):
-            raise TypeError("blockid is expected to be of type str, not be of type {}".format(type(blockid)))
+        if blockid is not None and not isinstance(blockid, str):
+            raise TypeError("blockid is expected to be None or of type str, not be of type {}".format(type(blockid)))
         self._identifier = identifier
         self._height = height
         self._blockid = blockid
@@ -632,6 +632,12 @@ class TransactionView:
         :returns: the transaction identifier
         """
         return self._identifier
+    @property
+    def confirmed(self):
+        """
+        :returns: True if confirmed, False otherwise
+        """
+        return self.blockid is not None
     @property
     def height(self):
         """
