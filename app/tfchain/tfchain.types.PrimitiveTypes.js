@@ -586,7 +586,7 @@ export var Currency =  __class__ ('Currency', [BaseDataTypeClass], {
 		var c = cls ();
 		c.value = jsdec.Decimal (obj);
 		if (lowest_unit) {
-			c.value *= jsdec.Decimal ('0.000000001');
+			c.value.__imul__ (jsdec.Decimal ('0.000000001'));
 		}
 		return c;
 	});},
@@ -1184,9 +1184,12 @@ export var Currency =  __class__ ('Currency', [BaseDataTypeClass], {
 		}
 		return self.str ();
 	});},
-	get str () {return __get__ (this, function (self, with_unit) {
+	get str () {return __get__ (this, function (self, with_unit, lowest_unit) {
 		if (typeof with_unit == 'undefined' || (with_unit != null && with_unit.hasOwnProperty ("__kwargtrans__"))) {;
 			var with_unit = false;
+		};
+		if (typeof lowest_unit == 'undefined' || (lowest_unit != null && lowest_unit.hasOwnProperty ("__kwargtrans__"))) {;
+			var lowest_unit = false;
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -1196,13 +1199,19 @@ export var Currency =  __class__ ('Currency', [BaseDataTypeClass], {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
 						case 'with_unit': var with_unit = __allkwargs0__ [__attrib0__]; break;
+						case 'lowest_unit': var lowest_unit = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
 		}
 		else {
 		}
-		var s = self.value.str (9);
+		if (lowest_unit) {
+			var s = self.value.__mul__ ('1000000000').str (9);
+		}
+		else {
+			var s = self.value.str (9);
+		}
 		if (jsstr.contains (s, '.')) {
 			var s = jsstr.rstrip (s, '0 ');
 			if (s [-(1)] == '.') {
@@ -1247,7 +1256,7 @@ export var Currency =  __class__ ('Currency', [BaseDataTypeClass], {
 		}
 		else {
 		}
-		return jsstr.from_int (self.__int__ ());
+		return self.str (__kwargtrans__ ({lowest_unit: true}));
 	});},
 	get sia_binary_encode () {return __get__ (this, function (self, encoder) {
 		if (arguments.length) {

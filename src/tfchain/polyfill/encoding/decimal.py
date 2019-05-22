@@ -94,12 +94,12 @@ class Decimal:
 
     def __iadd__(self, other):
         if not isinstance(other, Decimal):
-            return __iadd__(Decimal(other))
+            return self.__iadd__(Decimal(other))
         self._value = self.value.plus(other.value)
         return self
     def __isub__(self, other):
         if not isinstance(other, Decimal):
-            return __isub__(Decimal(other))
+            return self.__isub__(Decimal(other))
         self._value = self.value.minus(other.value)
         return self
 

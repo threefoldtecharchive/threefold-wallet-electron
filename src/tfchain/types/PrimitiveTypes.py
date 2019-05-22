@@ -200,7 +200,7 @@ class Currency(BaseDataTypeClass):
         c = cls()
         c.value = jsdec.Decimal(obj)
         if lowest_unit:
-            c.value *= jsdec.Decimal('0.000000001')
+            c.value.__imul__(jsdec.Decimal('0.000000001'))
         return c
 
     @classmethod
@@ -348,14 +348,17 @@ class Currency(BaseDataTypeClass):
     def __str__(self):
         return self.str()
 
-    def str(self, with_unit=False):
+    def str(self, with_unit=False, lowest_unit=False):
         """
         Turn this Currency value into a str TFT unit-based value,
         optionally with the currency notation.
 
         @param with_unit: include the TFT currency suffix unit with the str
         """
-        s = self.value.str(9)
+        if lowest_unit:
+            s = self.value.__mul__("1000000000").str(9)
+        else:
+            s = self.value.str(9)
         if jsstr.contains(s, "."):
             s = jsstr.rstrip(s, "0 ")
             if s[-1] == '.':
@@ -370,7 +373,7 @@ class Currency(BaseDataTypeClass):
         return self.str(with_unit=True)
 
     def json(self):
-        return jsstr.from_int(self.__int__())
+        return self.str(lowest_unit=True)
 
     def sia_binary_encode(self, encoder):
         """

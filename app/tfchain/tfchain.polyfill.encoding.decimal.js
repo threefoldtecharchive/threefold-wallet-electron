@@ -364,7 +364,7 @@ export var Decimal =  __class__ ('Decimal', [object], {
 		else {
 		}
 		if (!(isinstance (other, Decimal))) {
-			return __iadd__ (Decimal (other));
+			return self.__iadd__ (Decimal (other));
 		}
 		self._value = self.value.plus (other.value);
 		return self;
@@ -385,7 +385,7 @@ export var Decimal =  __class__ ('Decimal', [object], {
 		else {
 		}
 		if (!(isinstance (other, Decimal))) {
-			return __isub__ (Decimal (other));
+			return self.__isub__ (Decimal (other));
 		}
 		self._value = self.value.minus (other.value);
 		return self;
