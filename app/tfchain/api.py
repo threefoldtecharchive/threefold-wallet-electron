@@ -489,7 +489,7 @@ class CoinTransactionBuilder:
             try:
                 balance = wallet.balance_sync
                 print("Sending from wallet {} with a total balance of {} TFT...".format(wallet.wallet_name, balance.coins_total))
-                jssys.sleep(3)
+                # jssys.sleep(3)
                 print("Sent from wallet {} succesfully!".format(wallet.wallet_name))
                 resolve('66ccdf3a0bca58025be7fdc71f3f6bfbd6ed6287aa698a131734a947c71a3bbf')
             except Exception as e:

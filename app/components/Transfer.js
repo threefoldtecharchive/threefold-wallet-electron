@@ -1,10 +1,11 @@
 // @flow
 import { connect } from 'react-redux'
 import React, { Component } from 'react'
-import { Form, Button, Input, Icon, Dropdown, Divider } from 'semantic-ui-react'
+import { Form, Button, Input, Icon, Dropdown, Divider, Loader, Dimmer } from 'semantic-ui-react'
 import routes from '../constants/routes'
 import styles from './home/Home.css'
 import Footer from './footer'
+import { toast } from 'react-toastify'
 
 const mapStateToProps = state => ({
   account: state.account
@@ -21,7 +22,9 @@ class Transfer extends Component {
       destinationError: false,
       descriptionError: false,
       amountError: false,
-      wallets: []
+      wallets: [],
+      selectedWallet: undefined,
+      loader: false
     }
   }
 
@@ -41,19 +44,20 @@ class Transfer extends Component {
     const { wallets } = this.props.account
     return wallets.map(w => {
       return {
-        key: w.name,
-        text: w.name,
-        value: w.name
+        key: w._wallet_name,
+        text: w._wallet_name,
+        value: w
       }
     })
   }
 
   selectWallet = (event, data) => {
-    console.log(data.value)
+    this.setState({ selectedWallet: data.value })
   }
 
   submitTransaction = () => {
-    const { description, destination, amount } = this.state
+    this.renderLoader(true)
+    const { description, destination, amount, selectedWallet } = this.state
     let destinationError = false
     let descriptionError = false
     let amountError = false
@@ -70,17 +74,38 @@ class Transfer extends Component {
       amountError = true
     }
 
-    this.setState({ destinationError, descriptionError, amountError })
-
     if (!destinationError && !descriptionError && !amountError) {
-      return this.props.history.push('/account')
+      const builder = selectedWallet.transaction_new()
+      builder.output_add(destination, amount.toString())
+      builder.send({ data: description }).then(txid => {
+        const _this = this
+        setTimeout(function () {
+          _this.setState({ destinationError, descriptionError, amountError, loader: false })
+          return _this.props.history.push('/account')
+        }, 2000)
+      }).catch(err => {
+        toast('transaction failed')
+        this.setState({ loader: false, errorMessage: err })
+      })
     }
+  }
+
+  renderLoader = (active) => {
+    this.setState({ loader: active })
   }
 
   render () {
     const { description, destination, destinationError, descriptionError, amountError, amount } = this.state
     const walletsOptions = this.mapWalletsToDropdownOption()
-    console.log(walletsOptions)
+
+    if (this.state.loader) {
+      return (
+        <Dimmer active={this.state.loader}>
+          <Loader content='Loading' />
+        </Dimmer>
+      )
+    }
+
     return (
       <div>
         <div className={styles.container} >
@@ -108,9 +133,10 @@ class Transfer extends Component {
             />
           </Form.Field>
         </Form>
+        {this.renderErrorMessage()}
         <div style={{ position: 'absolute', bottom: 150, right: 80 }}>
           <Button onClick={() => this.props.history.push(routes.ACCOUNT)} style={{ marginTop: 20, float: 'left', background: '#2B3C72', color: 'white', marginRight: 15 }} size='big'>Cancel</Button>
-          <Button onClick={this.submitTransaction} style={{ marginTop: 20, marginRight: 10, float: 'left', background: '#015DE1', color: 'white' }} size='big'>Send</Button>
+          <Button onClick={() => this.submitTransaction()} style={{ marginTop: 20, marginRight: 10, float: 'left', background: '#015DE1', color: 'white' }} size='big'>Send</Button>
         </div>
         <Footer />
       </div>
