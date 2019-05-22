@@ -102,14 +102,14 @@ class NewAccount extends Component {
     if (generateSeed) {
       return (
         <div>
-          <TextArea labelPosition='right corner' value={this.state.seed} onChange={this.handleSeedChange} disabled />
+          <TextArea value={this.state.seed} onChange={this.handleSeedChange} disabled />
           {this.renderSeedError()}
         </div>
       )
     } else {
       return (
         <div>
-          <TextArea labelPosition='right corner' value={this.state.seed} onChange={this.handleSeedChange} />
+          <TextArea value={this.state.seed} onChange={this.handleSeedChange} />
           {this.renderSeedError()}
         </div>
       )

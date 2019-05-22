@@ -82,7 +82,7 @@ class Account extends Component {
       <Card.Group style={{ marginTop: 10, marginLeft: 50, padding: 20 }}>
         {wallets.map(w => {
           return (
-            <Card style={{ boxShadow: 'none', height: 180, width: 350, marginTop: 0, marginRight: 30, marginBottom: 30, background: 'linear-gradient(90deg, rgba(56,51,186,1) 0%, rgba(102,71,254,1) 100%)' }} onClick={() => this.handleWalletClick(w)}>
+            <Card key={w._wallet_name} style={{ boxShadow: 'none', height: 180, width: 350, marginTop: 0, marginRight: 30, marginBottom: 30, background: 'linear-gradient(90deg, rgba(56,51,186,1) 0%, rgba(102,71,254,1) 100%)' }} onClick={() => this.handleWalletClick(w)}>
               <Card.Content>
                 <Icon name='chevron right' style={{ position: 'absolute', right: 20, top: 120, fontSize: 25, opacity: '0.3', color: 'white' }} />
                 {/* <Divider /> */}
