@@ -73,7 +73,7 @@ class Home extends Component {
           </Segment> */}
            {accountNames.map(account => {
                 return (
-                  <div className={account} style={{ cursor: 'pointer', width: 300, height: 130, margin: 'auto', marginTop: 10, marginBottom: 10 }} onClick={() => this.selectAccount(account)}>
+                  <div key={account} className={styles.account} style={{ cursor: 'pointer', width: 300, margin: 'auto', marginTop: 15, marginBottom: 15 }} onClick={() => this.selectAccount(account)}>
                     {/* <Icon style={{ position: 'relative', top: 0, left: 0, fontSize: 100, opacity: '0.1', zIndex: 2 }} name='chevron right'/> */}
                     <div className={styles.accountBlockPart}>
                         {account}
