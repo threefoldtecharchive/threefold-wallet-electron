@@ -69,6 +69,8 @@ class SiaBinaryEncoder:
             self._data = jsarr.concat(self._data, jsstr.to_utf8(value))
         elif isinstance(value, (bytes, bytearray)):
             self._data = jsarr.concat(self._data, bytes(value))
+        elif jsarr.is_uint8_array(value):
+            self._data = jsarr.concat(self._data, value)
         else:
             try:
                 result = bytes()
@@ -91,6 +93,9 @@ class SiaBinaryEncoder:
         elif isinstance(value, (bytes, bytearray)):
             self.add_int(len(value))
             self._data = jsarr.concat(self._data, bytes(value))
+        elif jsarr.is_uint8_array(value):
+            self.add_int(len(value))
+            self._data = jsarr.concat(self._data, value)
         else:
             length = 0
             for _ in value:
@@ -111,11 +116,14 @@ class SiaBinaryEncoder:
         else:
             if isinstance(value, str):
                 value = jsstr.to_utf8(value)
-            elif not isinstance(value, (bytes, bytearray)):
+            elif not isinstance(value, (bytes, bytearray)) and not jsarr.is_uint8_array(value):
                 raise ValueError("value of type {} cannot be added as a single byte".format(type(value)))
             if len(value) != 1:
                 raise ValueError("a single byte has to be accepted, amount of bytes given: {}".format(len(value)))
-            self._data = jsarr.concat(self._data, bytes(value))
+            if jsarr.is_uint8_array(value):
+                self._data = jsarr.concat(self._data, value)
+            else:
+                self._data = jsarr.concat(self._data, bytes(value))
 
     def add(self,value):
         """

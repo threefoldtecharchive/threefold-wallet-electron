@@ -334,9 +334,10 @@ class UnlockHash(BaseDataTypeClass):
         uh = cls(uhtype=t, uhhash=h)
         
         if t.__eq__(UnlockHashType.NIL):
-            expectedNH = bytes(jsarr.new_array(UnlockHash._HASH_SIZE))
-            if h.value != expectedNH:
-                raise ValueError("unexpected nil hash {}".format(jshex.bytes_to_hex(h.value)))
+            expectedNH = jshex.bytes_to_hex(bytes(jsarr.new_array(UnlockHash._HASH_SIZE)))
+            nh = jshex.bytes_to_hex(h.value)
+            if nh != expectedNH:
+                raise ValueError("unexpected nil hash {}".format(nh))
         else:
             expected_checksum = jshex.bytes_to_hex(jsarr.slice_array(uh._checksum(), 0, UnlockHash._CHECKSUM_SIZE))
             checksum = jsarr.slice_array(obj, UnlockHash._TOTAL_SIZE_HEX-UnlockHash._CHECKSUM_SIZE_HEX)
@@ -375,7 +376,7 @@ class UnlockHash(BaseDataTypeClass):
         if self._type.__eq__(UnlockHashType.NIL):
             return bytes(jsarr.new_array(UnlockHash._CHECKSUM_SIZE))
         e = RivineBinaryEncoder()
-        e.add_int8(self._type.__int__())
+        e.add_int8(self._type.value)
         e.add(self._hash)
         return jscrypto.blake2b(e.data)
 

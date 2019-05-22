@@ -289,6 +289,9 @@ export var RivineBinaryEncoder =  __class__ ('RivineBinaryEncoder', [object], {
 		else if (isinstance (value, tuple ([bytes, bytearray]))) {
 			self._data = jsarr.concat (self._data, bytes (value));
 		}
+		else if (jsarr.is_uint8_array (value)) {
+			self._data = jsarr.concat (self._data, value);
+		}
 		else {
 			try {
 				for (var element of value) {
@@ -329,6 +332,10 @@ export var RivineBinaryEncoder =  __class__ ('RivineBinaryEncoder', [object], {
 		else if (isinstance (value, tuple ([bytes, bytearray]))) {
 			self._add_slice_length (len (value));
 			self._data = jsarr.concat (self._data, bytes (value));
+		}
+		else if (jsarr.is_uint8_array (value)) {
+			self._add_slice_length (len (value));
+			self._data = jsarr.concat (self._data, value);
 		}
 		else {
 			var length = 0;
@@ -394,7 +401,7 @@ export var RivineBinaryEncoder =  __class__ ('RivineBinaryEncoder', [object], {
 			if (isinstance (value, str)) {
 				var value = jsstr.to_utf8 (value);
 			}
-			else if (!(isinstance (value, tuple ([bytes, bytearray])))) {
+			else if (!(isinstance (value, tuple ([bytes, bytearray]))) && !(jsarr.is_uint8_array (value))) {
 				var __except0__ = ValueError ('value of type {} cannot be added as a single byte'.format (py_typeof (value)));
 				__except0__.__cause__ = null;
 				throw __except0__;
@@ -404,7 +411,12 @@ export var RivineBinaryEncoder =  __class__ ('RivineBinaryEncoder', [object], {
 				__except0__.__cause__ = null;
 				throw __except0__;
 			}
-			self._data = jsarr.concat (self._data, value);
+			if (jsarr.is_uint8_array (value)) {
+				self._data = jsarr.concat (self._data, value);
+			}
+			else {
+				self._data = jsarr.concat (self._data, bytes (value));
+			}
 		}
 	});},
 	get add_all () {return __get__ (this, function (self) {

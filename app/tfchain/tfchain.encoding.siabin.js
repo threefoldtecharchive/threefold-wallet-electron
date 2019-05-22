@@ -147,6 +147,9 @@ export var SiaBinaryEncoder =  __class__ ('SiaBinaryEncoder', [object], {
 		else if (isinstance (value, tuple ([bytes, bytearray]))) {
 			self._data = jsarr.concat (self._data, bytes (value));
 		}
+		else if (jsarr.is_uint8_array (value)) {
+			self._data = jsarr.concat (self._data, value);
+		}
 		else {
 			try {
 				var result = bytes ();
@@ -190,6 +193,10 @@ export var SiaBinaryEncoder =  __class__ ('SiaBinaryEncoder', [object], {
 			self.add_int (len (value));
 			self._data = jsarr.concat (self._data, bytes (value));
 		}
+		else if (jsarr.is_uint8_array (value)) {
+			self.add_int (len (value));
+			self._data = jsarr.concat (self._data, value);
+		}
 		else {
 			var length = 0;
 			for (var _ of value) {
@@ -226,7 +233,7 @@ export var SiaBinaryEncoder =  __class__ ('SiaBinaryEncoder', [object], {
 			if (isinstance (value, str)) {
 				var value = jsstr.to_utf8 (value);
 			}
-			else if (!(isinstance (value, tuple ([bytes, bytearray])))) {
+			else if (!(isinstance (value, tuple ([bytes, bytearray]))) && !(jsarr.is_uint8_array (value))) {
 				var __except0__ = ValueError ('value of type {} cannot be added as a single byte'.format (py_typeof (value)));
 				__except0__.__cause__ = null;
 				throw __except0__;
@@ -236,7 +243,12 @@ export var SiaBinaryEncoder =  __class__ ('SiaBinaryEncoder', [object], {
 				__except0__.__cause__ = null;
 				throw __except0__;
 			}
-			self._data = jsarr.concat (self._data, bytes (value));
+			if (jsarr.is_uint8_array (value)) {
+				self._data = jsarr.concat (self._data, value);
+			}
+			else {
+				self._data = jsarr.concat (self._data, bytes (value));
+			}
 		}
 	});},
 	get add () {return __get__ (this, function (self, value) {

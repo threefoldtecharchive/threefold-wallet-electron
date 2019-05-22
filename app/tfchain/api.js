@@ -2,13 +2,13 @@ import {AssertionError, AttributeError, BaseException, DeprecationWarning, Excep
 import {UnlockHash, UnlockHashType} from './tfchain.types.ConditionTypes.js';
 import * as tfexplorer from './tfchain.explorer.js';
 import * as tfnetwork from './tfchain.network.js';
+import * as tfsiabin from './tfchain.encoding.siabin.js';
+import * as bip39 from './tfchain.crypto.mnemonic.js';
 import * as jsstr from './tfchain.polyfill.encoding.str.js';
 import * as jshex from './tfchain.polyfill.encoding.hex.js';
 import * as jsjson from './tfchain.polyfill.encoding.json.js';
 import * as jsasync from './tfchain.polyfill.asynchronous.js';
 import * as jscrypto from './tfchain.polyfill.crypto.js';
-import * as tfsiabin from './tfchain.encoding.siabin.js';
-import * as bip39 from './tfchain.crypto.mnemonic.js';
 var __name__ = '__main__';
 export var __bip39 = bip39.Mnemonic ();
 export var Account =  __class__ ('Account', [object], {
@@ -1409,6 +1409,40 @@ export var mnemonic_is_valid = function (mnemonic) {
 		if (isinstance (__except0__, Exception)) {
 			var e = __except0__;
 			print (e);
+			return false;
+		}
+		else {
+			throw __except0__;
+		}
+	}
+};
+export var wallet_address_is_valid = function (address, multisig) {
+	if (typeof multisig == 'undefined' || (multisig != null && multisig.hasOwnProperty ("__kwargtrans__"))) {;
+		var multisig = true;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'address': var address = __allkwargs0__ [__attrib0__]; break;
+					case 'multisig': var multisig = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	try {
+		var uh = UnlockHash.from_str (address);
+		if (__in__ (uh.uhtype.value, tuple ([UnlockHashType.NIL.value, UnlockHashType.PUBLIC_KEY.value]))) {
+			return true;
+		}
+		return multisig && uh.uhtype.value == UnlockHashType.MULTI_SIG.value;
+	}
+	catch (__except0__) {
+		if (isinstance (__except0__, Exception)) {
 			return false;
 		}
 		else {

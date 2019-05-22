@@ -3,17 +3,17 @@ Contains the public Python API for the TFChain Wallet Desktop App,
 converted into Javascript (ES6) using Transcrypt.
 """
 
-import tfchain.crypto.mnemonic as bip39
-import tfchain.encoding.siabin as tfsiabin
 import tfchain.polyfill.crypto as jscrypto
 import tfchain.polyfill.asynchronous as jsasync
 import tfchain.polyfill.encoding.json as jsjson
 import tfchain.polyfill.encoding.hex as jshex
 import tfchain.polyfill.encoding.str as jsstr
+
+import tfchain.crypto.mnemonic as bip39
+import tfchain.encoding.siabin as tfsiabin
 import tfchain.network as tfnetwork
 import tfchain.explorer as tfexplorer
 
-# TODO: remove once we use the actual wallet, as we shouldn't need the inner types anymore if all goes well
 from tfchain.types.ConditionTypes import UnlockHash, UnlockHashType
 
 # BIP39 state object used for all Mnemonic purposes of this API
@@ -851,4 +851,21 @@ def mnemonic_is_valid(mnemonic):
         return __bip39.check(mnemonic)
     except Exception as e:
         print(e)
+        return False
+
+def wallet_address_is_valid(address, multisig=True):
+    """
+    Validate a wallet address.
+
+    :param multisig: True is multisig addresses are allowed as well
+
+    :returns: True if the mnemonic is valid, False otherwise
+    :rtype: bool
+    """
+    try:
+        uh = UnlockHash.from_str(address)
+        if uh.uhtype.value in (UnlockHashType.NIL.value, UnlockHashType.PUBLIC_KEY.value):
+            return True
+        return multisig and uh.uhtype.value == UnlockHashType.MULTI_SIG.value
+    except Exception:
         return False

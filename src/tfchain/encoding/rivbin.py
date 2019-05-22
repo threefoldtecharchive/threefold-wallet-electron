@@ -154,6 +154,8 @@ class RivineBinaryEncoder:
             self._data = jsarr.concat(self._data, jsstr.to_utf8(value))
         elif isinstance(value, (bytes, bytearray)):
             self._data = jsarr.concat(self._data, bytes(value))
+        elif jsarr.is_uint8_array(value):
+            self._data = jsarr.concat(self._data, value)
         else:
             try:
                 for element in value:
@@ -175,6 +177,9 @@ class RivineBinaryEncoder:
         elif isinstance(value, (bytes, bytearray)):
             self._add_slice_length(len(value))
             self._data = jsarr.concat(self._data, bytes(value))
+        elif jsarr.is_uint8_array(value):
+            self._add_slice_length(len(value))
+            self._data = jsarr.concat(self._data,value)
         else:
             length = 0
             for _ in value:
@@ -208,11 +213,14 @@ class RivineBinaryEncoder:
         else:
             if isinstance(value, str):
                 value = jsstr.to_utf8(value)
-            elif not isinstance(value, (bytes, bytearray)):
+            elif not isinstance(value, (bytes, bytearray)) and not jsarr.is_uint8_array(value):
                 raise ValueError("value of type {} cannot be added as a single byte".format(type(value)))
             if len(value) != 1:
                 raise ValueError("a single byte has to be accepted, amount of bytes given: {}".format(len(value)))
-            self._data = jsarr.concat(self._data, value)
+            if jsarr.is_uint8_array(value):
+                self._data = jsarr.concat(self._data, value)
+            else:
+                self._data = jsarr.concat(self._data, bytes(value))
 
     def add_all(self,*values):
         """

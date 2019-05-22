@@ -966,9 +966,10 @@ export var UnlockHash =  __class__ ('UnlockHash', [BaseDataTypeClass], {
 		var h = Hash (__kwargtrans__ ({value: obj.__getslice__ (UnlockHash._TYPE_SIZE_HEX, UnlockHash._TYPE_SIZE_HEX + UnlockHash._HASH_SIZE_HEX, 1)}));
 		var uh = cls (__kwargtrans__ ({uhtype: t, uhhash: h}));
 		if (t.__eq__ (UnlockHashType.NIL)) {
-			var expectedNH = bytes (jsarr.new_array (UnlockHash._HASH_SIZE));
-			if (h.value != expectedNH) {
-				var __except0__ = ValueError ('unexpected nil hash {}'.format (jshex.bytes_to_hex (h.value)));
+			var expectedNH = jshex.bytes_to_hex (bytes (jsarr.new_array (UnlockHash._HASH_SIZE)));
+			var nh = jshex.bytes_to_hex (h.value);
+			if (nh != expectedNH) {
+				var __except0__ = ValueError ('unexpected nil hash {}'.format (nh));
 				__except0__.__cause__ = null;
 				throw __except0__;
 			}
@@ -1110,7 +1111,7 @@ export var UnlockHash =  __class__ ('UnlockHash', [BaseDataTypeClass], {
 			return bytes (jsarr.new_array (UnlockHash._CHECKSUM_SIZE));
 		}
 		var e = RivineBinaryEncoder ();
-		e.add_int8 (self._type.__int__ ());
+		e.add_int8 (self._type.value);
 		e.add (self._hash);
 		return jscrypto.blake2b (e.data);
 	});},
