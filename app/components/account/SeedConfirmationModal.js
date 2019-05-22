@@ -51,7 +51,7 @@ function renderAccountCreationError (accountCreationError, accountCreationErrorM
       return (
         <Message negative>
           <Message.Header>Error occured</Message.Header>
-          <p style={{ fontSize: 12 }}>{accountCreationErrorMessage.__args__[0]}</p>
+          {accountCreationErrorMessage.__args__.length > 1 ? accountCreationErrorMessage.__args__.map(arg => <p style={{ fontSize: 12 }}>{arg}</p>) : <p style={{ fontSize: 12 }}>{accountCreationErrorMessage}</p>}
         </Message>
       )
     } else {
