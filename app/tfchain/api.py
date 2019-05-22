@@ -246,6 +246,19 @@ class Account:
             if len(addresses_set.intersection(set(wallet.addresses))) != 0:
                 raise ValueError("cannot use addresses for wallet {} as it overlaps with the addresses of wallet {}".format(candidate.wallet_name, wallet.wallet_name))
 
+    def next_available_wallet_start_index(self):
+        """
+        Returns the next available wallet start index,
+        that can/should be used to create a new wallet.
+
+        :returns: the index that can be used as the start (seed) index for a new wallet
+        :rtype: int
+        """
+        if len(self._wallets) == 0:
+            return 0
+        lw = self._wallets[len(self._wallets)-1]
+        return lw.start_index+lw.address_count
+
     def serialize(self):
         """
         Serialize the account into a (JS) Object,
@@ -545,6 +558,14 @@ class Balance:
         return Balance(network_type=self._network_type, amount=self._amount+other._amount)
 
     def spend_amount_is_valid(self, amount):
+        """
+        Validates if an amount (typically a str) is valid.
+        Valid meaning that it is strictly positive and that it is an amount
+        that can be spend using the current unlocked balance.
+
+        :returns: True if the amount is valid and can be spent, False otherwise
+        :rtype: bool
+        """
         # type-check and normalize amount (type)
         if not isinstance(amount, Currency):
             try:

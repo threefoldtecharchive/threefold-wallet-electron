@@ -365,6 +365,26 @@ export var Account =  __class__ ('Account', [object], {
 			}
 		}
 	});},
+	get next_available_wallet_start_index () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (len (self._wallets) == 0) {
+			return 0;
+		}
+		var lw = self._wallets [len (self._wallets) - 1];
+		return lw.start_index + lw.address_count;
+	});},
 	get serialize () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
