@@ -1,6 +1,11 @@
 .container {
   text-align: center;
   margin-top: 35px;
+  background-image: url('../../../resources/icons/logo.png');
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-position: 35px 35px;
+  background-size: 35px 35px;
 }
 
 .container h2 {

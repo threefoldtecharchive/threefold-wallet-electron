@@ -114,10 +114,10 @@ class Account extends Component {
       <div>
         <div data-tid='backButton'>
           <Link to={routes.ACCOUNT_SETTINGS}>
-            <Icon style={{ fontSize: 35, position: 'absolute', right: 20, cursor: 'pointer' }} name='setting' />
+            <Icon style={{ fontSize: 25, position: 'absolute', right: 20, cursor: 'pointer' }} name='setting' />
           </Link>
           <Link to={routes.HOME}>
-            <Icon style={{ fontSize: 35, position: 'absolute', right: 70, cursor: 'pointer' }} name='sign-out' />
+            <Icon style={{ fontSize: 25, position: 'absolute', right: 70, cursor: 'pointer' }} name='sign-out' />
           </Link>
         </div>
         <div className={styles.container} >

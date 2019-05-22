@@ -1,7 +1,7 @@
 // @flow
 import { connect } from 'react-redux'
 import React, { Component } from 'react'
-import { Form, Button, Input, Icon, Dropdown, Divider, Loader, Dimmer } from 'semantic-ui-react'
+import { Form, Button, Input, Icon, Dropdown, Divider, Loader, Dimmer, Message } from 'semantic-ui-react'
 import routes from '../constants/routes'
 import styles from './home/Home.css'
 import Footer from './footer'
@@ -92,6 +92,18 @@ class Transfer extends Component {
 
   renderLoader = (active) => {
     this.setState({ loader: active })
+  }
+
+  renderErrorMessage = () => {
+    const { errorMessage } = this.state
+    if (errorMessage) {
+      return (
+        <Message
+          error
+          header={errorMessage}
+        />
+      )
+    }
   }
 
   render () {
