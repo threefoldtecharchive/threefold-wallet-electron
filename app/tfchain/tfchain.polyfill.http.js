@@ -18,34 +18,37 @@ export var http_get = function (resource, headers) {
 	}
 	else {
 	}
+	var request = null;
 	
-	        var request = new XMLHttpRequest();
-	        request.open("GET", resource, false);
-	        
+	    request = new Request(resource, {method: 'GET'});
+	    
 	if (isinstance (headers, dict)) {
 		for (var [key, value] of headers.py_items ()) {
 			
-			                request.setRequestHeader(key, value);
+			            request.headers.append(key, value);
 			            
 		}
 	}
-	var resp = null;
+	var p = null;
 	
-	        request.send(null);
-	        var data = request.responseText;
-	        if (request.status !== 200) {
-	            resp = {
-	                "code": request.status,
-	                "data": "GET request to " + resource + " failed: " + data,
-	            };
-	        } else {
-	            resp = {
-	                "code": 200,
-	                "data": data,
-	            };
+	    p = fetch(request).then(function(response) {
+	        if (response.status === 200) {
+	            return response.json().then(function(data) {
+	                return {
+	                    code: 200,
+	                    data: data,
+	                };
+	            });
 	        }
+	        return response.json().then(function(data) {
+	            return {
+	                code: response.status,
+	                data: data.message || ("GET request to " + resource + " failed with status code " + response.status),
+	            };
+	        });
+	    });
 	    
-	return resp;
+	return p;
 };
 export var http_post = function (resource, data, headers) {
 	if (typeof headers == 'undefined' || (headers != null && headers.hasOwnProperty ("__kwargtrans__"))) {;
@@ -66,34 +69,37 @@ export var http_post = function (resource, data, headers) {
 	}
 	else {
 	}
+	var request = null;
 	
-	        var request = new XMLHttpRequest();
-	        request.open("POST", resource, false);
-	        
+	    request = new Request(resource, {method: 'POST', body: data});
+	    
 	if (isinstance (headers, dict)) {
 		for (var [key, value] of headers.py_items ()) {
 			
-			                request.setRequestHeader(key, value);
+			            request.headers.append(key, value);
 			            
 		}
 	}
-	var resp = null;
+	var p = null;
 	
-	        request.send(data);
-	        var data = request.responseText;
-	        if (request.status !== 200) {
-	            resp = {
-	                "code": request.status,
-	                "data": "POST request to " + resource + " failed: " + request.statusText + ": " + data,
-	            };
-	        } else {
-	            resp = {
-	                "code": 200,
-	                "data": data,
-	            };
+	    p = fetch(request).then(function(response) {
+	        if (response.status === 200) {
+	            return response.json().then(function(data) {
+	                return {
+	                    code: 200,
+	                    data: data,
+	                };
+	            });
 	        }
+	        return response.json().then(function(data) {
+	            return {
+	                code: response.status,
+	                data: data.message || ("POST request to " + resource + " failed with status code " + response.status),
+	            };
+	        });
+	    });
 	    
-	return resp;
+	return p;
 };
 
 //# sourceMappingURL=tfchain.polyfill.http.map

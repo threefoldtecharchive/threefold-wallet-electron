@@ -285,26 +285,38 @@ class Account:
 
         :returns: a promise that can be resolved in an async manner
         """
+        # define callbacks, that will be turned into promises
         explorer_client = self._explorer_client.clone()
-        def cb(resolve, reject):
-            try:
-                stats = explorer_client.data_get('/explorer')
-                chain_height = stats['height']
-                constants = explorer_client.data_get('/explorer/constants')
-                info = constants['chaininfo']
-                # TODO: replace with client block_get call
-                current_block = explorer_client.data_get('/explorer/blocks/{}'.format(chain_height))
+        def fetch_stats():
+            def cb(result):
+                return ('s', result)
+            return jsasync.chain(explorer_client.data_get('/explorer'), cb)
+        def fetch_constants():
+            def cb(result):
+                return ('c', result)
+            return jsasync.chain(explorer_client.data_get('/explorer/constants'), cb)
+        def fetch_current_block(results):
+            if len(results) != 2:
+                raise RuntimeError("expected 2 values as result, but received: {}".format(results))
+            results = dict(results)
+            chain_height = results['s']['height']
+            info = results['c']['chaininfo']
+            def cb(current_block):
                 chain_timestamp = current_block['block']['rawblock']['timestamp']
-                resolve(ChainInfo(
+                return ChainInfo(
                     info['Name'],
                     info['ChainVersion'],
                     info['NetworkName'],
                     chain_height,
                     chain_timestamp,
-                ))
-            except Exception as e:
-                reject(e)
-        return jsasync.promise_new(cb)
+                )
+            # TODO: replace with client block_get call
+            return jsasync.chain(explorer_client.data_get('/explorer/blocks/{}'.format(chain_height)), cb)
+        # chain them all and return as a single promise
+        return jsasync.chain(jsasync.wait(
+            jsasync.as_promise(fetch_stats),
+            jsasync.as_promise(fetch_constants)
+        ), fetch_current_block)
 
 
 class Wallet:
@@ -409,12 +421,9 @@ class Wallet:
         :rtype: Balance
         """
         wallet = self.clone()
-        def cb(resolve, reject):
-            try:
-                resolve(wallet.balance_sync)
-            except Exception as e:
-                reject(e)
-        return jsasync.promise_new(cb)
+        def cb():
+            return wallet.balance_sync
+        return jsasync.as_promise(cb)
 
     @property
     def balance_sync(self):
@@ -485,16 +494,12 @@ class CoinTransactionBuilder:
         :returns: a promise that resolves with a transaction ID or rejects with an Exception
         """
         wallet = self._wallet.clone()
-        def cb(resolve, reject):
-            try:
-                balance = wallet.balance_sync
-                print("Sending from wallet {} with a total balance of {} TFT...".format(wallet.wallet_name, balance.coins_total))
-                # jssys.sleep(3)
-                print("Sent from wallet {} succesfully!".format(wallet.wallet_name))
-                resolve('66ccdf3a0bca58025be7fdc71f3f6bfbd6ed6287aa698a131734a947c71a3bbf')
-            except Exception as e:
-                reject(e)
-        return jsasync.promise_new(cb)
+        def cb():
+            balance = wallet.balance_sync
+            print("Sent from wallet {} succesfully with an input balance of {} TFT!".format(wallet.wallet_name, balance.coins_total))
+            return '66ccdf3a0bca58025be7fdc71f3f6bfbd6ed6287aa698a131734a947c71a3bbf'
+        print("Sending from wallet {}...".format(wallet.wallet_name))
+        return jsasync.chain(jsasync.sleep(3000), cb)
 
 
 class Balance:
@@ -835,12 +840,12 @@ def mnemonic_is_valid(mnemonic):
         print(e)
         return False
 
-# def hello_pool(limit=None):
-#     def generator():
-#         for i in range(0, 8):
-#             x = i
-#             def cb():
-#                 jssys.sleep(3)
-#                 return x
-#             yield cb
-#     return jsasync.promise_pool_new(generator, limit)
+import random
+def hello_pool(limit=None):
+    def generator():
+        for i in range(0, 8):
+            x = i
+            def cb():
+                return x
+            yield jsasync.chain(jsasync.sleep(random.randint(1000, 5000)), jsasync.as_promise(cb))
+    return jsasync.promise_pool_new(generator, limit)

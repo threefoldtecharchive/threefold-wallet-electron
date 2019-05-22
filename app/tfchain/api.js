@@ -1,4 +1,7 @@
+var random = {};
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __proxy__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, abs, all, any, assert, bool, bytearray, bytes, callable, chr, copy, deepcopy, delattr, dict, dir, divmod, enumerate, filter, float, getattr, hasattr, input, int, isinstance, issubclass, len, list, map, max, min, object, ord, pow, print, property, py_TypeError, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
+import * as __module_random__ from './random.js';
+__nest__ (random, '', __module_random__);
 import {UnlockHash, UnlockHashType} from './tfchain.types.ConditionTypes.js';
 import * as tfexplorer from './tfchain.explorer.js';
 import * as tfnetwork from './tfchain.network.js';
@@ -404,41 +407,106 @@ export var Account =  __class__ ('Account', [object], {
 		else {
 		}
 		var explorer_client = self._explorer_client.clone ();
-		var cb = function (resolve, reject) {
+		var fetch_stats = function () {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+					}
+				}
+			}
+			else {
+			}
+			var cb = function (result) {
+				if (arguments.length) {
+					var __ilastarg0__ = arguments.length - 1;
+					if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+						var __allkwargs0__ = arguments [__ilastarg0__--];
+						for (var __attrib0__ in __allkwargs0__) {
+							switch (__attrib0__) {
+								case 'result': var result = __allkwargs0__ [__attrib0__]; break;
+							}
+						}
+					}
+				}
+				else {
+				}
+				return tuple (['s', result]);
+			};
+			return jsasync.chain (explorer_client.data_get ('/explorer'), cb);
+		};
+		var fetch_constants = function () {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+					}
+				}
+			}
+			else {
+			}
+			var cb = function (result) {
+				if (arguments.length) {
+					var __ilastarg0__ = arguments.length - 1;
+					if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+						var __allkwargs0__ = arguments [__ilastarg0__--];
+						for (var __attrib0__ in __allkwargs0__) {
+							switch (__attrib0__) {
+								case 'result': var result = __allkwargs0__ [__attrib0__]; break;
+							}
+						}
+					}
+				}
+				else {
+				}
+				return tuple (['c', result]);
+			};
+			return jsasync.chain (explorer_client.data_get ('/explorer/constants'), cb);
+		};
+		var fetch_current_block = function (results) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
 				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
-							case 'resolve': var resolve = __allkwargs0__ [__attrib0__]; break;
-							case 'reject': var reject = __allkwargs0__ [__attrib0__]; break;
+							case 'results': var results = __allkwargs0__ [__attrib0__]; break;
 						}
 					}
 				}
 			}
 			else {
 			}
-			try {
-				var stats = explorer_client.data_get ('/explorer');
-				var chain_height = stats ['height'];
-				var constants = explorer_client.data_get ('/explorer/constants');
-				var info = constants ['chaininfo'];
-				var current_block = explorer_client.data_get ('/explorer/blocks/{}'.format (chain_height));
-				var chain_timestamp = current_block ['block'] ['rawblock'] ['timestamp'];
-				resolve (ChainInfo (info ['Name'], info ['ChainVersion'], info ['NetworkName'], chain_height, chain_timestamp));
+			if (len (results) != 2) {
+				var __except0__ = RuntimeError ('expected 2 values as result, but received: {}'.format (results));
+				__except0__.__cause__ = null;
+				throw __except0__;
 			}
-			catch (__except0__) {
-				if (isinstance (__except0__, Exception)) {
-					var e = __except0__;
-					reject (e);
+			var results = dict (results);
+			var chain_height = results ['s'] ['height'];
+			var info = results ['c'] ['chaininfo'];
+			var cb = function (current_block) {
+				if (arguments.length) {
+					var __ilastarg0__ = arguments.length - 1;
+					if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+						var __allkwargs0__ = arguments [__ilastarg0__--];
+						for (var __attrib0__ in __allkwargs0__) {
+							switch (__attrib0__) {
+								case 'current_block': var current_block = __allkwargs0__ [__attrib0__]; break;
+							}
+						}
+					}
 				}
 				else {
-					throw __except0__;
 				}
-			}
+				var chain_timestamp = current_block ['block'] ['rawblock'] ['timestamp'];
+				return ChainInfo (info ['Name'], info ['ChainVersion'], info ['NetworkName'], chain_height, chain_timestamp);
+			};
+			return jsasync.chain (explorer_client.data_get ('/explorer/blocks/{}'.format (chain_height)), cb);
 		};
-		return jsasync.promise_new (cb);
+		return jsasync.chain (jsasync.wait (jsasync.as_promise (fetch_stats), jsasync.as_promise (fetch_constants)), fetch_current_block);
 	});}
 });
 Object.defineProperty (Account, 'wallet_count', property.call (Account, Account._get_wallet_count));
@@ -615,35 +683,20 @@ export var Wallet =  __class__ ('Wallet', [object], {
 		else {
 		}
 		var wallet = self.clone ();
-		var cb = function (resolve, reject) {
+		var cb = function () {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
 				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
-						switch (__attrib0__) {
-							case 'resolve': var resolve = __allkwargs0__ [__attrib0__]; break;
-							case 'reject': var reject = __allkwargs0__ [__attrib0__]; break;
-						}
 					}
 				}
 			}
 			else {
 			}
-			try {
-				resolve (wallet.balance_sync);
-			}
-			catch (__except0__) {
-				if (isinstance (__except0__, Exception)) {
-					var e = __except0__;
-					reject (e);
-				}
-				else {
-					throw __except0__;
-				}
-			}
+			return wallet.balance_sync;
 		};
-		return jsasync.promise_new (cb);
+		return jsasync.as_promise (cb);
 	});},
 	get _get_balance_sync () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -780,38 +833,23 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 		else {
 		}
 		var wallet = self._wallet.clone ();
-		var cb = function (resolve, reject) {
+		var cb = function () {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
 				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
-						switch (__attrib0__) {
-							case 'resolve': var resolve = __allkwargs0__ [__attrib0__]; break;
-							case 'reject': var reject = __allkwargs0__ [__attrib0__]; break;
-						}
 					}
 				}
 			}
 			else {
 			}
-			try {
-				var balance = wallet.balance_sync;
-				print ('Sending from wallet {} with a total balance of {} TFT...'.format (wallet.wallet_name, balance.coins_total));
-				print ('Sent from wallet {} succesfully!'.format (wallet.wallet_name));
-				resolve ('66ccdf3a0bca58025be7fdc71f3f6bfbd6ed6287aa698a131734a947c71a3bbf');
-			}
-			catch (__except0__) {
-				if (isinstance (__except0__, Exception)) {
-					var e = __except0__;
-					reject (e);
-				}
-				else {
-					throw __except0__;
-				}
-			}
+			var balance = wallet.balance_sync;
+			print ('Sent from wallet {} succesfully with an input balance of {} TFT!'.format (wallet.wallet_name, balance.coins_total));
+			return '66ccdf3a0bca58025be7fdc71f3f6bfbd6ed6287aa698a131734a947c71a3bbf';
 		};
-		return jsasync.promise_new (cb);
+		print ('Sending from wallet {}...'.format (wallet.wallet_name));
+		return jsasync.chain (jsasync.sleep (3000), cb);
 	});}
 });
 export var Balance =  __class__ ('Balance', [object], {
@@ -1357,6 +1395,54 @@ export var mnemonic_is_valid = function (mnemonic) {
 			throw __except0__;
 		}
 	}
+};
+export var hello_pool = function (limit) {
+	if (typeof limit == 'undefined' || (limit != null && limit.hasOwnProperty ("__kwargtrans__"))) {;
+		var limit = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'limit': var limit = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	var generator = function* () {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+				}
+			}
+		}
+		else {
+		}
+		for (var i = 0; i < 8; i++) {
+			var x = i;
+			var cb = function () {
+				if (arguments.length) {
+					var __ilastarg0__ = arguments.length - 1;
+					if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+						var __allkwargs0__ = arguments [__ilastarg0__--];
+						for (var __attrib0__ in __allkwargs0__) {
+						}
+					}
+				}
+				else {
+				}
+				return x;
+			};
+			yield jsasync.chain (jsasync.sleep (random.randint (1000, 5000)), jsasync.as_promise (cb));
+		}
+		};
+	return jsasync.promise_pool_new (generator, limit);
 };
 
 //# sourceMappingURL=api.map

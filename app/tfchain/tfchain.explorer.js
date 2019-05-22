@@ -1,5 +1,6 @@
 var random = {};
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __proxy__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, abs, all, any, assert, bool, bytearray, bytes, callable, chr, copy, deepcopy, delattr, dict, dir, divmod, enumerate, filter, float, getattr, hasattr, input, int, isinstance, issubclass, len, list, map, max, min, object, ord, pow, print, property, py_TypeError, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
+import * as jsasync from './tfchain.polyfill.asynchronous.js';
 import * as jshttp from './tfchain.polyfill.http.js';
 import * as jsjson from './tfchain.polyfill.encoding.json.js';
 import * as tferrors from './tfchain.errors.js';
@@ -85,41 +86,87 @@ export var Client =  __class__ ('Client', [object], {
 		}
 		var indices = list (range (len (self._addresses)));
 		random.shuffle (indices);
-		for (var idx of indices) {
-			try {
-				var address = self._addresses [idx];
-				if (!(isinstance (address, str))) {
-					var __except0__ = py_TypeError ('explorer address expected to be a string, not {}'.format (py_typeof (address)));
-					__except0__.__cause__ = null;
-					throw __except0__;
+		var resolve = function (result) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'result': var result = __allkwargs0__ [__attrib0__]; break;
+						}
+					}
 				}
-				var resource = address + endpoint;
-				var resp = jshttp.http_get (resource);
-				if (resp.code == 200) {
-					return jsjson.json_loads (resp.data);
-				}
-				if (resp.code == 204 || resp.code == 400 && (__in__ ('unrecognized hash', resp.data) || __in__ ('not found', resp.data))) {
-					var __except0__ = tferrors.ExplorerNoContent ('GET: no content available (code: 204)', endpoint);
-					__except0__.__cause__ = null;
-					throw __except0__;
-				}
-				var __except0__ = tferrors.ExplorerServerError ('error (code: {}): {}'.format (resp.code, resp.data), endpoint);
+			}
+			else {
+			}
+			if (result.code == 200) {
+				return result.data;
+			}
+			if (result.code == 204 || result.code == 400 && (__in__ ('unrecognized hash', result.data) || __in__ ('not found', result.data))) {
+				var __except0__ = tferrors.ExplorerNoContent ('GET: no content available (code: 204)', endpoint);
 				__except0__.__cause__ = null;
 				throw __except0__;
 			}
-			catch (__except0__) {
-				if (isinstance (__except0__, Exception)) {
-					var e = __except0__;
-					print ('tfchain explorer get exception at endpoint {} on {}: {}'.format (endpoint, address, e));
+			var __except0__ = tferrors.ExplorerServerError ('error (code: {}): {}'.format (result.code, result.data), endpoint);
+			__except0__.__cause__ = null;
+			throw __except0__;
+		};
+		var address = self._addresses [0];
+		if (!(isinstance (address, str))) {
+			var __except0__ = py_TypeError ('explorer address expected to be a string, not {}'.format (py_typeof (address)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		var resource = address + endpoint;
+		var p = jsasync.chain (jshttp.http_get (resource), resolve);
+		for (var idx of indices.__getslice__ (1, null, 1)) {
+			var address = self._addresses [idx];
+			if (!(isinstance (address, str))) {
+				var __except0__ = py_TypeError ('explorer address expected to be a string, not {}'.format (py_typeof (address)));
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
+			var resource = address + endpoint;
+			var cb = function (reason) {
+				if (arguments.length) {
+					var __ilastarg0__ = arguments.length - 1;
+					if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+						var __allkwargs0__ = arguments [__ilastarg0__--];
+						for (var __attrib0__ in __allkwargs0__) {
+							switch (__attrib0__) {
+								case 'reason': var reason = __allkwargs0__ [__attrib0__]; break;
+							}
+						}
+					}
 				}
 				else {
-					throw __except0__;
+				}
+				print ('retrying on another server, previous GET call failed: {}'.format (reason));
+				return jsasync.chain (jshttp.http_get (resource), resolve);
+			};
+			var p = jsasync.catch_promise (p, cb);
+		}
+		var final_catch = function (reason) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'reason': var reason = __allkwargs0__ [__attrib0__]; break;
+						}
+					}
 				}
 			}
-		}
-		var __except0__ = tferrors.ExplorerNotAvailable ('no explorer was available', endpoint, self._addresses);
-		__except0__.__cause__ = null;
-		throw __except0__;
+			else {
+			}
+			print ('servers exhausted, previous GET call failed as well: {}'.format (reason));
+			var __except0__ = tferrors.ExplorerNotAvailable ('no explorer was available', endpoint, self._addresses);
+			__except0__.__cause__ = null;
+			throw __except0__;
+		};
+		return jsasync.catch_promise (p, final_catch);
 	});},
 	get data_post () {return __get__ (this, function (self, endpoint, data) {
 		if (arguments.length) {
@@ -139,42 +186,87 @@ export var Client =  __class__ ('Client', [object], {
 		}
 		var indices = list (range (len (self._addresses)));
 		random.shuffle (indices);
-		for (var idx of indices) {
-			try {
-				var address = self._addresses [idx];
-				if (!(isinstance (address, str))) {
-					var __except0__ = py_TypeError ('explorer address expected to be a string, not {}'.format (py_typeof (address)));
-					__except0__.__cause__ = null;
-					throw __except0__;
+		var resolve = function (result) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'result': var result = __allkwargs0__ [__attrib0__]; break;
+						}
+					}
 				}
-				var resource = address + endpoint;
-				var headers = dict ({'Content-Type': 'Application/json;charset=UTF-8'});
-				var s = data;
-				if (!(isinstance (s, str))) {
-					var s = jsjson.json_dumps (s);
-				}
-				var resp = jshttp.http_post (resource, s, __kwargtrans__ ({headers: headers}));
-				if (resp.code == 200) {
-					return jsjson.json_loads (resp.data);
-				}
-				var __except0__ = tferrors.ExplorerServerPostError ('POST: unexpected error (code: {}): {}'.format (resp.code, resp.data), endpoint, __kwargtrans__ ({data: data}));
+			}
+			else {
+			}
+			if (result.code == 200) {
+				return result.data;
+			}
+			var __except0__ = tferrors.ExplorerServerPostError ('POST: unexpected error (code: {}): {}'.format (result.code, result.data), endpoint, __kwargtrans__ ({data: data}));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		};
+		var headers = dict ({'Content-Type': 'Application/json;charset=UTF-8'});
+		var s = data;
+		if (!(isinstance (s, str))) {
+			var s = jsjson.json_dumps (s);
+		}
+		var address = self._addresses [0];
+		if (!(isinstance (address, str))) {
+			var __except0__ = py_TypeError ('explorer address expected to be a string, not {}'.format (py_typeof (address)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		var resource = address + endpoint;
+		var p = jsasync.chain (jshttp.http_post (resource, s, headers), resolve);
+		for (var idx of indices.__getslice__ (1, null, 1)) {
+			var address = self._addresses [idx];
+			if (!(isinstance (address, str))) {
+				var __except0__ = py_TypeError ('explorer address expected to be a string, not {}'.format (py_typeof (address)));
 				__except0__.__cause__ = null;
 				throw __except0__;
 			}
-			catch (__except0__) {
-				if (isinstance (__except0__, Exception)) {
-					var e = __except0__;
-					print ('tfchain explorer get exception at endpoint {} on {}: {}'.format (endpoint, address, e));
-					// pass;
+			var resource = address + endpoint;
+			var cb = function (reason) {
+				if (arguments.length) {
+					var __ilastarg0__ = arguments.length - 1;
+					if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+						var __allkwargs0__ = arguments [__ilastarg0__--];
+						for (var __attrib0__ in __allkwargs0__) {
+							switch (__attrib0__) {
+								case 'reason': var reason = __allkwargs0__ [__attrib0__]; break;
+							}
+						}
+					}
 				}
 				else {
-					throw __except0__;
+				}
+				print ('retrying on another server, previous POST call failed: {}'.format (reason));
+				return jsasync.chain (jshttp.http_post (resource, s, headers), resolve);
+			};
+			var p = jsasync.catch_promise (p, cb);
+		}
+		var final_catch = function (reason) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'reason': var reason = __allkwargs0__ [__attrib0__]; break;
+						}
+					}
 				}
 			}
-		}
-		var __except0__ = tferrors.ExplorerNotAvailable ('no explorer was available', endpoint, self._addresses);
-		__except0__.__cause__ = null;
-		throw __except0__;
+			else {
+			}
+			print ('servers exhausted, previous POST call failed as well: {}'.format (reason));
+			var __except0__ = tferrors.ExplorerNotAvailable ('no explorer was available', endpoint, self._addresses);
+			__except0__.__cause__ = null;
+			throw __except0__;
+		};
+		return jsasync.catch_promise (p, final_catch);
 	});}
 });
 Object.defineProperty (Client, 'addresses', property.call (Client, Client._get_addresses));;

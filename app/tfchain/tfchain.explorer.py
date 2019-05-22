@@ -2,6 +2,7 @@ import random
 import tfchain.errors as tferrors
 import tfchain.polyfill.encoding.json as jsjson
 import tfchain.polyfill.http as jshttp
+import tfchain.polyfill.asynchronous as jsasync
 
 class Client:
     """
@@ -37,22 +38,40 @@ class Client:
         """
         indices = list(range(len(self._addresses)))
         random.shuffle(indices)
-        for idx in indices:
-            try:
-                address = self._addresses[idx]
-                if not isinstance(address, str):
-                    raise TypeError("explorer address expected to be a string, not {}".format(type(address)))
+
+        def resolve(result):
+            if result.code == 200:
+                return result.data
+            if result.code == 204 or (result.code == 400 and ('unrecognized hash' in result.data or 'not found' in result.data)):
+                raise tferrors.ExplorerNoContent("GET: no content available (code: 204)", endpoint)
+            raise tferrors.ExplorerServerError("error (code: {}): {}".format(result.code, result.data), endpoint)
+
+        address = self._addresses[0]
+        if not isinstance(address, str):
+            raise TypeError("explorer address expected to be a string, not {}".format(type(address)))
+        resource = address+endpoint
+        # do the request and check the response
+        p = jsasync.chain(jshttp.http_get(resource), resolve)
+
+        # for any remaining index, do the same logic, but as a chained catch
+        for idx in indices[1:]:
+            address = self._addresses[idx]
+            if not isinstance(address, str):
+                raise TypeError("explorer address expected to be a string, not {}".format(type(address)))
+            resource = address+endpoint
+            def cb(reason):
+                print("retrying on another server, previous GET call failed: {}".format(reason))
                 # do the request and check the response
-                resource = address+endpoint
-                resp = jshttp.http_get(resource)
-                if resp.code == 200:
-                    return jsjson.json_loads(resp.data)
-                if resp.code == 204 or (resp.code == 400 and ('unrecognized hash' in resp.data or 'not found' in resp.data)):
-                    raise tferrors.ExplorerNoContent("GET: no content available (code: 204)", endpoint)
-                raise tferrors.ExplorerServerError("error (code: {}): {}".format(resp.code, resp.data), endpoint)
-            except Exception as e:
-                print("tfchain explorer get exception at endpoint {} on {}: {}".format(endpoint, address, e))
-        raise tferrors.ExplorerNotAvailable("no explorer was available", endpoint, self._addresses)
+                return jsasync.chain(jshttp.http_get(resource), resolve)
+            p = jsasync.catch_promise(p, cb)
+
+        # define final catch cb, as a last fallback
+        def final_catch(reason):
+            print("servers exhausted, previous GET call failed as well: {}".format(reason))
+            raise tferrors.ExplorerNotAvailable("no explorer was available", endpoint, self._addresses)
+
+        # return the final promise chain
+        return jsasync.catch_promise(p, final_catch)
 
     def data_post(self, endpoint, data):
         """
@@ -64,23 +83,42 @@ class Client:
         """
         indices = list(range(len(self._addresses)))
         random.shuffle(indices)
-        for idx in indices:
-            try:
-                address = self._addresses[idx]
-                if not isinstance(address, str):
-                    raise TypeError("explorer address expected to be a string, not {}".format(type(address)))
-                resource = address+endpoint
-                headers = {
-                    'Content-Type': 'Application/json;charset=UTF-8',
-                }
-                s = data
-                if not isinstance(s, str):
-                    s = jsjson.json_dumps(s)
-                resp = jshttp.http_post(resource, s, headers=headers)
-                if resp.code == 200:
-                    return jsjson.json_loads(resp.data)
-                raise tferrors.ExplorerServerPostError("POST: unexpected error (code: {}): {}".format(resp.code, resp.data), endpoint, data=data)
-            except Exception as e:
-                print("tfchain explorer get exception at endpoint {} on {}: {}".format(endpoint, address, e))
-                pass
-        raise tferrors.ExplorerNotAvailable("no explorer was available", endpoint, self._addresses)
+
+        def resolve(result):
+            if result.code == 200:
+                return result.data
+            raise tferrors.ExplorerServerPostError("POST: unexpected error (code: {}): {}".format(result.code, result.data), endpoint, data=data)
+
+        headers = {
+            'Content-Type': 'Application/json;charset=UTF-8',
+        }
+        s = data
+        if not isinstance(s, str):
+            s = jsjson.json_dumps(s)
+        
+        address = self._addresses[0]
+        if not isinstance(address, str):
+            raise TypeError("explorer address expected to be a string, not {}".format(type(address)))
+        resource = address+endpoint
+         # do the request and check the response
+        p = jsasync.chain(jshttp.http_post(resource, s, headers), resolve)
+
+        # for any remaining index, do the same logic, but as a chained catch
+        for idx in indices[1:]:
+            address = self._addresses[idx]
+            if not isinstance(address, str):
+                raise TypeError("explorer address expected to be a string, not {}".format(type(address)))
+            resource = address+endpoint
+            def cb(reason):
+                print("retrying on another server, previous POST call failed: {}".format(reason))
+                # do the request and check the response
+                return jsasync.chain(jshttp.http_post(resource, s, headers), resolve)
+            p = jsasync.catch_promise(p, cb)
+
+        # define final catch cb, as a last fallback
+        def final_catch(reason):
+            print("servers exhausted, previous POST call failed as well: {}".format(reason))
+            raise tferrors.ExplorerNotAvailable("no explorer was available", endpoint, self._addresses)
+
+        # return the final promise chain
+        return jsasync.catch_promise(p, final_catch)

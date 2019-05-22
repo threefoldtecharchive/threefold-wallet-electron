@@ -21,6 +21,158 @@ export var promise_new = function (cb) {
 	    
 	return p;
 };
+export var as_promise = function (cb) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'cb': var cb = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	var f = function (resolve, reject) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'resolve': var resolve = __allkwargs0__ [__attrib0__]; break;
+						case 'reject': var reject = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		try {
+			var result = cb ();
+			resolve (result);
+		}
+		catch (__except0__) {
+			if (isinstance (__except0__, Exception)) {
+				var e = __except0__;
+				reject (e);
+			}
+			else {
+				throw __except0__;
+			}
+		}
+	};
+	return promise_new (f);
+};
+export var chain = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var promises = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var promises = tuple ();
+	}
+	if (len (promises) == 0) {
+		var __except0__ = ValueError ('chain: at least one promise is expected');
+		__except0__.__cause__ = null;
+		throw __except0__;
+	}
+	var p = promises [0];
+	for (var np of promises.__getslice__ (1, null, 1)) {
+		if (isinstance (np, tuple)) {
+			var __left0__ = np;
+			var resolve = __left0__ [0];
+			var reject = __left0__ [1];
+			
+			            p = p.then(resolve, reject);
+			            
+		}
+		else {
+			
+			            p = p.then(np);
+			            
+		}
+	}
+	return p;
+};
+export var catch_promise = function (p, cb) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'p': var p = __allkwargs0__ [__attrib0__]; break;
+					case 'cb': var cb = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	
+	    p = p.catch(cb);
+	    
+	return p;
+};
+export var sleep = function (ms) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'ms': var ms = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	var p = null;
+	
+	    p = new Promise(resolve => setTimeout(resolve, ms));
+	    
+	return p;
+};
+export var wait = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+		var promises = tuple ([].slice.apply (arguments).slice (0, __ilastarg0__ + 1));
+	}
+	else {
+		var promises = tuple ();
+	}
+	var promises = (function () {
+		var __accu0__ = [];
+		for (var p of promises) {
+			__accu0__.append (p);
+		}
+		return __accu0__;
+	}) ();
+	if (len (promises) == 0) {
+		var __except0__ = ValueError ('wait: at least one promise is expected');
+		__except0__.__cause__ = null;
+		throw __except0__;
+	}
+	var p = null;
+	
+	    p = Promise.all(promises);
+	    
+	return p;
+};
 export var promise_pool_new = function (generator, limit) {
 	if (typeof limit == 'undefined' || (limit != null && limit.hasOwnProperty ("__kwargtrans__"))) {;
 		var limit = null;
@@ -69,38 +221,7 @@ export var promise_pool_new = function (generator, limit) {
 			            
 			return result;
 		}
-		var cb = result.value;
-		var f = function (resolve, reject) {
-			if (arguments.length) {
-				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-					var __allkwargs0__ = arguments [__ilastarg0__--];
-					for (var __attrib0__ in __allkwargs0__) {
-						switch (__attrib0__) {
-							case 'resolve': var resolve = __allkwargs0__ [__attrib0__]; break;
-							case 'reject': var reject = __allkwargs0__ [__attrib0__]; break;
-						}
-					}
-				}
-			}
-			else {
-			}
-			try {
-				var result = cb ();
-				print ('resolve: ', result);
-				resolve (result);
-			}
-			catch (__except0__) {
-				if (isinstance (__except0__, Exception)) {
-					var e = __except0__;
-					reject (e);
-				}
-				else {
-					throw __except0__;
-				}
-			}
-		};
-		return promise_new (f);
+		return result.value;
 	};
 	var pool = jspromisepool.Pool (producer, limit);
 	return pool.start ();
