@@ -16,6 +16,13 @@ const mapDispatchToProps = (dispatch) => ({
 })
 
 class Footer extends Component {
+  constructor (props) {
+    super(props)
+    this.state = {
+      error: ''
+    }
+  }
+
   componentDidMount () {
     this.getChainInfo()
     this.interval = setInterval(() => { this.getChainInfo() }, 60000)
@@ -37,19 +44,36 @@ class Footer extends Component {
         }
         this.props.setChainConstants(chainInfo)
       })
+        .catch(err => {
+          this.setState({ error: err })
+        })
     }
   }
 
   render () {
     const { chainConstants } = this.props
+    const { error } = this.state
     const date = moment(chainConstants.chain_timestamp).format('MMMM Do , HH:mm')
+
+    let chainError = false
+    if (error !== '') {
+      chainError = true
+    }
 
     return (
       <div style={{ position: 'absolute', height: 70, bottom: 35, width: '100%', background: '#131216', borderTopStyle: 'solid', borderTopWidth: 2, borderTopColor: '#1A253F', padding: 25 }}>
-        <Icon name='circle' style={{ color: 'green', marginLeft: 10 }} />
-        <label>connected to {chainConstants.chainNetwork}</label>
-        <label style={{ position: 'absolute', right: 500 }}><Icon name='h square' /> {chainConstants.chainHeight} @ {date}</label>
-        <label style={{ position: 'absolute', right: 50 }}>version 0.1.0</label>
+        {chainError
+          ? <div>
+            <Icon name='circle' style={{ color: 'red', marginLeft: 10 }} />
+            <label>not connected</label>
+          </div>
+          : <div>
+            <Icon name='circle' style={{ color: 'green', marginLeft: 10 }} />
+            <label>connected to {chainConstants.chainNetwork}</label>
+            <label style={{ position: 'absolute', right: 500 }}><Icon name='h square' /> {chainConstants.chainHeight} @ {date}</label>
+            <label style={{ position: 'absolute', right: 50 }}>version 0.1.0</label>
+          </div>
+        }
       </div>
     )
   }
