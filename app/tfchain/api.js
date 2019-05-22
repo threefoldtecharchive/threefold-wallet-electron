@@ -6,6 +6,7 @@ import * as jsstr from './tfchain.polyfill.encoding.str.js';
 import * as jshex from './tfchain.polyfill.encoding.hex.js';
 import * as jsjson from './tfchain.polyfill.encoding.json.js';
 import * as jsasync from './tfchain.polyfill.asynchronous.js';
+import * as jssys from './tfchain.polyfill.sys.js';
 import * as jscrypto from './tfchain.polyfill.crypto.js';
 import * as tfsiabin from './tfchain.encoding.siabin.js';
 import * as bip39 from './tfchain.crypto.mnemonic.js';
@@ -796,7 +797,9 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 			}
 			try {
 				var balance = wallet.balance_sync;
-				print ('send from wallet {} with a total balance of {} TFT'.format (wallet.wallet_name, balance.coins_total));
+				print ('Sending from wallet {} with a total balance of {} TFT...'.format (wallet.wallet_name, balance.coins_total));
+				jssys.sleep (3);
+				print ('Sent from wallet {} succesfully!'.format (wallet.wallet_name));
 				resolve ('66ccdf3a0bca58025be7fdc71f3f6bfbd6ed6287aa698a131734a947c71a3bbf');
 			}
 			catch (__except0__) {

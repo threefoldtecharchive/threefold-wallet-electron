@@ -1,0 +1,8 @@
+{
+	"version": 3,
+	"file": "tfchain.polyfill.sys.js",
+	"sources": [
+		"tfchain.polyfill.sys.py"
+	],
+	"mappings": "AAAA;AAOA;AAPA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAMA;AACA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA"
+}

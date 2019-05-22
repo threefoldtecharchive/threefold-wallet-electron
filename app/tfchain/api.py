@@ -6,6 +6,7 @@ converted into Javascript (ES6) using Transcrypt.
 import tfchain.crypto.mnemonic as bip39
 import tfchain.encoding.siabin as tfsiabin
 import tfchain.polyfill.crypto as jscrypto
+import tfchain.polyfill.sys as jssys
 import tfchain.polyfill.asynchronous as jsasync
 import tfchain.polyfill.encoding.json as jsjson
 import tfchain.polyfill.encoding.hex as jshex
@@ -487,7 +488,9 @@ class CoinTransactionBuilder:
         def cb(resolve, reject):
             try:
                 balance = wallet.balance_sync
-                print("send from wallet {} with a total balance of {} TFT".format(wallet.wallet_name, balance.coins_total))
+                print("Sending from wallet {} with a total balance of {} TFT...".format(wallet.wallet_name, balance.coins_total))
+                jssys.sleep(3)
+                print("Sent from wallet {} succesfully!".format(wallet.wallet_name))
                 resolve('66ccdf3a0bca58025be7fdc71f3f6bfbd6ed6287aa698a131734a947c71a3bbf')
             except Exception as e:
                 reject(e)
