@@ -17,7 +17,8 @@ class Wallet extends Component {
     this.state = {
       coinsLocked: 0,
       coinsUnlocked: 0,
-      coinsTotal: 0
+      coinsTotal: 0,
+      transactions: []
     }
   }
 
@@ -27,17 +28,66 @@ class Wallet extends Component {
 
   getBalance = () => {
     if (this.props.wallet != null) {
-      this.setState({
-        coinsLocked: this.props.wallet.balance.coins_locked,
-        coinsUnlocked: this.props.wallet.balance.coins_unlocked,
-        coinsTotal: this.props.wallet.balance.coins_total
+      this.props.wallet._get_balance().then(info => {
+        this.setState({
+          coinsLocked: info.coins_locked,
+          coinsUnlocked: info.coins_unlocked,
+          coinsTotal: info.coins_total,
+          transactions: info.transactions
+        })
       })
     }
   }
 
-  handleWalletAddress = () => {
-    // const { wallet } = this.props
-    // console.log(GetWalletAddress(wallet))
+  renderTransactions = () => {
+    const { transactions } = this.state
+    if (transactions.length > 0) {
+      return (
+        <div>
+          <h3 style={{ color: 'white' }}>Transactions</h3>
+          <List style={{ marginLeft: 50, overflow: 'auto', color: 'white' }} divided relaxed>
+            {transactions.map(tx => {
+              return (
+                <List.Item style={{ borderBottom: '1px solid grey' }}>
+                  <List.Content>
+                    <List.Header as='a' style={{ color: '#6647fe', display: 'flex' }}>TXID: {tx.identifier} {tx.confirmed ? (<p style={{ fontSize: 14, marginLeft: 80 }}>Confirmed at height {tx.height}</p>) : (<p style={{ fontSize: 14, marginLeft: 80 }}>Unconfirmed</p>)}</List.Header>
+                    {this.renderTransactionBody(tx)}
+                  </List.Content>
+                </List.Item>
+              )
+            })}
+          </List>
+        </div>
+      )
+    } else {
+      return (
+        <h3 style={{ textAlign: 'center', position: 'relative', left: '45%', top: '45%', display: 'inline-block' }}>No transactions yet!</h3>
+      )
+    }
+  }
+
+  renderTransactionBody = (tx) => {
+    if (tx.inputs.length > 0) {
+      console.log(tx)
+      return tx.inputs.map(input => {
+        return (
+          <div style={{ marginTop: 5, marginBottom: 5 }}>
+            <List.Description style={{ color: 'white' }} as='a'>{input.senders.map(sender => { return (<p style={{ fontSize: 14, marginBottom: 0 }}>From: {sender} </p>) })}</List.Description>
+            <List.Description style={{ color: 'white' }} as='a'>Amount: <span style={{ color: 'green' }}>+ {input.amount}</span> TFT</List.Description>
+            <List.Description style={{ color: 'white' }} as='a'>To: {input.recipient}</List.Description>
+          </div>
+        )
+      })
+    } else if (tx.outputs.length > 0) {
+      return tx.outputs.map(out => {
+        return (
+          <div style={{ marginTop: 5, marginBottom: 5 }}>
+            <List.Description style={{ color: 'white' }} as='a'>To: {out.recipient}</List.Description>
+            <List.Description style={{ color: 'white' }} as='a'>Amount: <span style={{ color: 'red' }}>- {out.amount}</span> TFT</List.Description>
+          </div>
+        )
+      })
+    }
   }
 
   render () {
@@ -78,44 +128,7 @@ class Wallet extends Component {
             </GridColumn>
           </Grid>
           <Segment style={{ width: '90%', height: '300px', overflow: 'auto', overflowY: 'scroll', margin: 'auto', background: '#29272E' }}>
-            <h3 style={{ color: 'white' }}>Transactions</h3>
-            <List style={{ marginLeft: 50, overflow: 'auto', color: 'white' }} divided relaxed>
-              <List.Item>
-                <List.Content>
-                  <List.Header as='a' style={{ color: '#6647fe' }}>TXID: 226a299113934c53048a4c5008016199b40e359b82c898c19e115188a45545ac</List.Header>
-                  <List.Description style={{ color: 'white' }} as='a'>To: 0195de96da59de0bd59c416e96d17df1a5bbc80acb6b02a1db0cde0bcdffca55a4f7f369e955ef</List.Description>
-                  <List.Description style={{ color: 'white' }} as='a'>Amount: 500 TFT</List.Description>
-                </List.Content>
-              </List.Item>
-              <List.Item>
-                <List.Content>
-                  <List.Header as='a' style={{ color: '#6647fe' }}>TXID: 226a299113934c53048a4c5008016199b40e359b82c898c19e115188a45545ac</List.Header>
-                  <List.Description style={{ color: 'white' }} as='a'>To: 0195de96da59de0bd59c416e96d17df1a5bbc80acb6b02a1db0cde0bcdffca55a4f7f369e955ef</List.Description>
-                  <List.Description style={{ color: 'white' }} as='a'>Amount: 500 TFT</List.Description>
-                </List.Content>
-              </List.Item>
-              <List.Item>
-                <List.Content>
-                  <List.Header as='a' style={{ color: '#6647fe' }}>TXID: 226a299113934c53048a4c5008016199b40e359b82c898c19e115188a45545ac</List.Header>
-                  <List.Description style={{ color: 'white' }} as='a'>To: 0195de96da59de0bd59c416e96d17df1a5bbc80acb6b02a1db0cde0bcdffca55a4f7f369e955ef</List.Description>
-                  <List.Description style={{ color: 'white' }} as='a'>Amount: 500 TFT</List.Description>
-                </List.Content>
-              </List.Item>
-              <List.Item>
-                <List.Content>
-                  <List.Header as='a' style={{ color: '#6647fe' }}>TXID: 226a299113934c53048a4c5008016199b40e359b82c898c19e115188a45545ac</List.Header>
-                  <List.Description style={{ color: 'white' }} as='a'>To: 0195de96da59de0bd59c416e96d17df1a5bbc80acb6b02a1db0cde0bcdffca55a4f7f369e955ef</List.Description>
-                  <List.Description style={{ color: 'white' }} as='a'>Amount: 500 TFT</List.Description>
-                </List.Content>
-              </List.Item>
-              <List.Item>
-                <List.Content>
-                  <List.Header as='a' style={{ color: '#6647fe' }}>TXID: 226a299113934c53048a4c5008016199b40e359b82c898c19e115188a45545ac</List.Header>
-                  <List.Description style={{ color: 'white' }} as='a'>To: 0195de96da59de0bd59c416e96d17df1a5bbc80acb6b02a1db0cde0bcdffca55a4f7f369e955ef</List.Description>
-                  <List.Description style={{ color: 'white' }} as='a'>Amount: 500 TFT</List.Description>
-                </List.Content>
-              </List.Item>
-            </List>
+            {this.renderTransactions()}
           </Segment>
         </div>
         <Footer />
