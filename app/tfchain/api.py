@@ -838,13 +838,3 @@ def mnemonic_is_valid(mnemonic):
     except Exception as e:
         print(e)
         return False
-
-import random
-def hello_pool(limit=None):
-    def generator():
-        for i in range(0, 8):
-            x = i
-            def cb():
-                return x
-            yield jsasync.chain(jsasync.sleep(random.randint(1000, 5000)), jsasync.as_promise(cb))
-    return jsasync.promise_pool_new(generator, limit)
