@@ -47,11 +47,18 @@ class Account extends Component {
     if (!wallets) {
       return
     }
-    const totalCoinLocked = sumBy(wallets, w => parseInt(w.balance.coins_locked))
-    const totalCoinUnlocked = sumBy(wallets, w => parseInt(w.balance.coins_unlocked))
-    const totalCoins = sumBy(wallets, w => parseInt(w.balance.coins_total))
 
-    this.setState({ totalCoinLocked, totalCoinUnlocked, totalCoins })
+    const balancePromisses = wallets.map(w => {
+      return w._get_balance()
+    })
+
+    Promise.all(balancePromisses).then(res => {
+      console.log(res)
+      const totalSum = sumBy(res, r => parseInt(r.coins_total))
+      const totalUnlockedSum = sumBy(res, r => parseInt(r.coins_unlocked))
+      const totalLockedSum = sumBy(res, r => parseInt(r.coins_locked))
+      this.setState({ totalCoins: totalSum, totalCoinLocked: totalLockedSum, totalCoinUnlocked: totalUnlockedSum })
+    })
   }
 
   handleWalletClick = (wallet) => {
