@@ -533,6 +533,7 @@ class Balance:
             TransactionView(
                 '0df49c1ae60352f7fa173e8a10804d125aa23f0ede1a405b59032c29c3d30777',
                 0,
+                0,
                 None,
                 [
                     CoinOutputView(
@@ -550,6 +551,7 @@ class Balance:
             TransactionView(
                 'c3b29d74b8f98332d5c976451e15eab94c210fe4c0b4b6d020153f2a6b2c2253',
                 270010,
+                1557083437,
                 '101277c10b4c975419c2382d8bb06a2c8b0c30110de1844daf4ff8efe8e900bc',
                 [
                     CoinOutputView(
@@ -570,6 +572,7 @@ class Balance:
             TransactionView(
                 'a0e3f3036e8b7f082307c7747beada0656e1ea205f384ce7abea1401d5881a90',
                 270009,
+                1557083331,
                 '66d3d46f6a75dcab102baff7016cd518d857c37db0db4151dae45b225408de9d',
                 [
                     CoinOutputView(
@@ -587,6 +590,7 @@ class Balance:
             TransactionView(
                 'a3bf595635b3563859a00fedf6a5b435fef9802f1ff6e9d4640a072e0b2f49e4',
                 240000,
+                1553463308,
                 'a3bf595635b3563859a00fedf6a5b435fef9802f1ff6e9d4640a072e0b2f49e4',
                 [],
                 [
@@ -601,6 +605,7 @@ class Balance:
             TransactionView(
                 '66ccdf3a0bca58025be7fdc71f3f6bfbd6ed6287aa698a131734a947c71a3bbf',
                 240000,
+                1553463308,
                 'a3bf595635b3563859a00fedf6a5b435fef9802f1ff6e9d4640a072e0b2f49e4',
                 [],
                 [
@@ -626,15 +631,18 @@ class TransactionView:
     A human readable view of a transaction as filtered for a specific wallet in mind.
     """
 
-    def __init__(self, identifier, height, blockid, inputs, outputs):
+    def __init__(self, identifier, height, timestamp, blockid, inputs, outputs):
         if not isinstance(identifier, str):
             raise TypeError("identifier is expected to be of type str, not be of type {}".format(type(identifier)))
         if not isinstance(height, int):
             raise TypeError("height is expected to be of type int, not be of type {}".format(type(height)))
+        if not isinstance(timestamp, int):
+            raise TypeError("timestamp is expected to be of type int, not be of type {}".format(type(timestamp)))
         if blockid is not None and not isinstance(blockid, str):
             raise TypeError("blockid is expected to be None or of type str, not be of type {}".format(type(blockid)))
         self._identifier = identifier
         self._height = height
+        self._timestamp = timestamp
         self._blockid = blockid
         self._inputs = inputs
         self._outputs = outputs
@@ -657,6 +665,12 @@ class TransactionView:
         :returns: the parent block's height
         """
         return self._height
+    @property
+    def timestamp(self):
+        """
+        :returns: the parent block's timestamp
+        """
+        return self._timestamp
     @property
     def blockid(self):
         """

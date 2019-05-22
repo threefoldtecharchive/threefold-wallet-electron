@@ -960,7 +960,7 @@ export var Balance =  __class__ ('Balance', [object], {
 		}
 		else {
 		}
-		return [TransactionView ('0df49c1ae60352f7fa173e8a10804d125aa23f0ede1a405b59032c29c3d30777', 0, null, [CoinOutputView (['01a94cff5aa86508d742051ba743a525331cc9b31ba7152627344902ea79dc8d2c436ceda5bcb4', '0111429d9967c5c5e52e5aad522d6759e88c6fca8a54fa23ea12917006edf6842631a8a5d847ac'], '016c3dabb530029e4503a73ec944024f0d74ca080537972bb658a69f120ab307662f996d9fc85f', '40000000', 0)], []), TransactionView ('c3b29d74b8f98332d5c976451e15eab94c210fe4c0b4b6d020153f2a6b2c2253', 270010, '101277c10b4c975419c2382d8bb06a2c8b0c30110de1844daf4ff8efe8e900bc', [CoinOutputView (['0111429d9967c5c5e52e5aad522d6759e88c6fca8a54fa23ea12917006edf6842631a8a5d847ac'], '01ef91e8e584484c11850e49265256449a6acc9a75e0a7814e374d0248056d2d5d43fe494d9fd9', '100', 0), CoinOutputView (['01a94cff5aa86508d742051ba743a525331cc9b31ba7152627344902ea79dc8d2c436ceda5bcb4'], '01ef91e8e584484c11850e49265256449a6acc9a75e0a7814e374d0248056d2d5d43fe494d9fd9', '340200', 0)], []), TransactionView ('a0e3f3036e8b7f082307c7747beada0656e1ea205f384ce7abea1401d5881a90', 270009, '66d3d46f6a75dcab102baff7016cd518d857c37db0db4151dae45b225408de9d', [CoinOutputView (['0111429d9967c5c5e52e5aad522d6759e88c6fca8a54fa23ea12917006edf6842631a8a5d847ac', '01a94cff5aa86508d742051ba743a525331cc9b31ba7152627344902ea79dc8d2c436ceda5bcb4'], '01a94cff5aa86508d742051ba743a525331cc9b31ba7152627344902ea79dc8d2c436ceda5bcb4', '20000', 1558458390)], []), TransactionView ('a3bf595635b3563859a00fedf6a5b435fef9802f1ff6e9d4640a072e0b2f49e4', 240000, 'a3bf595635b3563859a00fedf6a5b435fef9802f1ff6e9d4640a072e0b2f49e4', [], [CoinOutputView (['01a94cff5aa86508d742051ba743a525331cc9b31ba7152627344902ea79dc8d2c436ceda5bcb4'], '0111429d9967c5c5e52e5aad522d6759e88c6fca8a54fa23ea12917006edf6842631a8a5d847ac', '123456789.2003', 0)]), TransactionView ('66ccdf3a0bca58025be7fdc71f3f6bfbd6ed6287aa698a131734a947c71a3bbf', 240000, 'a3bf595635b3563859a00fedf6a5b435fef9802f1ff6e9d4640a072e0b2f49e4', [], [CoinOutputView (['01ef91e8e584484c11850e49265256449a6acc9a75e0a7814e374d0248056d2d5d43fe494d9fd9'], '0111429d9967c5c5e52e5aad522d6759e88c6fca8a54fa23ea12917006edf6842631a8a5d847ac', '3000.200', 0), CoinOutputView (['01a94cff5aa86508d742051ba743a525331cc9b31ba7152627344902ea79dc8d2c436ceda5bcb4'], '0111429d9967c5c5e52e5aad522d6759e88c6fca8a54fa23ea12917006edf6842631a8a5d847ac', '10000', 250000)])];
+		return [TransactionView ('0df49c1ae60352f7fa173e8a10804d125aa23f0ede1a405b59032c29c3d30777', 0, 0, null, [CoinOutputView (['01a94cff5aa86508d742051ba743a525331cc9b31ba7152627344902ea79dc8d2c436ceda5bcb4', '0111429d9967c5c5e52e5aad522d6759e88c6fca8a54fa23ea12917006edf6842631a8a5d847ac'], '016c3dabb530029e4503a73ec944024f0d74ca080537972bb658a69f120ab307662f996d9fc85f', '40000000', 0)], []), TransactionView ('c3b29d74b8f98332d5c976451e15eab94c210fe4c0b4b6d020153f2a6b2c2253', 270010, 1557083437, '101277c10b4c975419c2382d8bb06a2c8b0c30110de1844daf4ff8efe8e900bc', [CoinOutputView (['0111429d9967c5c5e52e5aad522d6759e88c6fca8a54fa23ea12917006edf6842631a8a5d847ac'], '01ef91e8e584484c11850e49265256449a6acc9a75e0a7814e374d0248056d2d5d43fe494d9fd9', '100', 0), CoinOutputView (['01a94cff5aa86508d742051ba743a525331cc9b31ba7152627344902ea79dc8d2c436ceda5bcb4'], '01ef91e8e584484c11850e49265256449a6acc9a75e0a7814e374d0248056d2d5d43fe494d9fd9', '340200', 0)], []), TransactionView ('a0e3f3036e8b7f082307c7747beada0656e1ea205f384ce7abea1401d5881a90', 270009, 1557083331, '66d3d46f6a75dcab102baff7016cd518d857c37db0db4151dae45b225408de9d', [CoinOutputView (['0111429d9967c5c5e52e5aad522d6759e88c6fca8a54fa23ea12917006edf6842631a8a5d847ac', '01a94cff5aa86508d742051ba743a525331cc9b31ba7152627344902ea79dc8d2c436ceda5bcb4'], '01a94cff5aa86508d742051ba743a525331cc9b31ba7152627344902ea79dc8d2c436ceda5bcb4', '20000', 1558458390)], []), TransactionView ('a3bf595635b3563859a00fedf6a5b435fef9802f1ff6e9d4640a072e0b2f49e4', 240000, 1553463308, 'a3bf595635b3563859a00fedf6a5b435fef9802f1ff6e9d4640a072e0b2f49e4', [], [CoinOutputView (['01a94cff5aa86508d742051ba743a525331cc9b31ba7152627344902ea79dc8d2c436ceda5bcb4'], '0111429d9967c5c5e52e5aad522d6759e88c6fca8a54fa23ea12917006edf6842631a8a5d847ac', '123456789.2003', 0)]), TransactionView ('66ccdf3a0bca58025be7fdc71f3f6bfbd6ed6287aa698a131734a947c71a3bbf', 240000, 1553463308, 'a3bf595635b3563859a00fedf6a5b435fef9802f1ff6e9d4640a072e0b2f49e4', [], [CoinOutputView (['01ef91e8e584484c11850e49265256449a6acc9a75e0a7814e374d0248056d2d5d43fe494d9fd9'], '0111429d9967c5c5e52e5aad522d6759e88c6fca8a54fa23ea12917006edf6842631a8a5d847ac', '3000.200', 0), CoinOutputView (['01a94cff5aa86508d742051ba743a525331cc9b31ba7152627344902ea79dc8d2c436ceda5bcb4'], '0111429d9967c5c5e52e5aad522d6759e88c6fca8a54fa23ea12917006edf6842631a8a5d847ac', '10000', 250000)])];
 	});}
 });
 Object.defineProperty (Balance, 'transactions', property.call (Balance, Balance._get_transactions));
@@ -969,7 +969,7 @@ Object.defineProperty (Balance, 'coins_locked', property.call (Balance, Balance.
 Object.defineProperty (Balance, 'coins_unlocked', property.call (Balance, Balance._get_coins_unlocked));;
 export var TransactionView =  __class__ ('TransactionView', [object], {
 	__module__: __name__,
-	get __init__ () {return __get__ (this, function (self, identifier, height, blockid, inputs, outputs) {
+	get __init__ () {return __get__ (this, function (self, identifier, height, timestamp, blockid, inputs, outputs) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -979,6 +979,7 @@ export var TransactionView =  __class__ ('TransactionView', [object], {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
 						case 'identifier': var identifier = __allkwargs0__ [__attrib0__]; break;
 						case 'height': var height = __allkwargs0__ [__attrib0__]; break;
+						case 'timestamp': var timestamp = __allkwargs0__ [__attrib0__]; break;
 						case 'blockid': var blockid = __allkwargs0__ [__attrib0__]; break;
 						case 'inputs': var inputs = __allkwargs0__ [__attrib0__]; break;
 						case 'outputs': var outputs = __allkwargs0__ [__attrib0__]; break;
@@ -998,6 +999,11 @@ export var TransactionView =  __class__ ('TransactionView', [object], {
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
+		if (!(isinstance (timestamp, int))) {
+			var __except0__ = py_TypeError ('timestamp is expected to be of type int, not be of type {}'.format (py_typeof (timestamp)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
 		if (blockid !== null && !(isinstance (blockid, str))) {
 			var __except0__ = py_TypeError ('blockid is expected to be None or of type str, not be of type {}'.format (py_typeof (blockid)));
 			__except0__.__cause__ = null;
@@ -1005,6 +1011,7 @@ export var TransactionView =  __class__ ('TransactionView', [object], {
 		}
 		self._identifier = identifier;
 		self._height = height;
+		self._timestamp = timestamp;
 		self._blockid = blockid;
 		self._inputs = inputs;
 		self._outputs = outputs;
@@ -1056,6 +1063,22 @@ export var TransactionView =  __class__ ('TransactionView', [object], {
 		else {
 		}
 		return self._height;
+	});},
+	get _get_timestamp () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._timestamp;
 	});},
 	get _get_blockid () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -1109,6 +1132,7 @@ export var TransactionView =  __class__ ('TransactionView', [object], {
 Object.defineProperty (TransactionView, 'outputs', property.call (TransactionView, TransactionView._get_outputs));
 Object.defineProperty (TransactionView, 'inputs', property.call (TransactionView, TransactionView._get_inputs));
 Object.defineProperty (TransactionView, 'blockid', property.call (TransactionView, TransactionView._get_blockid));
+Object.defineProperty (TransactionView, 'timestamp', property.call (TransactionView, TransactionView._get_timestamp));
 Object.defineProperty (TransactionView, 'height', property.call (TransactionView, TransactionView._get_height));
 Object.defineProperty (TransactionView, 'confirmed', property.call (TransactionView, TransactionView._get_confirmed));
 Object.defineProperty (TransactionView, 'identifier', property.call (TransactionView, TransactionView._get_identifier));;
