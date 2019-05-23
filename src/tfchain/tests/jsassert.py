@@ -7,13 +7,21 @@ def equals(a, b):
     a = _as_primitive(a)
     b = _as_primitive(b)
     if a != b:
-        raise _throw_msg("expected {} to be {}".format(a, b))
+        _throw_msg("expected {} to be {}".format(a, b))
 
 def equals_not(a, b):
     a = _as_primitive(a)
     b = _as_primitive(b)
     if a == b:
-        raise _throw_msg("expected {} to be {}".format(a, b))
+        _throw_msg("expected {} to be {}".format(a, b))
+
+def raises(et, cb):
+    try:
+        cb()
+        raise _throw_msg("expected exception {}, but received none".format(et))
+    except Exception as e:
+        if not isinstance(e, et):
+            _throw_msg("expected exception {}, not {}".format(et, type(e)))
 
 def _throw_msg(msg):
     __pragma__("js", "{}", """
