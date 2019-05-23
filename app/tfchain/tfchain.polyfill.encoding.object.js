@@ -14,7 +14,7 @@ export var as_py_obj = function (obj) {
 	}
 	else {
 	}
-	if (_is_js_obj (obj)) {
+	if (is_js_obj (obj)) {
 		var out = new_dict ();
 		var cb = function (key, val) {
 			if (arguments.length) {
@@ -42,7 +42,7 @@ export var as_py_obj = function (obj) {
 		        
 		return out;
 	}
-	if (_is_js_arr (obj)) {
+	if (is_js_arr (obj)) {
 		var out = [];
 		
 		        for (const value of obj) {
@@ -51,7 +51,7 @@ export var as_py_obj = function (obj) {
 		        
 		return out;
 	}
-	var __left0__ = _try_as_bool (obj);
+	var __left0__ = try_as_bool (obj);
 	var out = __left0__ [0];
 	var ok = __left0__ [1];
 	if (ok) {
@@ -132,12 +132,12 @@ export var is_bool = function (obj) {
 	}
 	else {
 	}
-	var __left0__ = _try_as_bool (obj);
+	var __left0__ = try_as_bool (obj);
 	var _ = __left0__ [0];
 	var ok = __left0__ [1];
 	return ok;
 };
-export var _try_as_bool = function (obj) {
+export var try_as_bool = function (obj) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
 		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -151,6 +151,9 @@ export var _try_as_bool = function (obj) {
 	}
 	else {
 	}
+	if (isinstance (obj, bool)) {
+		return tuple ([obj, true]);
+	}
 	var t = true;
 	var f = false;
 	var result = null;
@@ -163,7 +166,7 @@ export var _try_as_bool = function (obj) {
 	    
 	return tuple ([result, result !== null]);
 };
-export var _is_js_obj = function (obj) {
+export var is_js_obj = function (obj) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
 		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -183,7 +186,7 @@ export var _is_js_obj = function (obj) {
 	    
 	return result;
 };
-export var _is_js_arr = function (obj) {
+export var is_js_arr = function (obj) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
 		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {

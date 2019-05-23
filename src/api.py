@@ -937,9 +937,3 @@ def wallet_address_is_valid(address, multisig=True):
         return multisig and uh.uhtype.value == UnlockHashType.MULTI_SIG.value
     except Exception:
         return False
-
-import tfchain.types.AtomicSwap as tfas
-asc = tfas
-import tfchain.types.ConditionTypes as tfct
-ct = tfct
-json_parse = jsjson.json_loads

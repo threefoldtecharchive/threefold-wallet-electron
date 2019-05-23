@@ -4,7 +4,7 @@ Javascript <-> Python encodong
 
 def as_py_obj(obj):
     # convert Objects as dicts
-    if _is_js_obj(obj):
+    if is_js_obj(obj):
         out = new_dict()
         def cb(key, val):
             out[key] = val
@@ -18,7 +18,7 @@ def as_py_obj(obj):
         return out
         
     # convert Arrays as lists
-    if _is_js_arr(obj):
+    if is_js_arr(obj):
         out = []
         __pragma__("js", "{}", """
         for (const value of obj) {
@@ -27,7 +27,7 @@ def as_py_obj(obj):
         """)
         return out
     # try to convert as bool
-    out, ok = _try_as_bool(obj)
+    out, ok = try_as_bool(obj)
     if ok:
         return out
     # return anything else as-is
@@ -55,10 +55,12 @@ def new_dict():
     return out
 
 def is_bool(obj):
-    _, ok = _try_as_bool(obj)
+    _, ok = try_as_bool(obj)
     return ok
 
-def _try_as_bool(obj):
+def try_as_bool(obj):
+    if isinstance(obj, bool):
+        return (obj, True)
     t = True
     f = False
     result = None
@@ -71,14 +73,14 @@ def _try_as_bool(obj):
     """)
     return (result, (result is not None))
 
-def _is_js_obj(obj):
+def is_js_obj(obj):
     result = None
     __pragma__("js", "{}", """
     result = typeof obj === 'object' && obj !== null && obj.constructor !== Array;
     """)
     return result
 
-def _is_js_arr(obj):
+def is_js_arr(obj):
     result = None
     __pragma__("js", "{}", """
     result = obj.constructor === Array;

@@ -25,10 +25,11 @@ class AtomicSwapContract:
         self._id = coinoutput.id
         self._condition = coinoutput.condition
         self._value = coinoutput.value
-        if isinstance(unspent, bool) or jsobj.is_bool(unspent):
+        unspent_bool, unspent_is_bool = jsobj.try_as_bool(unspent)
+        if not unspent_is_bool:
             raise TypeError(
                 "unspent status is expected to be of type bool, not {}".format(type(unspent)))
-        self._unspent = unspent
+        self._unspent = unspent_bool
         if current_timestamp is None:
             current_timestamp = int(datetime.now().timestamp())
         elif not isinstance(current_timestamp, int):
