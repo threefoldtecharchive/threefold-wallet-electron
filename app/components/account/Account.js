@@ -7,7 +7,6 @@ import routes from '../../constants/routes'
 import { selectWallet, setChainConstants } from '../../actions'
 import styles from '../home/Home.css'
 import Footer from '../footer'
-import { sumBy } from 'lodash'
 
 const mapStateToProps = state => ({
   account: state.account
@@ -68,11 +67,11 @@ class Account extends Component {
     }
 
     return (
-      <Card.Group style={{ marginTop: 10, marginLeft: 50, padding: 20 }}>
+      <Card.Group style={{ marginTop: 20, marginLeft: 20 }}>
         {wallets.map(w => {
           const balance = w._get_balance_sync()
           return (
-            <Card key={w._wallet_name} style={{ boxShadow: 'none', height: 180, width: 350, marginTop: 0, marginRight: 30, marginBottom: 30, background: 'linear-gradient(90deg, rgba(56,51,186,1) 0%, rgba(102,71,254,1) 100%)' }} onClick={() => this.handleWalletClick(w)}>
+            <Card key={w._wallet_name} style={{ boxShadow: 'none', height: 180, width: 350, marginTop: 0, marginRight: 20, marginBottom: 30, background: 'linear-gradient(90deg, rgba(56,51,186,1) 0%, rgba(102,71,254,1) 100%)' }} onClick={() => this.handleWalletClick(w)}>
               <Card.Content>
                 <Icon name='chevron right' style={{ position: 'absolute', right: 20, top: 130, fontSize: 25, opacity: '0.3', color: 'white' }} />
                 {/* <Divider /> */}
@@ -114,23 +113,22 @@ class Account extends Component {
           </Link>
         </div>
         <div className={styles.container} >
-          <h2 >{this.props.account.account_name}</h2>
+          {/* <h2 >{this.props.account.account_name}</h2> */}
+          <h2>Account</h2>
         </div>
         <Divider style={{ background: '#1A253F' }} />
         <div style={{ display: 'flex' }}>
-          <div style={{ width: '70%', overflowY: 'auto', height: '80vh', paddingBottom: 100 }}>
+          <div style={{ width: '65%', overflowY: 'auto', height: '80vh', paddingBottom: 100 }}>
             {this.renderWallets()}
           </div>
-          <div style={{ width: '30%', height: '100vh' }}>
-            <Segment style={{ marginTop: 30, marginRight: 20, marginLeft: 0, background: '#29272E', width: '90%' }}>
+          <div style={{ width: '35%', height: '100vh', marginTop: 20 }}>
+            <Segment style={{ background: '#29272E', width: '90%', margin: 'auto' }}>
               <h3 style={{ color: 'white' }}>Total Balance</h3>
               <h4 style={{ color: 'white', marginTop: 0 }}>{this.state.totalCoins} TFT</h4>
               <h4 style={{ color: 'white' }}><Icon name='lock' />Locked Balance</h4>
               <h4 style={{ color: 'white', marginTop: 0 }}>{this.state.totalCoinLocked}  TFT</h4>
-
               <h4 style={{ color: 'white' }}><Icon name='unlock' />Unlocked Balance</h4>
               <h4 style={{ color: 'white', marginTop: 0 }}>{this.state.totalCoinUnlocked}  TFT</h4>
-
             </Segment>
           </div>
         </div>

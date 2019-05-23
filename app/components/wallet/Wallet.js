@@ -105,12 +105,12 @@ class Wallet extends Component {
           </Link>
         </div>
         <div className={styles.container} >
-          <h2>{wallet.wallet_name}</h2>
+          <h2>Wallet {wallet.wallet_name}</h2>
         </div>
         <Divider style={{ background: '#1A253F' }} />
         <div>
           <Icon onClick={() => this.props.history.push(routes.ACCOUNT)} style={{ fontSize: 25, marginLeft: 15, marginTop: 15, cursor: 'pointer', zIndex: 5 }} name='chevron circle left' />
-          <Grid centered columns={2} style={{ marginBottom: 30, marginTop: -50 }}>
+          <Grid centered columns={2} style={{ marginBottom: 10, marginTop: -50 }}>
             <GridColumn style={{ height: 200, marginTop: 0, width: '40%' }}>
               <Segment style={{ marginTop: 20, background: '#29272E' }}>
                 <h3 style={{ color: 'white' }}>Total Balance: {coinsTotal} TFT</h3>

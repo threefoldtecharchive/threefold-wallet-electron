@@ -70,7 +70,7 @@ class Footer extends Component {
           : <div>
             <Icon name='circle' style={{ color: 'green', marginLeft: 10 }} />
             <label>connected to {chainConstants.chainNetwork}</label>
-            <label style={{ position: 'absolute', right: 500 }}><Icon name='h square' /> {chainConstants.chainHeight} @ {date}</label>
+            <label style={{ position: 'absolute', right: 500 }}><Icon name='h square' /> {chainConstants.chainHeight} @ {date} UTC</label>
             <label style={{ position: 'absolute', right: 50 }}>version 0.1.0</label>
           </div>
         }

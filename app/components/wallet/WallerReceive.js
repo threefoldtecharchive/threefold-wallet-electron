@@ -91,8 +91,9 @@ class WalletSettings extends Component {
           <Icon style={{ fontSize: 25, marginLeft: 15, marginTop: 15, cursor: 'pointer' }} name='chevron circle left' />
         </Link>
         <div style={{ width: '50%', margin: 'auto' }}>
+          <label style={{ color: 'white' }}>Wallet</label>
           <Dropdown
-            style={{ width: 650, marginLeft: 'auto', marginRight: 'auto', marginBottom: 20 }}
+            style={{ width: 690, marginRight: 'auto', marginBottom: 20, marginTop: 10 }}
             placeholder='Select Wallet'
             fluid
             selection
@@ -100,8 +101,9 @@ class WalletSettings extends Component {
             onChange={this.selectWallet}
             value={walletsOptions[0].value}
           />
+          <label style={{ color: 'white' }}>Address</label>
           <Dropdown
-            style={{ width: 650, marginLeft: 'auto', marginRight: 'auto', marginBottom: 20 }}
+            style={{ width: 690, marginLeft: 'auto', marginRight: 'auto', marginBottom: 20, marginTop: 10 }}
             placeholder='Select Address'
             fluid
             selection

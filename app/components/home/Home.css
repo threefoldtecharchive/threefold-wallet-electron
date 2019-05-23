@@ -65,3 +65,8 @@
   border-bottom-right-radius: 5px!important;
   font-family: SF UI Text Light !important;
 }
+
+.popup {
+  position: absolute !important;
+  top: 0 !important;
+}
