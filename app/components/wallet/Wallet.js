@@ -6,6 +6,7 @@ import { List, Segment, Grid, GridColumn, Button, Icon, Divider } from 'semantic
 import routes from '../../constants/routes'
 import styles from '../home/Home.css'
 import Footer from '../footer'
+import moment from 'moment'
 
 const mapStateToProps = state => ({
   wallet: state.wallet
@@ -30,9 +31,9 @@ class Wallet extends Component {
     if (this.props.wallet != null) {
       this.props.wallet._get_balance().then(info => {
         this.setState({
-          coinsLocked: info.coins_locked,
-          coinsUnlocked: info.coins_unlocked,
-          coinsTotal: info.coins_total,
+          coinsLocked: info.coins_locked.str(),
+          coinsUnlocked: info.coins_unlocked.str(),
+          coinsTotal: info.coins_total.str(),
           transactions: info.transactions
         })
       })
@@ -50,7 +51,7 @@ class Wallet extends Component {
               return (
                 <List.Item style={{ borderBottom: '1px solid grey' }}>
                   <List.Content>
-                    <List.Header as='a' style={{ color: '#6647fe', display: 'flex' }}>TXID: {tx.identifier} {tx.confirmed ? (<p style={{ fontSize: 14, marginLeft: 80 }}>Confirmed at height {tx.height}</p>) : (<p style={{ fontSize: 14, marginLeft: 80 }}>Unconfirmed</p>)}</List.Header>
+                    <List.Header as='a' style={{ color: '#6647fe', display: 'flex' }}>TXID: {tx.identifier} {tx.confirmed ? (<p style={{ fontSize: 14, marginLeft: 80 }}>Confirmed at {moment(tx.timestamp).format('MMMM Do , HH:mm')}</p>) : (<p style={{ fontSize: 14, marginLeft: 80 }}>Unconfirmed</p>)}</List.Header>
                     {this.renderTransactionBody(tx)}
                   </List.Content>
                 </List.Item>
@@ -68,12 +69,11 @@ class Wallet extends Component {
 
   renderTransactionBody = (tx) => {
     if (tx.inputs.length > 0) {
-      console.log(tx)
       return tx.inputs.map(input => {
         return (
           <div style={{ marginTop: 5, marginBottom: 5 }}>
             <List.Description style={{ color: 'white' }} as='a'>{input.senders.map(sender => { return (<p style={{ fontSize: 14, marginBottom: 0 }}>From: {sender} </p>) })}</List.Description>
-            <List.Description style={{ color: 'white' }} as='a'>Amount: <span style={{ color: 'green' }}>+ {input.amount}</span> TFT</List.Description>
+            <List.Description style={{ color: 'white' }} as='a'>Amount: <span style={{ color: 'green' }}>+ {input.amount.str()}</span> TFT</List.Description>
             <List.Description style={{ color: 'white' }} as='a'>To: {input.recipient}</List.Description>
           </div>
         )
@@ -83,7 +83,7 @@ class Wallet extends Component {
         return (
           <div style={{ marginTop: 5, marginBottom: 5 }}>
             <List.Description style={{ color: 'white' }} as='a'>To: {out.recipient}</List.Description>
-            <List.Description style={{ color: 'white' }} as='a'>Amount: <span style={{ color: 'red' }}>- {out.amount}</span> TFT</List.Description>
+            <List.Description style={{ color: 'white' }} as='a'>Amount: <span style={{ color: 'red' }}>- {out.amount.str()}</span> TFT</List.Description>
           </div>
         )
       })

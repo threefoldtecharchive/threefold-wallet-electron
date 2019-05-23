@@ -42,20 +42,10 @@ class Account extends Component {
   }
 
   getAccountBalance = () => {
-    const wallets = this.props.account.wallets
-
-    if (!wallets) {
-      return
-    }
-
-    const balancePromisses = wallets.map(w => {
-      return w._get_balance()
-    })
-
-    Promise.all(balancePromisses).then(res => {
-      const totalSum = sumBy(res, r => parseInt(r.coins_total))
-      const totalUnlockedSum = sumBy(res, r => parseInt(r.coins_unlocked))
-      const totalLockedSum = sumBy(res, r => parseInt(r.coins_locked))
+    this.props.account.balance.then(info => {
+      const totalSum = info.coins_total.str()
+      const totalUnlockedSum = info.coins_unlocked.str()
+      const totalLockedSum = info.coins_locked.str()
       this.setState({ totalCoins: totalSum, totalCoinLocked: totalLockedSum, totalCoinUnlocked: totalUnlockedSum })
     })
   }
@@ -87,10 +77,10 @@ class Account extends Component {
                 <Icon name='chevron right' style={{ position: 'absolute', right: 20, top: 130, fontSize: 25, opacity: '0.3', color: 'white' }} />
                 {/* <Divider /> */}
                 <Card.Description style={{ color: 'white', marginTop: 10, marginBottom: 10, fontFamily: 'SF UI Text Light', display: 'flex' }}>
-                  <Icon name='unlock' style={{ fontSize: 16, marginLeft: 20 }} /> <p style={{ marginLeft: 30, marginTop: -8 }}>{balance.coins_unlocked} TFT</p>
+                  <Icon name='unlock' style={{ fontSize: 16, marginLeft: 20 }} /> <p style={{ marginLeft: 30, marginTop: -8 }}>{balance.coins_unlocked.str()} TFT</p>
                 </Card.Description>
                 <Card.Description style={{ textAlign: 'left', color: 'white', marginTop: 20, marginBottom: 10, fontFamily: 'SF UI Text Light', display: 'flex' }}>
-                  <Icon name='lock' style={{ fontSize: 16, marginLeft: 20 }} /> <p style={{ marginLeft: 33, marginTop: -3, fontFamily: 'SF UI Text Light', fontSize: 18 }}>{balance.coins_locked} TFT</p>
+                  <Icon name='lock' style={{ fontSize: 16, marginLeft: 20 }} /> <p style={{ marginLeft: 33, marginTop: -3, fontFamily: 'SF UI Text Light', fontSize: 18 }}>{balance.coins_locked.str()} TFT</p>
                 </Card.Description>
                 <Divider />
                 <Card.Header style={{ textAlign: 'center', color: 'white', fontSize: 18, textTransform: 'uppercase', marginTop: 20, fontFamily: 'SF UI Text Light' }}>
