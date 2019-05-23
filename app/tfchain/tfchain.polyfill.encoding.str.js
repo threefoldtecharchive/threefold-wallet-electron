@@ -460,6 +460,26 @@ export var isdigit = function (s) {
 	    
 	return result;
 };
+export var isempty = function (s) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 's': var s = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	var result = false;
+	
+	    result = (!s || 0 === s.length);
+	    
+	return result;
+};
 export var String =  __class__ ('String', [object], {
 	__module__: __name__,
 	get from_utf8 () {return __getcm__ (this, function (cls, b) {
@@ -757,6 +777,22 @@ export var String =  __class__ ('String', [object], {
 		else {
 		}
 		return isdigit (self.value);
+	});},
+	get isempty () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return isempty (self.value);
 	});}
 });
 Object.defineProperty (String, 'value', property.call (String, String._get_value));;

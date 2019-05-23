@@ -159,6 +159,12 @@ def isdigit(s):
     """)
     return result
 
+def isempty(s):
+    result = False
+    __pragma__("js", "{}", """
+    result = (!s || 0 === s.length);
+    """)
+    return result
 
 class String:
     """
@@ -218,3 +224,6 @@ class String:
 
     def isdigit(self):
         return isdigit(self.value)
+
+    def isempty(self):
+        return isempty(self.value)

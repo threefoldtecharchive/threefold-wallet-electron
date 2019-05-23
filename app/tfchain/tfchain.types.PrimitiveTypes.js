@@ -522,8 +522,8 @@ export var Hash =  __class__ ('Hash', [BinaryData], {
 		else {
 		}
 		var s = __super__ (Hash, '__str__') (self);
-		if (!(s)) {
-			return '0' * (Hash.SIZE * 2);
+		if (jsstr.isempty (s)) {
+			return jsstr.repeat ('0', Hash.SIZE * 2);
 		}
 		return s;
 	});}

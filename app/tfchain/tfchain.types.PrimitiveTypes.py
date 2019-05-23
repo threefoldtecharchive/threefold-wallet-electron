@@ -174,8 +174,8 @@ class Hash(BinaryData):
 
     def __str__(self):
         s = super().__str__()
-        if not s:
-            return '0'*(Hash.SIZE*2)
+        if jsstr.isempty(s):
+            return jsstr.repeat('0', Hash.SIZE*2)
         return s
 
 class Currency(BaseDataTypeClass):

@@ -38,7 +38,12 @@ def new_dict():
     # add _get_or method
     def _get_or(k, d=None):
         if k in out:
-            return out[k]
+            v = out[k]
+            is_null = False
+            __pragma__("js", "{}", """
+            is_null = (v === undefined || v === null);
+            """)
+            return d if is_null else v
         return d
     out.get_or = _get_or
     # add is_empty method
@@ -83,6 +88,6 @@ def is_js_obj(obj):
 def is_js_arr(obj):
     result = None
     __pragma__("js", "{}", """
-    result = obj.constructor === Array;
+    result = obj !== null && obj.constructor === Array;
     """)
     return result

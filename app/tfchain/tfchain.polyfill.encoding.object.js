@@ -90,7 +90,12 @@ export var new_dict = function () {
 		else {
 		}
 		if (__in__ (k, out)) {
-			return out [k];
+			var v = out [k];
+			var is_null = false;
+			
+			            is_null = (v === undefined || v === null);
+			            
+			return (is_null ? d : v);
 		}
 		return d;
 	};
@@ -202,7 +207,7 @@ export var is_js_arr = function (obj) {
 	}
 	var result = null;
 	
-	    result = obj.constructor === Array;
+	    result = obj !== null && obj.constructor === Array;
 	    
 	return result;
 };
