@@ -34,30 +34,31 @@ def as_py_obj(obj):
     return obj
 
 def new_dict():
-    out = {}
-    # add _get_or method
+    return as_dict({})
+
+def as_dict(dv):# add _get_or method
     def _get_or(k, d=None):
-        if k in out:
-            v = out[k]
+        if k in dv:
+            v = dv[k]
             is_null = False
             __pragma__("js", "{}", """
             is_null = (v === undefined || v === null);
             """)
             return d if is_null else v
         return d
-    out.get_or = _get_or
+    dv.get_or = _get_or
     # add is_empty method
     def _is_empty():
-        if out in (None, {}):
+        if dv in (None, {}):
             return True
         result = None
         __pragma__("js", "{}", """
-        result = Object.keys(out).length === 0 && out.constructor === Object;
+        result = Object.keys(dv).length === 0 && dv.constructor === Object;
         """)
         return result
-    out.is_empty = _is_empty
+    dv.is_empty = _is_empty
     # return dict
-    return out
+    return dv
 
 def is_bool(obj):
     _, ok = try_as_bool(obj)

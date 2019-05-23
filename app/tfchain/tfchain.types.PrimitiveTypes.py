@@ -438,17 +438,19 @@ class Blockstake(BaseDataTypeClass):
         """
         Encode this block stake (==Currency) according to the Sia Binary Encoding format.
         """
-        nbytes, rem = divmod(jsint.bit_length(self._value), 8)
+        v = self.__int__()
+        nbytes, rem = divmod(jsint.bit_length(v), 8)
         if rem:
             nbytes += 1
         encoder.add_int(nbytes)
-        encoder.add_array(jsint.to_bytes(self._value, nbytes, order='big'))
+        encoder.add_array(jsint.to_bytes(v, nbytes, order='big'))
 
     def rivine_binary_encode(self, encoder):
         """
         Encode this block stake (==Currency) according to the Rivine Binary Encoding format.
         """
-        nbytes, rem = divmod(jsint.bit_length(self._value), 8)
+        v = self.__int__()
+        nbytes, rem = divmod(jsint.bit_length(v), 8)
         if rem:
             nbytes += 1
-        encoder.add_slice(jsint.to_bytes(self._value, nbytes, order='big'))
+        encoder.add_slice(jsint.to_bytes(v, nbytes, order='big'))

@@ -67,3 +67,10 @@ def index_of(arr, x):
     i = arr.indexOf(x);
     """)
     return i
+
+def is_empty(arr):
+    result = False
+    __pragma__("js", "{}", """
+    result = (a === null || a.length === 0);
+    """)
+    return result or not arr or len(arr) == 0

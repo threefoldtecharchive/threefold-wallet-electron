@@ -176,5 +176,25 @@ export var index_of = function (arr, x) {
 	    
 	return i;
 };
+export var is_empty = function (arr) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'arr': var arr = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	var result = false;
+	
+	    result = (a === null || a.length === 0);
+	    
+	return result || !(arr) || len (arr) == 0;
+};
 
 //# sourceMappingURL=tfchain.polyfill.array.map

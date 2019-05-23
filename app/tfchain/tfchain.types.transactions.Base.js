@@ -1,25 +1,15 @@
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __proxy__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, abs, all, any, assert, bool, bytearray, bytes, callable, chr, copy, deepcopy, delattr, dict, dir, divmod, enumerate, filter, float, getattr, hasattr, input, int, isinstance, issubclass, len, list, map, max, min, object, ord, pow, print, property, py_TypeError, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
-import {BaseDataTypeClass} from './tfchain.types.BaseDataType.js';
-import * as jsarray from './tfchain.polyfill.array.js';
-import * as jsdec from './tfchain.polyfill.encoding.decimal.js';
-import * as jsint from './tfchain.polyfill.encoding.int.js';
-import * as jsstr from './tfchain.polyfill.encoding.str.js';
-import * as jshex from './tfchain.polyfill.encoding.hex.js';
-import * as jsbase64 from './tfchain.polyfill.encoding.base64.js';
-import * as tferrors from './tfchain.errors.js';
-var __name__ = 'tfchain.types.PrimitiveTypes';
-export var BinaryData =  __class__ ('BinaryData', [BaseDataTypeClass], {
+import {blake2b} from './tfchain.polyfill.crypto.js';
+import * as jsarr from './tfchain.polyfill.array.js';
+import * as jsobj from './tfchain.polyfill.encoding.object.js';
+import * as jsjson from './tfchain.polyfill.encoding.json.js';
+import {Hash} from './tfchain.types.PrimitiveTypes.js';
+import {SiaBinaryEncoder} from './tfchain.encoding.siabin.js';
+import {RivineBinaryEncoder} from './tfchain.encoding.rivbin.js';
+var __name__ = 'tfchain.types.transactions.Base';
+export var TransactionVersion =  __class__ ('TransactionVersion', [object], {
 	__module__: __name__,
-	get __init__ () {return __get__ (this, function (self, value, fixed_size, strencoding) {
-		if (typeof value == 'undefined' || (value != null && value.hasOwnProperty ("__kwargtrans__"))) {;
-			var value = null;
-		};
-		if (typeof fixed_size == 'undefined' || (fixed_size != null && fixed_size.hasOwnProperty ("__kwargtrans__"))) {;
-			var fixed_size = null;
-		};
-		if (typeof strencoding == 'undefined' || (strencoding != null && strencoding.hasOwnProperty ("__kwargtrans__"))) {;
-			var strencoding = null;
-		};
+	get __init__ () {return __get__ (this, function (self, value) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -28,183 +18,16 @@ export var BinaryData =  __class__ ('BinaryData', [BaseDataTypeClass], {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
 						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
-						case 'fixed_size': var fixed_size = __allkwargs0__ [__attrib0__]; break;
-						case 'strencoding': var strencoding = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
 		}
 		else {
 		}
-		if (strencoding !== null && !(isinstance (strencoding, str))) {
-			var __except0__ = py_TypeError ('strencoding should be None or a str, not be of type {}'.format (strencoding));
-			__except0__.__cause__ = null;
-			throw __except0__;
+		if (isinstance (value, TransactionVersion)) {
+			var value = value.value;
 		}
-		if (strencoding === null || jsstr.String (strencoding).lower ().strip ().__eq__ ('hex')) {
-			self._from_str = (function __lambda__ (s) {
-				if (arguments.length) {
-					var __ilastarg0__ = arguments.length - 1;
-					if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-						var __allkwargs0__ = arguments [__ilastarg0__--];
-						for (var __attrib0__ in __allkwargs0__) {
-							switch (__attrib0__) {
-								case 's': var s = __allkwargs0__ [__attrib0__]; break;
-							}
-						}
-					}
-				}
-				else {
-				}
-				return jshex.bytes_from_hex (s);
-			});
-			self._to_str = (function __lambda__ (value) {
-				if (arguments.length) {
-					var __ilastarg0__ = arguments.length - 1;
-					if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-						var __allkwargs0__ = arguments [__ilastarg0__--];
-						for (var __attrib0__ in __allkwargs0__) {
-							switch (__attrib0__) {
-								case 'value': var value = __allkwargs0__ [__attrib0__]; break;
-							}
-						}
-					}
-				}
-				else {
-				}
-				return jshex.bytes_to_hex (value);
-			});
-		}
-		else if (jsstr.String (strencoding).lower ().strip ().__eq__ ('base64')) {
-			self._from_str = (function __lambda__ (s) {
-				if (arguments.length) {
-					var __ilastarg0__ = arguments.length - 1;
-					if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-						var __allkwargs0__ = arguments [__ilastarg0__--];
-						for (var __attrib0__ in __allkwargs0__) {
-							switch (__attrib0__) {
-								case 's': var s = __allkwargs0__ [__attrib0__]; break;
-							}
-						}
-					}
-				}
-				else {
-				}
-				return jsbase64.bytes_from_b64 (s);
-			});
-			self._to_str = (function __lambda__ (value) {
-				if (arguments.length) {
-					var __ilastarg0__ = arguments.length - 1;
-					if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-						var __allkwargs0__ = arguments [__ilastarg0__--];
-						for (var __attrib0__ in __allkwargs0__) {
-							switch (__attrib0__) {
-								case 'value': var value = __allkwargs0__ [__attrib0__]; break;
-							}
-						}
-					}
-				}
-				else {
-				}
-				return jsbase64.bytes_to_b64 (value);
-			});
-		}
-		else if (jsstr.String (strencoding).lower ().strip ().__eq__ ('hexprefix')) {
-			self._from_str = (function __lambda__ (s) {
-				if (arguments.length) {
-					var __ilastarg0__ = arguments.length - 1;
-					if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-						var __allkwargs0__ = arguments [__ilastarg0__--];
-						for (var __attrib0__ in __allkwargs0__) {
-							switch (__attrib0__) {
-								case 's': var s = __allkwargs0__ [__attrib0__]; break;
-							}
-						}
-					}
-				}
-				else {
-				}
-				return jshex.bytes_from_hex ((s.startswith ('0x') || s.startswith ('0X') ? s.__getslice__ (2, null, 1) : s));
-			});
-			self._to_str = (function __lambda__ (value) {
-				if (arguments.length) {
-					var __ilastarg0__ = arguments.length - 1;
-					if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-						var __allkwargs0__ = arguments [__ilastarg0__--];
-						for (var __attrib0__ in __allkwargs0__) {
-							switch (__attrib0__) {
-								case 'value': var value = __allkwargs0__ [__attrib0__]; break;
-							}
-						}
-					}
-				}
-				else {
-				}
-				return '0x' + jshex.bytes_to_hex (value);
-			});
-		}
-		else {
-			var __except0__ = py_TypeError ('{} is not a valid string encoding'.format (strencoding));
-			__except0__.__cause__ = null;
-			throw __except0__;
-		}
-		self._strencoding = strencoding;
-		if (fixed_size !== null) {
-			if (!(isinstance (fixed_size, int))) {
-				var __except0__ = py_TypeError ('fixed size should be None or int, not be of type {}'.format (py_typeof (fixed_size)));
-				__except0__.__cause__ = null;
-				throw __except0__;
-			}
-			if (fixed_size < 0) {
-				var __except0__ = py_TypeError ('fixed size should be at least 0, {} is not allowed'.format (fixed_size));
-				__except0__.__cause__ = null;
-				throw __except0__;
-			}
-		}
-		if (fixed_size != 0) {
-			self._fixed_size = fixed_size;
-		}
-		else {
-			self._fixed_size = null;
-		}
-		self._value = null;
-		self.value = value;
-		if (fixed_size == 0) {
-			self._fixed_size = len (self.value);
-		}
-	});},
-	get from_json () {return __getcm__ (this, function (cls, obj, fixed_size, strencoding) {
-		if (typeof fixed_size == 'undefined' || (fixed_size != null && fixed_size.hasOwnProperty ("__kwargtrans__"))) {;
-			var fixed_size = null;
-		};
-		if (typeof strencoding == 'undefined' || (strencoding != null && strencoding.hasOwnProperty ("__kwargtrans__"))) {;
-			var strencoding = null;
-		};
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
-						case 'obj': var obj = __allkwargs0__ [__attrib0__]; break;
-						case 'fixed_size': var fixed_size = __allkwargs0__ [__attrib0__]; break;
-						case 'strencoding': var strencoding = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (obj !== null && !(isinstance (obj, str))) {
-			var __except0__ = py_TypeError ('binary data is expected to be an encoded string when part of a JSON object');
-			__except0__.__cause__ = null;
-			throw __except0__;
-		}
-		if (obj == '') {
-			var obj = null;
-		}
-		return cls (__kwargtrans__ ({value: obj, fixed_size: fixed_size, strencoding: strencoding}));
+		self._value = value;
 	});},
 	get _get_value () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -222,110 +45,6 @@ export var BinaryData =  __class__ ('BinaryData', [BaseDataTypeClass], {
 		}
 		return self._value;
 	});},
-	get _set_value () {return __get__ (this, function (self, value) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (isinstance (value, BinaryData)) {
-			var value = value.value;
-		}
-		else if (value === null) {
-			var value = bytes (jsarray.new_array (0));
-		}
-		else if (isinstance (value, str)) {
-			var value = self._from_str (value);
-		}
-		else if (isinstance (value, bytearray)) {
-			var value = bytes (value);
-		}
-		else if (!(isinstance (value, bytes)) && !(jsarray.is_uint8_array (value))) {
-			var __except0__ = py_TypeError ('binary data can only be set to a BinaryData, str, bytes or bytearray, not {}'.format (py_typeof (value)));
-			__except0__.__cause__ = null;
-			throw __except0__;
-		}
-		var lvalue = len (value);
-		if (self._fixed_size !== null && lvalue != 0 && lvalue != self._fixed_size) {
-			var __except0__ = ValueError ('binary data was expected to be of fixed size {}, length {} is not allowed'.format (self._fixed_size, len (value)));
-			__except0__.__cause__ = null;
-			throw __except0__;
-		}
-		self._value = value;
-	});},
-	get __len__ () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		return len (self.value);
-	});},
-	get __str__ () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		return self._to_str (self._value);
-	});},
-	get __repr__ () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		return self.__str__ ();
-	});},
-	get json () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		return self.__str__ ();
-	});},
 	get __eq__ () {return __get__ (this, function (self, other) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -341,7 +60,9 @@ export var BinaryData =  __class__ ('BinaryData', [BaseDataTypeClass], {
 		}
 		else {
 		}
-		var other = self._op_other_as_binary_data (other);
+		if (!(isinstance (other, TransactionVersion))) {
+			return self.__eq__ (TransactionVersion (other));
+		}
 		return self.value == other.value;
 	});},
 	get __ne__ () {return __get__ (this, function (self, other) {
@@ -359,45 +80,9 @@ export var BinaryData =  __class__ ('BinaryData', [BaseDataTypeClass], {
 		}
 		else {
 		}
-		var other = self._op_other_as_binary_data (other);
-		return self.value != other.value;
+		return !(self.__eq__ (other));
 	});},
-	get _op_other_as_binary_data () {return __get__ (this, function (self, other) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (isinstance (other, tuple ([str, bytes, bytearray]))) {
-			var other = BinaryData (__kwargtrans__ ({value: other, fixed_size: self._fixed_size, strencoding: self._strencoding}));
-		}
-		else if (!(isinstance (other, BinaryData))) {
-			var __except0__ = py_TypeError ('Binary data of type {} is not supported'.format (py_typeof (other)));
-			__except0__.__cause__ = null;
-			throw __except0__;
-		}
-		if (self._fixed_size != other._fixed_size) {
-			var __except0__ = py_TypeError ('Cannot compare binary data with different fixed size: self({}) != other({})'.format (self._fixed_size, other._fixed_size));
-			__except0__.__cause__ = null;
-			throw __except0__;
-		}
-		if (self._strencoding != other._strencoding) {
-			var __except0__ = py_TypeError ('Cannot compare binary data with different strencoding: self({}) != other({})'.format (self._strencoding, other._strencoding));
-			__except0__.__cause__ = null;
-			throw __except0__;
-		}
-		return other;
-	});},
-	get __hash__ () {return __get__ (this, function (self) {
+	get __int__ () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -411,61 +96,23 @@ export var BinaryData =  __class__ ('BinaryData', [BaseDataTypeClass], {
 		}
 		else {
 		}
-		return hash (self.__str__ ());
-	});},
-	get sia_binary_encode () {return __get__ (this, function (self, encoder) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'encoder': var encoder = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (self._fixed_size === null) {
-			encoder.add_slice (self._value);
-		}
-		else {
-			encoder.add_array (self._value);
-		}
-	});},
-	get rivine_binary_encode () {return __get__ (this, function (self, encoder) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'encoder': var encoder = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (self._fixed_size === null) {
-			encoder.add_slice (self._value);
-		}
-		else {
-			encoder.add_array (self._value);
-		}
+		return self.value;
 	});}
 });
-Object.defineProperty (BinaryData, 'value', property.call (BinaryData, BinaryData._get_value, BinaryData._set_value));;
-export var Hash =  __class__ ('Hash', [BinaryData], {
+Object.defineProperty (TransactionVersion, 'value', property.call (TransactionVersion, TransactionVersion._get_value));;
+TransactionVersion.LEGACY = TransactionVersion (0);
+TransactionVersion.STANDARD = TransactionVersion (1);
+TransactionVersion.MINTER_DEFINITION = TransactionVersion (128);
+TransactionVersion.MINTER_COIN_CREATION = TransactionVersion (129);
+TransactionVersion.THREEBOT_REGISTRATION = TransactionVersion (144);
+TransactionVersion.THREEBOT_RECORD_UPDATE = TransactionVersion (145);
+TransactionVersion.THREEBOT_NAME_TRANSFER = TransactionVersion (146);
+TransactionVersion.ERC20_CONVERT = TransactionVersion (208);
+TransactionVersion.ERC20_COIN_CREATION = TransactionVersion (209);
+TransactionVersion.ERC20_ADDRESS_REGISTRATION = TransactionVersion (210);
+export var TransactionBaseClass =  __class__ ('TransactionBaseClass', [object], {
 	__module__: __name__,
-	SIZE: 32,
-	get __init__ () {return __get__ (this, function (self, value) {
-		if (typeof value == 'undefined' || (value != null && value.hasOwnProperty ("__kwargtrans__"))) {;
-			var value = null;
-		};
+	get __init__ () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -473,14 +120,15 @@ export var Hash =  __class__ ('Hash', [BinaryData], {
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
 		}
 		else {
 		}
-		__super__ (Hash, '__init__') (self, value, __kwargtrans__ ({fixed_size: Hash.SIZE, strencoding: 'hex'}));
+		self._id = null;
+		self._height = -(1);
+		self._unconfirmed = false;
 	});},
 	get from_json () {return __getcm__ (this, function (cls, obj) {
 		if (arguments.length) {
@@ -497,17 +145,17 @@ export var Hash =  __class__ ('Hash', [BinaryData], {
 		}
 		else {
 		}
-		if (obj !== null && !(isinstance (obj, str))) {
-			var __except0__ = py_TypeError ('hash is expected to be an encoded string when part of a JSON object, not {}'.format (py_typeof (obj)));
+		var txn = cls ();
+		var tv = obj.get_or ('version', -(1));
+		if (txn.version.__ne__ (tv)) {
+			var __except0__ = ValueError ('transaction is expected to be of version {}, not version {}'.format (txn.version, tv));
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		if (obj == '') {
-			var obj = null;
-		}
-		return cls (__kwargtrans__ ({value: obj}));
+		txn._from_json_data_object (obj.get_or ('data', jsobj.new_dict ()));
+		return txn;
 	});},
-	get __str__ () {return __get__ (this, function (self) {
+	get _get_version () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -521,88 +169,9 @@ export var Hash =  __class__ ('Hash', [BinaryData], {
 		}
 		else {
 		}
-		var s = __super__ (Hash, '__str__') (self);
-		if (jsstr.isempty (s)) {
-			return jsstr.repeat ('0', Hash.SIZE * 2);
-		}
-		return s;
-	});}
-});
-export var Currency =  __class__ ('Currency', [BaseDataTypeClass], {
-	__module__: __name__,
-	get __init__ () {return __get__ (this, function (self, value) {
-		if (typeof value == 'undefined' || (value != null && value.hasOwnProperty ("__kwargtrans__"))) {;
-			var value = null;
-		};
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		self._value = null;
-		self.value = value;
+		return self._custom_version_getter ();
 	});},
-	get from_str () {return __getcm__ (this, function (cls, obj, lowest_unit) {
-		if (typeof lowest_unit == 'undefined' || (lowest_unit != null && lowest_unit.hasOwnProperty ("__kwargtrans__"))) {;
-			var lowest_unit = false;
-		};
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
-						case 'obj': var obj = __allkwargs0__ [__attrib0__]; break;
-						case 'lowest_unit': var lowest_unit = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (obj !== null && !(isinstance (obj, str))) {
-			var __except0__ = py_TypeError ('currency is expected to be a string , not type {}'.format (py_typeof (obj)));
-			__except0__.__cause__ = null;
-			throw __except0__;
-		}
-		if (obj == '') {
-			var obj = null;
-		}
-		var c = cls ();
-		c.value = jsdec.Decimal (obj);
-		if (lowest_unit) {
-			c.value.__imul__ (jsdec.Decimal ('0.000000001'));
-		}
-		return c;
-	});},
-	get from_json () {return __getcm__ (this, function (_, obj) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case '_': var _ = __allkwargs0__ [__attrib0__]; break;
-						case 'obj': var obj = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		return Currency.from_str (obj, __kwargtrans__ ({lowest_unit: true}));
-	});},
-	get _get_value () {return __get__ (this, function (self) {
+	get _custom_version_getter () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -616,217 +185,11 @@ export var Currency =  __class__ ('Currency', [BaseDataTypeClass], {
 		}
 		else {
 		}
-		if (self._value === null) {
-			return jsdec.Decimal ();
-		}
-		return self._value;
-	});},
-	get plus () {return __get__ (this, function (self, other) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		return self.__add__ (other);
-	});},
-	get minus () {return __get__ (this, function (self, other) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		return self.__sub__ (other);
-	});},
-	get times () {return __get__ (this, function (self, other) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		return self.__mul__ (other);
-	});},
-	get equal_to () {return __get__ (this, function (self, other) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		return self.__eq__ (other);
-	});},
-	get not_equal_to () {return __get__ (this, function (self, other) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		return self.__ne__ (other);
-	});},
-	get less_than () {return __get__ (this, function (self, other) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		return self.__lt__ (other);
-	});},
-	get greater_than () {return __get__ (this, function (self, other) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		return self.__gt__ (other);
-	});},
-	get less_than_or_equal_to () {return __get__ (this, function (self, other) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		return self.__le__ (other);
-	});},
-	get greater_than_or_equal_to () {return __get__ (this, function (self, other) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		return self.__ge__ (other);
-	});},
-	get _set_value () {return __get__ (this, function (self, value) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (value === null) {
-			self._value = null;
-			return ;
-		}
-		if (isinstance (value, Currency)) {
-			self._value = value.value;
-			return ;
-		}
-		if (isinstance (value, tuple ([int, str, jsdec.Decimal]))) {
-			if (isinstance (value, str)) {
-				var value = jsstr.String (value).upper ().strip ().value;
-				if (len (value) >= 4 && value.__getslice__ (-(3), null, 1) == 'TFT') {
-					var value = jsstr.rstrip (value.__getslice__ (0, -(3), 1));
-				}
-			}
-			var d = jsdec.Decimal (value);
-			var __left0__ = d.as_tuple ();
-			var sign = __left0__ [0];
-			var _ = __left0__ [1];
-			var exp = __left0__ [2];
-			if (exp < -(9)) {
-				var __except0__ = tferrors.CurrencyPrecisionOverflow (d.__str__ ());
-				__except0__.__cause__ = null;
-				throw __except0__;
-			}
-			if (sign != 0) {
-				var __except0__ = tferrors.CurrencyNegativeValue (d.__str__ ());
-				__except0__.__cause__ = null;
-				throw __except0__;
-			}
-			self._value = d;
-			return ;
-		}
-		var __except0__ = py_TypeError ('cannot set value of type {} as Currency (invalid type)'.format (py_typeof (value)));
+		var __except0__ = NotImplementedError ('_custom_version_getter is not yet implemented');
 		__except0__.__cause__ = null;
 		throw __except0__;
 	});},
-	get __add__ () {return __get__ (this, function (self, other) {
+	get _get_unconfirmed () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -834,19 +197,15 @@ export var Currency =  __class__ ('Currency', [BaseDataTypeClass], {
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
 		}
 		else {
 		}
-		if (!(isinstance (other, Currency))) {
-			return self.__add__ (Currency (other));
-		}
-		return Currency (self.value.__add__ (other.value));
+		return self._unconfirmed;
 	});},
-	get __radd__ () {return __get__ (this, function (self, other) {
+	get _set_unconfirmed () {return __get__ (this, function (self, value) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -854,16 +213,26 @@ export var Currency =  __class__ ('Currency', [BaseDataTypeClass], {
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
+						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
 		}
 		else {
 		}
-		return self.__add__ (other);
+		var __left0__ = jsobj.try_as_bool (value);
+		var b = __left0__ [0];
+		var ok = __left0__ [1];
+		if (ok) {
+			self._unconfirmed = b;
+		}
+		else {
+			var __except0__ = py_TypeError ('unconfirmed status of a Transaction is expected to be of type bool, not {}'.format (py_typeof (value)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
 	});},
-	get __iadd__ () {return __get__ (this, function (self, other) {
+	get _get_id () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -871,20 +240,15 @@ export var Currency =  __class__ ('Currency', [BaseDataTypeClass], {
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
 		}
 		else {
 		}
-		if (!(isinstance (other, Currency))) {
-			return self.__iadd__ (Currency (other));
-		}
-		self.value.__iadd__ (other.value);
-		return self;
+		return self._id.__str__ ();
 	});},
-	get __mul__ () {return __get__ (this, function (self, other) {
+	get _set_id () {return __get__ (this, function (self, id) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -892,19 +256,19 @@ export var Currency =  __class__ ('Currency', [BaseDataTypeClass], {
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
+						case 'id': var id = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
 		}
 		else {
 		}
-		if (!(isinstance (other, Currency))) {
-			return self.__mul__ (Currency (other));
+		if (isinstance (id, Hash)) {
+			self._id = Hash (__kwargtrans__ ({value: id.value}));
 		}
-		return Currency (self.value.__mul__ (other.value));
+		self._id = Hash (__kwargtrans__ ({value: id}));
 	});},
-	get __rmul__ () {return __get__ (this, function (self, other) {
+	get __hash__ () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -912,133 +276,16 @@ export var Currency =  __class__ ('Currency', [BaseDataTypeClass], {
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
 		}
 		else {
 		}
-		return self.__mul__ (other);
-	});},
-	get __imul__ () {return __get__ (this, function (self, other) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
+		if (self._id === null) {
+			return hash (jsjson.json_dumps (self.json ()));
 		}
-		else {
-		}
-		if (!(isinstance (other, Currency))) {
-			return self.__imul__ (Currency (other));
-		}
-		self.value.__imul__ (other.value);
-		return self;
-	});},
-	get __sub__ () {return __get__ (this, function (self, other) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (!(isinstance (other, Currency))) {
-			return self.__sub__ (Currency (other));
-		}
-		return Currency (self.value.__sub__ (other.value));
-	});},
-	get __rsub__ () {return __get__ (this, function (self, other) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		return self.__sub__ (other);
-	});},
-	get __isub__ () {return __get__ (this, function (self, other) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (!(isinstance (other, Currency))) {
-			return self.__isub__ (Currency (other));
-		}
-		self.value -= other.value;
-		return self;
-	});},
-	get __lt__ () {return __get__ (this, function (self, other) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (!(isinstance (other, Currency))) {
-			return self.__lt__ (Currency (other));
-		}
-		return self.value.__lt__ (other.value);
-	});},
-	get __le__ () {return __get__ (this, function (self, other) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (!(isinstance (other, Currency))) {
-			return self.__le__ (Currency (other));
-		}
-		return self.value.__le__ (other.value);
+		return hash (self.id);
 	});},
 	get __eq__ () {return __get__ (this, function (self, other) {
 		if (arguments.length) {
@@ -1055,99 +302,14 @@ export var Currency =  __class__ ('Currency', [BaseDataTypeClass], {
 		}
 		else {
 		}
-		if (!(isinstance (other, Currency))) {
-			return self.__eq__ (Currency (other));
-		}
-		return self.value.__eq__ (other.value);
-	});},
-	get __ne__ () {return __get__ (this, function (self, other) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (!(isinstance (other, Currency))) {
-			return self.__ne__ (Currency (other));
-		}
-		return self.value.__ne__ (other.value);
-	});},
-	get __gt__ () {return __get__ (this, function (self, other) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (!(isinstance (other, Currency))) {
-			return self.__gt__ (Currency (other));
-		}
-		return self.value.__gt__ (other.value);
-	});},
-	get __ge__ () {return __get__ (this, function (self, other) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (!(isinstance (other, Currency))) {
-			return self.__ge__ (Currency (other));
-		}
-		return self.value.__ge__ (other.value);
-	});},
-	get _op_other_as_currency () {return function (other) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (isinstance (other, tuple ([int, str]))) {
-			var other = Currency (__kwargtrans__ ({value: other}));
-		}
-		else if (isinstance (other, float)) {
-			var other = Currency (__kwargtrans__ ({value: jsdec.Decimal (str (other))}));
-		}
-		else if (!(isinstance (other, Currency))) {
-			var __except0__ = py_TypeError ('currency of type {} is not supported'.format (py_typeof (other)));
+		if (!(isinstance (other, TransactionBaseClass))) {
+			var __except0__ = py_TypeError ('other is expected to be subtype of TransactionBaseClass, not {}'.format (py_typeof (other)));
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		return other;
-	};},
-	get __int__ () {return __get__ (this, function (self) {
+		return hash (self) == hash (other);
+	});},
+	get _get_height () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -1161,7 +323,539 @@ export var Currency =  __class__ ('Currency', [BaseDataTypeClass], {
 		}
 		else {
 		}
-		return self.value.__int__ ();
+		return self._height;
+	});},
+	get _set_height () {return __get__ (this, function (self, value) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (!(isinstance (value, int) && !(isinstance (value, bool)))) {
+			var __except0__ = py_TypeError ('value should be of type int or bool, not {}'.format (py_typeof (value)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		if (value < 0) {
+			var __except0__ = ValueError ('a block height cannot be negative');
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		self._height = value;
+	});},
+	get _get_coin_inputs () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._custom_coin_inputs_getter ();
+	});},
+	get _custom_coin_inputs_getter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return [];
+	});},
+	get _set_coin_inputs () {return __get__ (this, function (self, value) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		self._custom_coin_inputs_setter (value);
+	});},
+	get _custom_coin_inputs_setter () {return __get__ (this, function (self, value) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var __except0__ = NotImplementedError ('_custom_coin_inputs_setter is not implemented');
+		__except0__.__cause__ = null;
+		throw __except0__;
+	});},
+	get _get_coin_outputs () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._custom_coin_outputs_getter ();
+	});},
+	get _custom_coin_outputs_getter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return [];
+	});},
+	get _set_coin_outputs () {return __get__ (this, function (self, value) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		self._custom_coin_outputs_setter (value);
+	});},
+	get _custom_coin_outputs_setter () {return __get__ (this, function (self, value) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var __except0__ = NotImplementedError ('_custom_coin_outputs_setter is not implemented');
+		__except0__.__cause__ = null;
+		throw __except0__;
+	});},
+	get _get_blockstake_inputs () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._custom_blockstake_inputs_getter ();
+	});},
+	get _custom_blockstake_inputs_getter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return [];
+	});},
+	get _set_blockstake_inputs () {return __get__ (this, function (self, value) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		self._custom_blockstake_inputs_setter (value);
+	});},
+	get _custom_blockstake_inputs_setter () {return __get__ (this, function (self, value) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var __except0__ = NotImplementedError ('_custom_blockstake_inputs_setter is not implemented');
+		__except0__.__cause__ = null;
+		throw __except0__;
+	});},
+	get _get_blockstake_outputs () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._custom_blockstake_outputs_getter ();
+	});},
+	get _custom_blockstake_outputs_getter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return [];
+	});},
+	get _set_blockstake_outputs () {return __get__ (this, function (self, value) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		self._custom_blockstake_outputs_setter (value);
+	});},
+	get _custom_blockstake_outputs_setter () {return __get__ (this, function (self, value) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var __except0__ = NotImplementedError ('_custom_blockstake_outputs_setter is not implemented');
+		__except0__.__cause__ = null;
+		throw __except0__;
+	});},
+	get _get_miner_fees () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._custom_miner_fees_getter ();
+	});},
+	get _custom_miner_fees_getter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return [];
+	});},
+	get _set_miner_fees () {return __get__ (this, function (self, value) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		self._custom_miner_fees_setter (value);
+	});},
+	get _custom_miner_fees_setter () {return __get__ (this, function (self, value) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var __except0__ = NotImplementedError ('_custom_miner_fees_setter is not implemented');
+		__except0__.__cause__ = null;
+		throw __except0__;
+	});},
+	get _get_data () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._custom_data_getter ();
+	});},
+	get _custom_data_getter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return bytes (jsarr.new_array (0));
+	});},
+	get _set_data () {return __get__ (this, function (self, value) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		self._custom_data_setter (value);
+	});},
+	get _custom_data_setter () {return __get__ (this, function (self, value) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var __except0__ = NotImplementedError ('_custom_data_setter is not implemented');
+		__except0__.__cause__ = null;
+		throw __except0__;
+	});},
+	get _signature_hash_input_get () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+			var extra_objects = tuple ([].slice.apply (arguments).slice (1, __ilastarg0__ + 1));
+		}
+		else {
+			var extra_objects = tuple ();
+		}
+		var __except0__ = NotImplementedError ('_signature_hash_input_get is not yet implemented');
+		__except0__.__cause__ = null;
+		throw __except0__;
+	});},
+	get signature_hash_get () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+			var extra_objects = tuple ([].slice.apply (arguments).slice (1, __ilastarg0__ + 1));
+		}
+		else {
+			var extra_objects = tuple ();
+		}
+		var input = self._signature_hash_input_get (...extra_objects);
+		return blake2b (input);
+	});},
+	get _from_json_data_object () {return __get__ (this, function (self, data) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'data': var data = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var __except0__ = NotImplementedError ('_from_json_data_object is not yet implemented');
+		__except0__.__cause__ = null;
+		throw __except0__;
+	});},
+	get _json_data_object () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var __except0__ = NotImplementedError ('_json_data_object is not yet implemented');
+		__except0__.__cause__ = null;
+		throw __except0__;
+	});},
+	get json () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var obj = dict ({'version': self.version});
+		var data = self._json_data_object ();
+		if (data) {
+			obj ['data'] = data;
+		}
+		return obj;
 	});},
 	get __str__ () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -1177,47 +871,9 @@ export var Currency =  __class__ ('Currency', [BaseDataTypeClass], {
 		}
 		else {
 		}
-		return self.str ();
-	});},
-	get str () {return __get__ (this, function (self, with_unit, lowest_unit) {
-		if (typeof with_unit == 'undefined' || (with_unit != null && with_unit.hasOwnProperty ("__kwargtrans__"))) {;
-			var with_unit = false;
-		};
-		if (typeof lowest_unit == 'undefined' || (lowest_unit != null && lowest_unit.hasOwnProperty ("__kwargtrans__"))) {;
-			var lowest_unit = false;
-		};
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'with_unit': var with_unit = __allkwargs0__ [__attrib0__]; break;
-						case 'lowest_unit': var lowest_unit = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (lowest_unit) {
-			var s = self.value.__mul__ ('1000000000').str (9);
-		}
-		else {
-			var s = self.value.str (9);
-		}
-		if (jsstr.contains (s, '.')) {
-			var s = jsstr.rstrip (s, '0 ');
-			if (s [-(1)] == '.') {
-				var s = s.__getslice__ (0, -(1), 1);
-			}
-		}
-		if (len (s) == 0) {
-			var s = '0';
-		}
-		if (with_unit) {
-			s += ' TFT';
+		var s = 'transaction v{}'.format (self.version);
+		if (self.id) {
+			s += ' {}'.format (self.id);
 		}
 		return s;
 	});},
@@ -1235,9 +891,9 @@ export var Currency =  __class__ ('Currency', [BaseDataTypeClass], {
 		}
 		else {
 		}
-		return self.str (__kwargtrans__ ({with_unit: true}));
+		return self.__str__ ();
 	});},
-	get json () {return __get__ (this, function (self) {
+	get _get__coin_outputid_specifier () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -1251,9 +907,9 @@ export var Currency =  __class__ ('Currency', [BaseDataTypeClass], {
 		}
 		else {
 		}
-		return self.str (__kwargtrans__ ({lowest_unit: true}));
+		return self._custom_coin_outputid_specifier_getter ();
 	});},
-	get sia_binary_encode () {return __get__ (this, function (self, encoder) {
+	get _custom_coin_outputid_specifier_getter () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -1261,24 +917,15 @@ export var Currency =  __class__ ('Currency', [BaseDataTypeClass], {
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'encoder': var encoder = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
 		}
 		else {
 		}
-		var value = self.__int__ ();
-		var __left0__ = divmod (jsint.bit_length (value), 8);
-		var nbytes = __left0__ [0];
-		var rem = __left0__ [1];
-		if (rem) {
-			nbytes++;
-		}
-		encoder.add_int (nbytes);
-		encoder.add_array (jsint.to_bytes (value, nbytes, __kwargtrans__ ({order: 'big'})));
+		return bytes ('coin output     ');
 	});},
-	get rivine_binary_encode () {return __get__ (this, function (self, encoder) {
+	get _get__blockstake_outputid_specifier () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -1286,30 +933,15 @@ export var Currency =  __class__ ('Currency', [BaseDataTypeClass], {
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'encoder': var encoder = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
 		}
 		else {
 		}
-		var value = self.__int__ ();
-		var __left0__ = divmod (value.bit_length (), 8);
-		var nbytes = __left0__ [0];
-		var rem = __left0__ [1];
-		if (rem) {
-			nbytes++;
-		}
-		encoder.add_slice (jsint.to_bytes (value, nbytes, __kwargtrans__ ({order: 'big'})));
-	});}
-});
-Object.defineProperty (Currency, 'value', property.call (Currency, Currency._get_value, Currency._set_value));;
-export var Blockstake =  __class__ ('Blockstake', [BaseDataTypeClass], {
-	__module__: __name__,
-	get __init__ () {return __get__ (this, function (self, value) {
-		if (typeof value == 'undefined' || (value != null && value.hasOwnProperty ("__kwargtrans__"))) {;
-			var value = null;
-		};
+		return self._custom_blockstake_outputid_specifier_getter ();
+	});},
+	get _custom_blockstake_outputid_specifier_getter () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -1317,41 +949,82 @@ export var Blockstake =  __class__ ('Blockstake', [BaseDataTypeClass], {
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
 		}
 		else {
 		}
-		self._value = Currency (value);
+		return bytes ('blstake output  ');
 	});},
-	get from_json () {return __getcm__ (this, function (cls, obj) {
+	get coin_outputid_new () {return __get__ (this, function (self, index) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
-						case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
-						case 'obj': var obj = __allkwargs0__ [__attrib0__]; break;
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'index': var index = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
 		}
 		else {
 		}
-		if (obj !== null && !(isinstance (obj, str))) {
-			var __except0__ = py_TypeError ('block stake is expected to be a string when part of a JSON object, not type {}'.format (py_typeof (obj)));
+		if (index < 0 || index >= len (self.coin_outputs)) {
+			var __except0__ = ValueError ('coin output index is out of range');
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		if (obj == '') {
-			var obj = null;
-		}
-		return cls (__kwargtrans__ ({value: obj}));
+		return self._outputid_new (__kwargtrans__ ({specifier: self._coin_outputid_specifier, index: index}));
 	});},
-	get _get_value () {return __get__ (this, function (self) {
+	get blockstake_outputid_new () {return __get__ (this, function (self, index) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'index': var index = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (index < 0 || index >= len (self.coin_outputs)) {
+			var __except0__ = ValueError ('coin output index is out of range');
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		return self._outputid_new (__kwargtrans__ ({specifier: self._blockstake_outputid_specifier, index: index}));
+	});},
+	get _outputid_new () {return __get__ (this, function (self, specifier, index) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'specifier': var specifier = __allkwargs0__ [__attrib0__]; break;
+						case 'index': var index = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var encoder = SiaBinaryEncoder ();
+		encoder.add_array (specifier);
+		encoder.add_array (self._id_input_compute ());
+		encoder.add_int (index);
+		var hash = blake2b (encoder.data);
+		return Hash (__kwargtrans__ ({value: hash}));
+	});},
+	get _id_input_compute () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -1365,26 +1038,9 @@ export var Blockstake =  __class__ ('Blockstake', [BaseDataTypeClass], {
 		}
 		else {
 		}
-		return self._value;
+		return self.binary_encode ();
 	});},
-	get _set_value () {return __get__ (this, function (self, value) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		value._value = Currency (__kwargtrans__ ({value: value}));
-	});},
-	get __int__ () {return __get__ (this, function (self) {
+	get binary_encode () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -1398,9 +1054,9 @@ export var Blockstake =  __class__ ('Blockstake', [BaseDataTypeClass], {
 		}
 		else {
 		}
-		return self.value.__int__ ();
+		return bytes (jsarr.concat ([self.version.__int__ ()], self._binary_encode_data ()));
 	});},
-	get str () {return __get__ (this, function (self) {
+	get _binary_encode_data () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -1414,9 +1070,11 @@ export var Blockstake =  __class__ ('Blockstake', [BaseDataTypeClass], {
 		}
 		else {
 		}
-		return jsstr.from_int (self._value.__int__ ());
+		var encoder = SiaBinaryEncoder ();
+		encoder.add_all (self.coin_inputs, self.coin_outputs, self.blockstake_inputs, self.blockstake_outputs, self.miner_fees, self.data);
+		return encoder.data;
 	});},
-	get __str__ () {return __get__ (this, function (self) {
+	get signature_requests_new () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -1430,9 +1088,18 @@ export var Blockstake =  __class__ ('Blockstake', [BaseDataTypeClass], {
 		}
 		else {
 		}
-		return self.str ();
+		var requests = [];
+		for (var [index, ci] of enumerate (self.coin_inputs)) {
+			var f = InputSignatureHashFactory (self, index).signature_hash_new;
+			var requests = jsarr.concat (requests, ci.signature_requests_new (__kwargtrans__ ({input_hash_func: f})));
+		}
+		for (var [index, bsi] of enumerate (self.blockstake_inputs)) {
+			var f = InputSignatureHashFactory (self, index).signature_hash_new;
+			var requests = jsarr.concat (requests, bsi.signature_requests_new (__kwargtrans__ ({input_hash_func: f})));
+		}
+		return jsarr.concat (requests, self._extra_signature_requests_new ());
 	});},
-	get __repr__ () {return __get__ (this, function (self) {
+	get _extra_signature_requests_new () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -1446,9 +1113,9 @@ export var Blockstake =  __class__ ('Blockstake', [BaseDataTypeClass], {
 		}
 		else {
 		}
-		return self.__str__ ();
+		return [];
 	});},
-	get json () {return __get__ (this, function (self) {
+	get is_fulfilled () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -1462,9 +1129,14 @@ export var Blockstake =  __class__ ('Blockstake', [BaseDataTypeClass], {
 		}
 		else {
 		}
-		return self.__str__ ();
+		for (var ci of self.coin_inputs) {
+			if (!(ci.is_fulfilled ())) {
+				return false;
+			}
+		}
+		return self._extra_is_fulfilled ();
 	});},
-	get sia_binary_encode () {return __get__ (this, function (self, encoder) {
+	get _extra_is_fulfilled () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -1472,48 +1144,74 @@ export var Blockstake =  __class__ ('Blockstake', [BaseDataTypeClass], {
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'encoder': var encoder = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
 		}
 		else {
 		}
-		var v = self.__int__ ();
-		var __left0__ = divmod (jsint.bit_length (v), 8);
-		var nbytes = __left0__ [0];
-		var rem = __left0__ [1];
-		if (rem) {
-			nbytes++;
-		}
-		encoder.add_int (nbytes);
-		encoder.add_array (jsint.to_bytes (v, nbytes, __kwargtrans__ ({order: 'big'})));
-	});},
-	get rivine_binary_encode () {return __get__ (this, function (self, encoder) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'encoder': var encoder = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		var v = self.__int__ ();
-		var __left0__ = divmod (jsint.bit_length (v), 8);
-		var nbytes = __left0__ [0];
-		var rem = __left0__ [1];
-		if (rem) {
-			nbytes++;
-		}
-		encoder.add_slice (jsint.to_bytes (v, nbytes, __kwargtrans__ ({order: 'big'})));
+		return true;
 	});}
 });
-Object.defineProperty (Blockstake, 'value', property.call (Blockstake, Blockstake._get_value, Blockstake._set_value));;
+Object.defineProperty (TransactionBaseClass, '_blockstake_outputid_specifier', property.call (TransactionBaseClass, TransactionBaseClass._get__blockstake_outputid_specifier));
+Object.defineProperty (TransactionBaseClass, '_coin_outputid_specifier', property.call (TransactionBaseClass, TransactionBaseClass._get__coin_outputid_specifier));
+Object.defineProperty (TransactionBaseClass, 'data', property.call (TransactionBaseClass, TransactionBaseClass._get_data, TransactionBaseClass._set_data));
+Object.defineProperty (TransactionBaseClass, 'miner_fees', property.call (TransactionBaseClass, TransactionBaseClass._get_miner_fees, TransactionBaseClass._set_miner_fees));
+Object.defineProperty (TransactionBaseClass, 'blockstake_outputs', property.call (TransactionBaseClass, TransactionBaseClass._get_blockstake_outputs, TransactionBaseClass._set_blockstake_outputs));
+Object.defineProperty (TransactionBaseClass, 'blockstake_inputs', property.call (TransactionBaseClass, TransactionBaseClass._get_blockstake_inputs, TransactionBaseClass._set_blockstake_inputs));
+Object.defineProperty (TransactionBaseClass, 'coin_outputs', property.call (TransactionBaseClass, TransactionBaseClass._get_coin_outputs, TransactionBaseClass._set_coin_outputs));
+Object.defineProperty (TransactionBaseClass, 'coin_inputs', property.call (TransactionBaseClass, TransactionBaseClass._get_coin_inputs, TransactionBaseClass._set_coin_inputs));
+Object.defineProperty (TransactionBaseClass, 'height', property.call (TransactionBaseClass, TransactionBaseClass._get_height, TransactionBaseClass._set_height));
+Object.defineProperty (TransactionBaseClass, 'id', property.call (TransactionBaseClass, TransactionBaseClass._get_id, TransactionBaseClass._set_id));
+Object.defineProperty (TransactionBaseClass, 'unconfirmed', property.call (TransactionBaseClass, TransactionBaseClass._get_unconfirmed, TransactionBaseClass._set_unconfirmed));
+Object.defineProperty (TransactionBaseClass, 'version', property.call (TransactionBaseClass, TransactionBaseClass._get_version));;
+export var InputSignatureHashFactory =  __class__ ('InputSignatureHashFactory', [object], {
+	__module__: __name__,
+	get __init__ () {return __get__ (this, function (self, txn) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'txn': var txn = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+			var extra_objects = tuple ([].slice.apply (arguments).slice (2, __ilastarg0__ + 1));
+		}
+		else {
+			var extra_objects = tuple ();
+		}
+		if (!(isinstance (txn, TransactionBaseClass))) {
+			var __except0__ = py_TypeError ('txn has an invalid type {}'.format (py_typeof (txn)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		self._txn = txn;
+		self._extra_objects = extra_objects;
+	});},
+	get signature_hash_new () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+			var extra_objects = tuple ([].slice.apply (arguments).slice (1, __ilastarg0__ + 1));
+		}
+		else {
+			var extra_objects = tuple ();
+		}
+		var objects = list (self._extra_objects);
+		var objects = jsarr.concat (objects, extra_objects);
+		return self._txn.signature_hash_get (...objects);
+	});}
+});
 
-//# sourceMappingURL=tfchain.types.PrimitiveTypes.map
+//# sourceMappingURL=tfchain.types.transactions.Base.map

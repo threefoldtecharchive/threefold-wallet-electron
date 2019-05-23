@@ -1,4 +1,5 @@
 import tfchain.polyfill.encoding.bin as jsbin
+import tfchain.polyfill.array as jsarr
 
 def bit_length(x):
     length = 0
@@ -10,6 +11,8 @@ def bit_length(x):
     return length
 
 def to_bytes(x, nbytes, order=None):
+    if nbytes == 0:
+        return bytes(jsarr.new_array(0))
     if nbytes == 1:
         return jsbin.from_int8(x, order)
     if nbytes == 2:

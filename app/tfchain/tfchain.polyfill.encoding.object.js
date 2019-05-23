@@ -70,7 +70,22 @@ export var new_dict = function () {
 	}
 	else {
 	}
-	var out = dict ({});
+	return as_dict (dict ({}));
+};
+export var as_dict = function (dv) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'dv': var dv = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
 	var _get_or = function (k, d) {
 		if (typeof d == 'undefined' || (d != null && d.hasOwnProperty ("__kwargtrans__"))) {;
 			var d = null;
@@ -89,8 +104,8 @@ export var new_dict = function () {
 		}
 		else {
 		}
-		if (__in__ (k, out)) {
-			var v = out [k];
+		if (__in__ (k, dv)) {
+			var v = dv [k];
 			var is_null = false;
 			
 			            is_null = (v === undefined || v === null);
@@ -99,7 +114,7 @@ export var new_dict = function () {
 		}
 		return d;
 	};
-	out.get_or = _get_or;
+	dv.get_or = _get_or;
 	var _is_empty = function () {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -111,17 +126,17 @@ export var new_dict = function () {
 		}
 		else {
 		}
-		if (__in__ (out, tuple ([null, dict ({})]))) {
+		if (__in__ (dv, tuple ([null, dict ({})]))) {
 			return true;
 		}
 		var result = null;
 		
-		        result = Object.keys(out).length === 0 && out.constructor === Object;
+		        result = Object.keys(dv).length === 0 && dv.constructor === Object;
 		        
 		return result;
 	};
-	out.is_empty = _is_empty;
-	return out;
+	dv.is_empty = _is_empty;
+	return dv;
 };
 export var is_bool = function (obj) {
 	if (arguments.length) {

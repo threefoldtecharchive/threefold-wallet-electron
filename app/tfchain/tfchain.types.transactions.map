@@ -1,0 +1,8 @@
+{
+	"version": 3,
+	"file": "tfchain.types.transactions.js",
+	"sources": [
+		"tfchain.types.transactions.py"
+	],
+	"mappings": "AAAA;AAAA;AAAA;AAAA;AAAA;AAAA"
+}
