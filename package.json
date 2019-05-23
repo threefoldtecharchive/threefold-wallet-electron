@@ -10,7 +10,7 @@
     "build-main": "cross-env NODE_ENV=production webpack --config ./configs/webpack.config.main.prod.babel.js --colors",
     "build-renderer": "cross-env NODE_ENV=production webpack --config ./configs/webpack.config.renderer.prod.babel.js --colors",
     "build-py": "rm -rf ./app/tfchain && python3 -m transcrypt -k -b -n -m ./src/api.py && mv ./src/__target__ ./app/tfchain && find ./app/tfchain -name '*.js' | xargs -I '{}' ex -c ':1d' -c ':wq' {} && yarn build-tests-py",
-    "build-tests-py": "python3 -m transcrypt -k -b -n -m ./src/tests.py && find ./src/__target__ * | grep -E './src/__target__/tfchain.tests|./src/__target__/tests.' | xargs -I '{}' mv {} ./app/tfchain && rm -rf ./src/__target__",
+    "build-tests-py": "python3 -m transcrypt -k -b -n -m ./src/tests.py && find ./src/__target__ -name '*.js' | xargs -I '{}' ex -c ':1d' -c ':wq' {} && find ./src/__target__ * | grep -E './src/__target__/tfchain.tests|./src/__target__/tests.' | xargs -I '{}' mv {} ./app/tfchain && rm -rf ./src/__target__",
     "dev": "cross-env START_HOT=1 node -r @babel/register ./internals/scripts/CheckPortInUse.js && cross-env START_HOT=1 yarn start-renderer-dev",
     "flow": "flow",
     "flow-typed": "rimraf flow-typed/npm && flow-typed install --overwrite || true",
