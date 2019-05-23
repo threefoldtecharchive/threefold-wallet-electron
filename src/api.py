@@ -17,6 +17,10 @@ import tfchain.explorer as tfexplorer
 from tfchain.types.ConditionTypes import UnlockHash, UnlockHashType
 from tfchain.types.PrimitiveTypes import Currency
 
+# TODO: delete once used
+import tfchain.types.CryptoTypes
+import tfchain.types.FulfillmentTypes
+
 # BIP39 state object used for all Mnemonic purposes of this API
 __bip39 = bip39.Mnemonic()
 

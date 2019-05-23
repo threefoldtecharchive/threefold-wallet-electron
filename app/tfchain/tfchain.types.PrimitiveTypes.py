@@ -75,10 +75,7 @@ class BinaryData(BaseDataTypeClass):
         if isinstance(value, BinaryData):
             value = value.value
         elif value is None:
-            if self._fixed_size is not None:
-                value = bytes(jsarray.new_array(self._fixed_size))
-            else:
-                value = bytes()
+            value = bytes(jsarray.new_array(0))
         elif isinstance(value, str):
             value = self._from_str(value)
         elif isinstance(value, bytearray):

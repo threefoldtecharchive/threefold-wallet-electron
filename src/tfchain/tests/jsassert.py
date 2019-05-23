@@ -1,6 +1,7 @@
 import tfchain.polyfill.encoding.hex as jshex
 import tfchain.encoding.json as tfjson
 import tfchain.polyfill.encoding.json as jsjson
+import tfchain.polyfill.encoding.object as jsobj
 import tfchain.polyfill.array as jsarr
 
 def equals(a, b):
@@ -14,6 +15,20 @@ def equals_not(a, b):
     b = _as_primitive(b)
     if a == b:
         _throw_msg("expected {} to be {}".format(a, b))
+
+def is_true(a):
+    b, ok = jsobj.try_as_bool(a)
+    if ok is False:
+        _throw_msg("expected {} to to be a boolean, not be of type {}".format(a, type(a)))
+    if b is False:
+        _throw_msg("expected {} to to be True".format(b))
+
+def is_false(a):
+    b, ok = jsobj.try_as_bool(a)
+    if ok is False:
+        _throw_msg("expected {} to to be a boolean, not be of type {}".format(a, type(a)))
+    if b is True:
+        _throw_msg("expected {} to to be False".format(b))
 
 def raises(et, cb):
     try:
@@ -33,4 +48,6 @@ def _as_primitive(obj):
         return jshex.bytes_to_hex(obj)
     if isinstance(obj, tfjson.BaseJSONObject):
         return jsjson.json_dumps(obj.json())
+    if jsobj.is_js_obj(obj):
+        return jsjson.json_dumps(obj)
     return obj
