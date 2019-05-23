@@ -32,7 +32,7 @@ class Transfer extends Component {
       descriptionError: false,
       amountError: false,
       wallets: [],
-      selectedWallet: undefined,
+      selectedWallet: this.props.account.wallets[0],
       loader: false
     }
   }
@@ -51,6 +51,15 @@ class Transfer extends Component {
   }
 
   handleAmountChange = ({ target }) => {
+    if (this.state.selectedWallet && target.value !== 0) {
+      this.state.selectedWallet.balance.then(b => {
+        if (!b.spend_amount_is_valid(target.value)) {
+          this.setState({ amountError: true })
+        } else {
+          this.setState({ amountError: false })
+        }
+      })
+    }
     this.setState({ amount: target.value })
   }
 
@@ -71,10 +80,9 @@ class Transfer extends Component {
   }
 
   submitTransaction = () => {
-    const { description, destination, amount, selectedWallet } = this.state
+    const { description, destination, amount, selectedWallet, amountError } = this.state
     let destinationError = false
     // let descriptionError = false
-    let amountError = false
 
     if (destination === '') {
       destinationError = true
@@ -83,10 +91,6 @@ class Transfer extends Component {
     // if (description === '') {
     //   descriptionError = true
     // }
-
-    if (amount <= 0) {
-      amountError = true
-    }
 
     if (!destinationError && !amountError && selectedWallet != null) {
       this.renderLoader(true)
@@ -101,6 +105,8 @@ class Transfer extends Component {
         toast('transaction failed')
         this.setState({ loader: false, errorMessage: err })
       })
+    } else {
+      toast.error('All fields are required !')
     }
   }
 
@@ -127,6 +133,18 @@ class Transfer extends Component {
         <Message
           error
           header={'Destination address is not a valid format'}
+        />
+      )
+    }
+  }
+
+  renderAmountError = () => {
+    const { amountError } = this.state
+    if (amountError) {
+      return (
+        <Message
+          error
+          header={'Not enough balance'}
         />
       )
     }
@@ -161,6 +179,7 @@ class Transfer extends Component {
           </Form.Field> */}
           <Form.Field style={{ marginTop: 30 }}>
             <Input type='number' error={amountError} label='Amount TFT' style={{ background: '#0c111d !important', color: '#7784a9', width: 150 }} placeholder='amount' value={amount} onChange={this.handleAmountChange} />
+            {this.renderAmountError()}
           </Form.Field>
           <Form.Field style={{ marginTop: 30 }}>
             <Dropdown
@@ -169,6 +188,7 @@ class Transfer extends Component {
               selection
               options={walletsOptions}
               onChange={this.selectWallet}
+              value={walletsOptions[0].value}
             />
           </Form.Field>
         </Form>

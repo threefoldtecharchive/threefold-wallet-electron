@@ -80,7 +80,7 @@ class WalletSettings extends Component {
   render () {
     const walletsOptions = this.mapWalletsToDropdownOption()
     const addressOption = this.mapAddressesToDropdownOption()
-    const { amount, selectedAddress, selectedWallet } = this.state
+    const { amount, selectedAddress } = this.state
     return (
       <div>
         <div className={styles.container} >
@@ -98,7 +98,7 @@ class WalletSettings extends Component {
             selection
             options={walletsOptions}
             onChange={this.selectWallet}
-            value={selectedWallet}
+            value={walletsOptions[0].value}
           />
           <Dropdown
             style={{ width: 650, marginLeft: 'auto', marginRight: 'auto', marginBottom: 20 }}
@@ -107,7 +107,7 @@ class WalletSettings extends Component {
             selection
             options={addressOption}
             onChange={this.selectAddress}
-            value={selectedAddress}
+            value={addressOption[0].value}
           />
           {this.renderQRCode()}
           <CopyToClipboard text={selectedAddress}
