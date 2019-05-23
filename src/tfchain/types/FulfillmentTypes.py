@@ -1,5 +1,5 @@
 import tfchain.polyfill.array as jsarr
-import tfchain.polyfill.dict as jsdict
+import tfchain.polyfill.encoding.object as jsobj
 
 import tfchain.errors as tferrors
 from tfchain.encoding.siabin import SiaBinaryEncoder
@@ -13,7 +13,7 @@ from tfchain.types.ConditionTypes import UnlockHash, UnlockHashType, ConditionNi
 
 
 def from_json(obj):
-    ft = jsdict.get_or(obj, 'type', 0)
+    ft = obj.get_or('type', 0)
     if ft == _FULFULLMENT_TYPE_SINGLE_SIG:
         return FulfillmentSingleSignature.from_json(obj)
     if ft == _FULFILLMENT_TYPE_MULTI_SIG:
@@ -171,10 +171,10 @@ class FulfillmentBaseClass(SignatureCallbackBase, BaseDataTypeClass):
     @classmethod
     def from_json(cls, obj):
         ff = cls()
-        t = jsdict.get_or(obj, 'type', 0)
+        t = obj.get_or('type', 0)
         if ff.ftype != t:
             raise ValueError("invalid fulfillment type {}, expected it to be of type {}".format(t, ff.ftype))
-        ff.from_json_data_object(jsdict.get_or(obj, 'data', {}))
+        ff.from_json_data_object(obj.get_or('data', jsobj.new_dict()))
         return ff
 
     @property

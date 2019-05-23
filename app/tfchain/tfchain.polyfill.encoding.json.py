@@ -1,3 +1,5 @@
+import tfchain.polyfill.encoding.object as jsobj
+
 import tfchain.encoding.json as tfjson 
 
 def json_loads(s):
@@ -5,7 +7,7 @@ def json_loads(s):
     __pragma__("js", "{}", """
         obj = JSON.parse(s);
         """)
-    return obj
+    return jsobj.as_py_obj(obj)
 
 def json_dumps(obj):
     if isinstance(obj, tfjson.BaseJSONObject):

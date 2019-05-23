@@ -1,11 +1,12 @@
 from datetime import datetime, timedelta
 
 import tfchain.polyfill.array as jsarr
-import tfchain.polyfill.dict as jsdict
 import tfchain.polyfill.date as jsdate
 import tfchain.polyfill.encoding.hex as jshex
 import tfchain.polyfill.encoding.str as jsstr
-import tfchain.polyfill.crypto as jscrypto 
+import tfchain.polyfill.crypto as jscrypto
+
+import tfchain.polyfill.encoding.object as jsobj
 
 from tfchain.crypto.merkletree import Tree as MerkleTree
 from tfchain.types.PrimitiveTypes import Hash, BinaryData
@@ -23,7 +24,7 @@ _CONDITION_TYPE_MULTI_SIG = 4
 
 
 def from_json(obj):
-    ct = jsdict.get_or(obj, 'type', 0)
+    ct = obj.get_or('type', 0)
     if ct == _CONDITION_TYPE_NIL:
         return ConditionNil.from_json(obj)
     if ct == _CONDITION_TYPE_UNLOCK_HASH:
@@ -188,10 +189,10 @@ class ConditionBaseClass(BaseDataTypeClass):
     @classmethod
     def from_json(cls, obj):
         ff = cls()
-        ct = jsdict.get_or(obj, 'type', 0)
+        ct = obj.get_or('type', 0)
         if ff.ctype != ct:
             raise ValueError("condition is expected to be of type {}, not {}".format(ff.ctype, ct))
-        ff.from_json_data_object(jsdict.get_or(obj, 'data', {}))
+        ff.from_json_data_object(obj.get_or('data', jsobj.new_dict()))
         return ff
 
     @property
@@ -439,7 +440,7 @@ class ConditionNil(ConditionBaseClass):
         return UnlockHash(uhtype=UnlockHashType.NIL)
 
     def from_json_data_object(self, data):
-        if not jsdict.is_empty(data):
+        if data.is_empty():
             raise ValueError("unexpected JSON-encoded nil condition {} (type: {})".format(data, type(data)))
 
     def json_data_object(self):

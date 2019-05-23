@@ -937,3 +937,9 @@ def wallet_address_is_valid(address, multisig=True):
         return multisig and uh.uhtype.value == UnlockHashType.MULTI_SIG.value
     except Exception:
         return False
+
+import tfchain.types.ThreeBot as threebot
+tb = threebot
+
+from tfchain.polyfill.encoding.jsmods.ipaddrjs import api as ipaddrjs
+ip = ipaddrjs

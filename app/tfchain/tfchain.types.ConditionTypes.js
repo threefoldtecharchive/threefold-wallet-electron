@@ -5,11 +5,11 @@ import {RivineBinaryEncoder} from './tfchain.encoding.rivbin.js';
 import {BaseDataTypeClass} from './tfchain.types.BaseDataType.js';
 import {BinaryData, Hash} from './tfchain.types.PrimitiveTypes.js';
 import {Tree as MerkleTree} from './tfchain.crypto.merkletree.js';
+import * as jsobj from './tfchain.polyfill.encoding.object.js';
 import * as jscrypto from './tfchain.polyfill.crypto.js';
 import * as jsstr from './tfchain.polyfill.encoding.str.js';
 import * as jshex from './tfchain.polyfill.encoding.hex.js';
 import * as jsdate from './tfchain.polyfill.date.js';
-import * as jsdict from './tfchain.polyfill.dict.js';
 import * as jsarr from './tfchain.polyfill.array.js';
 import {datetime, timedelta} from './datetime.js';
 var __name__ = 'tfchain.types.ConditionTypes';
@@ -32,7 +32,7 @@ export var from_json = function (obj) {
 	}
 	else {
 	}
-	var ct = jsdict.get_or (obj, 'type', 0);
+	var ct = obj.get_or ('type', 0);
 	if (ct == _CONDITION_TYPE_NIL) {
 		return ConditionNil.from_json (obj);
 	}
@@ -427,13 +427,13 @@ export var ConditionBaseClass =  __class__ ('ConditionBaseClass', [BaseDataTypeC
 		else {
 		}
 		var ff = cls ();
-		var ct = jsdict.get_or (obj, 'type', 0);
+		var ct = obj.get_or ('type', 0);
 		if (ff.ctype != ct) {
 			var __except0__ = ValueError ('condition is expected to be of type {}, not {}'.format (ff.ctype, ct));
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		ff.from_json_data_object (jsdict.get_or (obj, 'data', dict ({})));
+		ff.from_json_data_object (obj.get_or ('data', jsobj.new_dict ()));
 		return ff;
 	});},
 	get _get_ctype () {return __get__ (this, function (self) {
@@ -1316,7 +1316,7 @@ export var ConditionNil =  __class__ ('ConditionNil', [ConditionBaseClass], {
 		}
 		else {
 		}
-		if (!(jsdict.is_empty (data))) {
+		if (data.is_empty ()) {
 			var __except0__ = ValueError ('unexpected JSON-encoded nil condition {} (type: {})'.format (data, py_typeof (data)));
 			__except0__.__cause__ = null;
 			throw __except0__;
