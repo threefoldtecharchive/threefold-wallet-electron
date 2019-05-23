@@ -53,7 +53,11 @@ def new_dict():
     out.is_empty = _is_empty
     # return dict
     return out
-    
+
+def is_bool(obj):
+    _, ok = _try_as_bool(obj)
+    return ok
+
 def _try_as_bool(obj):
     t = True
     f = False

@@ -25,10 +25,6 @@ def as_py_obj(obj):
             out.append(as_py_obj(value))
         }
         """)
-        __pragma__("js", "{}", """
-        console.log(out);
-        """)
-        print(isinstance(out, list), len(out))
         return out
     # try to convert as bool
     out, ok = _try_as_bool(obj)
@@ -57,7 +53,11 @@ def new_dict():
     out.is_empty = _is_empty
     # return dict
     return out
-    
+
+def is_bool(obj):
+    _, ok = _try_as_bool(obj)
+    return ok
+
 def _try_as_bool(obj):
     t = True
     f = False

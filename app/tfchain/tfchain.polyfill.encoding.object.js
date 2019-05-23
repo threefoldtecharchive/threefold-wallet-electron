@@ -49,10 +49,6 @@ export var as_py_obj = function (obj) {
 		            out.append(as_py_obj(value))
 		        }
 		        
-		
-		        console.log(out);
-		        
-		print (isinstance (out, list), len (out));
 		return out;
 	}
 	var __left0__ = _try_as_bool (obj);
@@ -121,6 +117,25 @@ export var new_dict = function () {
 	};
 	out.is_empty = _is_empty;
 	return out;
+};
+export var is_bool = function (obj) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'obj': var obj = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	var __left0__ = _try_as_bool (obj);
+	var _ = __left0__ [0];
+	var ok = __left0__ [1];
+	return ok;
 };
 export var _try_as_bool = function (obj) {
 	if (arguments.length) {
