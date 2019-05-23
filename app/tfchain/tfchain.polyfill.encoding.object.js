@@ -40,8 +40,8 @@ export var as_py_obj = function (obj) {
 		            }
 		        }
 		        
+		return out;
 	}
-	return out;
 	if (_is_js_arr (obj)) {
 		var out = [];
 		
@@ -49,12 +49,16 @@ export var as_py_obj = function (obj) {
 		            out.append(as_py_obj(value))
 		        }
 		        
+		
+		        console.log(out);
+		        
+		print (isinstance (out, list), len (out));
 		return out;
 	}
 	var __left0__ = _try_as_bool (obj);
 	var out = __left0__ [0];
 	var ok = __left0__ [1];
-	if (ok !== null) {
+	if (ok) {
 		return out;
 	}
 	return obj;
@@ -160,7 +164,7 @@ export var _is_js_obj = function (obj) {
 	}
 	var result = null;
 	
-	    result = typeof obj === 'object' && obj !== null;
+	    result = typeof obj === 'object' && obj !== null && obj.constructor !== Array;
 	    
 	return result;
 };

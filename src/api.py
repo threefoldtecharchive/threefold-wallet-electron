@@ -65,18 +65,18 @@ class Account:
             data.payload, jscrypto.RandomSymmetricEncryptionInput(data.iv, data.salt)))
 
         # ensure the account name matches the name stored in the passed data
-        if account_name != payload.account_name:
+        if account_name != payload['account_name']:
             raise ValueError("account_name {} is unexpected, does not match account data".format(account_name))
         # restore the account
         account = cls(
             account_name,
             password,
-            seed=jshex.bytes_from_hex(payload.seed),
-            network_type=payload.network_type,
-            explorer_addresses=payload.explorer_addresses,
+            seed=jshex.bytes_from_hex(payload['seed']),
+            network_type=payload['network_type'],
+            explorer_addresses=payload['explorer_addresses'],
         )
         # restore all wallets for the account
-        for data in payload.wallets:
+        for data in payload['wallets']:
             account.wallet_new(data.wallet_name, data.start_index, data.address_count)
 
         # return the fully restored account

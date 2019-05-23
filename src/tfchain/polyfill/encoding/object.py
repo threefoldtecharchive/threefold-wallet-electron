@@ -15,7 +15,7 @@ def as_py_obj(obj):
             }
         }
         """)
-    return out
+        return out
         
     # convert Arrays as lists
     if _is_js_arr(obj):
@@ -28,7 +28,7 @@ def as_py_obj(obj):
         return out
     # try to convert as bool
     out, ok = _try_as_bool(obj)
-    if ok is not None:
+    if ok:
         return out
     # return anything else as-is
     return obj
@@ -70,7 +70,7 @@ def _try_as_bool(obj):
 def _is_js_obj(obj):
     result = None
     __pragma__("js", "{}", """
-    result = typeof obj === 'object' && obj !== null;
+    result = typeof obj === 'object' && obj !== null && obj.constructor !== Array;
     """)
     return result
 
