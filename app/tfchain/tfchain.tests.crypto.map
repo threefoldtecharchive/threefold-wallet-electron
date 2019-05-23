@@ -1,0 +1,8 @@
+{
+	"version": 3,
+	"file": "tfchain.tests.crypto.js",
+	"sources": [
+		"tfchain.tests.crypto.py"
+	],
+	"mappings": "AAAA;AAAA;AAAA;AAAA;AAAA;AAEA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AACA;AAAA;AAHA"
+}

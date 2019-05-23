@@ -3,7 +3,7 @@
 # // The Tree also constructs proof that a single leaf is a part of the tree. The
 # // leaf can be chosen with 'SetIndex'. The memory footprint of Tree grows in
 # // O(log(n)) in the number of leaves.
-
+import tfchain.polyfill.array as jsarr
 
 class Tree:
     """
@@ -95,7 +95,8 @@ def leaf_sum(hash_func, data):
     """
     # print("Calling leafSum")
     data_ = bytearray([0])
-    data_.extend(data)
+    data_ = jsarr.concat(data_, data)
+    # data_.extend(data)
     return sum_(hash_func, data_)
 
 
@@ -107,8 +108,11 @@ def node_sum(hash_func, a, b):
     """
     # print("Calling node_sum")
     data_ = bytearray([1])
-    data_.extend(a)
-    data_.extend(b)
+    data_ = jsarr.concat(data_, a)
+    data_ = jsarr.concat(data_, b)
+
+    # data_.extend(a)
+    # data_.extend(b)
     return sum_(hash_func, data_)
 
 
