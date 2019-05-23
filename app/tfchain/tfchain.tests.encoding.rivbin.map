@@ -1,0 +1,8 @@
+{
+	"version": 3,
+	"file": "tfchain.tests.encoding.rivbin.js",
+	"sources": [
+		"tfchain.tests.encoding.rivbin.py"
+	],
+	"mappings": "AAAA;AAAA;AAGA;AAFA;AADA;AAAA;AAKA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AACA;AAIA;AACA;AACA;AACA;AAGA;AAAA;AAEA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AACA;AAAA;AAnBA"
+}
