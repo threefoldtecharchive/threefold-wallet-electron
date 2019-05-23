@@ -8,6 +8,7 @@ import Footer from './footer'
 import { toast } from 'react-toastify'
 import { selectWallet } from '../actions'
 import * as tfchain from '../tfchain/api'
+import moment from 'moment'
 
 const mapStateToProps = state => ({
   account: state.account,
@@ -33,7 +34,9 @@ class Transfer extends Component {
       amountError: false,
       wallets: [],
       selectedWallet: this.props.account.wallets[0],
-      loader: false
+      loader: false,
+      datelock: '',
+      timelock: ''
     }
   }
 
@@ -48,6 +51,14 @@ class Transfer extends Component {
 
   handleDescriptionChange = ({ target }) => {
     this.setState({ description: target.value })
+  }
+
+  handleDateLockChange = ({ target }) => {
+    this.setState({ datelock: target.value })
+  }
+
+  handleTimeLockChange = ({ target }) => {
+    this.setState({ timelock: target.value })
   }
 
   handleAmountChange = ({ target }) => {
@@ -80,7 +91,7 @@ class Transfer extends Component {
   }
 
   submitTransaction = () => {
-    const { description, destination, amount, selectedWallet, amountError } = this.state
+    const { description, destination, amount, selectedWallet, amountError, datelock, timelock } = this.state
     let destinationError = false
     // let descriptionError = false
 
@@ -88,6 +99,11 @@ class Transfer extends Component {
       destinationError = true
     }
 
+    let timestamp
+    if (datelock !== '') {
+      const concatDate = datelock + ' ' + timelock
+      timestamp = moment(concatDate).valueOf()
+    }
     // if (description === '') {
     //   descriptionError = true
     // }
@@ -96,7 +112,11 @@ class Transfer extends Component {
       this.renderLoader(true)
 
       const builder = selectedWallet.transaction_new()
-      builder.output_add(destination, amount.toString())
+      if (timestamp) {
+        builder.output_add(destination, amount.toString(), timestamp)
+      } else {
+        builder.output_add(destination, amount.toString())
+      }
       builder.send({ data: description }).then(txid => {
         this.setState({ destinationError, amountError, loader: false })
         toast('Transaction submitted')
@@ -151,7 +171,7 @@ class Transfer extends Component {
   }
 
   render () {
-    const { destination, destinationError, amountError, amount } = this.state
+    const { destination, destinationError, amountError, amount, timelock, datelock } = this.state
     const walletsOptions = this.mapWalletsToDropdownOption()
 
     if (this.state.loader) {
@@ -182,6 +202,12 @@ class Transfer extends Component {
             {this.renderAmountError()}
           </Form.Field>
           <Form.Field style={{ marginTop: 30 }}>
+            <label style={{ color: 'white' }}>Timelock (optional)</label>
+            <Input type='date' label='Timelock' style={{ background: '#0c111d !important', color: '#7784a9', width: 180 }} value={datelock} onChange={this.handleDateLockChange} />
+            <Input type='time' style={{ background: '#0c111d !important', color: '#7784a9', width: 150, marginLeft: 100, position: 'relative', top: 3 }} value={timelock} onChange={this.handleTimeLockChange} />
+          </Form.Field>
+          <Form.Field style={{ marginTop: 30 }}>
+            <label style={{ color: 'white' }}>Select wallet</label>
             <Dropdown
               placeholder='Select Wallet'
               fluid
