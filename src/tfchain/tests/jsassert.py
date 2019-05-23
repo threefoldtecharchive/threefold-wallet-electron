@@ -47,7 +47,7 @@ def _as_primitive(obj):
     if isinstance(obj, (bytes, bytearray)) or jsarr.is_uint8_array(obj):
         return jshex.bytes_to_hex(obj)
     if isinstance(obj, tfjson.BaseJSONObject):
-        return jsjson.json_dumps(obj.json())
+        return _as_primitive(obj.json())
     if jsobj.is_js_obj(obj):
         return jsjson.json_dumps(obj)
     return obj

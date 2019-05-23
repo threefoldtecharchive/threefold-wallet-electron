@@ -485,7 +485,7 @@ export var ConditionBaseClass =  __class__ ('ConditionBaseClass', [BaseDataTypeC
 		}
 		else {
 		}
-		return self._custom_type_setter (value);
+		self._custom_type_setter (value);
 	});},
 	get _custom_type_setter () {return __get__ (this, function (self, value) {
 		if (arguments.length) {
@@ -547,6 +547,41 @@ export var ConditionBaseClass =  __class__ ('ConditionBaseClass', [BaseDataTypeC
 		else {
 		}
 		var __except0__ = NotImplementedError ('_custom_lock_getter property is not yet implemented');
+		__except0__.__cause__ = null;
+		throw __except0__;
+	});},
+	get _set_lock () {return __get__ (this, function (self, value) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		self._custom_lock_setter (value);
+	});},
+	get _custom_lock_setter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var __except0__ = NotImplementedError ('_custom_lock_setter property is not yet implemented');
 		__except0__.__cause__ = null;
 		throw __except0__;
 	});},
@@ -774,7 +809,7 @@ export var ConditionBaseClass =  __class__ ('ConditionBaseClass', [BaseDataTypeC
 	});}
 });
 Object.defineProperty (ConditionBaseClass, 'unlockhash', property.call (ConditionBaseClass, ConditionBaseClass._get_unlockhash, ConditionBaseClass._set_unlockhash));
-Object.defineProperty (ConditionBaseClass, 'lock', property.call (ConditionBaseClass, ConditionBaseClass._get_lock));
+Object.defineProperty (ConditionBaseClass, 'lock', property.call (ConditionBaseClass, ConditionBaseClass._get_lock, ConditionBaseClass._set_lock));
 Object.defineProperty (ConditionBaseClass, 'ctype', property.call (ConditionBaseClass, ConditionBaseClass._get_ctype, ConditionBaseClass._set_ctype));;
 export var UnlockHashType =  __class__ ('UnlockHashType', [object], {
 	__module__: __name__,
@@ -899,7 +934,7 @@ export var UnlockHashType =  __class__ ('UnlockHashType', [object], {
 		}
 		else {
 		}
-		return int (self);
+		return self.__int__ ();
 	});}
 });
 Object.defineProperty (UnlockHashType, 'value', property.call (UnlockHashType, UnlockHashType._get_value));;
@@ -2174,7 +2209,7 @@ export var ConditionLockTime =  __class__ ('ConditionLockTime', [ConditionBaseCl
 		}
 		else {
 		}
-		self.lock = int (data ['locktime']);
+		self.lock = data ['locktime'];
 		var cond = from_json (__kwargtrans__ ({obj: data ['condition']}));
 		if (!__in__ (cond.ctype, tuple ([_CONDITION_TYPE_UNLOCK_HASH, _CONDITION_TYPE_MULTI_SIG, _CONDITION_TYPE_NIL]))) {
 			var __except0__ = ValueError ('internal condition of ConditionLockTime cannot be of type {}'.format (cond.ctype));
@@ -2465,13 +2500,13 @@ export var ConditionMultiSignature =  __class__ ('ConditionMultiSignature', [Con
 		}
 		else {
 		}
-		return dict ({'minimumsignaturecount': self._min_nr_sig, 'unlockhashes': (function () {
+		return dict ({'unlockhashes': (function () {
 			var __accu0__ = [];
 			for (var uh of self._unlockhashes) {
 				__accu0__.append (uh.json ());
 			}
 			return __accu0__;
-		}) ()});
+		}) (), 'minimumsignaturecount': self._min_nr_sig});
 	});},
 	get sia_binary_encode_data () {return __get__ (this, function (self, encoder) {
 		if (arguments.length) {

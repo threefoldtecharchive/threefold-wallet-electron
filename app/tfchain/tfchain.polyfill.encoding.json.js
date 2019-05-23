@@ -39,8 +39,8 @@ export var json_dumps = function (obj) {
 	if (isinstance (obj, tfjson.BaseJSONObject)) {
 		var obj = obj.json ();
 	}
-	if (!(isinstance (obj, dict))) {
-		var __except0__ = py_TypeError ('expected obj to be a dict not be of type {}: {}'.format (py_typeof (obj), obj));
+	if (!(isinstance (obj, dict)) && !(jsobj.is_js_obj (obj))) {
+		var __except0__ = py_TypeError ('expected obj to be a dict/js_object not be of type {}: {}'.format (py_typeof (obj), obj));
 		__except0__.__cause__ = null;
 		throw __except0__;
 	}

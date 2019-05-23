@@ -164,7 +164,7 @@ export var _as_primitive = function (obj) {
 		return jshex.bytes_to_hex (obj);
 	}
 	if (isinstance (obj, tfjson.BaseJSONObject)) {
-		return jsjson.json_dumps (obj.json ());
+		return _as_primitive (obj.json ());
 	}
 	if (jsobj.is_js_obj (obj)) {
 		return jsjson.json_dumps (obj);

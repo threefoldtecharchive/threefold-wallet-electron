@@ -12,8 +12,8 @@ def json_loads(s):
 def json_dumps(obj):
     if isinstance(obj, tfjson.BaseJSONObject):
         obj = obj.json()
-    if not isinstance(obj, dict):
-        raise TypeError("expected obj to be a dict not be of type {}: {}".format(type(obj), obj))
+    if not isinstance(obj, dict) and not jsobj.is_js_obj(obj):
+        raise TypeError("expected obj to be a dict/js_object not be of type {}: {}".format(type(obj), obj))
     s = ''
     __pragma__("js", "{}", """
         s = JSON.stringify(obj);

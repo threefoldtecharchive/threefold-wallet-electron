@@ -202,7 +202,7 @@ class ConditionBaseClass(BaseDataTypeClass):
         raise NotImplementedError("custom type getter is not yet implemented")
     @ctype.setter
     def ctype(self, value):
-        return self._custom_type_setter(value)
+        self._custom_type_setter(value)
     def _custom_type_setter(self, value):
         raise NotImplementedError("custom type setter is not yet implemented")
 
@@ -214,6 +214,11 @@ class ConditionBaseClass(BaseDataTypeClass):
             return OutputLock()
     def _custom_lock_getter(self):
         raise NotImplementedError("_custom_lock_getter property is not yet implemented")
+    @lock.setter
+    def lock(self, value):
+        self._custom_lock_setter(value)
+    def _custom_lock_setter(self):
+        raise NotImplementedError("_custom_lock_setter property is not yet implemented")
     
     @property
     def unlockhash(self):
@@ -305,7 +310,7 @@ class UnlockHashType:
         return self.value
 
     def json(self):
-        return int(self)
+        return self.__int__()
 
 UnlockHashType.NIL = UnlockHashType(0)
 UnlockHashType.PUBLIC_KEY = UnlockHashType(1)
@@ -684,7 +689,7 @@ class ConditionLockTime(ConditionBaseClass):
         return self.condition
 
     def from_json_data_object(self, data):
-        self.lock = int(data['locktime'])
+        self.lock = data['locktime']
         cond = from_json(obj=data['condition'])
         if cond.ctype not in(_CONDITION_TYPE_UNLOCK_HASH, _CONDITION_TYPE_MULTI_SIG, _CONDITION_TYPE_NIL):
             raise ValueError("internal condition of ConditionLockTime cannot be of type {}".format(cond.ctype))
@@ -765,8 +770,8 @@ class ConditionMultiSignature(ConditionBaseClass):
 
     def json_data_object(self):
         return {
-            'minimumsignaturecount': self._min_nr_sig,
             'unlockhashes': [uh.json() for uh in self._unlockhashes],
+            'minimumsignaturecount': self._min_nr_sig,
         }
 
     def sia_binary_encode_data(self, encoder):
