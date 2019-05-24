@@ -14,6 +14,8 @@ from tfchain.types.PrimitiveTypes import Hash, Currency
 from tfchain.types.ERC20 import ERC20Address
 from tfchain.types.IO import CoinOutput, BlockstakeOutput
 
+# TODO: add KeyScan feature to client,
+# this way we can automatically create a wallet based on a start index
 
 class TFChainClient:
     """

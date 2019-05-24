@@ -190,6 +190,13 @@ class Currency(BaseDataTypeClass):
         self.value = value
 
     @classmethod
+    def sum(cls, *values):
+        s = cls()
+        for value in values:
+            s.__iadd__(value)
+        return s
+
+    @classmethod
     def from_str(cls, obj, lowest_unit=False):
         if obj is not None and not isinstance(obj, str):
             raise TypeError(

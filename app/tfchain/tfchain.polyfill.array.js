@@ -210,7 +210,7 @@ export var is_empty = function (arr) {
 	}
 	var result = false;
 	
-	    result = (a === null || a.length === 0);
+	    result = (arr === null || arr.length === 0);
 	    
 	return result || !(arr) || len (arr) == 0;
 };
@@ -243,6 +243,48 @@ export var py_sort = function (arr, f, reverse) {
 		        
 	}
 	return arr;
+};
+export var py_pop = function (arr, index) {
+	if (typeof index == 'undefined' || (index != null && index.hasOwnProperty ("__kwargtrans__"))) {;
+		var index = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'arr': var arr = __allkwargs0__ [__attrib0__]; break;
+					case 'index': var index = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (isinstance (arr, list)) {
+		return arr.py_pop (index);
+	}
+	if (index === null) {
+		var val = null;
+		
+		        val = arr.pop();
+		        
+		return val;
+	}
+	if (index == 0) {
+		var val = null;
+		
+		        val = arr.shift();
+		        
+		return val;
+	}
+	var val = null;
+	
+	    val = arr[index];
+	    delete arr[index];
+	    
+	return val;
 };
 
 //# sourceMappingURL=tfchain.polyfill.array.map

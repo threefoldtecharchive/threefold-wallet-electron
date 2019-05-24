@@ -566,6 +566,28 @@ export var Currency =  __class__ ('Currency', [BaseDataTypeClass], {
 		self._value = null;
 		self.value = value;
 	});},
+	get sum () {return __getcm__ (this, function (cls) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+			var py_values = tuple ([].slice.apply (arguments).slice (1, __ilastarg0__ + 1));
+		}
+		else {
+			var py_values = tuple ();
+		}
+		var s = cls ();
+		for (var value of py_values) {
+			s.__iadd__ (value);
+		}
+		return s;
+	});},
 	get from_str () {return __getcm__ (this, function (cls, obj, lowest_unit) {
 		if (typeof lowest_unit == 'undefined' || (lowest_unit != null && lowest_unit.hasOwnProperty ("__kwargtrans__"))) {;
 			var lowest_unit = false;

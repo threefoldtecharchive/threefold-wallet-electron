@@ -14,6 +14,7 @@ import tfchain.encoding.siabin as tfsiabin
 import tfchain.network as tfnetwork
 import tfchain.explorer as tfexplorer
 import tfchain.client as tfclient
+import tfchain.wallet as tfwallet
 
 from tfchain.types.ConditionTypes import UnlockHash, UnlockHashType
 from tfchain.types.PrimitiveTypes import Currency
@@ -362,12 +363,10 @@ class Wallet:
         :type start_index: int
         :param pairs: the key pairs as generated using the start_index and account's seed
         """
-        self._network_type = network_type
-        self._explorer_client = explorer_client
+        self._start_index = start_index
         self._wallet_index = wallet_index
         self._wallet_name = wallet_name
-        self._start_index = start_index
-        self._pairs = pairs
+        self._tfwallet = tfwallet.TFChainWallet(network_type, pairs, explorer_client)
 
     def clone(self):
         """
@@ -377,12 +376,12 @@ class Wallet:
         :rtype: Wallet
         """
         return Wallet(
-            self._network_type,
-            self._explorer_client,
+            tfnetwork.Type(self._tfwallet.network_type),
+            self._tfwallet.client.clone(),
             self._wallet_index,
             self._wallet_name,
             self._start_index,
-            [pair for pair in self._pairs],
+            [pair for pair in self._tfwallet.pairs],
         )
 
     @property
@@ -415,10 +414,7 @@ class Wallet:
         :returns: the first (default) address of this wallet
         :rtype: str
         """
-        addresses = self.addresses
-        if not addresses:
-            return ''
-        return addresses[0]
+        return self._tfwallet.address
 
     @property
     def addresses(self):
@@ -426,12 +422,7 @@ class Wallet:
         :returns: the addresses of this wallet
         :rtype: list (of sts)
         """
-        addresses = []
-        for pair in self._pairs:
-            uh = UnlockHash(uhtype=UnlockHashType.PUBLIC_KEY, uhhash=pair.key_public)
-            address = uh.__str__()
-            addresses.append(address)
-        return addresses
+        return self._tfwallet.addresses
 
     @property
     def address_count(self):
@@ -439,7 +430,7 @@ class Wallet:
         :returns: the address count of this wallet
         :rtype: int
         """
-        return len(self._pairs)
+        return self._tfwallet.address_count
 
     @property
     def balance(self):
@@ -448,9 +439,7 @@ class Wallet:
         :rtype: Balance
         """
         wallet = self.clone()
-        def cb():
-            return wallet.balance_sync
-        return jsasync.as_promise(cb)
+        return jsasync.as_promise(wallet.balance_sync)
 
     @property
     def balance_sync(self):
