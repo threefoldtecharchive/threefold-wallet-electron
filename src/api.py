@@ -13,6 +13,7 @@ import tfchain.crypto.mnemonic as bip39
 import tfchain.encoding.siabin as tfsiabin
 import tfchain.network as tfnetwork
 import tfchain.explorer as tfexplorer
+import tfchain.client as tfclient
 
 from tfchain.types.ConditionTypes import UnlockHash, UnlockHashType
 from tfchain.types.PrimitiveTypes import Currency
@@ -126,9 +127,11 @@ class Account:
             network_type = tfnetwork.Type(network_type)
             explorer_addresses = network_type.default_explorer_addresses()
             self._explorer_client = tfexplorer.Client(explorer_addresses)
+            self._explorer_client = tfclient.TFChainClient(self._explorer_client)
         else:
             # explorer addresses are given, create the client
             self._explorer_client = tfexplorer.Client(explorer_addresses)
+            self._explorer_client = tfclient.TFChainClient(self._explorer_client)
             if network_type is None:
                 # if no network type is given, get it from one of the used explorer addresses
                 # NOTE: it is possible that in theory not all explorers used return the same network type,
@@ -277,7 +280,7 @@ class Account:
         payload = {
             'account_name': self._account_name,
             'network_type': self._network_type.__str__(),
-            'explorer_addresses': self._explorer_client.addresses,
+            'explorer_addresses': self._explorer_client.explorer_addresses,
             'seed': jshex.bytes_to_hex(self._seed),
             'wallets': wallets,
         }
@@ -298,38 +301,15 @@ class Account:
 
         :returns: a promise that can be resolved in an async manner
         """
-        # define callbacks, that will be turned into promises
-        explorer_client = self._explorer_client.clone()
-        def fetch_stats():
-            def cb(result):
-                return ('s', result)
-            return jsasync.chain(explorer_client.data_get('/explorer'), cb)
-        def fetch_constants():
-            def cb(result):
-                return ('c', result)
-            return jsasync.chain(explorer_client.data_get('/explorer/constants'), cb)
-        def fetch_current_block(results):
-            if len(results) != 2:
-                raise RuntimeError("expected 2 values as result, but received: {}".format(results))
-            results = dict(results)
-            chain_height = results['s']['height']
-            info = results['c']['chaininfo']
-            def cb(current_block):
-                chain_timestamp = current_block['block']['rawblock']['timestamp']
-                return ChainInfo(
-                    info['Name'],
-                    info['ChainVersion'],
-                    info['NetworkName'],
-                    chain_height,
-                    chain_timestamp,
-                )
-            # TODO: replace with client block_get call
-            return jsasync.chain(explorer_client.data_get('/explorer/blocks/{}'.format(chain_height)), cb)
-        # chain them all and return as a single promise
-        return jsasync.chain(jsasync.wait(
-            jsasync.as_promise(fetch_stats),
-            jsasync.as_promise(fetch_constants)
-        ), fetch_current_block)
+        def cb(info):
+            return ChainInfo(
+                info.constants.chain_name,
+                info.constants.chain_version,
+                info.constants.chain_network,
+                info.height,
+                info.timestamp,
+            )
+        return jsasync.chain(self._explorer_client.blockchain_info_get(), cb)
 
     @property
     def balance(self):

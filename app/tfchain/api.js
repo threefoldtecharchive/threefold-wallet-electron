@@ -1,6 +1,7 @@
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __proxy__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, abs, all, any, assert, bool, bytearray, bytes, callable, chr, copy, deepcopy, delattr, dict, dir, divmod, enumerate, filter, float, getattr, hasattr, input, int, isinstance, issubclass, len, list, map, max, min, object, ord, pow, print, property, py_TypeError, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
 import {Currency} from './tfchain.types.PrimitiveTypes.js';
 import {UnlockHash, UnlockHashType} from './tfchain.types.ConditionTypes.js';
+import * as tfclient from './tfchain.client.js';
 import * as tfexplorer from './tfchain.explorer.js';
 import * as tfnetwork from './tfchain.network.js';
 import * as tfsiabin from './tfchain.encoding.siabin.js';
@@ -134,9 +135,11 @@ export var Account =  __class__ ('Account', [object], {
 			var network_type = tfnetwork.Type (network_type);
 			var explorer_addresses = network_type.default_explorer_addresses ();
 			self._explorer_client = tfexplorer.Client (explorer_addresses);
+			self._explorer_client = tfclient.TFChainClient (self._explorer_client);
 		}
 		else {
 			self._explorer_client = tfexplorer.Client (explorer_addresses);
+			self._explorer_client = tfclient.TFChainClient (self._explorer_client);
 			if (network_type === null) {
 				var info = self.chain_info_get ();
 				var network_type = info.chain_network;
@@ -403,7 +406,7 @@ export var Account =  __class__ ('Account', [object], {
 		for (var wallet of self.wallets) {
 			wallets.append (dict ({'wallet_name': wallet.wallet_name, 'start_index': wallet.start_index, 'address_count': wallet.address_count}));
 		}
-		var payload = dict ({'account_name': self._account_name, 'network_type': self._network_type.__str__ (), 'explorer_addresses': self._explorer_client.addresses, 'seed': jshex.bytes_to_hex (self._seed), 'wallets': wallets});
+		var payload = dict ({'account_name': self._account_name, 'network_type': self._network_type.__str__ (), 'explorer_addresses': self._explorer_client.explorer_addresses, 'seed': jshex.bytes_to_hex (self._seed), 'wallets': wallets});
 		var __left0__ = self._symmetric_key.encrypt (payload);
 		var ct = __left0__ [0];
 		var rsei = __left0__ [1];
@@ -423,107 +426,23 @@ export var Account =  __class__ ('Account', [object], {
 		}
 		else {
 		}
-		var explorer_client = self._explorer_client.clone ();
-		var fetch_stats = function () {
-			if (arguments.length) {
-				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-					var __allkwargs0__ = arguments [__ilastarg0__--];
-					for (var __attrib0__ in __allkwargs0__) {
-					}
-				}
-			}
-			else {
-			}
-			var cb = function (result) {
-				if (arguments.length) {
-					var __ilastarg0__ = arguments.length - 1;
-					if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-						var __allkwargs0__ = arguments [__ilastarg0__--];
-						for (var __attrib0__ in __allkwargs0__) {
-							switch (__attrib0__) {
-								case 'result': var result = __allkwargs0__ [__attrib0__]; break;
-							}
-						}
-					}
-				}
-				else {
-				}
-				return tuple (['s', result]);
-			};
-			return jsasync.chain (explorer_client.data_get ('/explorer'), cb);
-		};
-		var fetch_constants = function () {
-			if (arguments.length) {
-				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-					var __allkwargs0__ = arguments [__ilastarg0__--];
-					for (var __attrib0__ in __allkwargs0__) {
-					}
-				}
-			}
-			else {
-			}
-			var cb = function (result) {
-				if (arguments.length) {
-					var __ilastarg0__ = arguments.length - 1;
-					if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-						var __allkwargs0__ = arguments [__ilastarg0__--];
-						for (var __attrib0__ in __allkwargs0__) {
-							switch (__attrib0__) {
-								case 'result': var result = __allkwargs0__ [__attrib0__]; break;
-							}
-						}
-					}
-				}
-				else {
-				}
-				return tuple (['c', result]);
-			};
-			return jsasync.chain (explorer_client.data_get ('/explorer/constants'), cb);
-		};
-		var fetch_current_block = function (results) {
+		var cb = function (info) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
 				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
-							case 'results': var results = __allkwargs0__ [__attrib0__]; break;
+							case 'info': var info = __allkwargs0__ [__attrib0__]; break;
 						}
 					}
 				}
 			}
 			else {
 			}
-			if (len (results) != 2) {
-				var __except0__ = RuntimeError ('expected 2 values as result, but received: {}'.format (results));
-				__except0__.__cause__ = null;
-				throw __except0__;
-			}
-			var results = dict (results);
-			var chain_height = results ['s'] ['height'];
-			var info = results ['c'] ['chaininfo'];
-			var cb = function (current_block) {
-				if (arguments.length) {
-					var __ilastarg0__ = arguments.length - 1;
-					if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-						var __allkwargs0__ = arguments [__ilastarg0__--];
-						for (var __attrib0__ in __allkwargs0__) {
-							switch (__attrib0__) {
-								case 'current_block': var current_block = __allkwargs0__ [__attrib0__]; break;
-							}
-						}
-					}
-				}
-				else {
-				}
-				var chain_timestamp = current_block ['block'] ['rawblock'] ['timestamp'];
-				return ChainInfo (info ['Name'], info ['ChainVersion'], info ['NetworkName'], chain_height, chain_timestamp);
-			};
-			return jsasync.chain (explorer_client.data_get ('/explorer/blocks/{}'.format (chain_height)), cb);
+			return ChainInfo (info.constants.chain_name, info.constants.chain_version, info.constants.chain_network, info.height, info.timestamp);
 		};
-		return jsasync.chain (jsasync.wait (jsasync.as_promise (fetch_stats), jsasync.as_promise (fetch_constants)), fetch_current_block);
+		return jsasync.chain (self._explorer_client.blockchain_info_get (), cb);
 	});},
 	get _get_balance () {return __get__ (this, function (self) {
 		if (arguments.length) {

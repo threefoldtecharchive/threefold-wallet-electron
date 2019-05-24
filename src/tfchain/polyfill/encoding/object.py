@@ -57,6 +57,16 @@ def as_dict(dv):# add _get_or method
         """)
         return result
     dv.is_empty = _is_empty
+    # convert props
+    def prop_cb(key, val):
+        dv[key] = val
+    __pragma__("js", "{}", """
+    for (let property in dv) {
+        if (dv.hasOwnProperty(property)) {
+            prop_cb(property, as_py_obj(dv[property]));
+        }
+    }
+    """)
     # return dict
     return dv
 

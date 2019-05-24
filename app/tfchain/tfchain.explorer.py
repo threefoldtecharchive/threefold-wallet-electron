@@ -1,6 +1,7 @@
 import random
 import tfchain.errors as tferrors
 import tfchain.polyfill.encoding.json as jsjson
+import tfchain.polyfill.encoding.object as jsobj
 import tfchain.polyfill.http as jshttp
 import tfchain.polyfill.asynchronous as jsasync
 
@@ -41,7 +42,7 @@ class Client:
 
         def resolve(result):
             if result.code == 200:
-                return result.data
+                return jsobj.as_dict(result.data)
             if result.code == 204 or (result.code == 400 and ('unrecognized hash' in result.data or 'not found' in result.data)):
                 raise tferrors.ExplorerNoContent("GET: no content available (code: 204)", endpoint)
             raise tferrors.ExplorerServerError("error (code: {}): {}".format(result.code, result.data), endpoint)
@@ -86,7 +87,7 @@ class Client:
 
         def resolve(result):
             if result.code == 200:
-                return result.data
+                return jsobj.as_dict(result.data)
             raise tferrors.ExplorerServerPostError("POST: unexpected error (code: {}): {}".format(result.code, result.data), endpoint, data=data)
 
         headers = {

@@ -136,6 +136,30 @@ export var as_dict = function (dv) {
 		return result;
 	};
 	dv.is_empty = _is_empty;
+	var prop_cb = function (key, val) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'key': var key = __allkwargs0__ [__attrib0__]; break;
+						case 'val': var val = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		dv [key] = val;
+	};
+	
+	    for (let property in dv) {
+	        if (dv.hasOwnProperty(property)) {
+	            prop_cb(property, as_py_obj(dv[property]));
+	        }
+	    }
+	    
 	return dv;
 };
 export var is_bool = function (obj) {
