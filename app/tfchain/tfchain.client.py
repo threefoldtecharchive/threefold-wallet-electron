@@ -2,13 +2,16 @@ import tfchain.errors as tferrors
 import tfchain.explorer as tfexplorer
 
 import tfchain.polyfill.encoding.object as jsobj
+import tfchain.polyfill.encoding.str as jsstr
 import tfchain.polyfill.asynchronous as jsasync
 import tfchain.polyfill.date as jsdate
+import tfchain.polyfill.array as jsarr
 
-from tfchain.types import transactions
+from tfchain.types import transactions, ConditionTypes
 from tfchain.types.transactions.Base import TransactionBaseClass
-from tfchain.types.ConditionTypes import UnlockHash
+from tfchain.types.ConditionTypes import UnlockHash, UnlockHashType
 from tfchain.types.PrimitiveTypes import Hash, Currency
+from tfchain.types.ERC20 import ERC20Address
 from tfchain.types.IO import CoinOutput, BlockstakeOutput
 
 
@@ -23,7 +26,7 @@ class TFChainClient:
 
         # create subclients
         # self._threebot = TFChainThreeBotClient(self)
-        # self._minter = TFChainMinterClient(self)
+        self._minter = TFChainMinterClient(self)
         # self._erc20 = TFChainERC20Client(self)
 
     # @property
@@ -33,12 +36,12 @@ class TFChainClient:
     #     """
     #     return self._threebot
 
-    # @property
-    # def minter(self):
-    #     """
-    #     Minter Client API.
-    #     """
-    #     return self._minter
+    @property
+    def minter(self):
+        """
+        Minter Client API.
+        """
+        return self._minter
 
     # @property
     # def erc20(self):
@@ -210,60 +213,69 @@ class TFChainClient:
     #         # return a KeyError as an invalid Explorer Response
     #         raise tferrors.ExplorerInvalidResponse(str(exc), endpoint, resp) from exc
 
-    # def unlockhash_get(self, target):
-    #     """
-    #     Get all transactions linked to the given unlockhash (target),
-    #     as well as other information such as the multisig addresses linked to the given unlockhash (target).
+    def unlockhash_get(self, target):
+        """
+        Get all transactions linked to the given unlockhash (target),
+        as well as other information such as the multisig addresses linked to the given unlockhash (target).
 
-    #     target can be any of:
-    #         - None: unlockhash of the Free-For-All wallet will be used
-    #         - str (or unlockhash/bytes/bytearray): target is assumed to be the unlockhash of a personal wallet
-    #         - list: target is assumed to be the addresses of a MultiSig wallet where all owners (specified as a list of addresses) have to sign
-    #         - tuple (addresses, sigcount): target is a sigcount-of-addresscount MultiSig wallet
+        target can be any of:
+            - None: unlockhash of the Free-For-All wallet will be used
+            - str (or unlockhash/bytes/bytearray): target is assumed to be the unlockhash of a personal wallet
+            - list: target is assumed to be the addresses of a MultiSig wallet where all owners (specified as a list of addresses) have to sign
+            - tuple (addresses, sigcount): target is a sigcount-of-addresscount MultiSig wallet
 
-    #     @param target: the target wallet to look up transactions for in the explorer, see above for more info
-    #     """
-    #     unlockhash = str(ConditionTypes.from_recipient(target).unlockhash)
-    #     endpoint = "/explorer/hashes/"+unlockhash
-    #     resp = self.explorer_get(endpoint=endpoint)
-    #     resp = json_loads(resp)
-    #     try:
-    #         if resp['hashtype'] != 'unlockhash':
-    #             raise tferrors.ExplorerInvalidResponse("expected hash type 'unlockhash' not '{}'".format(resp['hashtype']), endpoint, resp)
-    #         # parse the transactions
-    #         transactions = []
-    #         for etxn in resp['transactions']:
-    #             # parse the explorer transaction
-    #             transaction = self._transaction_from_explorer_transaction(etxn, endpoint=endpoint, resp=resp)
-    #             # append the transaction to the list of transactions
-    #             transactions.append(transaction)
-    #         # collect all multisig addresses
-    #         multisig_addresses = [UnlockHash.from_json(obj=uh) for uh in resp.get('multisigaddresses', None) or []]
-    #         for addr in multisig_addresses:
-    #             if addr.type != UnlockHashType.MULTI_SIG:
-    #                 raise tferrors.ExplorerInvalidResponse("invalid unlock hash type {} for MultiSignature Address (expected: 3)".format(addr.type), endpoint, resp)
-    #         erc20_info = None
-    #         if 'erc20info' in resp:
-    #             info = resp['erc20info']
-    #             erc20_info = ERC20AddressInfo(
-    #                 address_tft=UnlockHash.from_json(info['tftaddress']),
-    #                 address_erc20=ERC20Address.from_json(info['erc20address']),
-    #                 confirmations=int(info['confirmations']),
-    #             )
+        @param target: the target wallet to look up transactions for in the explorer, see above for more info
+        """
+        ec = self.clone()
 
-    #         # sort the transactions by height
-    #         transactions.sort(key=(lambda txn: sys.maxsize if txn.height < 0 else txn.height), reverse=True)
+        unlockhash = ConditionTypes.from_recipient(target).unlockhash.__str__()
+        endpoint = "/explorer/hashes/"+unlockhash
 
-    #         # return explorer data for the unlockhash
-    #         return ExplorerUnlockhashResult(
-    #             unlockhash=UnlockHash.from_json(unlockhash),
-    #             transactions=transactions,
-    #             multisig_addresses=multisig_addresses,
-    #             erc20_info=erc20_info,
-    #             client=self)
-    #     except KeyError as exc:
-    #         # return a KeyError as an invalid Explorer Response
-    #         raise tferrors.ExplorerInvalidResponse(str(exc), endpoint, resp) from exc
+        def cb(resp):
+            try:
+                if resp['hashtype'] != 'unlockhash':
+                    raise tferrors.ExplorerInvalidResponse("expected hash type 'unlockhash' not '{}'".format(resp['hashtype']), endpoint, resp)
+                # parse the transactions
+                transactions = []
+                for etxn in resp['transactions']:
+                    # parse the explorer transaction
+                    transaction = ec._transaction_from_explorer_transaction(etxn, endpoint=endpoint, resp=resp)
+                    # append the transaction to the list of transactions
+                    transactions.append(transaction)
+                # collect all multisig addresses
+                multisig_addresses = [UnlockHash.from_json(obj=uh) for uh in resp.get_or('multisigaddresses', None) or []]
+                for addr in multisig_addresses:
+                    if addr.type.__ne__(UnlockHashType.MULTI_SIG):
+                        raise tferrors.ExplorerInvalidResponse("invalid unlock hash type {} for MultiSignature Address (expected: 3)".format(addr.type.value), endpoint, resp)
+                erc20_info = None
+                if 'erc20info' in resp:
+                    info = resp['erc20info']
+                    erc20_info = ERC20AddressInfo(
+                        address_tft=UnlockHash.from_json(info['tftaddress']),
+                        address_erc20=ERC20Address.from_json(info['erc20address']),
+                        confirmations=int(info['confirmations']),
+                    )
+
+                # sort the transactions by height
+                def txn_arr_sort(a, b):
+                    height_a = pow(2, 64) if a.height < 0 else a.height
+                    height_b = pow(2, 64) if b.height < 0 else b.height
+                    return height_a-height_b
+                transactions = jsarr.sort(transactions, txn_arr_sort, reverse=True)
+
+                # return explorer data for the unlockhash
+                return ExplorerUnlockhashResult(
+                    unlockhash=UnlockHash.from_json(unlockhash),
+                    transactions=transactions,
+                    multisig_addresses=multisig_addresses,
+                    erc20_info=erc20_info,
+                    client=self)
+            except KeyError as exc:
+                # return a KeyError as an invalid Explorer Response
+                raise tferrors.ExplorerInvalidResponse(str(exc), endpoint, resp) from exc
+
+        return jsasync.chain(ec.explorer_get(endpoint=endpoint), cb)
+
 
     def coin_output_get(self, id):
         """
@@ -506,44 +518,44 @@ class BlockchainConstants:
         return self._chain_network
 
 
-# class ExplorerUnlockhashResult():
-#     def __init__(self, unlockhash, transactions, multisig_addresses, erc20_info, client=None):
-#         """
-#         All the info found for a given unlock hash, as reported by an explorer.
-#         """
-#         self._unlockhash = unlockhash
-#         self._transactions = transactions
-#         self._multisig_addresses = multisig_addresses
-#         # client is optionally used to get additional info in a lazy manner should it be needed
-#         if client is not None and not isinstance(client, TFChainClient):
-#             raise TypeError("client cannot be set to a value of type {}".format(type(client)))
-#         self._client = client
-#         self._erc20_info = erc20_info
+class ExplorerUnlockhashResult():
+    def __init__(self, unlockhash, transactions, multisig_addresses, erc20_info, client=None):
+        """
+        All the info found for a given unlock hash, as reported by an explorer.
+        """
+        self._unlockhash = unlockhash
+        self._transactions = transactions
+        self._multisig_addresses = multisig_addresses
+        # client is optionally used to get additional info in a lazy manner should it be needed
+        if client is not None and not isinstance(client, TFChainClient):
+            raise TypeError("client cannot be set to a value of type {}".format(type(client)))
+        self._client = client
+        self._erc20_info = erc20_info
     
-#     @property
-#     def unlockhash(self):
-#         """
-#         Unlock hash looked up.
-#         """
-#         return self._unlockhash
+    @property
+    def unlockhash(self):
+        """
+        Unlock hash looked up.
+        """
+        return self._unlockhash
     
-#     @property
-#     def transactions(self):
-#         """
-#         Transactions linked to the looked up unlockhash.
-#         """
-#         return self._transactions
+    @property
+    def transactions(self):
+        """
+        Transactions linked to the looked up unlockhash.
+        """
+        return self._transactions
 
-#     @property
-#     def multisig_addresses(self):
-#         """
-#         Addresses of multisignature wallets co-owned by the looked up unlockhash.
-#         """
-#         return self._multisig_addresses
+    @property
+    def multisig_addresses(self):
+        """
+        Addresses of multisignature wallets co-owned by the looked up unlockhash.
+        """
+        return self._multisig_addresses
 
-#     @property
-#     def erc20_info(self):
-#         return self._erc20_info
+    @property
+    def erc20_info(self):
+        return self._erc20_info
 
 #     def __repr__(self):
 #         return "Found {} transaction(s) and {} multisig address(es) for {}".format(
@@ -608,24 +620,24 @@ class BlockchainConstants:
 #             return info
 #         return self._client.blockchain_info_get()
 
-# class ERC20AddressInfo():
-#     """
-#     Contains the information for an ERC20 address (registration).
-#     """
-#     def __init__(self, address_tft, address_erc20, confirmations):
-#         self._address_tft = address_tft
-#         self._address_erc20 = address_erc20
-#         self._confirmations = confirmations
+class ERC20AddressInfo():
+    """
+    Contains the information for an ERC20 address (registration).
+    """
+    def __init__(self, address_tft, address_erc20, confirmations):
+        self._address_tft = address_tft
+        self._address_erc20 = address_erc20
+        self._confirmations = confirmations
 
-#     @property
-#     def address_tft(self):
-#         return self._address_tft
-#     @property
-#     def address_erc20(self):
-#         return self._address_erc20
-#     @property
-#     def confirmations(self):
-#         return self._confirmations
+    @property
+    def address_tft(self):
+        return self._address_tft
+    @property
+    def address_erc20(self):
+        return self._address_erc20
+    @property
+    def confirmations(self):
+        return self._confirmations
 
 class ExplorerBlock():
     def __init__(self, id, parentid, height, timestamp, transactions, miner_payouts):
@@ -723,41 +735,48 @@ class ExplorerMinerPayout():
         return self.__str__()
 
 
-# class TFChainMinterClient():
-#     """
-#     TFChainMinterClient contains all Coin Minting logic.
-#     """
+class TFChainMinterClient():
+    """
+    TFChainMinterClient contains all Coin Minting logic.
+    """
 
-#     def __init__(self, client):
-#         if not isinstance(client, TFChainClient):
-#             raise TypeError("client is expected to be a TFChainClient")
-#         self._client = client
+    def __init__(self, client):
+        if not isinstance(client, TFChainClient):
+            raise TypeError("client is expected to be a TFChainClient")
+        self._client = client
 
-#     def condition_get(self, height=None):
-#         """
-#         Get the latest (coin) mint condition or the (coin) mint condition at the specified block height.
+    def clone(self):
+        tfclient = self._client.clone()
+        return TFChainMinterClient(tfclient)
 
-#         @param height: if defined the block height at which to look up the (coin) mint condition (if none latest block will be used)
-#         """
-#         # define the endpoint
-#         endpoint = "/explorer/mintcondition"
-#         if height is not None:
-#             if not isinstance(height, (int, str)):
-#                 raise TypeError("invalid block height given")
-#             height = int(height)
-#             endpoint += "/%d"%(height)
+    def condition_get(self, height=None):
+        """
+        Get the latest (coin) mint condition or the (coin) mint condition at the specified block height.
 
-#         # get the mint condition
-#         resp = self._client.explorer_get(endpoint=endpoint)
-#         resp = json_loads(resp)
+        @param height: if defined the block height at which to look up the (coin) mint condition (if none latest block will be used)
+        """
+        tfmc = self.clone()
 
-#         try:
-#             # return the decoded mint condition
-#             return ConditionTypes.from_json(obj=resp['mintcondition'])
-#         except KeyError as exc:
-#             # return a KeyError as an invalid Explorer Response
-#             raise tferrors.ExplorerInvalidResponse(str(exc), endpoint, resp) from exc
+        # define the endpoint
+        endpoint = "/explorer/mintcondition"
+        if height is not None:
+            if not isinstance(height, (int, str)):
+                raise TypeError("invalid block height given")
+            if isinstance(height, str):
+                height = jsstr.to_int(height)
+            endpoint += "/{}".format(height)
 
+        # define the cb to get the mint condition
+        def cb(resp):
+            try:
+                # return the decoded mint condition
+                return ConditionTypes.from_json(obj=resp['mintcondition'])
+            except KeyError as exc:
+                # return a KeyError as an invalid Explorer Response
+                raise tferrors.ExplorerInvalidResponse(str(exc), endpoint, resp) from exc
+
+        # get + parse the mint condition as a promise
+        return jsasync.chain(tfmc._client.explorer_get(endpoint=endpoint), cb)
 
 # class TFChainThreeBotClient():
 #     """
@@ -807,8 +826,8 @@ class ExplorerMinerPayout():
 #             record = resp['record']
 #             return ThreeBotRecord(
 #                 identifier=int(record['id']),
-#                 names=[BotName.from_json(name) for name in record.get('names', []) or []],
-#                 addresses=[NetworkAddress.from_json(address) for address in record.get('addresses', []) or []],
+#                 names=[BotName.from_json(name) for name in record.get_or('names', []) or []],
+#                 addresses=[NetworkAddress.from_json(address) for address in record.get_or('addresses', []) or []],
 #                 public_key=PublicKey.from_json(record['publickey']),
 #                 expiration=int(record['expiration']),
 #             )

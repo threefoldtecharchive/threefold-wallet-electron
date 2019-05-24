@@ -82,3 +82,14 @@ def is_empty(arr):
     result = (a === null || a.length === 0);
     """)
     return result or not arr or len(arr) == 0
+
+def sort(arr, f, reverse=False):
+    __pragma__("js", "{}", """
+    arr = arr.slice();
+    arr.sort(f);
+    """)
+    if reverse is True:
+        __pragma__("js", "{}", """
+        arr.reverse();
+        """)
+    return arr

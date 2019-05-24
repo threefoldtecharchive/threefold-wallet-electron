@@ -214,5 +214,35 @@ export var is_empty = function (arr) {
 	    
 	return result || !(arr) || len (arr) == 0;
 };
+export var py_sort = function (arr, f, reverse) {
+	if (typeof reverse == 'undefined' || (reverse != null && reverse.hasOwnProperty ("__kwargtrans__"))) {;
+		var reverse = false;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'arr': var arr = __allkwargs0__ [__attrib0__]; break;
+					case 'f': var f = __allkwargs0__ [__attrib0__]; break;
+					case 'reverse': var reverse = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	
+	    arr = arr.slice();
+	    arr.sort(f);
+	    
+	if (reverse === true) {
+		
+		        arr.reverse();
+		        
+	}
+	return arr;
+};
 
 //# sourceMappingURL=tfchain.polyfill.array.map

@@ -1,11 +1,15 @@
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __proxy__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, abs, all, any, assert, bool, bytearray, bytes, callable, chr, copy, deepcopy, delattr, dict, dir, divmod, enumerate, filter, float, getattr, hasattr, input, int, isinstance, issubclass, len, list, map, max, min, object, ord, pow, print, property, py_TypeError, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
 import {BlockstakeOutput, CoinOutput} from './tfchain.types.IO.js';
+import {ERC20Address} from './tfchain.types.ERC20.js';
 import {Currency, Hash} from './tfchain.types.PrimitiveTypes.js';
-import {UnlockHash} from './tfchain.types.ConditionTypes.js';
+import {UnlockHash, UnlockHashType} from './tfchain.types.ConditionTypes.js';
 import {TransactionBaseClass} from './tfchain.types.transactions.Base.js';
 import * as transactions from './tfchain.types.transactions.js';
+import * as ConditionTypes from './tfchain.types.ConditionTypes.js';
+import * as jsarr from './tfchain.polyfill.array.js';
 import * as jsdate from './tfchain.polyfill.date.js';
 import * as jsasync from './tfchain.polyfill.asynchronous.js';
+import * as jsstr from './tfchain.polyfill.encoding.str.js';
 import * as jsobj from './tfchain.polyfill.encoding.object.js';
 import * as tfexplorer from './tfchain.explorer.js';
 import * as tferrors from './tfchain.errors.js';
@@ -33,6 +37,23 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 			throw __except0__;
 		}
 		self._explorer_client = explorer_client;
+		self._minter = TFChainMinterClient (self);
+	});},
+	get _get_minter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._minter;
 	});},
 	get clone () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -415,6 +436,104 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 		};
 		return jsasync.chain (ec.explorer_get (__kwargtrans__ ({endpoint: endpoint})), cb);
 	});},
+	get unlockhash_get () {return __get__ (this, function (self, target) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'target': var target = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var ec = self.clone ();
+		var unlockhash = ConditionTypes.from_recipient (target).unlockhash.__str__ ();
+		var endpoint = '/explorer/hashes/' + unlockhash;
+		var cb = function (resp) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'resp': var resp = __allkwargs0__ [__attrib0__]; break;
+						}
+					}
+				}
+			}
+			else {
+			}
+			try {
+				if (resp ['hashtype'] != 'unlockhash') {
+					var __except0__ = tferrors.ExplorerInvalidResponse ("expected hash type 'unlockhash' not '{}'".format (resp ['hashtype']), endpoint, resp);
+					__except0__.__cause__ = null;
+					throw __except0__;
+				}
+				var transactions = [];
+				for (var etxn of resp ['transactions']) {
+					var transaction = ec._transaction_from_explorer_transaction (etxn, __kwargtrans__ ({endpoint: endpoint, resp: resp}));
+					transactions.append (transaction);
+				}
+				var multisig_addresses = (function () {
+					var __accu0__ = [];
+					for (var uh of resp.get_or ('multisigaddresses', null) || []) {
+						__accu0__.append (UnlockHash.from_json (__kwargtrans__ ({obj: uh})));
+					}
+					return __accu0__;
+				}) ();
+				for (var addr of multisig_addresses) {
+					if (addr.py_metatype.__ne__ (UnlockHashType.MULTI_SIG)) {
+						var __except0__ = tferrors.ExplorerInvalidResponse ('invalid unlock hash type {} for MultiSignature Address (expected: 3)'.format (addr.py_metatype.value), endpoint, resp);
+						__except0__.__cause__ = null;
+						throw __except0__;
+					}
+				}
+				var erc20_info = null;
+				if (__in__ ('erc20info', resp)) {
+					var info = resp ['erc20info'];
+					var erc20_info = ERC20AddressInfo (__kwargtrans__ ({address_tft: UnlockHash.from_json (info ['tftaddress']), address_erc20: ERC20Address.from_json (info ['erc20address']), confirmations: int (info ['confirmations'])}));
+				}
+				var txn_arr_sort = function (a, b) {
+					if (arguments.length) {
+						var __ilastarg0__ = arguments.length - 1;
+						if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+							var __allkwargs0__ = arguments [__ilastarg0__--];
+							for (var __attrib0__ in __allkwargs0__) {
+								switch (__attrib0__) {
+									case 'a': var a = __allkwargs0__ [__attrib0__]; break;
+									case 'b': var b = __allkwargs0__ [__attrib0__]; break;
+								}
+							}
+						}
+					}
+					else {
+					}
+					var height_a = (a.height < 0 ? pow (2, 64) : a.height);
+					var height_b = (b.height < 0 ? pow (2, 64) : b.height);
+					return height_a - height_b;
+				};
+				var transactions = jsarr.py_sort (transactions, txn_arr_sort, __kwargtrans__ ({reverse: true}));
+				return ExplorerUnlockhashResult (__kwargtrans__ ({unlockhash: UnlockHash.from_json (unlockhash), transactions: transactions, multisig_addresses: multisig_addresses, erc20_info: erc20_info, client: self}));
+			}
+			catch (__except0__) {
+				if (isinstance (__except0__, KeyError)) {
+					var exc = __except0__;
+					var __except1__ = tferrors.ExplorerInvalidResponse (str (exc), endpoint, resp);
+					__except1__.__cause__ = exc;
+					throw __except1__;
+				}
+				else {
+					throw __except0__;
+				}
+			}
+		};
+		return jsasync.chain (ec.explorer_get (__kwargtrans__ ({endpoint: endpoint})), cb);
+	});},
 	get coin_output_get () {return __get__ (this, function (self, id) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -671,7 +790,8 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 		return Hash (__kwargtrans__ ({value: id})).str ();
 	});}
 });
-Object.defineProperty (TFChainClient, 'explorer_addresses', property.call (TFChainClient, TFChainClient._get_explorer_addresses));;
+Object.defineProperty (TFChainClient, 'explorer_addresses', property.call (TFChainClient, TFChainClient._get_explorer_addresses));
+Object.defineProperty (TFChainClient, 'minter', property.call (TFChainClient, TFChainClient._get_minter));;
 export var ExplorerOutputResult =  __class__ ('ExplorerOutputResult', [object], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, output, creation_tx, spend_tx) {
@@ -954,6 +1074,185 @@ export var BlockchainConstants =  __class__ ('BlockchainConstants', [object], {
 Object.defineProperty (BlockchainConstants, 'chain_network', property.call (BlockchainConstants, BlockchainConstants._get_chain_network));
 Object.defineProperty (BlockchainConstants, 'chain_version', property.call (BlockchainConstants, BlockchainConstants._get_chain_version));
 Object.defineProperty (BlockchainConstants, 'chain_name', property.call (BlockchainConstants, BlockchainConstants._get_chain_name));;
+export var ExplorerUnlockhashResult =  __class__ ('ExplorerUnlockhashResult', [object], {
+	__module__: __name__,
+	get __init__ () {return __get__ (this, function (self, unlockhash, transactions, multisig_addresses, erc20_info, client) {
+		if (typeof client == 'undefined' || (client != null && client.hasOwnProperty ("__kwargtrans__"))) {;
+			var client = null;
+		};
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'unlockhash': var unlockhash = __allkwargs0__ [__attrib0__]; break;
+						case 'transactions': var transactions = __allkwargs0__ [__attrib0__]; break;
+						case 'multisig_addresses': var multisig_addresses = __allkwargs0__ [__attrib0__]; break;
+						case 'erc20_info': var erc20_info = __allkwargs0__ [__attrib0__]; break;
+						case 'client': var client = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		self._unlockhash = unlockhash;
+		self._transactions = transactions;
+		self._multisig_addresses = multisig_addresses;
+		if (client !== null && !(isinstance (client, TFChainClient))) {
+			var __except0__ = py_TypeError ('client cannot be set to a value of type {}'.format (py_typeof (client)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		self._client = client;
+		self._erc20_info = erc20_info;
+	});},
+	get _get_unlockhash () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._unlockhash;
+	});},
+	get _get_transactions () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._transactions;
+	});},
+	get _get_multisig_addresses () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._multisig_addresses;
+	});},
+	get _get_erc20_info () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._erc20_info;
+	});}
+});
+Object.defineProperty (ExplorerUnlockhashResult, 'erc20_info', property.call (ExplorerUnlockhashResult, ExplorerUnlockhashResult._get_erc20_info));
+Object.defineProperty (ExplorerUnlockhashResult, 'multisig_addresses', property.call (ExplorerUnlockhashResult, ExplorerUnlockhashResult._get_multisig_addresses));
+Object.defineProperty (ExplorerUnlockhashResult, 'transactions', property.call (ExplorerUnlockhashResult, ExplorerUnlockhashResult._get_transactions));
+Object.defineProperty (ExplorerUnlockhashResult, 'unlockhash', property.call (ExplorerUnlockhashResult, ExplorerUnlockhashResult._get_unlockhash));;
+export var ERC20AddressInfo =  __class__ ('ERC20AddressInfo', [object], {
+	__module__: __name__,
+	get __init__ () {return __get__ (this, function (self, address_tft, address_erc20, confirmations) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'address_tft': var address_tft = __allkwargs0__ [__attrib0__]; break;
+						case 'address_erc20': var address_erc20 = __allkwargs0__ [__attrib0__]; break;
+						case 'confirmations': var confirmations = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		self._address_tft = address_tft;
+		self._address_erc20 = address_erc20;
+		self._confirmations = confirmations;
+	});},
+	get _get_address_tft () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._address_tft;
+	});},
+	get _get_address_erc20 () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._address_erc20;
+	});},
+	get _get_confirmations () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._confirmations;
+	});}
+});
+Object.defineProperty (ERC20AddressInfo, 'confirmations', property.call (ERC20AddressInfo, ERC20AddressInfo._get_confirmations));
+Object.defineProperty (ERC20AddressInfo, 'address_erc20', property.call (ERC20AddressInfo, ERC20AddressInfo._get_address_erc20));
+Object.defineProperty (ERC20AddressInfo, 'address_tft', property.call (ERC20AddressInfo, ERC20AddressInfo._get_address_tft));;
 export var ExplorerBlock =  __class__ ('ExplorerBlock', [object], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, id, parentid, height, timestamp, transactions, miner_payouts) {
@@ -1225,5 +1524,109 @@ export var ExplorerMinerPayout =  __class__ ('ExplorerMinerPayout', [object], {
 Object.defineProperty (ExplorerMinerPayout, 'unlockhash', property.call (ExplorerMinerPayout, ExplorerMinerPayout._get_unlockhash));
 Object.defineProperty (ExplorerMinerPayout, 'value', property.call (ExplorerMinerPayout, ExplorerMinerPayout._get_value));
 Object.defineProperty (ExplorerMinerPayout, 'id', property.call (ExplorerMinerPayout, ExplorerMinerPayout._get_id));;
+export var TFChainMinterClient =  __class__ ('TFChainMinterClient', [object], {
+	__module__: __name__,
+	get __init__ () {return __get__ (this, function (self, client) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'client': var client = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (!(isinstance (client, TFChainClient))) {
+			var __except0__ = py_TypeError ('client is expected to be a TFChainClient');
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		self._client = client;
+	});},
+	get clone () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var tfclient = self._client.clone ();
+		return TFChainMinterClient (tfclient);
+	});},
+	get condition_get () {return __get__ (this, function (self, height) {
+		if (typeof height == 'undefined' || (height != null && height.hasOwnProperty ("__kwargtrans__"))) {;
+			var height = null;
+		};
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'height': var height = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var tfmc = self.clone ();
+		var endpoint = '/explorer/mintcondition';
+		if (height !== null) {
+			if (!(isinstance (height, tuple ([int, str])))) {
+				var __except0__ = py_TypeError ('invalid block height given');
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
+			if (isinstance (height, str)) {
+				var height = jsstr.to_int (height);
+			}
+			endpoint += '/{}'.format (height);
+		}
+		var cb = function (resp) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'resp': var resp = __allkwargs0__ [__attrib0__]; break;
+						}
+					}
+				}
+			}
+			else {
+			}
+			try {
+				return ConditionTypes.from_json (__kwargtrans__ ({obj: resp ['mintcondition']}));
+			}
+			catch (__except0__) {
+				if (isinstance (__except0__, KeyError)) {
+					var exc = __except0__;
+					var __except1__ = tferrors.ExplorerInvalidResponse (str (exc), endpoint, resp);
+					__except1__.__cause__ = exc;
+					throw __except1__;
+				}
+				else {
+					throw __except0__;
+				}
+			}
+		};
+		return jsasync.chain (tfmc._client.explorer_get (__kwargtrans__ ({endpoint: endpoint})), cb);
+	});}
+});
 
 //# sourceMappingURL=tfchain.client.map
