@@ -60,12 +60,6 @@ class Account extends Component {
       return
     }
 
-    if (wallets.length < 1) {
-      return (
-        <p>no wallets</p>
-      )
-    }
-
     return (
       <Card.Group style={{ marginTop: 20, marginLeft: 20 }}>
         {wallets.map(w => {
