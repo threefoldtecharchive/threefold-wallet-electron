@@ -233,6 +233,8 @@ class NewAccount extends Component {
           <h2 >New Account</h2>
         </div>
         <Divider style={{ background: '#1A253F' }} />
+        <Icon onClick={() => this.props.history.goBack()} style={{ fontSize: 25, marginLeft: 15, marginTop: 15, cursor: 'pointer' }} name='chevron circle left' />
+        <span onClick={() => this.props.history.goBack()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
         <Form error style={{ width: '50%', margin: 'auto', marginTop: 5, marginBottom: 50, fontSize: 18 }}>
           <Form.Field>
             <label style={{ float: 'left', color: 'white', marginRight: 20 }}>What network do you want to choose? </label>

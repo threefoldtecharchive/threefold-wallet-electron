@@ -1,7 +1,6 @@
 // @flow
 import { connect } from 'react-redux'
 import React, { Component } from 'react'
-import { Link } from 'react-router-dom'
 import { Form, Button, Icon, Header } from 'semantic-ui-react'
 import routes from '../../constants/routes'
 import styles from '../home/Home.css'
@@ -105,11 +104,10 @@ class WalletSettings extends Component {
           deleteNameError={deleteNameError}
           deleteWallet={this.deleteWallet}
         />
-        <div className={styles.backButton} data-tid='backButton'>
-          <Link to={routes.WALLET}>
-            <Icon style={{ fontSize: 25, position: 'absolute', left: 20, top: 50, cursor: 'pointer' }} name='chevron circle left' />
-          </Link>
-          <Icon onClick={this.openDeleteModal} style={{ fontSize: 25, position: 'absolute', right: 70, top: 50, cursor: 'pointer' }} name='trash' />
+        <div style={{ position: 'absolute', top: 40, height: 50, width: '100%' }} data-tid='backButton'>
+          <Icon onClick={() => this.props.history.goBack()} style={{ fontSize: 25, position: 'absolute', left: 15, top: 41, cursor: 'pointer' }} name='chevron circle left' />
+          <span onClick={() => this.props.history.goBack()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'absolute', top: 42, left: 48 }}>Go Back</span>
+          <Icon onClick={this.openDeleteModal} style={{ fontSize: 25, position: 'absolute', right: 70, top: 41, cursor: 'pointer' }} name='trash' />
         </div>
         <div className={styles.container} >
           <Header as='h2' icon style={{ color: 'white', marginTop: 50 }}>

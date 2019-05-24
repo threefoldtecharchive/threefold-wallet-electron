@@ -1,9 +1,7 @@
 // @flow
 import { connect } from 'react-redux'
 import React, { Component } from 'react'
-import { Link } from 'react-router-dom'
 import { Icon, Input, Divider, Dropdown, Segment, Label } from 'semantic-ui-react'
-import routes from '../../constants/routes'
 import styles from '../home/Home.css'
 import Footer from '../footer'
 import QRCode from 'qrcode.react'
@@ -87,9 +85,10 @@ class WalletSettings extends Component {
           <h2>Receive</h2>
         </div>
         <Divider style={{ background: '#1A253F' }} />
-        <Link to={routes.ACCOUNT}>
-          <Icon style={{ fontSize: 25, marginLeft: 15, marginTop: 15, cursor: 'pointer' }} name='chevron circle left' />
-        </Link>
+        {/* <Link to={routes.ACCOUNT}> */}
+        <Icon onClick={() => this.props.history.goBack()} style={{ fontSize: 25, marginLeft: 15, marginTop: 15, cursor: 'pointer' }} name='chevron circle left' />
+        <span onClick={() => this.props.history.goBack()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
+        {/* </Link> */}
         <div style={{ width: '50%', margin: 'auto' }}>
           <label style={{ color: 'white' }}>Wallet</label>
           <Dropdown

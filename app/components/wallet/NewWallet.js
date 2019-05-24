@@ -127,9 +127,8 @@ class WalletSettings extends Component {
           <h2>Create a new wallet</h2>
         </div>
         <Divider style={{ background: '#1A253F' }} />
-        <Link to={routes.ACCOUNT}>
-          <Icon style={{ fontSize: 25, marginLeft: 15, marginTop: 15, cursor: 'pointer' }} name='chevron circle left' />
-        </Link>
+        <Icon onClick={() => this.props.history.goBack()} style={{ fontSize: 25, marginLeft: 15, marginTop: 15, cursor: 'pointer' }} name='chevron circle left' />
+        <span onClick={() => this.props.history.goBack()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
         <div className={styles.container} >
           <Form error style={{ width: '50%', margin: 'auto', marginTop: 10 }}>
             <Form.Field error={nameError}>

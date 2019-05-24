@@ -2,7 +2,6 @@
 import { connect } from 'react-redux'
 import React, { Component } from 'react'
 import { Form, Button, Input, Icon, Dropdown, Divider, Loader, Dimmer, Message } from 'semantic-ui-react'
-import routes from '../constants/routes'
 import styles from './home/Home.css'
 import Footer from './footer'
 import { toast } from 'react-toastify'
@@ -38,6 +37,12 @@ class Transfer extends Component {
       datelock: '',
       timelock: ''
     }
+  }
+
+  // when component re-renders
+  componentDidUpdate (prevProps, prevState) {
+    console.log(prevProps)
+    console.log(prevState)
   }
 
   handleDestinationChange = ({ target }) => {
@@ -188,6 +193,8 @@ class Transfer extends Component {
           <h2 >Transfer</h2>
         </div>
         <Divider style={{ background: '#1A253F' }} />
+        <Icon onClick={() => this.props.history.goBack()} style={{ fontSize: 25, marginLeft: 15, marginTop: 15, cursor: 'pointer' }} name='chevron circle left' />
+        <span onClick={() => this.props.history.goBack()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
         <Form error style={{ width: '50%', marginLeft: '20%', marginTop: 50 }}>
           <h2 style={{ marginBottom: 20 }}>Send funds to:</h2>
           <Form.Field style={{ marginTop: 10 }}>
@@ -220,7 +227,7 @@ class Transfer extends Component {
         </Form>
         {this.renderErrorMessage()}
         <div style={{ position: 'absolute', bottom: 150, right: 80 }}>
-          <Button className={styles.cancelButton} onClick={() => this.props.history.push(routes.ACCOUNT)} style={{ marginTop: 20, float: 'left', background: '#2B3C72', color: 'white', marginRight: 15 }} size='big'>Cancel</Button>
+          <Button className={styles.cancelButton} onClick={() => this.props.history.goBack()} style={{ marginTop: 20, float: 'left', background: '#2B3C72', color: 'white', marginRight: 15 }} size='big'>Cancel</Button>
           <Button className={styles.acceptButton} onClick={() => this.submitTransaction()} style={{ marginTop: 20, marginRight: 10, float: 'left', background: '#015DE1', color: 'white' }} size='big'>Send</Button>
         </div>
         <Footer />

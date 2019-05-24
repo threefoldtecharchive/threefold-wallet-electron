@@ -111,6 +111,9 @@ class Account extends Component {
           <h2>Account</h2>
         </div>
         <Divider style={{ background: '#1A253F' }} />
+        {/* <Breadcrumb>
+          <Breadcrumb.Section link>Account</Breadcrumb.Section>
+        </Breadcrumb> */}
         <div style={{ display: 'flex' }}>
           <div style={{ width: '65%', overflowY: 'auto', height: '80vh', paddingBottom: 100 }}>
             {this.renderWallets()}
