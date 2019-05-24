@@ -238,14 +238,14 @@ class TransactionBaseClass():
         raise NotImplementedError("_json_data_object is not yet implemented")
 
     def json(self):
-        obj = {'version': self.version}
+        obj = {'version': self.version.value}
         data = self._json_data_object()
         if data:
             obj['data'] = data
         return obj
 
     def __str__(self):
-        s = "transaction v{}".format(self.version)
+        s = "transaction v{}".format(self.version.value)
         if self.id:
             s += " {}".format(self.id)
         return s
@@ -300,7 +300,7 @@ class TransactionBaseClass():
         Binary encoding of a Transaction,
         the transaction type defines if it is done using Sia or Rivine encoding.
         """
-        return bytes(jsarr.concat([self.version.__int__()], self._binary_encode_data()))
+        return bytes(jsarr.concat([self.version.value], self._binary_encode_data()))
 
     def _binary_encode_data(self):
         """

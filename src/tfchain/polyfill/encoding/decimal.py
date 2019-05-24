@@ -1,6 +1,7 @@
 from tfchain.polyfill.encoding.jsmods.decimaljs import api as jsdec
 
 import tfchain.polyfill.encoding.str as jsstr
+import tfchain.polyfill.encoding.hex as jshex
 
 class Decimal:
     def __init__(self, value=None):
@@ -31,19 +32,47 @@ class Decimal:
         sign = jsdec.sign(self.value)
         sign = 1 if sign < 0 else 0
         # get digits
-        digits = [jsstr.to_int(s) for s in jsstr.split(jsstr.from_int(self.__int__()))]
+        digits = [jsstr.to_int(c) for c in jsstr.split(jsstr.replace(self.str(), ".", ""))]
         # get exponent
         exponent = self.value.decimalPlaces()
-        exponent = 0 if exponent > 0 else exponent-1
+        exponent = (exponent*(-1)) if exponent > 0 else 0
         # return them all
         return (sign, digits, exponent)
 
     def str(self, prec=None):
         if isinstance(prec, int):
             if prec <= 0:
-                return jsstr.from_int(self.__int__())
-            return self.value.toNearest('.' + jsstr.repeat('0', prec-1) + '1').toString()
+                return self.value.toNearest('1').toString()
+            s = self.value.toNearest('.' + jsstr.repeat('0', prec-1) + '1').toString()
+            if '.' not in s:
+                return s + '.' + jsstr.repeat('0', prec)
+            s = jsstr.split(s, '.', 2)
+            return s[0] + '.' + jsstr.zfillr(s[1], prec)
         return self.value.toString()
+
+    def bytes(self, prec=None):
+        v = None
+        mep = None
+        if isinstance(prec, int):
+            if prec <= 0:
+                v = self.value.toNearest('1')
+                mep = 0
+            else:
+                v = self.value.toNearest('.' + jsstr.repeat('0', prec-1) + '1')
+                mep = prec
+        else:
+            v = self.value
+            mep = v.decimalPlaces()
+        # convert to a whole integer
+        p = v.decimalPlaces()
+        if p > mep:
+            raise RuntimeError("bug in decimal bytes method: p ({}) > mep ({})".format(p, mep))
+        if mep:
+            v = Decimal(v).__mul__(Decimal('1' + jsstr.repeat('0', mep))).value
+        # convert to hexadecimal
+        s = v.toHexadecimal()[2:]
+        # convert to bytes
+        return jshex.bytes_from_hex(s)
 
     def __str__(self):
         return self.str()

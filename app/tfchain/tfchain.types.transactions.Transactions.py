@@ -1,6 +1,6 @@
 from tfchain.types.transactions.Base import TransactionBaseClass, TransactionVersion
 from tfchain.types.transactions.Standard import TransactionV1
-# from tfchain.types.transactions.Minting import TransactionV128, TransactionV129
+from tfchain.types.transactions.Minting import TransactionV128, TransactionV129
 # from tfchain.types.transactions.ThreeBot import TransactionV144, TransactionV145, TransactionV146
 # from tfchain.types.transactions.ERC20 import TransactionV208, TransactionV209, TransactionV210
 
@@ -14,17 +14,17 @@ def new():
     """
     return TransactionV1()
 
-# def mint_definition_new():
-#     """
-#     Creates and returns an empty Mint Definition transaction.
-#     """
-#     return TransactionV128()
+def mint_definition_new():
+    """
+    Creates and returns an empty Mint Definition transaction.
+    """
+    return TransactionV128()
 
-# def mint_coin_creation_new():
-#     """
-#     Creates and returns an empty Mint CoinCreation transaction.
-#     """
-#     return TransactionV129()
+def mint_coin_creation_new():
+    """
+    Creates and returns an empty Mint CoinCreation transaction.
+    """
+    return TransactionV129()
 
 # def threebot_registration_new():
 #     """
@@ -90,10 +90,10 @@ def from_json(obj, id=None):
     #     txn = TransactionV209.from_json(obj)
     # elif tt == TransactionVersion.ERC20_ADDRESS_REGISTRATION.value:
     #     txn = TransactionV210.from_json(obj)
-    # elif tt == TransactionVersion.MINTER_DEFINITION.value:
-    #     txn = TransactionV128.from_json(obj)
-    # elif tt == TransactionVersion.MINTER_COIN_CREATION.value:
-    #     txn = TransactionV129.from_json(obj)
+    elif tt == TransactionVersion.MINTER_DEFINITION.value:
+        txn = TransactionV128.from_json(obj)
+    elif tt == TransactionVersion.MINTER_COIN_CREATION.value:
+        txn = TransactionV129.from_json(obj)
     elif tt == TransactionVersion.LEGACY.value:
         txn = TransactionV1.legacy_from_json(obj)
 

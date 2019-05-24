@@ -33,7 +33,16 @@ def zfill(s, n):
         return s
     n -= len(s)
     __pragma__("js", "{}", """
-    s = '0'.repeat(n) + s
+    s = '0'.repeat(n) + s;
+    """)
+    return s
+
+def zfillr(s, n):
+    if len(s) >= n:
+        return s
+    n -= len(s)
+    __pragma__("js", "{}", """
+    s += '0'.repeat(n);
     """)
     return s
 
@@ -188,6 +197,12 @@ class String:
         return self.value == other
     def __ne__(self, other):
         return not self.__eq__(other)
+
+    def zfill(self, n):
+        return String(zfill(self.value, n))
+
+    def zfillr(self, n):
+        return String(zfillr(self.value,  n))
 
     def strip(self):
         return String(strip(self.value))

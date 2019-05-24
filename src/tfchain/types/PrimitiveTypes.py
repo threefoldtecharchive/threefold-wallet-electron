@@ -3,7 +3,6 @@ import tfchain.errors as tferrors
 import tfchain.polyfill.encoding.base64 as jsbase64
 import tfchain.polyfill.encoding.hex as jshex
 import tfchain.polyfill.encoding.str as jsstr
-import tfchain.polyfill.encoding.int as jsint
 import tfchain.polyfill.encoding.decimal as jsdec
 import tfchain.polyfill.array as jsarray
 
@@ -97,6 +96,9 @@ class BinaryData(BaseDataTypeClass):
 
     def __str__(self):
         return self._to_str(self._value)
+
+    def str(self):
+        return self.__str__()
 
     def __repr__(self):
         return self.__str__()
@@ -340,7 +342,10 @@ class Currency(BaseDataTypeClass):
 
     # allow our currency to be turned into an int
     def __int__(self):
-        return self.value.__int__()
+        return jsstr.to_int(self.str(lowest_unit=True))
+
+    def bytes(self):
+        return self.value.bytes(prec=9)
 
     def __str__(self):
         return self.str()
@@ -352,15 +357,12 @@ class Currency(BaseDataTypeClass):
 
         @param with_unit: include the TFT currency suffix unit with the str
         """
+        s = self.value.str(9)
         if lowest_unit:
-            s = self.value.__mul__("1000000000").str(9)
-        else:
-            s = self.value.str(9)
-        if jsstr.contains(s, "."):
-            s = jsstr.rstrip(s, "0 ")
-            if s[-1] == '.':
-                s = s[:-1]
-        if len(s) == 0:
+            s = jsstr.replace(s, ".", "")
+        elif jsstr.contains(s, "."):
+            s = jsstr.rstrip(jsstr.rstrip(s, "0 "), '.')
+        if jsstr.isempty(s):
             s = "0"
         if with_unit:
             s += " TFT"
@@ -376,22 +378,16 @@ class Currency(BaseDataTypeClass):
         """
         Encode this currency according to the Sia Binary Encoding format.
         """
-        value = self.__int__()
-        nbytes, rem = divmod(jsint.bit_length(value), 8)
-        if rem:
-            nbytes += 1
-        encoder.add_int(nbytes)
-        encoder.add_array(jsint.to_bytes(value, nbytes, order='big'))
+        b = self.bytes()
+        encoder.add_int(len(b))
+        encoder.add_array(b)
 
     def rivine_binary_encode(self, encoder):
         """
         Encode this currency according to the Rivine Binary Encoding format.
         """
-        value = self.__int__()
-        nbytes, rem = divmod(value.bit_length(), 8)
-        if rem:
-            nbytes += 1
-        encoder.add_slice(jsint.to_bytes(value, nbytes, order='big'))
+        b = self.bytes()
+        encoder.add_slice(b)
 
 
 class Blockstake(BaseDataTypeClass):
@@ -421,10 +417,10 @@ class Blockstake(BaseDataTypeClass):
 
     # allow our block stake to be turned into an int
     def __int__(self):
-        return self.value.__int__()
+        return jsstr.to_int(self.value.str(lowest_unit=False))
 
     def str(self):
-        return jsstr.from_int(self._value.__int__())
+        return jsstr.from_int(self.__int__())
 
     def __str__(self):
         return self.str()
@@ -434,23 +430,20 @@ class Blockstake(BaseDataTypeClass):
     def json(self):
         return self.__str__()
 
+    def bytes(self):
+        return self.value.bytes()
+
     def sia_binary_encode(self, encoder):
         """
         Encode this block stake (==Currency) according to the Sia Binary Encoding format.
         """
-        v = self.__int__()
-        nbytes, rem = divmod(jsint.bit_length(v), 8)
-        if rem:
-            nbytes += 1
-        encoder.add_int(nbytes)
-        encoder.add_array(jsint.to_bytes(v, nbytes, order='big'))
+        b = self.bytes()
+        encoder.add_int(len(b))
+        encoder.add_array(b)
 
     def rivine_binary_encode(self, encoder):
         """
         Encode this block stake (==Currency) according to the Rivine Binary Encoding format.
         """
-        v = self.__int__()
-        nbytes, rem = divmod(jsint.bit_length(v), 8)
-        if rem:
-            nbytes += 1
-        encoder.add_slice(jsint.to_bytes(v, nbytes, order='big'))
+        b = self.bytes()
+        encoder.add_slice(b)

@@ -123,6 +123,108 @@ export var from_int32 = function (num, order) {
 	}
 	return bytes (buf);
 };
+export var from_int40 = function (num, order) {
+	if (typeof order == 'undefined' || (order != null && order.hasOwnProperty ("__kwargtrans__"))) {;
+		var order = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'num': var num = __allkwargs0__ [__attrib0__]; break;
+					case 'order': var order = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	var buf = null;
+	
+	    buf = [
+	         (num & 0x00000000ff),
+	         (num & 0x000000ff00) >> 8,
+	         (num & 0x0000ff0000) >> 16,
+	         (num & 0x00ff000000) >> 24,
+	         (num & 0xff00000000) >> 32,
+	    ];
+	    
+	if (order == 'big') {
+		return bytes (jsarray.reverse (buf));
+	}
+	return bytes (buf);
+};
+export var from_int48 = function (num, order) {
+	if (typeof order == 'undefined' || (order != null && order.hasOwnProperty ("__kwargtrans__"))) {;
+		var order = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'num': var num = __allkwargs0__ [__attrib0__]; break;
+					case 'order': var order = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	var buf = null;
+	
+	    buf = [
+	         (num & 0x0000000000ff),
+	         (num & 0x00000000ff00) >> 8,
+	         (num & 0x000000ff0000) >> 16,
+	         (num & 0x0000ff000000) >> 24,
+	         (num & 0x00ff00000000) >> 32,
+	         (num & 0xff0000000000) >> 40,
+	    ];
+	    
+	if (order == 'big') {
+		return bytes (jsarray.reverse (buf));
+	}
+	return bytes (buf);
+};
+export var from_int56 = function (num, order) {
+	if (typeof order == 'undefined' || (order != null && order.hasOwnProperty ("__kwargtrans__"))) {;
+		var order = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'num': var num = __allkwargs0__ [__attrib0__]; break;
+					case 'order': var order = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	var buf = null;
+	
+	    buf = [
+	         (num & 0x000000000000ff),
+	         (num & 0x0000000000ff00) >> 8,
+	         (num & 0x00000000ff0000) >> 16,
+	         (num & 0x000000ff000000) >> 24,
+	         (num & 0x0000ff00000000) >> 32,
+	         (num & 0x00ff0000000000) >> 40,
+	         (num & 0xff000000000000) >> 48,
+	    ];
+	    
+	if (order == 'big') {
+		return bytes (jsarray.reverse (buf));
+	}
+	return bytes (buf);
+};
 export var from_int64 = function (num, order) {
 	if (typeof order == 'undefined' || (order != null && order.hasOwnProperty ("__kwargtrans__"))) {;
 		var order = null;
@@ -175,7 +277,7 @@ export var bin_str_to_int = function (s) {
 	}
 	var x = 0;
 	
-	    x = parseInt(s, 2)
+	    x = parseInt(s, 2);
 	    
 	var x = int (x);
 	return x;

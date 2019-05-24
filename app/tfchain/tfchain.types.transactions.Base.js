@@ -850,7 +850,7 @@ export var TransactionBaseClass =  __class__ ('TransactionBaseClass', [object], 
 		}
 		else {
 		}
-		var obj = dict ({'version': self.version});
+		var obj = dict ({'version': self.version.value});
 		var data = self._json_data_object ();
 		if (data) {
 			obj ['data'] = data;
@@ -871,7 +871,7 @@ export var TransactionBaseClass =  __class__ ('TransactionBaseClass', [object], 
 		}
 		else {
 		}
-		var s = 'transaction v{}'.format (self.version);
+		var s = 'transaction v{}'.format (self.version.value);
 		if (self.id) {
 			s += ' {}'.format (self.id);
 		}
@@ -1054,7 +1054,7 @@ export var TransactionBaseClass =  __class__ ('TransactionBaseClass', [object], 
 		}
 		else {
 		}
-		return bytes (jsarr.concat ([self.version.__int__ ()], self._binary_encode_data ()));
+		return bytes (jsarr.concat ([self.version.value], self._binary_encode_data ()));
 	});},
 	get _binary_encode_data () {return __get__ (this, function (self) {
 		if (arguments.length) {

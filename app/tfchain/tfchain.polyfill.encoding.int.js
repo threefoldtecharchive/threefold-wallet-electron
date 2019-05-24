@@ -58,6 +58,15 @@ export var to_bytes = function (x, nbytes, order) {
 	if (nbytes == 4) {
 		return jsbin.from_int32 (x, order);
 	}
+	if (nbytes == 5) {
+		return jsbin.from_int40 (x, order);
+	}
+	if (nbytes == 6) {
+		return jsbin.from_int48 (x, order);
+	}
+	if (nbytes == 7) {
+		return jsbin.from_int56 (x, order);
+	}
 	if (nbytes == 8) {
 		return jsbin.from_int64 (x, order);
 	}

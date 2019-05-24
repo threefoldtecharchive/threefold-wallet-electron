@@ -14,27 +14,27 @@ export var test_types = function () {
 	}
 	else {
 	}
-	jsass.equals (str (Currency ()), '0');
-	jsass.equals (str (Currency (__kwargtrans__ ({value: 123}))), '123');
-	jsass.equals (str (Currency (__kwargtrans__ ({value: '1'}))), '1');
-	jsass.equals (str (Currency (__kwargtrans__ ({value: '1 TFT'}))), '1');
-	jsass.equals (str (Currency (__kwargtrans__ ({value: '0.123456789'}))), '0.123456789');
-	jsass.equals (str (Currency (__kwargtrans__ ({value: '9.123456789'}))), '9.123456789');
-	jsass.equals (str (Currency (__kwargtrans__ ({value: '1234.34'}))), '1234.34');
-	jsass.equals (str (Currency (__kwargtrans__ ({value: '1.00000'}))), '1');
-	jsass.equals (str (Currency (__kwargtrans__ ({value: '1.0 tft'}))), '1');
-	jsass.equals (str (Currency (__kwargtrans__ ({value: 1}))), '1');
-	jsass.equals (str (Currency (__kwargtrans__ ({value: 12344}))), '12344');
-	jsass.equals (str (Hash ()), '0' * 64);
+	jsass.equals (Currency ().str (), '0');
+	jsass.equals (Currency (__kwargtrans__ ({value: 123})).str (), '123');
+	jsass.equals (Currency (__kwargtrans__ ({value: '1'})).str (), '1');
+	jsass.equals (Currency (__kwargtrans__ ({value: '1 TFT'})).str (), '1');
+	jsass.equals (Currency (__kwargtrans__ ({value: '0.123456789'})).str (), '0.123456789');
+	jsass.equals (Currency (__kwargtrans__ ({value: '9.123456789'})).str (), '9.123456789');
+	jsass.equals (Currency (__kwargtrans__ ({value: '1234.34'})).str (), '1234.34');
+	jsass.equals (Currency (__kwargtrans__ ({value: '1.00000'})).str (), '1');
+	jsass.equals (Currency (__kwargtrans__ ({value: '1.0 tft'})).str (), '1');
+	jsass.equals (Currency (__kwargtrans__ ({value: 1})).str (), '1');
+	jsass.equals (Currency (__kwargtrans__ ({value: 12344})).str (), '12344');
+	jsass.equals (Hash ().str (), '0' * 64);
 	jsass.equals (Hash (bytes ('12345678901234567890123456789001')).value, bytes ('12345678901234567890123456789001'));
-	jsass.equals (str (BinaryData ()), '');
-	jsass.equals (str (BinaryData (bytes ('1'))), '31');
-	jsass.equals (str (BinaryData (bytes ('1'), __kwargtrans__ ({fixed_size: 0}))), '31');
-	jsass.equals (str (BinaryData (bytes ('1'), __kwargtrans__ ({fixed_size: 1}))), '31');
-	jsass.equals (str (BinaryData (bytes ('data'), __kwargtrans__ ({strencoding: 'base64'}))), 'ZGF0YQ==');
-	jsass.equals (str (Blockstake ()), '0');
-	jsass.equals (str (Blockstake (__kwargtrans__ ({value: 123}))), '123');
-	jsass.equals (str (Blockstake (__kwargtrans__ ({value: '1'}))), '1');
+	jsass.equals (BinaryData ().str (), '');
+	jsass.equals (BinaryData (bytes ('1')).str (), '31');
+	jsass.equals (BinaryData (bytes ('1'), __kwargtrans__ ({fixed_size: 0})).str (), '31');
+	jsass.equals (BinaryData (bytes ('1'), __kwargtrans__ ({fixed_size: 1})).str (), '31');
+	jsass.equals (BinaryData (bytes ('data'), __kwargtrans__ ({strencoding: 'base64'})).str (), 'ZGF0YQ==');
+	jsass.equals (Blockstake ().str (), '0');
+	jsass.equals (Blockstake (__kwargtrans__ ({value: 123})).str (), '123');
+	jsass.equals (Blockstake (__kwargtrans__ ({value: '1'})).str (), '1');
 };
 export var tests = function () {
 	if (arguments.length) {

@@ -34,6 +34,14 @@ def concat(a, b):
     :param b: array to add at the end of the new array
     :returns: the concatination of a and b as a single new array
     """
+    if isinstance(a, (bytes, bytearray, tuple, list)):
+        a = [v for v in a]
+        if isinstance(b, (bytes, bytearray, tuple, list)):
+            a.extend(b)
+        else:
+            for v in b:
+                a.append(v)
+        return a
     c = None
     __pragma__("js", "{}", """
     c = new (a.constructor)(a.length + b.length);

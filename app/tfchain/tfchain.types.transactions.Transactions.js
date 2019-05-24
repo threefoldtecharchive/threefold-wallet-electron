@@ -2,6 +2,7 @@ import {AssertionError, AttributeError, BaseException, DeprecationWarning, Excep
 import {UnknownTransansactionVersion} from './tfchain.errors.js';
 import * as jsjson from './tfchain.polyfill.encoding.object.js';
 import {json_loads} from './tfchain.polyfill.encoding.json.js';
+import {TransactionV128, TransactionV129} from './tfchain.types.transactions.Minting.js';
 import {TransactionV1} from './tfchain.types.transactions.Standard.js';
 import {TransactionBaseClass, TransactionVersion} from './tfchain.types.transactions.Base.js';
 var __name__ = 'tfchain.types.transactions.Transactions';
@@ -17,6 +18,32 @@ export var py_new = function () {
 	else {
 	}
 	return TransactionV1 ();
+};
+export var mint_definition_new = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return TransactionV128 ();
+};
+export var mint_coin_creation_new = function () {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+			}
+		}
+	}
+	else {
+	}
+	return TransactionV129 ();
 };
 export var from_json = function (obj, id) {
 	if (typeof id == 'undefined' || (id != null && id.hasOwnProperty ("__kwargtrans__"))) {;
@@ -48,6 +75,12 @@ export var from_json = function (obj, id) {
 	var txn = null;
 	if (tt == TransactionVersion.STANDARD.value) {
 		var txn = TransactionV1.from_json (obj);
+	}
+	else if (tt == TransactionVersion.MINTER_DEFINITION.value) {
+		var txn = TransactionV128.from_json (obj);
+	}
+	else if (tt == TransactionVersion.MINTER_COIN_CREATION.value) {
+		var txn = TransactionV129.from_json (obj);
 	}
 	else if (tt == TransactionVersion.LEGACY.value) {
 		var txn = TransactionV1.legacy_from_json (obj);

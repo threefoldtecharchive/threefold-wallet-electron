@@ -95,6 +95,24 @@ export var concat = function (a, b) {
 	}
 	else {
 	}
+	if (isinstance (a, tuple ([bytes, bytearray, tuple, list]))) {
+		var a = (function () {
+			var __accu0__ = [];
+			for (var v of a) {
+				__accu0__.append (v);
+			}
+			return __accu0__;
+		}) ();
+		if (isinstance (b, tuple ([bytes, bytearray, tuple, list]))) {
+			a.extend (b);
+		}
+		else {
+			for (var v of b) {
+				a.append (v);
+			}
+		}
+		return a;
+	}
 	var c = null;
 	
 	    c = new (a.constructor)(a.length + b.length);

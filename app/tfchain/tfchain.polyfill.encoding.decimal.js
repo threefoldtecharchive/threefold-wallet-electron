@@ -1,4 +1,5 @@
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __proxy__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, abs, all, any, assert, bool, bytearray, bytes, callable, chr, copy, deepcopy, delattr, dict, dir, divmod, enumerate, filter, float, getattr, hasattr, input, int, isinstance, issubclass, len, list, map, max, min, object, ord, pow, print, property, py_TypeError, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
+import * as jshex from './tfchain.polyfill.encoding.hex.js';
 import * as jsstr from './tfchain.polyfill.encoding.str.js';
 import {api as jsdec} from './tfchain.polyfill.encoding.jsmods.decimaljs.js';
 var __name__ = 'tfchain.polyfill.encoding.decimal';
@@ -80,13 +81,13 @@ export var Decimal =  __class__ ('Decimal', [object], {
 		var sign = (sign < 0 ? 1 : 0);
 		var digits = (function () {
 			var __accu0__ = [];
-			for (var s of jsstr.py_split (jsstr.from_int (self.__int__ ()))) {
-				__accu0__.append (jsstr.to_int (s));
+			for (var c of jsstr.py_split (jsstr.py_replace (self.str (), '.', ''))) {
+				__accu0__.append (jsstr.to_int (c));
 			}
 			return __accu0__;
 		}) ();
 		var exponent = self.value.decimalPlaces ();
-		var exponent = (exponent > 0 ? 0 : exponent - 1);
+		var exponent = (exponent > 0 ? exponent * -(1) : 0);
 		return tuple ([sign, digits, exponent]);
 	});},
 	get str () {return __get__ (this, function (self, prec) {
@@ -109,11 +110,62 @@ export var Decimal =  __class__ ('Decimal', [object], {
 		}
 		if (isinstance (prec, int)) {
 			if (prec <= 0) {
-				return jsstr.from_int (self.__int__ ());
+				return self.value.toNearest ('1').toString ();
 			}
-			return self.value.toNearest (('.' + jsstr.repeat ('0', prec - 1)) + '1').toString ();
+			var s = self.value.toNearest (('.' + jsstr.repeat ('0', prec - 1)) + '1').toString ();
+			if (!__in__ ('.', s)) {
+				return (s + '.') + jsstr.repeat ('0', prec);
+			}
+			var s = jsstr.py_split (s, '.', 2);
+			return (s [0] + '.') + jsstr.zfillr (s [1], prec);
 		}
 		return self.value.toString ();
+	});},
+	get bytes () {return __get__ (this, function (self, prec) {
+		if (typeof prec == 'undefined' || (prec != null && prec.hasOwnProperty ("__kwargtrans__"))) {;
+			var prec = null;
+		};
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'prec': var prec = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var v = null;
+		var mep = null;
+		if (isinstance (prec, int)) {
+			if (prec <= 0) {
+				var v = self.value.toNearest ('1');
+				var mep = 0;
+			}
+			else {
+				var v = self.value.toNearest (('.' + jsstr.repeat ('0', prec - 1)) + '1');
+				var mep = prec;
+			}
+		}
+		else {
+			var v = self.value;
+			var mep = v.decimalPlaces ();
+		}
+		var p = v.decimalPlaces ();
+		if (p > mep) {
+			var __except0__ = RuntimeError ('bug in decimal bytes method: p ({}) > mep ({})'.format (p, mep));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		if (mep) {
+			var v = Decimal (v).__mul__ (Decimal ('1' + jsstr.repeat ('0', mep))).value;
+		}
+		var s = v.toHexadecimal ().__getslice__ (2, null, 1);
+		return jshex.bytes_from_hex (s);
 	});},
 	get __str__ () {return __get__ (this, function (self) {
 		if (arguments.length) {

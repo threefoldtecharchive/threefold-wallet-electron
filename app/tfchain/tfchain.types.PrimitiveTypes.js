@@ -2,7 +2,6 @@ import {AssertionError, AttributeError, BaseException, DeprecationWarning, Excep
 import {BaseDataTypeClass} from './tfchain.types.BaseDataType.js';
 import * as jsarray from './tfchain.polyfill.array.js';
 import * as jsdec from './tfchain.polyfill.encoding.decimal.js';
-import * as jsint from './tfchain.polyfill.encoding.int.js';
 import * as jsstr from './tfchain.polyfill.encoding.str.js';
 import * as jshex from './tfchain.polyfill.encoding.hex.js';
 import * as jsbase64 from './tfchain.polyfill.encoding.base64.js';
@@ -293,6 +292,22 @@ export var BinaryData =  __class__ ('BinaryData', [BaseDataTypeClass], {
 		else {
 		}
 		return self._to_str (self._value);
+	});},
+	get str () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self.__str__ ();
 	});},
 	get __repr__ () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -1161,7 +1176,23 @@ export var Currency =  __class__ ('Currency', [BaseDataTypeClass], {
 		}
 		else {
 		}
-		return self.value.__int__ ();
+		return jsstr.to_int (self.str (__kwargtrans__ ({lowest_unit: true})));
+	});},
+	get bytes () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self.value.bytes (__kwargtrans__ ({prec: 9}));
 	});},
 	get __str__ () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -1201,19 +1232,14 @@ export var Currency =  __class__ ('Currency', [BaseDataTypeClass], {
 		}
 		else {
 		}
+		var s = self.value.str (9);
 		if (lowest_unit) {
-			var s = self.value.__mul__ ('1000000000').str (9);
+			var s = jsstr.py_replace (s, '.', '');
 		}
-		else {
-			var s = self.value.str (9);
+		else if (jsstr.contains (s, '.')) {
+			var s = jsstr.rstrip (jsstr.rstrip (s, '0 '), '.');
 		}
-		if (jsstr.contains (s, '.')) {
-			var s = jsstr.rstrip (s, '0 ');
-			if (s [-(1)] == '.') {
-				var s = s.__getslice__ (0, -(1), 1);
-			}
-		}
-		if (len (s) == 0) {
+		if (jsstr.isempty (s)) {
 			var s = '0';
 		}
 		if (with_unit) {
@@ -1268,15 +1294,9 @@ export var Currency =  __class__ ('Currency', [BaseDataTypeClass], {
 		}
 		else {
 		}
-		var value = self.__int__ ();
-		var __left0__ = divmod (jsint.bit_length (value), 8);
-		var nbytes = __left0__ [0];
-		var rem = __left0__ [1];
-		if (rem) {
-			nbytes++;
-		}
-		encoder.add_int (nbytes);
-		encoder.add_array (jsint.to_bytes (value, nbytes, __kwargtrans__ ({order: 'big'})));
+		var b = self.bytes ();
+		encoder.add_int (len (b));
+		encoder.add_array (b);
 	});},
 	get rivine_binary_encode () {return __get__ (this, function (self, encoder) {
 		if (arguments.length) {
@@ -1293,14 +1313,8 @@ export var Currency =  __class__ ('Currency', [BaseDataTypeClass], {
 		}
 		else {
 		}
-		var value = self.__int__ ();
-		var __left0__ = divmod (value.bit_length (), 8);
-		var nbytes = __left0__ [0];
-		var rem = __left0__ [1];
-		if (rem) {
-			nbytes++;
-		}
-		encoder.add_slice (jsint.to_bytes (value, nbytes, __kwargtrans__ ({order: 'big'})));
+		var b = self.bytes ();
+		encoder.add_slice (b);
 	});}
 });
 Object.defineProperty (Currency, 'value', property.call (Currency, Currency._get_value, Currency._set_value));;
@@ -1398,7 +1412,7 @@ export var Blockstake =  __class__ ('Blockstake', [BaseDataTypeClass], {
 		}
 		else {
 		}
-		return self.value.__int__ ();
+		return jsstr.to_int (self.value.str (__kwargtrans__ ({lowest_unit: false})));
 	});},
 	get str () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -1414,7 +1428,7 @@ export var Blockstake =  __class__ ('Blockstake', [BaseDataTypeClass], {
 		}
 		else {
 		}
-		return jsstr.from_int (self._value.__int__ ());
+		return jsstr.from_int (self.__int__ ());
 	});},
 	get __str__ () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -1464,6 +1478,22 @@ export var Blockstake =  __class__ ('Blockstake', [BaseDataTypeClass], {
 		}
 		return self.__str__ ();
 	});},
+	get bytes () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self.value.bytes ();
+	});},
 	get sia_binary_encode () {return __get__ (this, function (self, encoder) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -1479,15 +1509,9 @@ export var Blockstake =  __class__ ('Blockstake', [BaseDataTypeClass], {
 		}
 		else {
 		}
-		var v = self.__int__ ();
-		var __left0__ = divmod (jsint.bit_length (v), 8);
-		var nbytes = __left0__ [0];
-		var rem = __left0__ [1];
-		if (rem) {
-			nbytes++;
-		}
-		encoder.add_int (nbytes);
-		encoder.add_array (jsint.to_bytes (v, nbytes, __kwargtrans__ ({order: 'big'})));
+		var b = self.bytes ();
+		encoder.add_int (len (b));
+		encoder.add_array (b);
 	});},
 	get rivine_binary_encode () {return __get__ (this, function (self, encoder) {
 		if (arguments.length) {
@@ -1504,14 +1528,8 @@ export var Blockstake =  __class__ ('Blockstake', [BaseDataTypeClass], {
 		}
 		else {
 		}
-		var v = self.__int__ ();
-		var __left0__ = divmod (jsint.bit_length (v), 8);
-		var nbytes = __left0__ [0];
-		var rem = __left0__ [1];
-		if (rem) {
-			nbytes++;
-		}
-		encoder.add_slice (jsint.to_bytes (v, nbytes, __kwargtrans__ ({order: 'big'})));
+		var b = self.bytes ();
+		encoder.add_slice (b);
 	});}
 });
 Object.defineProperty (Blockstake, 'value', property.call (Blockstake, Blockstake._get_value, Blockstake._set_value));;

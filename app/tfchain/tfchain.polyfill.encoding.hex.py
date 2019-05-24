@@ -11,6 +11,10 @@ def bytes_from_hex(s):
     b = None
     n = len(s)
     __pragma__("js", "{}", """
+    if (n%2 == 1) {
+        s = '0' + s;
+        n += 1;
+    }
     b = [];
     for (var i = 0; i < n; i += 2) {
         b.push(parseInt(s.substr(i, 2), 16));
