@@ -1,5 +1,6 @@
 import tfchain.polyfill.encoding.object as jsobj
 import tfchain.polyfill.array as jsarr
+import tfchain.polyfill.asynchronous as jsasync
 
 import tfchain.client as tfclient
 import tfchain.errors as tferrors
@@ -187,26 +188,32 @@ class TFChainWallet:
         # return the balance
         return balance
 
+
     @property
     def transactions(self):
         """
         Get all transactions linked to a personal wallet address.
         """
+        w = self.clone()
         # for each address get all transactions
+        def generator():
+            for address in w.addresses:
+                yield w._unlockhash_get(address)
         transactions = set()
-        for address in self.addresses:
-            result = self._unlockhash_get(address)
-            transactions.update(result.transactions)
+        p = jsasync.promise_pool_new(generator, cb=(lambda result: transactions.update(result.transactions)))
 
-        # sort all transactions
-        def txn_arr_sort(a, b):
-            height_a = pow(2, 64) if a.height < 0 else a.height
-            height_b = pow(2, 64) if b.height < 0 else b.height
-            return height_a-height_b
-        transactions = jsarr.sort(transactions, txn_arr_sort, reverse=True)
+        # define sort cb that will sort it prior to the final return
+        def cb():
+            # sort all transactions
+            def txn_arr_sort(a, b):
+                height_a = pow(2, 64) if a.height < 0 else a.height
+                height_b = pow(2, 64) if b.height < 0 else b.height
+                return height_a-height_b
+            return jsarr.sort(transactions, txn_arr_sort, reverse=True)
 
-        # return all transactions
-        return transactions
+        # return promise chain
+        return jsasync.chain(p, cb)
+
 
     # def coins_send(self, recipient, amount, source=None, refund=None, lock=None, data=None):
     #     """

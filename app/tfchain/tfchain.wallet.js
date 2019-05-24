@@ -9,6 +9,7 @@ import * as transactions from './tfchain.types.transactions.js';
 import {Type as NetworkType} from './tfchain.network.js';
 import * as tferrors from './tfchain.errors.js';
 import * as tfclient from './tfchain.client.js';
+import * as jsasync from './tfchain.polyfill.asynchronous.js';
 import * as jsarr from './tfchain.polyfill.array.js';
 import * as jsobj from './tfchain.polyfill.encoding.object.js';
 var __name__ = 'tfchain.wallet';
@@ -265,32 +266,72 @@ export var TFChainWallet =  __class__ ('TFChainWallet', [object], {
 		}
 		else {
 		}
+		var w = self.clone ();
+		var generator = function* () {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+					}
+				}
+			}
+			else {
+			}
+			for (var address of w.addresses) {
+				yield w._unlockhash_get (address);
+			}
+			};
 		var transactions = set ();
-		for (var address of self.addresses) {
-			var result = self._unlockhash_get (address);
-			transactions.py_update (result.transactions);
-		}
-		var txn_arr_sort = function (a, b) {
+		var p = jsasync.promise_pool_new (generator, __kwargtrans__ ({cb: (function __lambda__ (result) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
 				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
-							case 'a': var a = __allkwargs0__ [__attrib0__]; break;
-							case 'b': var b = __allkwargs0__ [__attrib0__]; break;
+							case 'result': var result = __allkwargs0__ [__attrib0__]; break;
 						}
 					}
 				}
 			}
 			else {
 			}
-			var height_a = (a.height < 0 ? pow (2, 64) : a.height);
-			var height_b = (b.height < 0 ? pow (2, 64) : b.height);
-			return height_a - height_b;
+			return transactions.py_update (result.transactions);
+		})}));
+		var cb = function () {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+					}
+				}
+			}
+			else {
+			}
+			var txn_arr_sort = function (a, b) {
+				if (arguments.length) {
+					var __ilastarg0__ = arguments.length - 1;
+					if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+						var __allkwargs0__ = arguments [__ilastarg0__--];
+						for (var __attrib0__ in __allkwargs0__) {
+							switch (__attrib0__) {
+								case 'a': var a = __allkwargs0__ [__attrib0__]; break;
+								case 'b': var b = __allkwargs0__ [__attrib0__]; break;
+							}
+						}
+					}
+				}
+				else {
+				}
+				var height_a = (a.height < 0 ? pow (2, 64) : a.height);
+				var height_b = (b.height < 0 ? pow (2, 64) : b.height);
+				return height_a - height_b;
+			};
+			return jsarr.py_sort (transactions, txn_arr_sort, __kwargtrans__ ({reverse: true}));
 		};
-		var transactions = jsarr.py_sort (transactions, txn_arr_sort, __kwargtrans__ ({reverse: true}));
-		return transactions;
+		return jsasync.chain (p, cb);
 	});},
 	get key_pair_get () {return __get__ (this, function (self, unlockhash) {
 		if (arguments.length) {

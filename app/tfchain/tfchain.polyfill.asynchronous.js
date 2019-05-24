@@ -173,9 +173,12 @@ export var wait = function () {
 	    
 	return p;
 };
-export var promise_pool_new = function (generator, limit) {
+export var promise_pool_new = function (generator, limit, cb) {
 	if (typeof limit == 'undefined' || (limit != null && limit.hasOwnProperty ("__kwargtrans__"))) {;
 		var limit = null;
+	};
+	if (typeof cb == 'undefined' || (cb != null && cb.hasOwnProperty ("__kwargtrans__"))) {;
+		var cb = null;
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -185,6 +188,7 @@ export var promise_pool_new = function (generator, limit) {
 				switch (__attrib0__) {
 					case 'generator': var generator = __allkwargs0__ [__attrib0__]; break;
 					case 'limit': var limit = __allkwargs0__ [__attrib0__]; break;
+					case 'cb': var cb = __allkwargs0__ [__attrib0__]; break;
 				}
 			}
 		}
@@ -223,7 +227,26 @@ export var promise_pool_new = function (generator, limit) {
 		return result.value;
 	};
 	var pool = jspromisepool.Pool (producer, limit);
-	var results = [];
+	var results = null;
+	if (cb === null) {
+		var results = [];
+		var cb = (function __lambda__ (result) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'result': var result = __allkwargs0__ [__attrib0__]; break;
+						}
+					}
+				}
+			}
+			else {
+			}
+			return results.append (result);
+		});
+	}
 	var fulfilled_cb = function (event) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -238,23 +261,29 @@ export var promise_pool_new = function (generator, limit) {
 		}
 		else {
 		}
-		results.append (event.data.result);
+		cb (event.data.result);
 	};
 	pool.addEventListener ('fulfilled', fulfilled_cb);
-	var pool_then_cb = function () {
+	var p = pool.start ();
+	if (results === null) {
+		return p;
+	}
+	return chain (p, (function __lambda__ (_) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case '_': var _ = __allkwargs0__ [__attrib0__]; break;
+					}
 				}
 			}
 		}
 		else {
 		}
 		return results;
-	};
-	return chain (pool.start (), pool_then_cb);
+	}));
 };
 
 //# sourceMappingURL=tfchain.polyfill.asynchronous.map
