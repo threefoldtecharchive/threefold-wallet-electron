@@ -2,6 +2,7 @@ import {AssertionError, AttributeError, BaseException, DeprecationWarning, Excep
 import {BlockstakeOutput, CoinOutput} from './tfchain.types.IO.js';
 import {Currency, Hash} from './tfchain.types.PrimitiveTypes.js';
 import {UnlockHash} from './tfchain.types.ConditionTypes.js';
+import {TransactionBaseClass} from './tfchain.types.transactions.Base.js';
 import * as transactions from './tfchain.types.transactions.js';
 import * as jsdate from './tfchain.polyfill.date.js';
 import * as jsasync from './tfchain.polyfill.asynchronous.js';
@@ -172,7 +173,7 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 		else {
 		}
 		var c = self.clone ();
-		c._block_get (value);
+		return c._block_get (value);
 	});},
 	get _block_get () {return __get__ (this, function (self, value) {
 		if (arguments.length) {
@@ -354,6 +355,196 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 		};
 		return jsasync.chain (self.explorer_get (__kwargtrans__ ({endpoint: endpoint})), get_block_prop);
 	});},
+	get transaction_get () {return __get__ (this, function (self, txid) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'txid': var txid = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var ec = self.clone ();
+		var txid = ec._normalize_id (txid);
+		var endpoint = '/explorer/hashes/' + txid;
+		var cb = function (result) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'result': var result = __allkwargs0__ [__attrib0__]; break;
+						}
+					}
+				}
+			}
+			else {
+			}
+			try {
+				if (result ['hashtype'] != 'transactionid') {
+					var __except0__ = tferrors.ExplorerInvalidResponse ("expected hash type 'transactionid' not '{}'".format (result ['hashtype']), endpoint, result);
+					__except0__.__cause__ = null;
+					throw __except0__;
+				}
+				var txnresult = result ['transaction'];
+				if (txnresult ['id'] != txid) {
+					var __except0__ = tferrors.ExplorerInvalidResponse ("expected transaction ID '{}' not '{}'".format (txid, txnresult ['id']), endpoint, result);
+					__except0__.__cause__ = null;
+					throw __except0__;
+				}
+				return ec._transaction_from_explorer_transaction (txnresult, __kwargtrans__ ({endpoint: endpoint, resp: result}));
+			}
+			catch (__except0__) {
+				if (isinstance (__except0__, KeyError)) {
+					var exc = __except0__;
+					var __except1__ = tferrors.ExplorerInvalidResponse (str (exc), endpoint, result);
+					__except1__.__cause__ = exc;
+					throw __except1__;
+				}
+				else {
+					throw __except0__;
+				}
+			}
+		};
+		return jsasync.chain (ec.explorer_get (__kwargtrans__ ({endpoint: endpoint})), cb);
+	});},
+	get coin_output_get () {return __get__ (this, function (self, id) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'id': var id = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var ec = self.clone ();
+		return ec._output_get (id, __kwargtrans__ ({expected_hash_type: 'coinoutputid'}));
+	});},
+	get blockstake_output_get () {return __get__ (this, function (self, id) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'id': var id = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var ec = self.clone ();
+		return ec._output_get (id, __kwargtrans__ ({expected_hash_type: 'blockstakeoutputid'}));
+	});},
+	get _output_get () {return __get__ (this, function (self, id, expected_hash_type) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'id': var id = __allkwargs0__ [__attrib0__]; break;
+						case 'expected_hash_type': var expected_hash_type = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (!__in__ (expected_hash_type, tuple (['coinoutputid', 'blockstakeoutputid']))) {
+			var __except0__ = ValueError ("expected hash type should be one of ('coinoutputid', 'blockstakeoutputid'), not {}".format (expected_hash_type));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		var id = self._normalize_id (id);
+		var endpoint = '/explorer/hashes/' + id;
+		var cb = function (result) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'result': var result = __allkwargs0__ [__attrib0__]; break;
+						}
+					}
+				}
+			}
+			else {
+			}
+			try {
+				var hash_type = result ['hashtype'];
+				if (hash_type != expected_hash_type) {
+					var __except0__ = tferrors.ExplorerInvalidResponse ("expected hash type '{}', not '{}'".format (expected_hash_type, hash_type), endpoint, result);
+					__except0__.__cause__ = null;
+					throw __except0__;
+				}
+				var tresp = result ['transactions'];
+				var lresp = len (tresp);
+				if (!__in__ (lresp, tuple ([1, 2]))) {
+					var __except0__ = tferrors.ExplorerInvalidResponse ('expected one or two transactions to be returned, not {}'.format (lresp), endpoint, result);
+					__except0__.__cause__ = null;
+					throw __except0__;
+				}
+				var creation_txn = tresp [0];
+				var spend_txn = null;
+				if (lresp == 2) {
+					if (tresp [1] ['height'] > creation_txn ['height']) {
+						var spend_txn = tresp [1];
+					}
+					else {
+						var spend_txn = creation_txn;
+						var creation_txn = tresp [1];
+					}
+				}
+				var creation_txn = self._transaction_from_explorer_transaction (creation_txn, __kwargtrans__ ({endpoint: endpoint, resp: result}));
+				if (spend_txn !== null) {
+					var spend_txn = self._transaction_from_explorer_transaction (spend_txn, __kwargtrans__ ({endpoint: endpoint, resp: result}));
+				}
+				var output = null;
+				for (var out of (hash_type == 'coinoutputid' ? creation_txn.coin_outputs : creation_txn.blockstake_outputs)) {
+					if (str (out.id) == id) {
+						var output = out;
+						break;
+					}
+				}
+				if (output === null) {
+					var __except0__ = tferrors.ExplorerInvalidResponse ("expected output {} to be part of creation Tx, but it wasn't".format (id), endpoint, result);
+					__except0__.__cause__ = null;
+					throw __except0__;
+				}
+				return ExplorerOutputResult (output, creation_txn, spend_txn);
+			}
+			catch (__except0__) {
+				if (isinstance (__except0__, KeyError)) {
+					var exc = __except0__;
+					var __except1__ = tferrors.ExplorerInvalidResponse (str (exc), endpoint, result);
+					__except1__.__cause__ = exc;
+					throw __except1__;
+				}
+				else {
+					throw __except0__;
+				}
+			}
+		};
+		return jsasync.chain (self.explorer_get (__kwargtrans__ ({endpoint: endpoint})), cb);
+	});},
 	get _transaction_from_explorer_transaction () {return __get__ (this, function (self, etxn, endpoint, resp) {
 		if (typeof endpoint == 'undefined' || (endpoint != null && endpoint.hasOwnProperty ("__kwargtrans__"))) {;
 			var endpoint = '/?';
@@ -481,6 +672,96 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 	});}
 });
 Object.defineProperty (TFChainClient, 'explorer_addresses', property.call (TFChainClient, TFChainClient._get_explorer_addresses));;
+export var ExplorerOutputResult =  __class__ ('ExplorerOutputResult', [object], {
+	__module__: __name__,
+	get __init__ () {return __get__ (this, function (self, output, creation_tx, spend_tx) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'output': var output = __allkwargs0__ [__attrib0__]; break;
+						case 'creation_tx': var creation_tx = __allkwargs0__ [__attrib0__]; break;
+						case 'spend_tx': var spend_tx = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (!(isinstance (output, tuple ([CoinOutput, BlockstakeOutput])))) {
+			var __except0__ = py_TypeError ('output has to be a coin- or blocktake output, not be of type {}'.format (py_typeof (output)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		self._output = output;
+		if (!(isinstance (creation_tx, TransactionBaseClass))) {
+			var __except0__ = py_TypeError ('creation tx has to be of type TransactionBaseClass, not be of type {}'.format (py_typeof (creation_tx)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		self._creation_tx = creation_tx;
+		if (spend_tx !== null && !(isinstance (spend_tx, TransactionBaseClass))) {
+			var __except0__ = py_TypeError ('spend tx has to be None or be of type TransactionBaseClass, not be of type {}'.format (py_typeof (spend_tx)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		self._spend_tx = spend_tx;
+	});},
+	get _get_output () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._output;
+	});},
+	get _get_creation_transaction () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._creation_tx;
+	});},
+	get _get_spend_transaction () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._spend_tx;
+	});}
+});
+Object.defineProperty (ExplorerOutputResult, 'spend_transaction', property.call (ExplorerOutputResult, ExplorerOutputResult._get_spend_transaction));
+Object.defineProperty (ExplorerOutputResult, 'creation_transaction', property.call (ExplorerOutputResult, ExplorerOutputResult._get_creation_transaction));
+Object.defineProperty (ExplorerOutputResult, 'output', property.call (ExplorerOutputResult, ExplorerOutputResult._get_output));;
 export var ExplorerBlockchainInfo =  __class__ ('ExplorerBlockchainInfo', [object], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, constants, last_block) {

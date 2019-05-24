@@ -6,6 +6,7 @@ import tfchain.polyfill.asynchronous as jsasync
 import tfchain.polyfill.date as jsdate
 
 from tfchain.types import transactions
+from tfchain.types.transactions.Base import TransactionBaseClass
 from tfchain.types.ConditionTypes import UnlockHash
 from tfchain.types.PrimitiveTypes import Hash, Currency
 from tfchain.types.IO import CoinOutput, BlockstakeOutput
@@ -93,7 +94,7 @@ class TFChainClient:
         @param value: the identifier or height that points to the desired block
         """
         c = self.clone()
-        c._block_get(value)
+        return c._block_get(value)
 
     def _block_get(self, value):
         """
@@ -170,26 +171,27 @@ class TFChainClient:
                 raise tferrors.ExplorerInvalidResponse(str(exc), endpoint, result) from exc
         return jsasync.chain(self.explorer_get(endpoint=endpoint), get_block_prop)
 
-    # def transaction_get(self, txid):
-    #     """
-    #     Get a transaction from an available explorer Node.
+    def transaction_get(self, txid):
+        """
+        Get a transaction from an available explorer Node.
 
-    #     @param txid: the identifier (bytes, bytearray, hash or string) that points to the desired transaction
-    #     """
-    #     txid = self._normalize_id(txid)
-    #     endpoint = "/explorer/hashes/"+txid
-    #     resp = self.explorer_get(endpoint=endpoint)
-    #     resp = json_loads(resp)
-    #     try:
-    #         if resp['hashtype'] != 'transactionid':
-    #             raise tferrors.ExplorerInvalidResponse("expected hash type 'transactionid' not '{}'".format(resp['hashtype']), endpoint, resp)
-    #         resp = resp['transaction']
-    #         if resp['id'] != txid:
-    #             raise tferrors.ExplorerInvalidResponse("expected transaction ID '{}' not '{}'".format(txid, resp['id']), endpoint, resp)
-    #         return self._transaction_from_explorer_transaction(resp, endpoint=endpoint, resp=resp)
-    #     except KeyError as exc:
-    #         # return a KeyError as an invalid Explorer Response
-    #         raise tferrors.ExplorerInvalidResponse(str(exc), endpoint, resp) from exc
+        @param txid: the identifier (bytes, bytearray, hash or string) that points to the desired transaction
+        """
+        ec = self.clone()
+        txid = ec._normalize_id(txid)
+        endpoint = "/explorer/hashes/"+txid
+        def cb(result):
+            try:
+                if result['hashtype'] != 'transactionid':
+                    raise tferrors.ExplorerInvalidResponse("expected hash type 'transactionid' not '{}'".format(result['hashtype']), endpoint, result)
+                txnresult = result['transaction']
+                if txnresult['id'] != txid:
+                    raise tferrors.ExplorerInvalidResponse("expected transaction ID '{}' not '{}'".format(txid, txnresult['id']), endpoint, result)
+                return ec._transaction_from_explorer_transaction(txnresult, endpoint=endpoint, resp=result)
+            except KeyError as exc:
+                # return a KeyError as an invalid Explorer Response
+                raise tferrors.ExplorerInvalidResponse(str(exc), endpoint, result) from exc
+        return jsasync.chain(ec.explorer_get(endpoint=endpoint), cb)
 
     # def transaction_put(self, transaction):
     #     """
@@ -263,74 +265,77 @@ class TFChainClient:
     #         # return a KeyError as an invalid Explorer Response
     #         raise tferrors.ExplorerInvalidResponse(str(exc), endpoint, resp) from exc
 
-    # def coin_output_get(self, id):
-    #     """
-    #     Get a coin output from an available explorer Node.
+    def coin_output_get(self, id):
+        """
+        Get a coin output from an available explorer Node.
 
-    #     Returns (output, creation_txn, spend_txn).
+        Returns (output, creation_txn, spend_txn).
 
-    #     @param id: the identifier (bytes, bytearray, hash or string) that points to the desired coin output
-    #     """
-    #     return self._output_get(id, expected_hash_type='coinoutputid')
+        @param id: the identifier (bytes, bytearray, hash or string) that points to the desired coin output
+        """
+        ec = self.clone()
+        return ec._output_get(id, expected_hash_type='coinoutputid')
 
-    # def blockstake_output_get(self, id):
-    #     """
-    #     Get a blockstake output from an available explorer Node.
+    def blockstake_output_get(self, id):
+        """
+        Get a blockstake output from an available explorer Node.
 
-    #     Returns (output, creation_txn, spend_txn).
+        Returns (output, creation_txn, spend_txn).
 
-    #     @param id: the identifier (bytes, bytearray, hash or string) that points to the desired blockstake output
-    #     """
-    #     return self._output_get(id, expected_hash_type='blockstakeoutputid')
+        @param id: the identifier (bytes, bytearray, hash or string) that points to the desired blockstake output
+        """
+        ec = self.clone()
+        return ec._output_get(id, expected_hash_type='blockstakeoutputid')
 
-    # def _output_get(self, id, expected_hash_type):
-    #     """
-    #     Get an output from an available explorer Node.
+    def _output_get(self, id, expected_hash_type):
+        """
+        Get an output from an available explorer Node.
 
-    #     Returns (output, creation_txn, spend_txn).
+        Returns (output, creation_txn, spend_txn).
 
-    #     @param id: the identifier (bytes, bytearray, hash or string) that points to the desired output
-    #     @param expected_hash_type: one of ('coinoutputid', 'blockstakeoutputid')
-    #     """
-    #     if expected_hash_type not in ('coinoutputid', 'blockstakeoutputid'):
-    #         raise ValueError("expected hash type should be one of ('coinoutputid', 'blockstakeoutputid'), not {}".format(expected_hash_type))
-    #     id = self._normalize_id(id)
-    #     endpoint = "/explorer/hashes/"+id
-    #     resp = self.explorer_get(endpoint=endpoint)
-    #     resp = json_loads(resp)
-    #     try:
-    #         hash_type = resp['hashtype']
-    #         if hash_type != expected_hash_type:
-    #             raise tferrors.ExplorerInvalidResponse("expected hash type '{}', not '{}'".format(expected_hash_type, hash_type), endpoint, resp)
-    #         tresp = resp['transactions']
-    #         lresp = len(tresp)
-    #         if lresp not in (1, 2):
-    #             raise tferrors.ExplorerInvalidResponse("expected one or two transactions to be returned, not {}".format(lresp), endpoint, resp)
-    #         # parse the transaction(s)
-    #         creation_txn = tresp[0]
-    #         spend_txn = None
-    #         if lresp == 2:
-    #             if tresp[1]['height'] > creation_txn['height']:
-    #                 spend_txn = tresp[1]
-    #             else:
-    #                 spend_txn = creation_txn
-    #                 creation_txn = tresp[1]
-    #         creation_txn = self._transaction_from_explorer_transaction(creation_txn, endpoint=endpoint, resp=resp)
-    #         if spend_txn is not None:
-    #             spend_txn = self._transaction_from_explorer_transaction(spend_txn, endpoint=endpoint, resp=resp)
-    #         # collect the output
-    #         output = None
-    #         for out in (creation_txn.coin_outputs if hash_type == 'coinoutputid' else creation_txn.blockstake_outputs):
-    #             if str(out.id) == id:
-    #                 output = out
-    #                 break
-    #         if output is None:
-    #             raise tferrors.ExplorerInvalidResponse("expected output {} to be part of creation Tx, but it wasn't".format(id), endpoint, resp)
-    #         # return the output and related transaction(s)
-    #         return (output, creation_txn, spend_txn)
-    #     except KeyError as exc:
-    #         # return a KeyError as an invalid Explorer Response
-    #         raise tferrors.ExplorerInvalidResponse(str(exc), endpoint, resp) from exc
+        @param id: the identifier (bytes, bytearray, hash or string) that points to the desired output
+        @param expected_hash_type: one of ('coinoutputid', 'blockstakeoutputid')
+        """
+        if expected_hash_type not in ('coinoutputid', 'blockstakeoutputid'):
+            raise ValueError("expected hash type should be one of ('coinoutputid', 'blockstakeoutputid'), not {}".format(expected_hash_type))
+        id = self._normalize_id(id)
+        endpoint = "/explorer/hashes/"+id
+        def cb(result):
+            try:
+                hash_type = result['hashtype']
+                if hash_type != expected_hash_type:
+                    raise tferrors.ExplorerInvalidResponse("expected hash type '{}', not '{}'".format(expected_hash_type, hash_type), endpoint, result)
+                tresp = result['transactions']
+                lresp = len(tresp)
+                if lresp not in (1, 2):
+                    raise tferrors.ExplorerInvalidResponse("expected one or two transactions to be returned, not {}".format(lresp), endpoint, result)
+                # parse the transaction(s)
+                creation_txn = tresp[0]
+                spend_txn = None
+                if lresp == 2:
+                    if tresp[1]['height'] > creation_txn['height']:
+                        spend_txn = tresp[1]
+                    else:
+                        spend_txn = creation_txn
+                        creation_txn = tresp[1]
+                creation_txn = self._transaction_from_explorer_transaction(creation_txn, endpoint=endpoint, resp=result)
+                if spend_txn is not None:
+                    spend_txn = self._transaction_from_explorer_transaction(spend_txn, endpoint=endpoint, resp=result)
+                # collect the output
+                output = None
+                for out in (creation_txn.coin_outputs if hash_type == 'coinoutputid' else creation_txn.blockstake_outputs):
+                    if str(out.id) == id:
+                        output = out
+                        break
+                if output is None:
+                    raise tferrors.ExplorerInvalidResponse("expected output {} to be part of creation Tx, but it wasn't".format(id), endpoint, result)
+                # return the output and related transaction(s)
+                return ExplorerOutputResult(output, creation_txn, spend_txn)
+            except KeyError as exc:
+                # return a KeyError as an invalid Explorer Response
+                raise tferrors.ExplorerInvalidResponse(str(exc), endpoint, result) from exc
+        # return as chained promise
+        return jsasync.chain(self.explorer_get(endpoint=endpoint), cb)
 
     def _transaction_from_explorer_transaction(self, etxn, endpoint="/?", resp=None): # keyword parameters for error handling purposes only
         if resp is None:
@@ -389,6 +394,30 @@ class TFChainClient:
 
     def _normalize_id(self, id):
         return Hash(value=id).str()
+
+class ExplorerOutputResult():
+    def __init__(self, output, creation_tx, spend_tx):
+        if not isinstance(output, (CoinOutput, BlockstakeOutput)):
+            raise TypeError("output has to be a coin- or blocktake output, not be of type {}".format(type(output)))
+        self._output = output
+        if not isinstance(creation_tx, TransactionBaseClass):
+            raise TypeError("creation tx has to be of type TransactionBaseClass, not be of type {}".format(type(creation_tx)))
+        self._creation_tx = creation_tx
+        if spend_tx is not None and not isinstance(spend_tx, TransactionBaseClass):
+            raise TypeError("spend tx has to be None or be of type TransactionBaseClass, not be of type {}".format(type(spend_tx)))
+        self._spend_tx = spend_tx
+
+    @property
+    def output(self):
+        return self._output
+
+    @property
+    def creation_transaction(self):
+        return self._creation_tx
+
+    @property
+    def spend_transaction(self):
+        return self._spend_tx
 
 
 class ExplorerBlockchainInfo():

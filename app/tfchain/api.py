@@ -182,6 +182,13 @@ class Account:
         return self._wallets[0]
 
     @property
+    def explorer(self):
+        """
+        :returns: the raw explorer client that can be used for direct calls to the explorer (advancded users only)
+        """
+        return self._explorer_client
+
+    @property
     def wallets(self):
         """
         :returns: all wallets created for this account (instance), or None if no wallets have been created so far
