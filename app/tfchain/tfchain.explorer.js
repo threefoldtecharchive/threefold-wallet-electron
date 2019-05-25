@@ -109,6 +109,11 @@ export var Client =  __class__ ('Client', [object], {
 				__except0__.__cause__ = null;
 				throw __except0__;
 			}
+			if (result.code == 400) {
+				var __except0__ = tferrors.ExplorerBadRequest ('error (code: {}): {}'.format (result.code, result.data), endpoint);
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
 			var __except0__ = tferrors.ExplorerServerError ('error (code: {}): {}'.format (result.code, result.data), endpoint);
 			__except0__.__cause__ = null;
 			throw __except0__;
@@ -143,6 +148,11 @@ export var Client =  __class__ ('Client', [object], {
 				}
 				else {
 				}
+				if (isinstance (reason, tferrors.ExplorerUserError)) {
+					var __except0__ = reason;
+					__except0__.__cause__ = null;
+					throw __except0__;
+				}
 				print ('retrying on another server, previous GET call failed: {}'.format (reason));
 				return jsasync.chain (jshttp.http_get (resource), resolve);
 			};
@@ -161,6 +171,11 @@ export var Client =  __class__ ('Client', [object], {
 				}
 			}
 			else {
+			}
+			if (isinstance (reason, tferrors.ExplorerUserError)) {
+				var __except0__ = reason;
+				__except0__.__cause__ = null;
+				throw __except0__;
 			}
 			print ('servers exhausted, previous GET call failed as well: {}'.format (reason));
 			var __except0__ = tferrors.ExplorerNotAvailable ('no explorer was available', endpoint, self._addresses);

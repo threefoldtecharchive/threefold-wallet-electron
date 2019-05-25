@@ -13,6 +13,7 @@ import tfchain.crypto.mnemonic as bip39
 import tfchain.encoding.siabin as tfsiabin
 import tfchain.network as tfnetwork
 import tfchain.explorer as tfexplorer
+import tfchain.balance as wbalance
 import tfchain.client as tfclient
 import tfchain.wallet as tfwallet
 
@@ -324,7 +325,7 @@ class Account:
         wallets = self.wallets
         if len(wallets) == 0:
             def no_balance_cb():
-                return Balance(self._network_type, amount=0)
+                return Balance(self._network_type)
             return jsasync.as_promise(no_balance_cb)
         # create aggregaton cb
         def aggregate(balances):
@@ -439,15 +440,9 @@ class Wallet:
         :rtype: Balance
         """
         wallet = self.clone()
-        return jsasync.as_promise(wallet.balance_sync)
-
-    @property
-    def balance_sync(self):
-        """
-        :returns: the current balance of this wallet (sync)
-        :rtype: Balance
-        """
-        return Balance(self._network_type)
+        def create_api_balance_obj(balance):
+            return Balance(wallet._tfwallet.network_type, balance)
+        return jsasync.chain(wallet._tfwallet.balance, create_api_balance_obj)
 
     def transaction_new(self):
         """
@@ -510,28 +505,32 @@ class CoinTransactionBuilder:
         :returns: a promise that resolves with a transaction ID or rejects with an Exception
         """
         wallet = self._wallet.clone()
-        def cb():
-            balance = wallet.balance_sync
+        def cb(balance):
             print("Sent from wallet {} succesfully with an input balance of {} TFT!".format(wallet.wallet_name, balance.coins_total))
             return '66ccdf3a0bca58025be7fdc71f3f6bfbd6ed6287aa698a131734a947c71a3bbf'
         print("Sending from wallet {}...".format(wallet.wallet_name))
-        return jsasync.chain(jsasync.sleep(3000), cb)
+        return jsasync.chain(wallet.balance, cb)
 
 
 class Balance:
-    def __init__(self, network_type, amount=None):
-        if amount is None:
-            self._amount = 1
-        else:
-            if not isinstance(amount, int):
-                raise TypeError("amount can only be int or None, not be of type {}".format(type(amount)))
-            self._amount = max(amount, 0)
+    def __init__(self, network_type, tfbalance=None):
+        if not isinstance(network_type, tfnetwork.Type):
+            raise TypeError("network_type has to be of type tfchain.network.Type, not be of type {}".format(type(network_type)))
         self._network_type = network_type
+        if tfbalance is None:
+            self._tfbalance = wbalance.WalletBalance()
+        else:
+            if not isinstance(tfbalance, wbalance.WalletBalance):
+                raise TypeError("tfbalance has to be of type tfchain.balance.WalletBalance, not be of type {}".format(type(tfbalance)))
+            self._tfbalance = tfbalance
 
     def merge(self, other):
         if self._network_type.__ne__(other._network_type):
             raise ValueError("miner fees of to-be-merged balance objects have to be equal")
-        return Balance(network_type=self._network_type, amount=self._amount+other._amount)
+        return Balance(
+            network_type=self._network_type,
+            tfbalance=wbalance.WalletBalance().balance_add(self._tfbalance).balance_add(other._tfbalance),
+        )
 
     def spend_amount_is_valid(self, amount):
         """
@@ -556,19 +555,20 @@ class Balance:
 
     @property
     def coins_unlocked(self):
-        return Currency(jsstr.from_int(self._amount))
+        return self._tfbalance.available
 
     @property
     def coins_locked(self):
-        return Currency(jsstr.from_int(self._amount))
+        return self._tfbalance.locked
 
     @property
     def coins_total(self):
         return self.coins_unlocked.plus(self.coins_locked)
 
     def address_filter(self, address):
+        # TODO: replace with real logic
         UnlockHash.from_str(address)
-        return Balance(self._network_type, jshex.hex_to_int(address[3])%9 + 1)
+        return Balance(self._network_type, self._tfbalance)
 
     @property
     def transactions(self):

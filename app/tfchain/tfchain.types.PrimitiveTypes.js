@@ -653,9 +653,6 @@ export var Currency =  __class__ ('Currency', [BaseDataTypeClass], {
 		}
 		else {
 		}
-		if (self._value === null) {
-			return jsdec.Decimal ();
-		}
 		return self._value;
 	});},
 	get plus () {return __get__ (this, function (self, other) {
@@ -827,7 +824,7 @@ export var Currency =  __class__ ('Currency', [BaseDataTypeClass], {
 		else {
 		}
 		if (value === null) {
-			self._value = null;
+			self._value = jsdec.Decimal ();
 			return ;
 		}
 		if (isinstance (value, Currency)) {
@@ -918,7 +915,7 @@ export var Currency =  __class__ ('Currency', [BaseDataTypeClass], {
 		if (!(isinstance (other, Currency))) {
 			return self.__iadd__ (Currency (other));
 		}
-		self.value.__iadd__ (other.value);
+		self._value.__iadd__ (other.value);
 		return self;
 	});},
 	get __mul__ () {return __get__ (this, function (self, other) {
@@ -976,7 +973,7 @@ export var Currency =  __class__ ('Currency', [BaseDataTypeClass], {
 		if (!(isinstance (other, Currency))) {
 			return self.__imul__ (Currency (other));
 		}
-		self.value.__imul__ (other.value);
+		self._value.__imul__ (other.value);
 		return self;
 	});},
 	get __sub__ () {return __get__ (this, function (self, other) {
@@ -1034,7 +1031,7 @@ export var Currency =  __class__ ('Currency', [BaseDataTypeClass], {
 		if (!(isinstance (other, Currency))) {
 			return self.__isub__ (Currency (other));
 		}
-		self.value -= other.value;
+		self._value.__isub__ (other.value);
 		return self;
 	});},
 	get __lt__ () {return __get__ (this, function (self, other) {

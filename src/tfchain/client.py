@@ -1,15 +1,17 @@
-import tfchain.errors as tferrors
-import tfchain.explorer as tfexplorer
-
 import tfchain.polyfill.encoding.object as jsobj
 import tfchain.polyfill.encoding.str as jsstr
 import tfchain.polyfill.asynchronous as jsasync
 import tfchain.polyfill.date as jsdate
 import tfchain.polyfill.array as jsarr
 
+import tfchain.errors as tferrors
+import tfchain.explorer as tfexplorer
+from tfchain.balance import WalletBalance, MultiSigWalletBalance
+
 from tfchain.types import transactions, ConditionTypes
 from tfchain.types.transactions.Base import TransactionBaseClass
-from tfchain.types.ConditionTypes import UnlockHash, UnlockHashType
+from tfchain.types.transactions.Minting import TransactionV128
+from tfchain.types.ConditionTypes import UnlockHash, UnlockHashType, ConditionMultiSignature
 from tfchain.types.PrimitiveTypes import Hash, Currency
 from tfchain.types.ERC20 import ERC20Address
 from tfchain.types.IO import CoinOutput, BlockstakeOutput
@@ -233,6 +235,17 @@ class TFChainClient:
         unlockhash = ConditionTypes.from_recipient(target).unlockhash.__str__()
         endpoint = "/explorer/hashes/"+unlockhash
 
+        def catch_no_content(reason):
+            if isinstance(reason, tferrors.ExplorerNoContent):
+                return ExplorerUnlockhashResult(
+                    unlockhash=UnlockHash.from_json(unlockhash),
+                    transactions=[],
+                    multisig_addresses=None,
+                    erc20_info=None,
+                )
+            # pass on any other reason
+            raise reason
+
         def cb(resp):
             try:
                 if resp['hashtype'] != 'unlockhash':
@@ -271,12 +284,14 @@ class TFChainClient:
                     transactions=transactions,
                     multisig_addresses=multisig_addresses,
                     erc20_info=erc20_info,
-                    client=self)
+                )
             except KeyError as exc:
                 # return a KeyError as an invalid Explorer Response
                 raise tferrors.ExplorerInvalidResponse(str(exc), endpoint, resp) from exc
 
-        return jsasync.chain(ec.explorer_get(endpoint=endpoint), cb)
+        return jsasync.catch_promise(
+            jsasync.chain(ec.explorer_get(endpoint=endpoint), cb),
+            catch_no_content)
 
 
     def coin_output_get(self, id):
@@ -521,17 +536,13 @@ class BlockchainConstants:
 
 
 class ExplorerUnlockhashResult():
-    def __init__(self, unlockhash, transactions, multisig_addresses, erc20_info, client=None):
+    def __init__(self, unlockhash, transactions, multisig_addresses, erc20_info):
         """
         All the info found for a given unlock hash, as reported by an explorer.
         """
         self._unlockhash = unlockhash
-        self._transactions = transactions
-        self._multisig_addresses = multisig_addresses
-        # client is optionally used to get additional info in a lazy manner should it be needed
-        if client is not None and not isinstance(client, TFChainClient):
-            raise TypeError("client cannot be set to a value of type {}".format(type(client)))
-        self._client = client
+        self._transactions = transactions or []
+        self._multisig_addresses = multisig_addresses or []
         self._erc20_info = erc20_info
     
     @property
@@ -563,64 +574,58 @@ class ExplorerUnlockhashResult():
 #         return "Found {} transaction(s) and {} multisig address(es) for {}".format(
 #             len(self._transactions), len(self._multisig_addresses), str(self._unlockhash))
 
-#     def balance(self, info=None):
-#         """
-#         Compute a balance report for the defined unlockhash,
-#         based on the transactions of this report.
-#         """
-#         if self._unlockhash.type == UnlockHashType.MULTI_SIG:
-#             balance = self._multisig_balance(info)
-#         else:
-#             balance = WalletBalance()
-#             # collect the balance
-#             address = str(self.unlockhash)
-#             for txn in self.transactions:
-#                 for ci in txn.coin_inputs:
-#                     if str(ci.parent_output.condition.unlockhash) == address:
-#                         balance.output_add(ci.parent_output, confirmed=(not txn.unconfirmed), spent=True)
-#                 for co in txn.coin_outputs:
-#                     if str(co.condition.unlockhash) == address:
-#                         balance.output_add(co, confirmed=(not txn.unconfirmed), spent=False)
-#         # if a client is set, attach the current chain info to it
-#         info = self._get_info(info)
-#         if info is not None:
-#             balance.chain_height = info.height
-#             balance.chain_time = info.timestamp
-#             balance.chain_blockid = info.blockid
-#         return balance
+    def balance(self, info=None):
+        """
+        Compute a balance report for the defined unlockhash,
+        based on the transactions of this report.
+        """
+        if self._unlockhash.type == UnlockHashType.MULTI_SIG:
+            balance = self._multisig_balance(info)
+        else:
+            balance = WalletBalance()
+            # collect the balance
+            address = self.unlockhash.__str__()
+            for txn in self.transactions:
+                for ci in txn.coin_inputs:
+                    if ci.parent_output.condition.unlockhash.__str__() == address:
+                        balance.output_add(ci.parent_output, confirmed=(not txn.unconfirmed), spent=True)
+                for co in txn.coin_outputs:
+                    if co.condition.unlockhash.__str__() == address:
+                        balance.output_add(co, confirmed=(not txn.unconfirmed), spent=False)
+        # if a client is set, attach the current chain info to it
+        if info is not None:
+            balance.chain_height = info.height
+            balance.chain_time = info.timestamp
+            balance.chain_blockid = info.blockid
+        return balance
     
-#     def _multisig_balance(self, info):
-#         balance = None
-#         # collect the balance
-#         address = str(self.unlockhash)
-#         for txn in self.transactions:
-#             for ci in txn.coin_inputs:
-#                 if str(ci.parent_output.condition.unlockhash) == address:
-#                     oc = ci.parent_output.condition.unwrap()
-#                     if not isinstance(oc, ConditionMultiSignature):
-#                         raise TypeError("multi signature's output condition cannot be of type {} (expected: ConditionMultiSignature)".format(type(oc)))
-#                     if balance is None:
-#                         balance = MultiSigWalletBalance(owners=oc.unlockhashes, signature_count=oc.required_signatures)
-#                     balance.output_add(ci.parent_output, confirmed=(not txn.unconfirmed), spent=True)
-#             for co in txn.coin_outputs:
-#                 if str(co.condition.unlockhash) == address:
-#                     oc = co.condition.unwrap()
-#                     if not isinstance(oc, ConditionMultiSignature):
-#                         raise TypeError("multi signature's output condition cannot be of type {} (expected: ConditionMultiSignature)".format(type(oc)))
-#                     if balance is None:
-#                         balance = MultiSigWalletBalance(owners=oc.unlockhashes, signature_count=oc.required_signatures)
-#                     balance.output_add(co, confirmed=(not txn.unconfirmed), spent=False)
-#             if isinstance(txn, TransactionV128):
-#                 oc = txn.mint_condition
-#                 balance = MultiSigWalletBalance(owners=oc.unlockhashes, signature_count=oc.required_signatures)
-#         if balance is None:
-#             return WalletBalance() # return empty balance
-#         return balance
-
-#     def _get_info(self, info):
-#         if info is not None or self._client is None:
-#             return info
-#         return self._client.blockchain_info_get()
+    def _multisig_balance(self, info):
+        balance = None
+        # collect the balance
+        address = str(self.unlockhash)
+        for txn in self.transactions:
+            for ci in txn.coin_inputs:
+                if str(ci.parent_output.condition.unlockhash) == address:
+                    oc = ci.parent_output.condition.unwrap()
+                    if not isinstance(oc, ConditionMultiSignature):
+                        raise TypeError("multi signature's output condition cannot be of type {} (expected: ConditionMultiSignature)".format(type(oc)))
+                    if balance is None:
+                        balance = MultiSigWalletBalance(owners=oc.unlockhashes, signature_count=oc.required_signatures)
+                    balance.output_add(ci.parent_output, confirmed=(not txn.unconfirmed), spent=True)
+            for co in txn.coin_outputs:
+                if str(co.condition.unlockhash) == address:
+                    oc = co.condition.unwrap()
+                    if not isinstance(oc, ConditionMultiSignature):
+                        raise TypeError("multi signature's output condition cannot be of type {} (expected: ConditionMultiSignature)".format(type(oc)))
+                    if balance is None:
+                        balance = MultiSigWalletBalance(owners=oc.unlockhashes, signature_count=oc.required_signatures)
+                    balance.output_add(co, confirmed=(not txn.unconfirmed), spent=False)
+            if isinstance(txn, TransactionV128):
+                oc = txn.mint_condition
+                balance = MultiSigWalletBalance(owners=oc.unlockhashes, signature_count=oc.required_signatures)
+        if balance is None:
+            return WalletBalance() # return empty balance
+        return balance
 
 class ERC20AddressInfo():
     """

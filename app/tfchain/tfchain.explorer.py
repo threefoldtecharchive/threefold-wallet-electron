@@ -45,6 +45,8 @@ class Client:
                 return jsobj.as_dict(result.data)
             if result.code == 204 or (result.code == 400 and ('unrecognized hash' in result.data or 'not found' in result.data)):
                 raise tferrors.ExplorerNoContent("GET: no content available (code: 204)", endpoint)
+            if result.code == 400: # are there other error codes?
+                raise tferrors.ExplorerBadRequest("error (code: {}): {}".format(result.code, result.data), endpoint)
             raise tferrors.ExplorerServerError("error (code: {}): {}".format(result.code, result.data), endpoint)
 
         address = self._addresses[0]
@@ -61,6 +63,8 @@ class Client:
                 raise TypeError("explorer address expected to be a string, not {}".format(type(address)))
             resource = address+endpoint
             def cb(reason):
+                if isinstance(reason, tferrors.ExplorerUserError):
+                    raise reason # no need to retry user errors
                 print("retrying on another server, previous GET call failed: {}".format(reason))
                 # do the request and check the response
                 return jsasync.chain(jshttp.http_get(resource), resolve)
@@ -68,6 +72,9 @@ class Client:
 
         # define final catch cb, as a last fallback
         def final_catch(reason):
+            # pass on user errors
+            if isinstance(reason, tferrors.ExplorerUserError):
+                raise reason # no need to retry user errors
             print("servers exhausted, previous GET call failed as well: {}".format(reason))
             raise tferrors.ExplorerNotAvailable("no explorer was available", endpoint, self._addresses)
 

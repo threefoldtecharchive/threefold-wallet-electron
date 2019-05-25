@@ -196,7 +196,7 @@ export var promise_pool_new = function (generator, limit, cb) {
 	else {
 	}
 	if (limit === null || !(isinstance (limit, int))) {
-		var limit = 3;
+		var limit = 8;
 	}
 	else if (limit < 1) {
 		var limit = 1;

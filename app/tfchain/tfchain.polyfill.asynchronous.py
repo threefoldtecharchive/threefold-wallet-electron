@@ -58,7 +58,7 @@ def wait(*promises):
 def promise_pool_new(generator, limit=None, cb=None):
     # fix limit param
     if limit is None or not isinstance(limit, int):
-        limit = 3
+        limit = 8
     elif limit < 1:
         limit = 1
 
