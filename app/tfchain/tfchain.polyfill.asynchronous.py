@@ -55,12 +55,13 @@ def wait(*promises):
     """)
     return p
 
-def promise_pool_new(generator, limit=None):
+def promise_pool_new(generator, limit=None, cb=None):
     # fix limit param
     if limit is None or not isinstance(limit, int):
-        limit = 3
+        limit = 8
     elif limit < 1:
         limit = 1
+
     # wrap generator as producer
     g = generator()
     def producer():
@@ -75,13 +76,22 @@ def promise_pool_new(generator, limit=None):
             """)
             return result
         return result.value
+
     # create the pool, start it and return as a promise
     pool = jspromisepool.Pool(producer, limit)
-    # TODO: make this streaming somehow
-    results = []
+    results = None
+    if cb is None:
+        results = []
+        cb = lambda result: results.append(result)
     def fulfilled_cb(event):
-        results.append(event.data.result)
+        cb(event.data.result)
     pool.addEventListener('fulfilled', fulfilled_cb)
-    def pool_then_cb():
-        return results
-    return chain(pool.start(), pool_then_cb)
+
+    # start pool
+    p = pool.start()
+
+    # if a cb was defined, do not chain,
+    # otherwise chain a cb to return the kept results
+    if results is None:
+        return p
+    return chain(p, lambda _: results)

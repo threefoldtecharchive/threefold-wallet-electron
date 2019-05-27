@@ -1,7 +1,9 @@
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __proxy__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, abs, all, any, assert, bool, bytearray, bytes, callable, chr, copy, deepcopy, delattr, dict, dir, divmod, enumerate, filter, float, getattr, hasattr, input, int, isinstance, issubclass, len, list, map, max, min, object, ord, pow, print, property, py_TypeError, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
 import {Currency} from './tfchain.types.PrimitiveTypes.js';
 import {UnlockHash, UnlockHashType} from './tfchain.types.ConditionTypes.js';
+import * as tfwallet from './tfchain.wallet.js';
 import * as tfclient from './tfchain.client.js';
+import * as wbalance from './tfchain.balance.js';
 import * as tfexplorer from './tfchain.explorer.js';
 import * as tfnetwork from './tfchain.network.js';
 import * as tfsiabin from './tfchain.encoding.siabin.js';
@@ -11,6 +13,7 @@ import * as jshex from './tfchain.polyfill.encoding.hex.js';
 import * as jsjson from './tfchain.polyfill.encoding.json.js';
 import * as jsasync from './tfchain.polyfill.asynchronous.js';
 import * as jscrypto from './tfchain.polyfill.crypto.js';
+import * as jslog from './tfchain.polyfill.log.js';
 var __name__ = '__main__';
 export var __bip39 = bip39.Mnemonic ();
 export var Account =  __class__ ('Account', [object], {
@@ -487,7 +490,7 @@ export var Account =  __class__ ('Account', [object], {
 				}
 				else {
 				}
-				return Balance (self._network_type, __kwargtrans__ ({amount: 0}));
+				return Balance (self._network_type);
 			};
 			return jsasync.as_promise (no_balance_cb);
 		}
@@ -559,12 +562,10 @@ export var Wallet =  __class__ ('Wallet', [object], {
 		}
 		else {
 		}
-		self._network_type = network_type;
-		self._explorer_client = explorer_client;
+		self._start_index = start_index;
 		self._wallet_index = wallet_index;
 		self._wallet_name = wallet_name;
-		self._start_index = start_index;
-		self._pairs = pairs;
+		self._tfwallet = tfwallet.TFChainWallet (network_type, pairs, explorer_client);
 	});},
 	get clone () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -580,9 +581,9 @@ export var Wallet =  __class__ ('Wallet', [object], {
 		}
 		else {
 		}
-		return Wallet (self._network_type, self._explorer_client, self._wallet_index, self._wallet_name, self._start_index, (function () {
+		return Wallet (tfnetwork.Type (self._tfwallet.network_type), self._tfwallet.client.clone (), self._wallet_index, self._wallet_name, self._start_index, (function () {
 			var __accu0__ = [];
-			for (var pair of self._pairs) {
+			for (var pair of self._tfwallet.pairs) {
 				__accu0__.append (pair);
 			}
 			return __accu0__;
@@ -650,11 +651,7 @@ export var Wallet =  __class__ ('Wallet', [object], {
 		}
 		else {
 		}
-		var addresses = self.addresses;
-		if (!(addresses)) {
-			return '';
-		}
-		return addresses [0];
+		return self._tfwallet.address;
 	});},
 	get _get_addresses () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -670,13 +667,7 @@ export var Wallet =  __class__ ('Wallet', [object], {
 		}
 		else {
 		}
-		var addresses = [];
-		for (var pair of self._pairs) {
-			var uh = UnlockHash (__kwargtrans__ ({uhtype: UnlockHashType.PUBLIC_KEY, uhhash: pair.key_public}));
-			var address = uh.__str__ ();
-			addresses.append (address);
-		}
-		return addresses;
+		return self._tfwallet.addresses;
 	});},
 	get _get_address_count () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -692,7 +683,7 @@ export var Wallet =  __class__ ('Wallet', [object], {
 		}
 		else {
 		}
-		return len (self._pairs);
+		return self._tfwallet.address_count;
 	});},
 	get _get_balance () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -709,36 +700,23 @@ export var Wallet =  __class__ ('Wallet', [object], {
 		else {
 		}
 		var wallet = self.clone ();
-		var cb = function () {
+		var create_api_balance_obj = function (balance) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
 				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'balance': var balance = __allkwargs0__ [__attrib0__]; break;
+						}
 					}
 				}
 			}
 			else {
 			}
-			return wallet.balance_sync;
+			return Balance (wallet._tfwallet.network_type, balance);
 		};
-		return jsasync.as_promise (cb);
-	});},
-	get _get_balance_sync () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		return Balance (self._network_type);
+		return jsasync.chain (wallet._tfwallet.balance, create_api_balance_obj);
 	});},
 	get transaction_new () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -757,7 +735,6 @@ export var Wallet =  __class__ ('Wallet', [object], {
 		return CoinTransactionBuilder (self);
 	});}
 });
-Object.defineProperty (Wallet, 'balance_sync', property.call (Wallet, Wallet._get_balance_sync));
 Object.defineProperty (Wallet, 'balance', property.call (Wallet, Wallet._get_balance));
 Object.defineProperty (Wallet, 'address_count', property.call (Wallet, Wallet._get_address_count));
 Object.defineProperty (Wallet, 'addresses', property.call (Wallet, Wallet._get_addresses));
@@ -859,30 +836,32 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 		else {
 		}
 		var wallet = self._wallet.clone ();
-		var cb = function () {
+		var cb = function (balance) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
 				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'balance': var balance = __allkwargs0__ [__attrib0__]; break;
+						}
 					}
 				}
 			}
 			else {
 			}
-			var balance = wallet.balance_sync;
 			print ('Sent from wallet {} succesfully with an input balance of {} TFT!'.format (wallet.wallet_name, balance.coins_total));
 			return '66ccdf3a0bca58025be7fdc71f3f6bfbd6ed6287aa698a131734a947c71a3bbf';
 		};
 		print ('Sending from wallet {}...'.format (wallet.wallet_name));
-		return jsasync.chain (jsasync.sleep (3000), cb);
+		return jsasync.chain (wallet.balance, cb);
 	});}
 });
 export var Balance =  __class__ ('Balance', [object], {
 	__module__: __name__,
-	get __init__ () {return __get__ (this, function (self, network_type, amount) {
-		if (typeof amount == 'undefined' || (amount != null && amount.hasOwnProperty ("__kwargtrans__"))) {;
-			var amount = null;
+	get __init__ () {return __get__ (this, function (self, network_type, tfbalance) {
+		if (typeof tfbalance == 'undefined' || (tfbalance != null && tfbalance.hasOwnProperty ("__kwargtrans__"))) {;
+			var tfbalance = null;
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -892,25 +871,30 @@ export var Balance =  __class__ ('Balance', [object], {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
 						case 'network_type': var network_type = __allkwargs0__ [__attrib0__]; break;
-						case 'amount': var amount = __allkwargs0__ [__attrib0__]; break;
+						case 'tfbalance': var tfbalance = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
 		}
 		else {
 		}
-		if (amount === null) {
-			self._amount = 1;
+		if (!(isinstance (network_type, tfnetwork.Type))) {
+			var __except0__ = py_TypeError ('network_type has to be of type tfchain.network.Type, not be of type {}'.format (py_typeof (network_type)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		self._network_type = network_type;
+		if (tfbalance === null) {
+			self._tfbalance = wbalance.WalletBalance ();
 		}
 		else {
-			if (!(isinstance (amount, int))) {
-				var __except0__ = py_TypeError ('amount can only be int or None, not be of type {}'.format (py_typeof (amount)));
+			if (!(isinstance (tfbalance, wbalance.WalletBalance))) {
+				var __except0__ = py_TypeError ('tfbalance has to be of type tfchain.balance.WalletBalance, not be of type {}'.format (py_typeof (tfbalance)));
 				__except0__.__cause__ = null;
 				throw __except0__;
 			}
-			self._amount = max (amount, 0);
+			self._tfbalance = tfbalance;
 		}
-		self._network_type = network_type;
 	});},
 	get merge () {return __get__ (this, function (self, other) {
 		if (arguments.length) {
@@ -932,7 +916,7 @@ export var Balance =  __class__ ('Balance', [object], {
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		return Balance (__kwargtrans__ ({network_type: self._network_type, amount: self._amount + other._amount}));
+		return Balance (__kwargtrans__ ({network_type: self._network_type, tfbalance: wbalance.WalletBalance ().balance_add (self._tfbalance).balance_add (other._tfbalance)}));
 	});},
 	get spend_amount_is_valid () {return __get__ (this, function (self, amount) {
 		if (arguments.length) {
@@ -981,7 +965,7 @@ export var Balance =  __class__ ('Balance', [object], {
 		}
 		else {
 		}
-		return Currency (jsstr.from_int (self._amount));
+		return self._tfbalance.available;
 	});},
 	get _get_coins_locked () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -997,7 +981,7 @@ export var Balance =  __class__ ('Balance', [object], {
 		}
 		else {
 		}
-		return Currency (jsstr.from_int (self._amount));
+		return self._tfbalance.locked;
 	});},
 	get _get_coins_total () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -1031,7 +1015,7 @@ export var Balance =  __class__ ('Balance', [object], {
 		else {
 		}
 		UnlockHash.from_str (address);
-		return Balance (self._network_type, __mod__ (jshex.hex_to_int (address [3]), 9) + 1);
+		return Balance (self._network_type, self._tfbalance);
 	});},
 	get _get_transactions () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -1495,7 +1479,7 @@ export var mnemonic_is_valid = function (mnemonic) {
 	catch (__except0__) {
 		if (isinstance (__except0__, Exception)) {
 			var e = __except0__;
-			print (e);
+			jslog.debug (e);
 			return false;
 		}
 		else {

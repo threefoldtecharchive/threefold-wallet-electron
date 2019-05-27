@@ -70,6 +70,39 @@ def as_dict(dv):# add _get_or method
     # return dict
     return dv
 
+def dict_values(obj):
+    if not isinstance(obj, dict):
+        vals = None
+        __pragma__("js", "{}", """
+        vals = Object.values(obj);
+        """)
+        return vals
+    return list(obj.values())
+
+def get_attr(obj, k, d=None):
+    attr = None
+    __pragma__("js", "{}", """
+    attr = obj.k;
+    if (attr === undefined || attr == null) {
+        attr = d;
+    }
+    """)
+    return attr
+
+def get_items(obj):
+    ontries = None
+    __pragma__("js", "{}", """
+    ontries = Object.entries(obj);
+    """)
+    return ontries
+
+def get_keys(obj):
+    okeys = None
+    __pragma__("js", "{}", """
+    okeys = Object.keys(obj);
+    """)
+    return okeys
+
 def is_bool(obj):
     _, ok = try_as_bool(obj)
     return ok

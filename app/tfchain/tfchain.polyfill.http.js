@@ -40,10 +40,14 @@ export var http_get = function (resource, headers) {
 	                };
 	            });
 	        }
-	        return response.json().then(function(data) {
+	        return response.text().then(function(data) {
+	            let message;
+	            try {
+	                message = JSON.parse(data).message;
+	            } catch(e) {}
 	            return {
 	                code: response.status,
-	                data: data.message || ("GET request to " + resource + " failed with status code " + response.status),
+	                data: message || ("GET request to " + resource + " failed with status code " + response.status),
 	            };
 	        });
 	    });

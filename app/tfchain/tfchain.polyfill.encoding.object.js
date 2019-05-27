@@ -162,6 +162,97 @@ export var as_dict = function (dv) {
 	    
 	return dv;
 };
+export var dict_values = function (obj) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'obj': var obj = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (!(isinstance (obj, dict))) {
+		var vals = null;
+		
+		        vals = Object.values(obj);
+		        
+		return vals;
+	}
+	return list (obj.py_values ());
+};
+export var get_attr = function (obj, k, d) {
+	if (typeof d == 'undefined' || (d != null && d.hasOwnProperty ("__kwargtrans__"))) {;
+		var d = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'obj': var obj = __allkwargs0__ [__attrib0__]; break;
+					case 'k': var k = __allkwargs0__ [__attrib0__]; break;
+					case 'd': var d = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	var attr = null;
+	
+	    attr = obj.k;
+	    if (attr === undefined || attr == null) {
+	        attr = d;
+	    }
+	    
+	return attr;
+};
+export var get_items = function (obj) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'obj': var obj = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	var ontries = null;
+	
+	    ontries = Object.entries(obj);
+	    
+	return ontries;
+};
+export var get_keys = function (obj) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'obj': var obj = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	var okeys = null;
+	
+	    okeys = Object.keys(obj);
+	    
+	return okeys;
+};
 export var is_bool = function (obj) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;

@@ -79,7 +79,7 @@ def index_of(arr, x):
 def is_empty(arr):
     result = False
     __pragma__("js", "{}", """
-    result = (a === null || a.length === 0);
+    result = (arr === null || arr.length === 0);
     """)
     return result or not arr or len(arr) == 0
 
@@ -93,3 +93,25 @@ def sort(arr, f, reverse=False):
         arr.reverse();
         """)
     return arr
+
+def pop(arr, index=None):
+    if isinstance(arr, list):
+        return arr.pop(index)
+    if index is None:
+        val = None
+        __pragma__("js", "{}", """
+        val = arr.pop();
+        """)
+        return val
+    if index == 0:
+        val = None
+        __pragma__("js", "{}", """
+        val = arr.shift();
+        """)
+        return val
+    val = None
+    __pragma__("js", "{}", """
+    val = arr[index];
+    delete arr[index];
+    """)
+    return val

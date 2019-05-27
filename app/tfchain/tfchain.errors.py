@@ -2,6 +2,8 @@
 Public TFChain Errors
 """
 
+import tfchain.polyfill.encoding.object as jsobj
+
 from datetime import datetime
 
 class InvalidPublicKeySpecifier(Exception):
@@ -79,9 +81,19 @@ class ExplorerError(Exception):
         return self._endpoint
 
 
-class ExplorerNoContent(ExplorerError):
+class ExplorerUserError(ExplorerError):
+    """
+    ExplorerUserError error
+    """
+
+class ExplorerNoContent(ExplorerUserError):
     """
     ExplorerNoContent error
+    """
+
+class ExplorerBadRequest(ExplorerUserError):
+    """
+    ExplorerBadRequest error
     """
 
 class ExplorerServerError(ExplorerError):
@@ -127,7 +139,7 @@ class ExplorerInvalidResponse(ExplorerError):
     """
     def __init__(self, message, endpoint, response):
         super().__init__(message, endpoint)
-        if not isinstance(response, dict):
+        if not isinstance(response, dict) and not jsobj.is_js_obj(response):
             raise TypeError("invalid response, expected it to be of type dict not {}".format(type(response)))
         self._response = response
 

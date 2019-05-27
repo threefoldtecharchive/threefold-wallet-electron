@@ -566,6 +566,28 @@ export var Currency =  __class__ ('Currency', [BaseDataTypeClass], {
 		self._value = null;
 		self.value = value;
 	});},
+	get sum () {return __getcm__ (this, function (cls) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+			var py_values = tuple ([].slice.apply (arguments).slice (1, __ilastarg0__ + 1));
+		}
+		else {
+			var py_values = tuple ();
+		}
+		var s = cls ();
+		for (var value of py_values) {
+			s.__iadd__ (value);
+		}
+		return s;
+	});},
 	get from_str () {return __getcm__ (this, function (cls, obj, lowest_unit) {
 		if (typeof lowest_unit == 'undefined' || (lowest_unit != null && lowest_unit.hasOwnProperty ("__kwargtrans__"))) {;
 			var lowest_unit = false;
@@ -630,9 +652,6 @@ export var Currency =  __class__ ('Currency', [BaseDataTypeClass], {
 			}
 		}
 		else {
-		}
-		if (self._value === null) {
-			return jsdec.Decimal ();
 		}
 		return self._value;
 	});},
@@ -805,7 +824,7 @@ export var Currency =  __class__ ('Currency', [BaseDataTypeClass], {
 		else {
 		}
 		if (value === null) {
-			self._value = null;
+			self._value = jsdec.Decimal ();
 			return ;
 		}
 		if (isinstance (value, Currency)) {
@@ -896,7 +915,7 @@ export var Currency =  __class__ ('Currency', [BaseDataTypeClass], {
 		if (!(isinstance (other, Currency))) {
 			return self.__iadd__ (Currency (other));
 		}
-		self.value.__iadd__ (other.value);
+		self._value.__iadd__ (other.value);
 		return self;
 	});},
 	get __mul__ () {return __get__ (this, function (self, other) {
@@ -954,7 +973,7 @@ export var Currency =  __class__ ('Currency', [BaseDataTypeClass], {
 		if (!(isinstance (other, Currency))) {
 			return self.__imul__ (Currency (other));
 		}
-		self.value.__imul__ (other.value);
+		self._value.__imul__ (other.value);
 		return self;
 	});},
 	get __sub__ () {return __get__ (this, function (self, other) {
@@ -1012,7 +1031,7 @@ export var Currency =  __class__ ('Currency', [BaseDataTypeClass], {
 		if (!(isinstance (other, Currency))) {
 			return self.__isub__ (Currency (other));
 		}
-		self.value -= other.value;
+		self._value.__isub__ (other.value);
 		return self;
 	});},
 	get __lt__ () {return __get__ (this, function (self, other) {

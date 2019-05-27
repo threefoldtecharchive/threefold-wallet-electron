@@ -2,17 +2,19 @@ import {AssertionError, AttributeError, BaseException, DeprecationWarning, Excep
 import {BlockstakeOutput, CoinOutput} from './tfchain.types.IO.js';
 import {ERC20Address} from './tfchain.types.ERC20.js';
 import {Currency, Hash} from './tfchain.types.PrimitiveTypes.js';
-import {UnlockHash, UnlockHashType} from './tfchain.types.ConditionTypes.js';
+import {ConditionMultiSignature, UnlockHash, UnlockHashType} from './tfchain.types.ConditionTypes.js';
+import {TransactionV128} from './tfchain.types.transactions.Minting.js';
 import {TransactionBaseClass} from './tfchain.types.transactions.Base.js';
 import * as transactions from './tfchain.types.transactions.js';
 import * as ConditionTypes from './tfchain.types.ConditionTypes.js';
+import {MultiSigWalletBalance, WalletBalance} from './tfchain.balance.js';
+import * as tfexplorer from './tfchain.explorer.js';
+import * as tferrors from './tfchain.errors.js';
 import * as jsarr from './tfchain.polyfill.array.js';
 import * as jsdate from './tfchain.polyfill.date.js';
 import * as jsasync from './tfchain.polyfill.asynchronous.js';
 import * as jsstr from './tfchain.polyfill.encoding.str.js';
 import * as jsobj from './tfchain.polyfill.encoding.object.js';
-import * as tfexplorer from './tfchain.explorer.js';
-import * as tferrors from './tfchain.errors.js';
 var __name__ = 'tfchain.client';
 export var TFChainClient =  __class__ ('TFChainClient', [object], {
 	__module__: __name__,
@@ -454,6 +456,27 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 		var ec = self.clone ();
 		var unlockhash = ConditionTypes.from_recipient (target).unlockhash.__str__ ();
 		var endpoint = '/explorer/hashes/' + unlockhash;
+		var catch_no_content = function (reason) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'reason': var reason = __allkwargs0__ [__attrib0__]; break;
+						}
+					}
+				}
+			}
+			else {
+			}
+			if (isinstance (reason, tferrors.ExplorerNoContent)) {
+				return ExplorerUnlockhashResult (__kwargtrans__ ({unlockhash: UnlockHash.from_json (unlockhash), transactions: [], multisig_addresses: null, erc20_info: null}));
+			}
+			var __except0__ = reason;
+			__except0__.__cause__ = null;
+			throw __except0__;
+		};
 		var cb = function (resp) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
@@ -518,7 +541,7 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 					return height_a - height_b;
 				};
 				var transactions = jsarr.py_sort (transactions, txn_arr_sort, __kwargtrans__ ({reverse: true}));
-				return ExplorerUnlockhashResult (__kwargtrans__ ({unlockhash: UnlockHash.from_json (unlockhash), transactions: transactions, multisig_addresses: multisig_addresses, erc20_info: erc20_info, client: self}));
+				return ExplorerUnlockhashResult (__kwargtrans__ ({unlockhash: UnlockHash.from_json (unlockhash), transactions: transactions, multisig_addresses: multisig_addresses, erc20_info: erc20_info}));
 			}
 			catch (__except0__) {
 				if (isinstance (__except0__, KeyError)) {
@@ -532,7 +555,7 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 				}
 			}
 		};
-		return jsasync.chain (ec.explorer_get (__kwargtrans__ ({endpoint: endpoint})), cb);
+		return jsasync.catch_promise (jsasync.chain (ec.explorer_get (__kwargtrans__ ({endpoint: endpoint})), cb), catch_no_content);
 	});},
 	get coin_output_get () {return __get__ (this, function (self, id) {
 		if (arguments.length) {
@@ -1076,10 +1099,7 @@ Object.defineProperty (BlockchainConstants, 'chain_version', property.call (Bloc
 Object.defineProperty (BlockchainConstants, 'chain_name', property.call (BlockchainConstants, BlockchainConstants._get_chain_name));;
 export var ExplorerUnlockhashResult =  __class__ ('ExplorerUnlockhashResult', [object], {
 	__module__: __name__,
-	get __init__ () {return __get__ (this, function (self, unlockhash, transactions, multisig_addresses, erc20_info, client) {
-		if (typeof client == 'undefined' || (client != null && client.hasOwnProperty ("__kwargtrans__"))) {;
-			var client = null;
-		};
+	get __init__ () {return __get__ (this, function (self, unlockhash, transactions, multisig_addresses, erc20_info) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -1091,7 +1111,6 @@ export var ExplorerUnlockhashResult =  __class__ ('ExplorerUnlockhashResult', [o
 						case 'transactions': var transactions = __allkwargs0__ [__attrib0__]; break;
 						case 'multisig_addresses': var multisig_addresses = __allkwargs0__ [__attrib0__]; break;
 						case 'erc20_info': var erc20_info = __allkwargs0__ [__attrib0__]; break;
-						case 'client': var client = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
@@ -1099,14 +1118,8 @@ export var ExplorerUnlockhashResult =  __class__ ('ExplorerUnlockhashResult', [o
 		else {
 		}
 		self._unlockhash = unlockhash;
-		self._transactions = transactions;
-		self._multisig_addresses = multisig_addresses;
-		if (client !== null && !(isinstance (client, TFChainClient))) {
-			var __except0__ = py_TypeError ('client cannot be set to a value of type {}'.format (py_typeof (client)));
-			__except0__.__cause__ = null;
-			throw __except0__;
-		}
-		self._client = client;
+		self._transactions = transactions || [];
+		self._multisig_addresses = multisig_addresses || [];
 		self._erc20_info = erc20_info;
 	});},
 	get _get_unlockhash () {return __get__ (this, function (self) {
@@ -1172,6 +1185,106 @@ export var ExplorerUnlockhashResult =  __class__ ('ExplorerUnlockhashResult', [o
 		else {
 		}
 		return self._erc20_info;
+	});},
+	get balance () {return __get__ (this, function (self, info) {
+		if (typeof info == 'undefined' || (info != null && info.hasOwnProperty ("__kwargtrans__"))) {;
+			var info = null;
+		};
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'info': var info = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (self._unlockhash.py_metatype == UnlockHashType.MULTI_SIG) {
+			var balance = self._multisig_balance (info);
+		}
+		else {
+			var balance = WalletBalance ();
+			var address = self.unlockhash.__str__ ();
+			for (var txn of self.transactions) {
+				for (var ci of txn.coin_inputs) {
+					if (ci.parent_output.condition.unlockhash.__str__ () == address) {
+						balance.output_add (ci.parent_output, __kwargtrans__ ({confirmed: !(txn.unconfirmed), spent: true}));
+					}
+				}
+				for (var co of txn.coin_outputs) {
+					if (co.condition.unlockhash.__str__ () == address) {
+						balance.output_add (co, __kwargtrans__ ({confirmed: !(txn.unconfirmed), spent: false}));
+					}
+				}
+			}
+		}
+		if (info !== null) {
+			balance.chain_height = info.height;
+			balance.chain_time = info.timestamp;
+			balance.chain_blockid = info.blockid;
+		}
+		return balance;
+	});},
+	get _multisig_balance () {return __get__ (this, function (self, info) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'info': var info = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var balance = null;
+		var address = str (self.unlockhash);
+		for (var txn of self.transactions) {
+			for (var ci of txn.coin_inputs) {
+				if (str (ci.parent_output.condition.unlockhash) == address) {
+					var oc = ci.parent_output.condition.unwrap ();
+					if (!(isinstance (oc, ConditionMultiSignature))) {
+						var __except0__ = py_TypeError ("multi signature's output condition cannot be of type {} (expected: ConditionMultiSignature)".format (py_typeof (oc)));
+						__except0__.__cause__ = null;
+						throw __except0__;
+					}
+					if (balance === null) {
+						var balance = MultiSigWalletBalance (__kwargtrans__ ({owners: oc.unlockhashes, signature_count: oc.required_signatures}));
+					}
+					balance.output_add (ci.parent_output, __kwargtrans__ ({confirmed: !(txn.unconfirmed), spent: true}));
+				}
+			}
+			for (var co of txn.coin_outputs) {
+				if (str (co.condition.unlockhash) == address) {
+					var oc = co.condition.unwrap ();
+					if (!(isinstance (oc, ConditionMultiSignature))) {
+						var __except0__ = py_TypeError ("multi signature's output condition cannot be of type {} (expected: ConditionMultiSignature)".format (py_typeof (oc)));
+						__except0__.__cause__ = null;
+						throw __except0__;
+					}
+					if (balance === null) {
+						var balance = MultiSigWalletBalance (__kwargtrans__ ({owners: oc.unlockhashes, signature_count: oc.required_signatures}));
+					}
+					balance.output_add (co, __kwargtrans__ ({confirmed: !(txn.unconfirmed), spent: false}));
+				}
+			}
+			if (isinstance (txn, TransactionV128)) {
+				var oc = txn.mint_condition;
+				var balance = MultiSigWalletBalance (__kwargtrans__ ({owners: oc.unlockhashes, signature_count: oc.required_signatures}));
+			}
+		}
+		if (balance === null) {
+			return WalletBalance ();
+		}
+		return balance;
 	});}
 });
 Object.defineProperty (ExplorerUnlockhashResult, 'erc20_info', property.call (ExplorerUnlockhashResult, ExplorerUnlockhashResult._get_erc20_info));

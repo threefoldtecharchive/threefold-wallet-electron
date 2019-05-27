@@ -3,6 +3,7 @@ Contains the public Python API for the TFChain Wallet Desktop App,
 converted into Javascript (ES6) using Transcrypt.
 """
 
+import tfchain.polyfill.log as jslog
 import tfchain.polyfill.crypto as jscrypto
 import tfchain.polyfill.asynchronous as jsasync
 import tfchain.polyfill.encoding.json as jsjson
@@ -13,7 +14,9 @@ import tfchain.crypto.mnemonic as bip39
 import tfchain.encoding.siabin as tfsiabin
 import tfchain.network as tfnetwork
 import tfchain.explorer as tfexplorer
+import tfchain.balance as wbalance
 import tfchain.client as tfclient
+import tfchain.wallet as tfwallet
 
 from tfchain.types.ConditionTypes import UnlockHash, UnlockHashType
 from tfchain.types.PrimitiveTypes import Currency
@@ -323,7 +326,7 @@ class Account:
         wallets = self.wallets
         if len(wallets) == 0:
             def no_balance_cb():
-                return Balance(self._network_type, amount=0)
+                return Balance(self._network_type)
             return jsasync.as_promise(no_balance_cb)
         # create aggregaton cb
         def aggregate(balances):
@@ -362,12 +365,10 @@ class Wallet:
         :type start_index: int
         :param pairs: the key pairs as generated using the start_index and account's seed
         """
-        self._network_type = network_type
-        self._explorer_client = explorer_client
+        self._start_index = start_index
         self._wallet_index = wallet_index
         self._wallet_name = wallet_name
-        self._start_index = start_index
-        self._pairs = pairs
+        self._tfwallet = tfwallet.TFChainWallet(network_type, pairs, explorer_client)
 
     def clone(self):
         """
@@ -377,12 +378,12 @@ class Wallet:
         :rtype: Wallet
         """
         return Wallet(
-            self._network_type,
-            self._explorer_client,
+            tfnetwork.Type(self._tfwallet.network_type),
+            self._tfwallet.client.clone(),
             self._wallet_index,
             self._wallet_name,
             self._start_index,
-            [pair for pair in self._pairs],
+            [pair for pair in self._tfwallet.pairs],
         )
 
     @property
@@ -415,10 +416,7 @@ class Wallet:
         :returns: the first (default) address of this wallet
         :rtype: str
         """
-        addresses = self.addresses
-        if not addresses:
-            return ''
-        return addresses[0]
+        return self._tfwallet.address
 
     @property
     def addresses(self):
@@ -426,12 +424,7 @@ class Wallet:
         :returns: the addresses of this wallet
         :rtype: list (of sts)
         """
-        addresses = []
-        for pair in self._pairs:
-            uh = UnlockHash(uhtype=UnlockHashType.PUBLIC_KEY, uhhash=pair.key_public)
-            address = uh.__str__()
-            addresses.append(address)
-        return addresses
+        return self._tfwallet.addresses
 
     @property
     def address_count(self):
@@ -439,7 +432,7 @@ class Wallet:
         :returns: the address count of this wallet
         :rtype: int
         """
-        return len(self._pairs)
+        return self._tfwallet.address_count
 
     @property
     def balance(self):
@@ -448,17 +441,9 @@ class Wallet:
         :rtype: Balance
         """
         wallet = self.clone()
-        def cb():
-            return wallet.balance_sync
-        return jsasync.as_promise(cb)
-
-    @property
-    def balance_sync(self):
-        """
-        :returns: the current balance of this wallet (sync)
-        :rtype: Balance
-        """
-        return Balance(self._network_type)
+        def create_api_balance_obj(balance):
+            return Balance(wallet._tfwallet.network_type, balance)
+        return jsasync.chain(wallet._tfwallet.balance, create_api_balance_obj)
 
     def transaction_new(self):
         """
@@ -521,28 +506,32 @@ class CoinTransactionBuilder:
         :returns: a promise that resolves with a transaction ID or rejects with an Exception
         """
         wallet = self._wallet.clone()
-        def cb():
-            balance = wallet.balance_sync
+        def cb(balance):
             print("Sent from wallet {} succesfully with an input balance of {} TFT!".format(wallet.wallet_name, balance.coins_total))
             return '66ccdf3a0bca58025be7fdc71f3f6bfbd6ed6287aa698a131734a947c71a3bbf'
         print("Sending from wallet {}...".format(wallet.wallet_name))
-        return jsasync.chain(jsasync.sleep(3000), cb)
+        return jsasync.chain(wallet.balance, cb)
 
 
 class Balance:
-    def __init__(self, network_type, amount=None):
-        if amount is None:
-            self._amount = 1
-        else:
-            if not isinstance(amount, int):
-                raise TypeError("amount can only be int or None, not be of type {}".format(type(amount)))
-            self._amount = max(amount, 0)
+    def __init__(self, network_type, tfbalance=None):
+        if not isinstance(network_type, tfnetwork.Type):
+            raise TypeError("network_type has to be of type tfchain.network.Type, not be of type {}".format(type(network_type)))
         self._network_type = network_type
+        if tfbalance is None:
+            self._tfbalance = wbalance.WalletBalance()
+        else:
+            if not isinstance(tfbalance, wbalance.WalletBalance):
+                raise TypeError("tfbalance has to be of type tfchain.balance.WalletBalance, not be of type {}".format(type(tfbalance)))
+            self._tfbalance = tfbalance
 
     def merge(self, other):
         if self._network_type.__ne__(other._network_type):
             raise ValueError("miner fees of to-be-merged balance objects have to be equal")
-        return Balance(network_type=self._network_type, amount=self._amount+other._amount)
+        return Balance(
+            network_type=self._network_type,
+            tfbalance=wbalance.WalletBalance().balance_add(self._tfbalance).balance_add(other._tfbalance),
+        )
 
     def spend_amount_is_valid(self, amount):
         """
@@ -567,19 +556,20 @@ class Balance:
 
     @property
     def coins_unlocked(self):
-        return Currency(jsstr.from_int(self._amount))
+        return self._tfbalance.available
 
     @property
     def coins_locked(self):
-        return Currency(jsstr.from_int(self._amount))
+        return self._tfbalance.locked
 
     @property
     def coins_total(self):
         return self.coins_unlocked.plus(self.coins_locked)
 
     def address_filter(self, address):
+        # TODO: replace with real logic
         UnlockHash.from_str(address)
-        return Balance(self._network_type, jshex.hex_to_int(address[3])%9 + 1)
+        return Balance(self._network_type, self._tfbalance)
 
     @property
     def transactions(self):
@@ -905,7 +895,7 @@ def mnemonic_is_valid(mnemonic):
     try:
         return __bip39.check(mnemonic)
     except Exception as e:
-        print(e)
+        jslog.debug(e)
         return False
 
 def wallet_address_is_valid(address, multisig=True):

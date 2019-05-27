@@ -190,6 +190,13 @@ class Currency(BaseDataTypeClass):
         self.value = value
 
     @classmethod
+    def sum(cls, *values):
+        s = cls()
+        for value in values:
+            s.__iadd__(value)
+        return s
+
+    @classmethod
     def from_str(cls, obj, lowest_unit=False):
         if obj is not None and not isinstance(obj, str):
             raise TypeError(
@@ -208,8 +215,6 @@ class Currency(BaseDataTypeClass):
 
     @property
     def value(self):
-        if self._value is None:
-            return jsdec.Decimal()
         return self._value
 
     def plus(self, other):
@@ -235,7 +240,7 @@ class Currency(BaseDataTypeClass):
     @value.setter
     def value(self, value):
         if value is None:
-            self._value = None
+            self._value = jsdec.Decimal()
             return
         if isinstance(value, Currency):
             self._value = value.value
@@ -267,7 +272,7 @@ class Currency(BaseDataTypeClass):
     def __iadd__(self, other):
         if not isinstance(other, Currency):
             return self.__iadd__(Currency(other))
-        self.value.__iadd__(other.value)
+        self._value.__iadd__(other.value)
         return self
 
     # operator overloading to allow currencies to be multiplied
@@ -281,7 +286,7 @@ class Currency(BaseDataTypeClass):
     def __imul__(self, other):
         if not isinstance(other, Currency):
             return self.__imul__(Currency(other))
-        self.value.__imul__(other.value)
+        self._value.__imul__(other.value)
         return self
 
     # operator overloading to allow currencies to be subtracted
@@ -295,7 +300,7 @@ class Currency(BaseDataTypeClass):
     def __isub__(self, other):
         if not isinstance(other, Currency):
             return self.__isub__(Currency(other))
-        self.value -= other.value
+        self._value.__isub__(other.value)
         return self
 
     # operator overloading to allow currencies to be compared
