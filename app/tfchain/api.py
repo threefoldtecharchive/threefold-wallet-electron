@@ -237,13 +237,7 @@ class Account:
         # generate all key pairs for this wallet
         pairs = []
         for i in range(0, address_count):
-            # generate the entropy
-            encoder = tfsiabin.SiaBinaryEncoder()
-            encoder.add_array(self.seed)
-            encoder.add_int(start_index+i)
-            entropy = jscrypto.blake2b(encoder.data)
-            # generate key pair and add it to the list of pairs
-            pair = jscrypto.AssymetricSignKeyPair(entropy)
+            pair = tfwallet.assymetric_key_pair_generate(self.seed, start_index+i)
             pairs.append(pair)
         wallet = Wallet(self._network_type, self._explorer_client, wallet_index, wallet_name, start_index, pairs)
         self._validate_wallet_state(wallet)

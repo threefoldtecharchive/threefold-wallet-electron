@@ -6,14 +6,69 @@ import {PublicKey, PublicKeySpecifier} from './tfchain.types.CryptoTypes.js';
 import {CoinInput} from './tfchain.types.IO.js';
 import * as ConditionTypes from './tfchain.types.ConditionTypes.js';
 import * as transactions from './tfchain.types.transactions.js';
+import {SiaBinaryEncoder} from './tfchain.encoding.siabin.js';
 import {WalletsBalance} from './tfchain.balance.js';
 import {Type as NetworkType} from './tfchain.network.js';
 import * as tferrors from './tfchain.errors.js';
 import * as tfclient from './tfchain.client.js';
+import * as jscrypto from './tfchain.polyfill.crypto.js';
 import * as jsasync from './tfchain.polyfill.asynchronous.js';
 import * as jsarr from './tfchain.polyfill.array.js';
 import * as jsobj from './tfchain.polyfill.encoding.object.js';
 var __name__ = 'tfchain.wallet';
+export var assymetric_key_pair_generate = function (entropy, index) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'entropy': var entropy = __allkwargs0__ [__attrib0__]; break;
+					case 'index': var index = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (!(isinstance (entropy, tuple ([bytes, bytearray]))) && !(jsarr.is_uint8_array (entropy))) {
+		var __except0__ = py_TypeError ('entropy is of an invalid type {}'.format (py_typeof (entropy)));
+		__except0__.__cause__ = null;
+		throw __except0__;
+	}
+	if (!(isinstance (index, int))) {
+		var __except0__ = py_TypeError ('index is of an invalid type {}'.format (py_typeof (index)));
+		__except0__.__cause__ = null;
+		throw __except0__;
+	}
+	var encoder = SiaBinaryEncoder ();
+	encoder.add_array (entropy);
+	encoder.add_int (index);
+	var entropy = jscrypto.blake2b (encoder.data);
+	return jscrypto.AssymetricSignKeyPair (entropy);
+};
+export var unlockhash_from_assymetric_key_pair = function (pair) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'pair': var pair = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (!(isinstance (pair, jscrypto.AssymetricSignKeyPair))) {
+		var __except0__ = py_TypeError ('pair is of an invalid type {}'.format (py_typeof (pair)));
+		__except0__.__cause__ = null;
+		throw __except0__;
+	}
+	var pk = PublicKey (__kwargtrans__ ({specifier: PublicKeySpecifier.ED25519, hash: pair.key_public}));
+	return pk.unlockhash;
+};
 export var TFChainWallet =  __class__ ('TFChainWallet', [object], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, network_type, pairs, client) {
@@ -53,7 +108,7 @@ export var TFChainWallet =  __class__ ('TFChainWallet', [object], {
 		self._client = client;
 		self._addresses = [];
 		for (var pair of self._pairs) {
-			var uh = UnlockHash (__kwargtrans__ ({uhtype: UnlockHashType.PUBLIC_KEY, uhhash: pair.key_public}));
+			var uh = unlockhash_from_assymetric_key_pair (pair);
 			var address = uh.__str__ ();
 			self._addresses.append (address);
 		}

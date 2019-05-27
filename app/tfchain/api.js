@@ -344,11 +344,7 @@ export var Account =  __class__ ('Account', [object], {
 		var address_count = max (address_count, 1);
 		var pairs = [];
 		for (var i = 0; i < address_count; i++) {
-			var encoder = tfsiabin.SiaBinaryEncoder ();
-			encoder.add_array (self.seed);
-			encoder.add_int (start_index + i);
-			var entropy = jscrypto.blake2b (encoder.data);
-			var pair = jscrypto.AssymetricSignKeyPair (entropy);
+			var pair = tfwallet.assymetric_key_pair_generate (self.seed, start_index + i);
 			pairs.append (pair);
 		}
 		var wallet = Wallet (self._network_type, self._explorer_client, wallet_index, wallet_name, start_index, pairs);

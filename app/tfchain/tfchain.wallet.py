@@ -1,12 +1,14 @@
 import tfchain.polyfill.encoding.object as jsobj
 import tfchain.polyfill.array as jsarr
 import tfchain.polyfill.asynchronous as jsasync
+import tfchain.polyfill.crypto as jscrypto
 
 import tfchain.client as tfclient
 import tfchain.errors as tferrors
 
 from tfchain.network import Type as NetworkType
 from tfchain.balance import WalletsBalance
+from tfchain.encoding.siabin import SiaBinaryEncoder
 
 from tfchain.types import ConditionTypes, transactions
 from tfchain.types.IO import CoinInput
@@ -14,6 +16,23 @@ from tfchain.types.CryptoTypes import PublicKey, PublicKeySpecifier
 from tfchain.types.PrimitiveTypes import Hash, Currency
 from tfchain.types.ConditionTypes import UnlockHash, UnlockHashType, ConditionMultiSignature
 from tfchain.types.FulfillmentTypes import FulfillmentMultiSignature, PublicKeySignaturePair
+
+def assymetric_key_pair_generate(entropy, index):
+    if not isinstance(entropy, (bytes, bytearray)) and not jsarr.is_uint8_array(entropy):
+        raise TypeError("entropy is of an invalid type {}".format(type(entropy)))
+    if not isinstance(index, int):
+        raise TypeError("index is of an invalid type {}".format(type(index)))
+    encoder = SiaBinaryEncoder()
+    encoder.add_array(entropy)
+    encoder.add_int(index)
+    entropy = jscrypto.blake2b(encoder.data)
+    return jscrypto.AssymetricSignKeyPair(entropy)
+
+def unlockhash_from_assymetric_key_pair(pair):
+    if not isinstance(pair, jscrypto.AssymetricSignKeyPair):
+        raise TypeError("pair is of an invalid type {}".format(type(pair)))
+    pk = PublicKey(specifier=PublicKeySpecifier.ED25519, hash=pair.key_public)
+    return pk.unlockhash
 
 class TFChainWallet:
     """
@@ -34,7 +53,7 @@ class TFChainWallet:
         # store all addresses as well
         self._addresses = []
         for pair in self._pairs:
-            uh = UnlockHash(uhtype=UnlockHashType.PUBLIC_KEY, uhhash=pair.key_public)
+            uh = unlockhash_from_assymetric_key_pair(pair)
             address = uh.__str__()
             self._addresses.append(address)
 

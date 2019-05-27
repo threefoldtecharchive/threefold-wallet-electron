@@ -1,0 +1,8 @@
+{
+	"version": 3,
+	"file": "tfchain.tests.wallet.js",
+	"sources": [
+		"tfchain.tests.wallet.py"
+	],
+	"mappings": "AAAA;AAAA;AAMA;AAFA;AADA;AADA;AAFA;AAAA;AAQA;AAEA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AACA;AACA;AACA;AACA;AACA;AACA;AAAA;AAEA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AACA;AAAA;AAnBA"
+}
