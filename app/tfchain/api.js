@@ -1,6 +1,4 @@
-var tfchain = {};
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __proxy__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, abs, all, any, assert, bool, bytearray, bytes, callable, chr, copy, deepcopy, delattr, dict, dir, divmod, enumerate, filter, float, getattr, hasattr, input, int, isinstance, issubclass, len, list, map, max, min, object, ord, pow, print, property, py_TypeError, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
-import * as jslog from './tfchain.polyfill.log.js';
 import {Currency} from './tfchain.types.PrimitiveTypes.js';
 import {UnlockHash, UnlockHashType} from './tfchain.types.ConditionTypes.js';
 import * as tfwallet from './tfchain.wallet.js';
@@ -10,13 +8,14 @@ import * as tfexplorer from './tfchain.explorer.js';
 import * as tfnetwork from './tfchain.network.js';
 import * as tfsiabin from './tfchain.encoding.siabin.js';
 import * as bip39 from './tfchain.crypto.mnemonic.js';
+import * as jsobj from './tfchain.polyfill.encoding.object.js';
 import * as jsstr from './tfchain.polyfill.encoding.str.js';
 import * as jshex from './tfchain.polyfill.encoding.hex.js';
 import * as jsjson from './tfchain.polyfill.encoding.json.js';
+import * as jsfunc from './tfchain.polyfill.func.js';
 import * as jsasync from './tfchain.polyfill.asynchronous.js';
 import * as jscrypto from './tfchain.polyfill.crypto.js';
-import * as __module_tfchain_polyfill_log__ from './tfchain.polyfill.log.js';
-__nest__ (tfchain, 'polyfill.log', __module_tfchain_polyfill_log__);
+import * as jslog from './tfchain.polyfill.log.js';
 var __name__ = '__main__';
 export var __bip39 = bip39.Mnemonic ();
 export var Account =  __class__ ('Account', [object], {
@@ -76,21 +75,15 @@ export var Account =  __class__ ('Account', [object], {
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		var account = cls (account_name, password, __kwargtrans__ ({seed: jshex.bytes_from_hex (payload ['seed']), network_type: payload ['network_type'], explorer_addresses: payload ['explorer_addresses']}));
+		var account = cls (account_name, password, __kwargtrans__ ({opts: dict ({'seed': jshex.bytes_from_hex (payload ['seed']), 'network': payload ['network_type'], 'addresses': payload ['explorer_addresses']})}));
 		for (var data of payload ['wallets']) {
 			account.wallet_new (data.wallet_name, data.start_index, data.address_count);
 		}
 		return account;
 	});},
-	get __init__ () {return __get__ (this, function (self, account_name, password, seed, network_type, explorer_addresses) {
-		if (typeof seed == 'undefined' || (seed != null && seed.hasOwnProperty ("__kwargtrans__"))) {;
-			var seed = null;
-		};
-		if (typeof network_type == 'undefined' || (network_type != null && network_type.hasOwnProperty ("__kwargtrans__"))) {;
-			var network_type = null;
-		};
-		if (typeof explorer_addresses == 'undefined' || (explorer_addresses != null && explorer_addresses.hasOwnProperty ("__kwargtrans__"))) {;
-			var explorer_addresses = null;
+	get __init__ () {return __get__ (this, function (self, account_name, password, opts) {
+		if (typeof opts == 'undefined' || (opts != null && opts.hasOwnProperty ("__kwargtrans__"))) {;
+			var opts = null;
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -101,15 +94,17 @@ export var Account =  __class__ ('Account', [object], {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
 						case 'account_name': var account_name = __allkwargs0__ [__attrib0__]; break;
 						case 'password': var password = __allkwargs0__ [__attrib0__]; break;
-						case 'seed': var seed = __allkwargs0__ [__attrib0__]; break;
-						case 'network_type': var network_type = __allkwargs0__ [__attrib0__]; break;
-						case 'explorer_addresses': var explorer_addresses = __allkwargs0__ [__attrib0__]; break;
+						case 'opts': var opts = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
 		}
 		else {
 		}
+		var __left0__ = jsfunc.opts_get (opts, 'seed', 'network', 'addresses');
+		var seed = __left0__ [0];
+		var network_type = __left0__ [1];
+		var explorer_addresses = __left0__ [2];
 		if (!(account_name)) {
 			var __except0__ = ValueError ('no account_name is given, while it is required');
 			__except0__.__cause__ = null;
@@ -777,8 +772,10 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 		}
 		self._builder = wallet._tfwallet.coin_transaction_builder_new ();
 	});},
-	get output_add () {return __get__ (this, function (self, recipient, amount) {
-		var kwargs = dict ();
+	get output_add () {return __get__ (this, function (self, recipient, amount, opts) {
+		if (typeof opts == 'undefined' || (opts != null && opts.hasOwnProperty ("__kwargtrans__"))) {;
+			var opts = null;
+		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -788,23 +785,21 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
 						case 'recipient': var recipient = __allkwargs0__ [__attrib0__]; break;
 						case 'amount': var amount = __allkwargs0__ [__attrib0__]; break;
-						default: kwargs [__attrib0__] = __allkwargs0__ [__attrib0__];
+						case 'opts': var opts = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
-				delete kwargs.__kwargtrans__;
 			}
 		}
 		else {
 		}
-		var lock = null;
-		if (__in__ ('lock', kwargs)) {
-			var lock = kwargs ['lock'];
-		}
+		var lock = jsfunc.opts_get (opts, 'lock');
 		self._builder.output_add (recipient, amount, __kwargtrans__ ({lock: lock}));
 		return self;
 	});},
-	get send () {return __get__ (this, function (self) {
-		var kwargs = dict ();
+	get send () {return __get__ (this, function (self, opts) {
+		if (typeof opts == 'undefined' || (opts != null && opts.hasOwnProperty ("__kwargtrans__"))) {;
+			var opts = null;
+		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -812,29 +807,17 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						default: kwargs [__attrib0__] = __allkwargs0__ [__attrib0__];
+						case 'opts': var opts = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
-				delete kwargs.__kwargtrans__;
 			}
 		}
 		else {
 		}
-		var source = null;
-		if (__in__ ('source', kwargs)) {
-			var source = kwargs ['source'];
-		}
-		var refund = null;
-		if (__in__ ('refund', kwargs)) {
-			var refund = kwargs ['refund'];
-		}
-		var data = null;
-		if (__in__ ('data', kwargs)) {
-			var data = kwargs ['data'];
-		}
-		jslog.info (source);
-		jslog.info (refund);
-		jslog.info (data);
+		var __left0__ = jsfunc.opts_get (opts, 'source', 'refund', 'data');
+		var source = __left0__ [0];
+		var refund = __left0__ [1];
+		var data = __left0__ [2];
 		return self._builder.send (__kwargtrans__ ({source: source, refund: refund, data: data}));
 	});}
 });
@@ -1667,9 +1650,9 @@ export var ChainInfo =  __class__ ('ChainInfo', [object], {
 		}
 		return self._tf_chain_info.timestamp;
 	});},
-	get last_block_get () {return __get__ (this, function (self, addresses) {
-		if (typeof addresses == 'undefined' || (addresses != null && addresses.hasOwnProperty ("__kwargtrans__"))) {;
-			var addresses = null;
+	get last_block_get () {return __get__ (this, function (self, opts) {
+		if (typeof opts == 'undefined' || (opts != null && opts.hasOwnProperty ("__kwargtrans__"))) {;
+			var opts = null;
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -1678,13 +1661,14 @@ export var ChainInfo =  __class__ ('ChainInfo', [object], {
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'addresses': var addresses = __allkwargs0__ [__attrib0__]; break;
+						case 'opts': var opts = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
 		}
 		else {
 		}
+		var addresses = jsfunc.opts_get (opts, 'addresses');
 		return BlockView.from_block (self._tf_chain_info.last_block, __kwargtrans__ ({addresses: addresses}));
 	});}
 });
@@ -1766,9 +1750,9 @@ export var mnemonic_is_valid = function (mnemonic) {
 		}
 	}
 };
-export var wallet_address_is_valid = function (address, multisig) {
-	if (typeof multisig == 'undefined' || (multisig != null && multisig.hasOwnProperty ("__kwargtrans__"))) {;
-		var multisig = true;
+export var wallet_address_is_valid = function (address, opts) {
+	if (typeof opts == 'undefined' || (opts != null && opts.hasOwnProperty ("__kwargtrans__"))) {;
+		var opts = null;
 	};
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -1777,13 +1761,14 @@ export var wallet_address_is_valid = function (address, multisig) {
 			for (var __attrib0__ in __allkwargs0__) {
 				switch (__attrib0__) {
 					case 'address': var address = __allkwargs0__ [__attrib0__]; break;
-					case 'multisig': var multisig = __allkwargs0__ [__attrib0__]; break;
+					case 'opts': var opts = __allkwargs0__ [__attrib0__]; break;
 				}
 			}
 		}
 	}
 	else {
 	}
+	var multisig = jsfunc.opts_get_with_defaults (opts, dict ({'multisig': true}));
 	try {
 		var uh = UnlockHash.from_str (address);
 		if (__in__ (uh.uhtype.value, tuple ([UnlockHashType.NIL.value, UnlockHashType.PUBLIC_KEY.value]))) {

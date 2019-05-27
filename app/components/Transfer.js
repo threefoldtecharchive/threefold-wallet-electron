@@ -107,7 +107,7 @@ class Transfer extends Component {
     let timestamp
     if (datelock !== '') {
       const concatDate = datelock + ' ' + timelock
-      timestamp = moment(concatDate).valueOf()
+      timestamp = moment(concatDate).unix()
     }
     // if (description === '') {
     //   descriptionError = true
@@ -118,7 +118,7 @@ class Transfer extends Component {
 
       const builder = selectedWallet.transaction_new()
       if (timestamp) {
-        builder.output_add(destination, amount.toString(), timestamp)
+        builder.output_add(destination, amount.toString(), {lock: timestamp})
       } else {
         builder.output_add(destination, amount.toString())
       }

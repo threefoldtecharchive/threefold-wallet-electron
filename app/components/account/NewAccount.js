@@ -178,7 +178,10 @@ class NewAccount extends Component {
     this.setState({ seedConfirmationError: false })
     try {
       // create account
-      const account = new tfchain.Account(name, password, seed, network)
+      const account = new tfchain.Account(name, password, {
+        seed: seed,
+        network: network,
+      })
       // create wallet
       account.wallet_new('default', 0, 1)
 

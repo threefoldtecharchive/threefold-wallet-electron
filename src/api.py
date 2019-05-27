@@ -6,9 +6,11 @@ converted into Javascript (ES6) using Transcrypt.
 import tfchain.polyfill.log as jslog
 import tfchain.polyfill.crypto as jscrypto
 import tfchain.polyfill.asynchronous as jsasync
+import tfchain.polyfill.func as jsfunc
 import tfchain.polyfill.encoding.json as jsjson
 import tfchain.polyfill.encoding.hex as jshex
 import tfchain.polyfill.encoding.str as jsstr
+import tfchain.polyfill.encoding.object as jsobj
 
 import tfchain.crypto.mnemonic as bip39
 import tfchain.encoding.siabin as tfsiabin
@@ -72,13 +74,11 @@ class Account:
         if account_name != payload['account_name']:
             raise ValueError("account_name {} is unexpected, does not match account data".format(account_name))
         # restore the account
-        account = cls(
-            account_name,
-            password,
-            seed=jshex.bytes_from_hex(payload['seed']),
-            network_type=payload['network_type'],
-            explorer_addresses=payload['explorer_addresses'],
-        )
+        account = cls(account_name, password, opts={
+            'seed': jshex.bytes_from_hex(payload['seed']),
+            'network': payload['network_type'],
+            'addresses': payload['explorer_addresses'],
+        })
         # restore all wallets for the account
         for data in payload['wallets']:
             account.wallet_new(data.wallet_name, data.start_index, data.address_count)
@@ -86,7 +86,7 @@ class Account:
         # return the fully restored account
         return account
 
-    def __init__(self, account_name, password, seed=None, network_type=None, explorer_addresses=None):
+    def __init__(self, account_name, password, opts=None):
         """
         Create a new TFChain account, identified by a seed and labeled with a human-friendly name.
         See the docstring of the Account class for more information.
@@ -95,13 +95,10 @@ class Account:
         :type account_name: str
         :param password: password used to protect the serialized data
         :type password: str
-        :param seed: optional seed (or mnemonic == sentence phrase), used as the entropy for this account's private keys
-        :type seed: str (mnemonic) or bytes (seed==entropy)
-        :param network_type: the type of this account's used network (standard, testnet or devnet)
-        :type network_type: str or int
-        :param explorer_addresses: a list of to be used addresses, the default network type-defined addresses are used if none are given
-        :type explorer_addresses: list (of str)
         """
+        # opts: seed=None, network_type=None, explorer_addresses=None
+        # parse opts
+        seed, network_type, explorer_addresses = jsfunc.opts_get(opts, 'seed', 'network', 'addresses')
 
         # validate params
         if not account_name:
@@ -457,7 +454,7 @@ class CoinTransactionBuilder:
         self._builder = wallet._tfwallet.coin_transaction_builder_new()
 
     # TODO: make kwargs work with an opt value
-    def output_add(self, recipient, amount, **kwargs):
+    def output_add(self, recipient, amount, opts=None):
         """
         Add an output to the transaction, returning the transaction
         itself to allow for chaining.
@@ -478,33 +475,18 @@ class CoinTransactionBuilder:
 
         @param recipient: see explanation above
         @param amount: int or str that defines the amount of TFT to set, see explanation above
-        @param lock: optional lock that can be used to lock the sent amount to a specific time or block height, see explation above
         """
-        lock = None
-        if 'lock' in kwargs:
-            lock = kwargs['lock']
+        lock = jsfunc.opts_get(opts, 'lock')
         self._builder.output_add(recipient, amount, lock=lock)
         return self
 
-    def send(self, **kwargs):
+    def send(self, opts=None):
         """
         Sign and send the transaction.
 
         :returns: a promise that resolves with a transaction ID or rejects with an Exception
         """
-        source=None
-        if 'source' in kwargs:
-            source=kwargs['source']
-        refund=None
-        if 'refund' in kwargs:
-            refund=kwargs['refund']
-        data = None
-        if 'data' in kwargs:
-            data=kwargs['data']
-        import tfchain.polyfill.log as jslog
-        jslog.info(source)
-        jslog.info(refund)
-        jslog.info(data)
+        source, refund, data = jsfunc.opts_get(opts, 'source', 'refund', 'data')
         return self._builder.send(source=source, refund=refund, data=data)
 
 
@@ -872,11 +854,12 @@ class ChainInfo:
         """
         return self._tf_chain_info.timestamp
 
-    def last_block_get(self, addresses=None):
+    def last_block_get(self, opts=None):
         """
         :returns: the last block, optionally with transaction inputs and outputs filtered by addresses
         :rtype: BlockView
         """
+        addresses = jsfunc.opts_get(opts, 'addresses')
         return BlockView.from_block(self._tf_chain_info.last_block, addresses=addresses)
 
 
@@ -925,7 +908,7 @@ def mnemonic_is_valid(mnemonic):
         jslog.debug(e)
         return False
 
-def wallet_address_is_valid(address, multisig=True):
+def wallet_address_is_valid(address, opts=None):
     """
     Validate a wallet address.
 
@@ -934,6 +917,9 @@ def wallet_address_is_valid(address, multisig=True):
     :returns: True if the mnemonic is valid, False otherwise
     :rtype: bool
     """
+    multisig = jsfunc.opts_get_with_defaults(opts, {
+        'multisig': True,
+    })
     try:
         uh = UnlockHash.from_str(address)
         if uh.uhtype.value in (UnlockHashType.NIL.value, UnlockHashType.PUBLIC_KEY.value):
