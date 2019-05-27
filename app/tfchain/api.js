@@ -913,7 +913,8 @@ export var Balance =  __class__ ('Balance', [object], {
 		if (amount.less_than_or_equal_to ('0')) {
 			return false;
 		}
-		return amount.plus (self._network_type.minimum_miner_fee ()).less_than_or_equal_to (self.coins_unlocked);
+		var available_amount = self.coins_unlocked.plus (self.unconfirmed_coins_unlocked);
+		return amount.plus (self._network_type.minimum_miner_fee ()).less_than_or_equal_to (available_amount);
 	});},
 	get _get_coins_unlocked () {return __get__ (this, function (self) {
 		if (arguments.length) {

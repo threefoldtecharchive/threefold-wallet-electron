@@ -529,7 +529,8 @@ class Balance:
         if amount.less_than_or_equal_to('0'):
             return False
         # ensure amount is less or equal to the fee + the amount of unlocked coins
-        return amount.plus(self._network_type.minimum_miner_fee()).less_than_or_equal_to(self.coins_unlocked)
+        available_amount = self.coins_unlocked.plus(self.unconfirmed_coins_unlocked)
+        return amount.plus(self._network_type.minimum_miner_fee()).less_than_or_equal_to(available_amount)
 
     @property
     def coins_unlocked(self):
