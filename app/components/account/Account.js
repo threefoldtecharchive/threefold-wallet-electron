@@ -2,11 +2,12 @@
 import { connect } from 'react-redux'
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
-import { Segment, Button, Icon, Divider, Card } from 'semantic-ui-react'
+import { Segment, Button, Icon, Divider, Card, Dimmer, Loader } from 'semantic-ui-react'
 import routes from '../../constants/routes'
 import { selectWallet, setChainConstants } from '../../actions'
 import styles from '../home/Home.css'
 import Footer from '../footer'
+import { findIndex } from 'lodash'
 
 const mapStateToProps = state => ({
   account: state.account
@@ -27,13 +28,20 @@ class Account extends Component {
     this.state = {
       totalCoins: 0,
       totalCoinLocked: 0,
-      totalCoinUnlocked: 0
+      totalCoinUnlocked: 0,
+      wallets: this.props.account.wallets
     }
   }
 
-  componentDidMount () {
+  async componentDidMount () {
     this.getAccountBalance()
-    this.interval = setInterval(() => { this.getAccountBalance() }, 60000)
+    this.refreshWalletBalances()
+
+    // Every minut update the account total balance and seperate wallet balances
+    this.interval = setInterval(() => {
+      this.getAccountBalance()
+      this.refreshWalletBalances()
+    }, 60000)
   }
 
   componentWillUnmount () {
@@ -49,36 +57,80 @@ class Account extends Component {
     })
   }
 
+  getWalletsBalances = () => {
+    this.props.account.wallets.map(async w => {
+      const balance = await w.balance
+      // Extend wallet object with a fullfilled promise of balance information to render in the cards
+      w._balance = balance
+      // Set wallets into component state
+      this.setState(state => {
+        const wallets = state.wallets.concat(w)
+        return {
+          wallets
+        }
+      })
+    })
+  }
+
+  refreshWalletBalances = () => {
+    this.props.account.wallets.map(async w => {
+      const balance = await w.balance
+      // Extend wallet object with a fullfilled promise of balance information to render in the cards
+      w._balance = balance
+      // Set wallets into component state
+      this.setState(state => {
+        // refresh wallets in state instead of clearing them all
+        const index = findIndex(state.wallets, { '_wallet_name': w._wallet_name })
+        state.wallets[index] = w
+        const wallets = state.wallets
+        return {
+          wallets
+        }
+      })
+    })
+  }
+
   handleWalletClick = (wallet) => {
     this.props.selectWallet(wallet)
     this.props.history.push(routes.WALLET)
   }
 
   renderWallets = () => {
-    const { wallets } = this.props.account
+    const { wallets } = this.state
     if (!wallets) {
       return
     }
 
     return (
       <Card.Group style={{ marginTop: 20, marginLeft: 20 }}>
-        {wallets.map(w => {
-          const balance = w._get_balance_sync()
+        {this.state.wallets.map(w => {
+          const balance = w._balance
           return (
             <Card key={w._wallet_name} style={{ boxShadow: 'none', height: 180, width: 350, marginTop: 0, marginRight: 20, marginBottom: 30, background: 'linear-gradient(90deg, rgba(56,51,186,1) 0%, rgba(102,71,254,1) 100%)' }} onClick={() => this.handleWalletClick(w)}>
               <Card.Content>
-                <Icon name='chevron right' style={{ position: 'absolute', right: 20, top: 130, fontSize: 25, opacity: '0.3', color: 'white' }} />
-                {/* <Divider /> */}
-                <Card.Description style={{ color: 'white', marginTop: 10, marginBottom: 10, fontFamily: 'SF UI Text Light', display: 'flex' }}>
-                  <Icon name='unlock' style={{ fontSize: 16, marginLeft: 20 }} /> <p style={{ marginLeft: 30, marginTop: -8 }}>{balance.coins_unlocked.str()} TFT</p>
-                </Card.Description>
-                <Card.Description style={{ textAlign: 'left', color: 'white', marginTop: 20, marginBottom: 10, fontFamily: 'SF UI Text Light', display: 'flex' }}>
-                  <Icon name='lock' style={{ fontSize: 16, marginLeft: 20 }} /> <p style={{ marginLeft: 33, marginTop: -3, fontFamily: 'SF UI Text Light', fontSize: 18 }}>{balance.coins_locked.str()} TFT</p>
-                </Card.Description>
-                <Divider />
-                <Card.Header style={{ textAlign: 'center', color: 'white', fontSize: 18, textTransform: 'uppercase', marginTop: 20, fontFamily: 'SF UI Text Light' }}>
-                  wallet {w._wallet_name}
-                </Card.Header>
+                {balance
+                  ? (
+                    <div>
+                      <Icon name='chevron right' style={{ position: 'absolute', right: 20, top: 130, fontSize: 25, opacity: '0.3', color: 'white' }} />
+                      <Card.Description style={{ color: 'white', marginTop: 10, marginBottom: 10, fontFamily: 'SF UI Text Light', display: 'flex' }}>
+                        <Icon name='unlock' style={{ fontSize: 16, marginLeft: 20 }} /> <p style={{ marginLeft: 30, marginTop: -8 }}>{balance.coins_unlocked.str()} TFT</p>
+                      </Card.Description>
+                      <Card.Description style={{ textAlign: 'left', color: 'white', marginTop: 20, marginBottom: 10, fontFamily: 'SF UI Text Light', display: 'flex' }}>
+                        <Icon name='lock' style={{ fontSize: 16, marginLeft: 20 }} /> <p style={{ marginLeft: 33, marginTop: -3, fontFamily: 'SF UI Text Light', fontSize: 18 }}>{balance.coins_locked.str()} TFT</p>
+                      </Card.Description>
+                      <Divider />
+                      <Card.Header style={{ textAlign: 'center', color: 'white', fontSize: 18, textTransform: 'uppercase', marginTop: 20, fontFamily: 'SF UI Text Light' }}>
+                        wallet {w._wallet_name}
+                      </Card.Header>
+                    </div>
+                  )
+                  : (
+                    <Dimmer active>
+                      <Loader />
+                    </Dimmer>
+                  )
+                }
+
               </Card.Content>
             </Card>
           )

@@ -29,7 +29,7 @@ class Wallet extends Component {
 
   getBalance = () => {
     if (this.props.wallet != null) {
-      this.props.wallet._get_balance().then(info => {
+      this.props.wallet.balance.then(info => {
         this.setState({
           coinsLocked: info.coins_locked.str(),
           coinsUnlocked: info.coins_unlocked.str(),
