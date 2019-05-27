@@ -1069,7 +1069,7 @@ export var TransactionView =  __class__ ('TransactionView', [object], {
 		else {
 			var height = transaction.height;
 			var timestamp = transaction.timestamp;
-			var blockid = transaction.blockid;
+			var blockid = transaction.blockid.__str__ ();
 		}
 		var senders = set ();
 		for (var ci of transaction.coin_inputs) {
@@ -1082,7 +1082,7 @@ export var TransactionView =  __class__ ('TransactionView', [object], {
 			var senders = list (senders);
 			for (var co of transaction.coin_outputs) {
 				if (__in__ (co.condition.unlockhash.__str__ (), addresses)) {
-					outputs.append (CoinOutputView.from_coin_output (co, senders));
+					inputs.append (CoinOutputView.from_coin_output (co, senders));
 				}
 			}
 		}
@@ -1106,10 +1106,10 @@ export var TransactionView =  __class__ ('TransactionView', [object], {
 			}
 			for (var ci of transaction.coin_inputs) {
 				var output = ci.parent_output;
-				inputs.append (CoinOutputView.from_coin_output (co, senders, __kwargtrans__ ({ratio: ratio})));
+				outputs.append (CoinOutputView.from_coin_output (co, senders, __kwargtrans__ ({ratio: ratio})));
 			}
 		}
-		return cls (identifier, height, timestamp, blockid.__str__ (), inputs, outputs);
+		return cls (identifier, height, timestamp, blockid, inputs, outputs);
 	});},
 	get __init__ () {return __get__ (this, function (self, identifier, height, timestamp, blockid, inputs, outputs) {
 		if (arguments.length) {

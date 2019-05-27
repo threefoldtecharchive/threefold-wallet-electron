@@ -292,7 +292,13 @@ export var TFChainWallet =  __class__ ('TFChainWallet', [object], {
 				}
 				var height_a = (a.height < 0 ? pow (2, 64) : a.height);
 				var height_b = (b.height < 0 ? pow (2, 64) : b.height);
-				return height_a - height_b;
+				if (height_a < height_b) {
+					return -(1);
+				}
+				if (height_a > height_b) {
+					return 1;
+				}
+				return 0;
 			};
 			return jsarr.py_sort (transactions, txn_arr_sort, __kwargtrans__ ({reverse: true}));
 		};

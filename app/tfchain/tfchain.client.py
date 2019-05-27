@@ -270,8 +270,6 @@ class TFChainClient:
                 for etxn in resp['transactions']:
                     # parse the explorer transaction
                     transaction = ec._transaction_from_explorer_transaction(etxn, endpoint=endpoint, resp=resp)
-                    transaction.height = int(etxn.get_or('height', 0))
-                    transaction.blockid = etxn.get_or('parent', None)
                     # append the transaction to the list of transactions
                     transactions.append(transaction)
                 # collect all multisig addresses
@@ -292,7 +290,11 @@ class TFChainClient:
                 def txn_arr_sort(a, b):
                     height_a = pow(2, 64) if a.height < 0 else a.height
                     height_b = pow(2, 64) if b.height < 0 else b.height
-                    return height_a-height_b
+                    if height_a < height_b:
+                        return -1
+                    if height_a > height_b:
+                        return 1
+                    return 0
                 transactions = jsarr.sort(transactions, txn_arr_sort, reverse=True)
 
                 # return explorer data for the unlockhash
@@ -467,7 +469,7 @@ class TFChainClient:
         transaction.unconfirmed = etxn.get_or('unconfirmed', False)
         # set the blockid and height of the transaction only if confirmed
         if not transaction.unconfirmed:
-            transaction.height = int(etxn.get_or('height', 0))
+            transaction.height = int(etxn.get_or('height', -1))
             transaction.blockid = etxn.get_or('parent', None)
         # return the transaction
         return transaction

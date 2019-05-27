@@ -98,7 +98,11 @@ class WalletBalance(object):
         def txn_arr_sort(a, b):
             height_a = pow(2, 64) if a.height < 0 else a.height
             height_b = pow(2, 64) if b.height < 0 else b.height
-            return height_a-height_b
+            if height_a < height_b:
+                return -1
+            if height_a > height_b:
+                return 1
+            return 0
         return jsarr.sort(transactions, txn_arr_sort, reverse=True)
 
     @property

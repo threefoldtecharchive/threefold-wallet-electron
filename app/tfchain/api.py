@@ -595,7 +595,7 @@ class TransactionView:
         else:
             height = transaction.height
             timestamp = transaction.timestamp
-            blockid = transaction.blockid
+            blockid = transaction.blockid.__str__()
         # define the senders of this transaction
         senders = set()
         for ci in transaction.coin_inputs:
@@ -614,7 +614,7 @@ class TransactionView:
             senders = list(senders)
             for co in transaction.coin_outputs:
                 if co.condition.unlockhash.__str__() in addresses:
-                    outputs.append(CoinOutputView.from_coin_output(co, senders))
+                    inputs.append(CoinOutputView.from_coin_output(co, senders))
         else:
             # gather address-filtered information
             ratio = Currency("1.0")
@@ -633,10 +633,10 @@ class TransactionView:
             # add all inputs
             for ci in transaction.coin_inputs:
                 output = ci.parent_output
-                inputs.append(CoinOutputView.from_coin_output(co, senders, ratio=ratio))
+                outputs.append(CoinOutputView.from_coin_output(co, senders, ratio=ratio))
 
         # return transaction view
-        return cls(identifier, height, timestamp, blockid.__str__(), inputs, outputs)
+        return cls(identifier, height, timestamp, blockid, inputs, outputs)
 
     def __init__(self, identifier, height, timestamp, blockid, inputs, outputs):
         if not isinstance(identifier, str):

@@ -1,5 +1,10 @@
+all: tfchain-py dev
+
 dev:
 	yarn dev
+
+tfchain-py:
+	yarn build-py
 
 clean:
 	rm -rf package-lock.json

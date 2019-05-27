@@ -542,8 +542,6 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 				var transactions = [];
 				for (var etxn of resp ['transactions']) {
 					var transaction = ec._transaction_from_explorer_transaction (etxn, __kwargtrans__ ({endpoint: endpoint, resp: resp}));
-					transaction.height = int (etxn.get_or ('height', 0));
-					transaction.blockid = etxn.get_or ('parent', null);
 					transactions.append (transaction);
 				}
 				var multisig_addresses = (function () {
@@ -582,7 +580,13 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 					}
 					var height_a = (a.height < 0 ? pow (2, 64) : a.height);
 					var height_b = (b.height < 0 ? pow (2, 64) : b.height);
-					return height_a - height_b;
+					if (height_a < height_b) {
+						return -(1);
+					}
+					if (height_a > height_b) {
+						return 1;
+					}
+					return 0;
 				};
 				var transactions = jsarr.py_sort (transactions, txn_arr_sort, __kwargtrans__ ({reverse: true}));
 				return ExplorerUnlockhashResult (__kwargtrans__ ({unlockhash: UnlockHash.from_json (unlockhash), transactions: transactions, multisig_addresses: multisig_addresses, erc20_info: erc20_info}));
@@ -933,7 +937,7 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 		}
 		transaction.unconfirmed = etxn.get_or ('unconfirmed', false);
 		if (!(transaction.unconfirmed)) {
-			transaction.height = int (etxn.get_or ('height', 0));
+			transaction.height = int (etxn.get_or ('height', -(1)));
 			transaction.blockid = etxn.get_or ('parent', null);
 		}
 		return transaction;
