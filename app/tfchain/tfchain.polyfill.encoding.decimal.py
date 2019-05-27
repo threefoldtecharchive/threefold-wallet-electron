@@ -39,11 +39,16 @@ class Decimal:
         # return them all
         return (sign, digits, exponent)
 
+    def to_nearest(self, prec):
+        if not isinstance(prec, int):
+            raise TypeError("precision is to be of type int, not type {}".format(type(prec)))
+        if prec <= 0:
+            return Decimal(self.value.toNearest('1'))
+        return Decimal(self.value.toNearest('.' + jsstr.repeat('0', prec-1) + '1'))
+
     def str(self, prec=None):
         if isinstance(prec, int):
-            if prec <= 0:
-                return self.value.toNearest('1').toString()
-            s = self.value.toNearest('.' + jsstr.repeat('0', prec-1) + '1').toString()
+            s = self.to_nearest(prec).value.toString()
             if '.' not in s:
                 return s + '.' + jsstr.repeat('0', prec)
             s = jsstr.split(s, '.', 2)

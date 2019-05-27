@@ -217,7 +217,7 @@ class ConditionBaseClass(BaseDataTypeClass):
     @lock.setter
     def lock(self, value):
         self._custom_lock_setter(value)
-    def _custom_lock_setter(self):
+    def _custom_lock_setter(self, value):
         raise NotImplementedError("_custom_lock_setter property is not yet implemented")
     
     @property

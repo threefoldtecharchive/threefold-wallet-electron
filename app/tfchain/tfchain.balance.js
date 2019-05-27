@@ -29,7 +29,7 @@ export var WalletBalance =  __class__ ('WalletBalance', [object], {
 		self._outputs_spent = dict ({});
 		self._outputs_unconfirmed = dict ({});
 		self._outputs_unconfirmed_spent = dict ({});
-		self._transactions = [];
+		self._transactions = dict ({});
 		self._chain_time = 0;
 		self._chain_height = 0;
 		self._chain_blockid = Hash ();
@@ -168,6 +168,42 @@ export var WalletBalance =  __class__ ('WalletBalance', [object], {
 			throw __except0__;
 		}
 		self._chain_height = int (value);
+	});},
+	get _get_transactions () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var transactions = jsobj.dict_values (self._transactions);
+		var txn_arr_sort = function (a, b) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'a': var a = __allkwargs0__ [__attrib0__]; break;
+							case 'b': var b = __allkwargs0__ [__attrib0__]; break;
+						}
+					}
+				}
+			}
+			else {
+			}
+			var height_a = (a.height < 0 ? pow (2, 64) : a.height);
+			var height_b = (b.height < 0 ? pow (2, 64) : b.height);
+			return height_a - height_b;
+		};
+		return jsarr.py_sort (transactions, txn_arr_sort, __kwargtrans__ ({reverse: true}));
 	});},
 	get _get_active () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -406,7 +442,7 @@ export var WalletBalance =  __class__ ('WalletBalance', [object], {
 			return Currency ();
 		}
 	});},
-	get output_add () {return __get__ (this, function (self, output, confirmed, spent) {
+	get output_add () {return __get__ (this, function (self, txn, index, confirmed, spent) {
 		if (typeof confirmed == 'undefined' || (confirmed != null && confirmed.hasOwnProperty ("__kwargtrans__"))) {;
 			var confirmed = true;
 		};
@@ -420,7 +456,8 @@ export var WalletBalance =  __class__ ('WalletBalance', [object], {
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'output': var output = __allkwargs0__ [__attrib0__]; break;
+						case 'txn': var txn = __allkwargs0__ [__attrib0__]; break;
+						case 'index': var index = __allkwargs0__ [__attrib0__]; break;
 						case 'confirmed': var confirmed = __allkwargs0__ [__attrib0__]; break;
 						case 'spent': var spent = __allkwargs0__ [__attrib0__]; break;
 					}
@@ -428,6 +465,13 @@ export var WalletBalance =  __class__ ('WalletBalance', [object], {
 			}
 		}
 		else {
+		}
+		var txnid = txn.id.__str__ ();
+		if (spent) {
+			var output = txn.coin_inputs [index].parent_output;
+		}
+		else {
+			var output = txn.coin_outputs [index];
 		}
 		var strid = output.id.__str__ ();
 		if (confirmed) {
@@ -453,6 +497,7 @@ export var WalletBalance =  __class__ ('WalletBalance', [object], {
 			}
 		}
 		self._addresses.add (str (output.condition.unlockhash));
+		self._transactions [txnid] = txn;
 	});},
 	get _get__base () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -473,6 +518,7 @@ export var WalletBalance =  __class__ ('WalletBalance', [object], {
 		b._outputs_spent = self._outputs_spent;
 		b._outputs_unconfirmed = self._outputs_unconfirmed;
 		b._outputs_unconfirmed_spent = self._outputs_unconfirmed_spent;
+		b._transactions = self._transactions;
 		b._chain_blockid = self._chain_blockid;
 		b._chain_height = self._chain_height;
 		b._chain_time = self._chain_time;
@@ -535,6 +581,9 @@ export var WalletBalance =  __class__ ('WalletBalance', [object], {
 			self._outputs_unconfirmed_spent [id] = output;
 		}
 		self._addresses = self._addresses.union (other._addresses);
+		for (var [id, txn] of jsobj.get_items (other._transactions)) {
+			self._transactions [id] = txn;
+		}
 		return self;
 	});},
 	get drain () {return __get__ (this, function (self, recipient, miner_fee, unconfirmed, data, lock) {
@@ -619,6 +668,7 @@ Object.defineProperty (WalletBalance, 'outputs_unconfirmed_available', property.
 Object.defineProperty (WalletBalance, 'outputs_unconfirmed', property.call (WalletBalance, WalletBalance._get_outputs_unconfirmed));
 Object.defineProperty (WalletBalance, 'outputs_spent', property.call (WalletBalance, WalletBalance._get_outputs_spent));
 Object.defineProperty (WalletBalance, 'active', property.call (WalletBalance, WalletBalance._get_active));
+Object.defineProperty (WalletBalance, 'transactions', property.call (WalletBalance, WalletBalance._get_transactions));
 Object.defineProperty (WalletBalance, 'chain_height', property.call (WalletBalance, WalletBalance._get_chain_height, WalletBalance._set_chain_height));
 Object.defineProperty (WalletBalance, 'chain_time', property.call (WalletBalance, WalletBalance._get_chain_time, WalletBalance._set_chain_time));
 Object.defineProperty (WalletBalance, 'chain_blockid', property.call (WalletBalance, WalletBalance._get_chain_blockid, WalletBalance._set_chain_blockid));
@@ -802,7 +852,7 @@ export var WalletsBalance =  __class__ ('WalletsBalance', [WalletBalance], {
 		}
 		return jsobj.get_keys (self.wallets);
 	});},
-	get multisig_output_add () {return __get__ (this, function (self, address, output, confirmed, spent) {
+	get _multisig_output_add () {return __get__ (this, function (self, address, output, txn, index, confirmed, spent) {
 		if (typeof confirmed == 'undefined' || (confirmed != null && confirmed.hasOwnProperty ("__kwargtrans__"))) {;
 			var confirmed = true;
 		};
@@ -818,6 +868,8 @@ export var WalletsBalance =  __class__ ('WalletsBalance', [WalletBalance], {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
 						case 'address': var address = __allkwargs0__ [__attrib0__]; break;
 						case 'output': var output = __allkwargs0__ [__attrib0__]; break;
+						case 'txn': var txn = __allkwargs0__ [__attrib0__]; break;
+						case 'index': var index = __allkwargs0__ [__attrib0__]; break;
 						case 'confirmed': var confirmed = __allkwargs0__ [__attrib0__]; break;
 						case 'spent': var spent = __allkwargs0__ [__attrib0__]; break;
 					}
@@ -835,9 +887,9 @@ export var WalletsBalance =  __class__ ('WalletsBalance', [WalletBalance], {
 		if (!(__in__ (address, self._wallets))) {
 			self._wallets [address] = MultiSigWalletBalance (__kwargtrans__ ({owners: output.condition.unlockhashes, signature_count: output.condition.required_signatures}));
 		}
-		self._wallets [address].output_add (output, __kwargtrans__ ({confirmed: confirmed, spent: spent}));
+		self._wallets [address].output_add (txn, index, __kwargtrans__ ({confirmed: confirmed, spent: spent}));
 	});},
-	get output_add () {return __get__ (this, function (self, output, confirmed, spent) {
+	get output_add () {return __get__ (this, function (self, txn, index, confirmed, spent) {
 		if (typeof confirmed == 'undefined' || (confirmed != null && confirmed.hasOwnProperty ("__kwargtrans__"))) {;
 			var confirmed = true;
 		};
@@ -851,7 +903,8 @@ export var WalletsBalance =  __class__ ('WalletsBalance', [WalletBalance], {
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'output': var output = __allkwargs0__ [__attrib0__]; break;
+						case 'txn': var txn = __allkwargs0__ [__attrib0__]; break;
+						case 'index': var index = __allkwargs0__ [__attrib0__]; break;
 						case 'confirmed': var confirmed = __allkwargs0__ [__attrib0__]; break;
 						case 'spent': var spent = __allkwargs0__ [__attrib0__]; break;
 					}
@@ -860,12 +913,18 @@ export var WalletsBalance =  __class__ ('WalletsBalance', [WalletBalance], {
 		}
 		else {
 		}
+		if (spent) {
+			var output = txn.coin_inputs [index].parent_output;
+		}
+		else {
+			var output = txn.coin_outputs [index];
+		}
 		var uh = output.condition.unlockhash;
 		if (uh.py_metatype.__eq__ (UnlockHashType.MULTI_SIG)) {
-			return self.multisig_output_add (__kwargtrans__ ({address: uh.__str__ (), output: output, confirmed: confirmed, spent: spent}));
+			return self._multisig_output_add (__kwargtrans__ ({address: uh.__str__ (), output: output, txn: txn, index: index, confirmed: confirmed, spent: spent}));
 		}
 		self._addresses.add (uh.__str__ ());
-		return __super__ (WalletsBalance, 'output_add') (self, __kwargtrans__ ({output: output, confirmed: confirmed, spent: spent}));
+		return __super__ (WalletsBalance, 'output_add') (self, __kwargtrans__ ({txn: txn, index: index, confirmed: confirmed, spent: spent}));
 	});},
 	get balance_add () {return __get__ (this, function (self, other) {
 		if (arguments.length) {

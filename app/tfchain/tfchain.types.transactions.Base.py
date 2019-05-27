@@ -51,6 +51,8 @@ class TransactionBaseClass():
     def __init__(self):
         self._id = None
         self._height = -1
+        self._block_timestamp = -1
+        self._blockid = None
         self._unconfirmed = False
 
     @classmethod
@@ -117,7 +119,6 @@ class TransactionBaseClass():
         if not yet part of a block it will be negative (-1 is the default value).
         """
         return self._height
-
     @height.setter
     def height(self, value):
         if not (isinstance(value, int) and not isinstance(value, bool)):
@@ -126,6 +127,33 @@ class TransactionBaseClass():
         if value < 0:
             raise ValueError("a block height cannot be negative")
         self._height = value
+
+    @property
+    def timestamp(self):
+        """
+        Timestamp of the block this transaction is part of,
+        if not yet part of a block it will be negative (-1 is the default value).
+        """
+        return self._block_timestamp
+    @timestamp.setter
+    def timestamp(self, value):
+        if not (isinstance(value, int) and not isinstance(value, bool)):
+            raise TypeError(
+                "value should be of type int or bool, not {}".format(type(value)))
+        if value < 0:
+            raise ValueError("a block timestamp cannot be negative")
+        self._block_timestamp = value
+
+    @property
+    def blockid(self):
+        """
+        Identifier of the block this transaction is part of,
+        if not yet part of a block it will be None (its default value)
+        """
+        return self._blockid
+    @blockid.setter
+    def blockid(self, value):
+        self._blockid = Hash(value=value)
 
     @property
     def coin_inputs(self):

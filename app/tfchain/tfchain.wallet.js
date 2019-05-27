@@ -736,14 +736,14 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 		var submit = txn.is_fulfilled ();
 		if (submit) {
 			txn.id = self._wallet._transaction_put (__kwargtrans__ ({transaction: txn}));
-			for (var ci of txn.coin_inputs) {
-				balance.output_add (ci.parent_output, __kwargtrans__ ({confirmed: false, spent: true}));
+			for (var [idx, ci] of enumerate (txn.coin_inputs)) {
+				balance.output_add (txn, idx, __kwargtrans__ ({confirmed: false, spent: true}));
 			}
 			var addresses = jsarr.concat (self._wallet.addresses, balance.addresses_multisig);
 			for (var [idx, co] of enumerate (txn.coin_outputs)) {
 				if (__in__ (co.condition.unlockhash.__str__ (), addresses)) {
 					co.id = txn.coin_outputid_new (idx);
-					balance.output_add (co, __kwargtrans__ ({confirmed: false, spent: false}));
+					balance.output_add (txn, idx, __kwargtrans__ ({confirmed: false, spent: false}));
 				}
 			}
 		}

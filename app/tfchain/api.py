@@ -573,108 +573,70 @@ class Balance:
 
     @property
     def transactions(self):
-        # TODO: replace with real logic
-        return [
-            TransactionView(
-                '0df49c1ae60352f7fa173e8a10804d125aa23f0ede1a405b59032c29c3d30777',
-                0,
-                0,
-                None,
-                [
-                    CoinOutputView(
-                        [
-                            '01a94cff5aa86508d742051ba743a525331cc9b31ba7152627344902ea79dc8d2c436ceda5bcb4',
-                            '0111429d9967c5c5e52e5aad522d6759e88c6fca8a54fa23ea12917006edf6842631a8a5d847ac',
-                        ],
-                        '016c3dabb530029e4503a73ec944024f0d74ca080537972bb658a69f120ab307662f996d9fc85f',
-                        Currency('40000000'),
-                        0,
-                    ),
-                ],
-                [],
-            ),
-            TransactionView(
-                'c3b29d74b8f98332d5c976451e15eab94c210fe4c0b4b6d020153f2a6b2c2253',
-                270010,
-                1557083437,
-                '101277c10b4c975419c2382d8bb06a2c8b0c30110de1844daf4ff8efe8e900bc',
-                [
-                    CoinOutputView(
-                        ['0111429d9967c5c5e52e5aad522d6759e88c6fca8a54fa23ea12917006edf6842631a8a5d847ac'],
-                        '01ef91e8e584484c11850e49265256449a6acc9a75e0a7814e374d0248056d2d5d43fe494d9fd9',
-                        Currency('100'),
-                        0,
-                    ),
-                    CoinOutputView(
-                        ['01a94cff5aa86508d742051ba743a525331cc9b31ba7152627344902ea79dc8d2c436ceda5bcb4'],
-                        '01ef91e8e584484c11850e49265256449a6acc9a75e0a7814e374d0248056d2d5d43fe494d9fd9',
-                        Currency('340200'),
-                        0,
-                    ),
-                ],
-                [],
-            ),
-            TransactionView(
-                'a0e3f3036e8b7f082307c7747beada0656e1ea205f384ce7abea1401d5881a90',
-                270009,
-                1557083331,
-                '66d3d46f6a75dcab102baff7016cd518d857c37db0db4151dae45b225408de9d',
-                [
-                    CoinOutputView(
-                        [
-                            '0111429d9967c5c5e52e5aad522d6759e88c6fca8a54fa23ea12917006edf6842631a8a5d847ac',
-                            '01a94cff5aa86508d742051ba743a525331cc9b31ba7152627344902ea79dc8d2c436ceda5bcb4',
-                        ],
-                        '01a94cff5aa86508d742051ba743a525331cc9b31ba7152627344902ea79dc8d2c436ceda5bcb4',
-                        Currency('20000'),
-                        1558458390,
-                    ),
-                ],
-                [],
-            ),
-            TransactionView(
-                'a3bf595635b3563859a00fedf6a5b435fef9802f1ff6e9d4640a072e0b2f49e4',
-                240000,
-                1553463308,
-                'a3bf595635b3563859a00fedf6a5b435fef9802f1ff6e9d4640a072e0b2f49e4',
-                [],
-                [
-                    CoinOutputView(
-                        ['01a94cff5aa86508d742051ba743a525331cc9b31ba7152627344902ea79dc8d2c436ceda5bcb4'],
-                        '0111429d9967c5c5e52e5aad522d6759e88c6fca8a54fa23ea12917006edf6842631a8a5d847ac',
-                        Currency('123456789.2003'),
-                        0,
-                    ),
-                ],
-            ),
-            TransactionView(
-                '66ccdf3a0bca58025be7fdc71f3f6bfbd6ed6287aa698a131734a947c71a3bbf',
-                240000,
-                1553463308,
-                'a3bf595635b3563859a00fedf6a5b435fef9802f1ff6e9d4640a072e0b2f49e4',
-                [],
-                [
-                    CoinOutputView(
-                        ['01ef91e8e584484c11850e49265256449a6acc9a75e0a7814e374d0248056d2d5d43fe494d9fd9'],
-                        '0111429d9967c5c5e52e5aad522d6759e88c6fca8a54fa23ea12917006edf6842631a8a5d847ac',
-                        Currency('3000.200'),
-                        0,
-                    ),
-                    CoinOutputView(
-                        ['01a94cff5aa86508d742051ba743a525331cc9b31ba7152627344902ea79dc8d2c436ceda5bcb4'],
-                        '0111429d9967c5c5e52e5aad522d6759e88c6fca8a54fa23ea12917006edf6842631a8a5d847ac',
-                        Currency('10000'),
-                        250000,
-                    ),
-                ],
-            ),
-        ]
+        transactions = []
+        for transaction in self._tfbalance.transactions:
+            transactions.append(TransactionView.from_transaction(transaction, self._tfbalance.addresses))
+        return transactions
 
 
 class TransactionView:
     """
     A human readable view of a transaction as filtered for a specific wallet in mind.
     """
+
+    @classmethod
+    def from_transaction(cls, transaction, addresses):
+        # gather const information
+        identifier = transaction.id
+        if transaction.unconfirmed:
+            height = -1
+            timestamp = -1
+            blockid = None
+        else:
+            height = transaction.height
+            timestamp = transaction.timestamp
+            blockid = transaction.blockid
+        # define the senders of this transaction
+        senders = set()
+        for ci in transaction.coin_inputs:
+            senders.add(ci.parent_output.condition.unlockhash.__str__())
+        addresses = set(addresses)
+
+        # collect inputs/outputs
+        inputs = []
+        outputs = []
+
+        # if at least one filtered address is in the senders,
+        # we'll assume this is an outgoing transaction,
+        # otherwise it is is an incoming transaction
+        # NOTE: it could be that another senders is not us, in that case we'll need to define a ratio
+        if len(addresses.intersection(senders)) == 0:
+            senders = list(senders)
+            for co in transaction.coin_outputs:
+                if co.condition.unlockhash.__str__() in addresses:
+                    outputs.append(CoinOutputView.from_coin_output(co, senders))
+        else:
+            # gather address-filtered information
+            ratio = Currency("1.0")
+            if len(addresses.union(senders)) != len(addresses):
+                senders = addresses.intersection(senders)
+                v = Currency()
+                fv = Currency()
+                for ci in transaction.coin_inputs:
+                    output = ci.parent_output
+                    v.__iadd__(output.value)
+                    if output.condition.unlockhash.__str__() in addresses:
+                        fv.__iadd__(output.value)
+                ratio = Currency(fv.value.__truediv__(v.value.to_nearest(9)))
+            else:
+                senders = list(senders)
+            # add all inputs
+            for ci in transaction.coin_inputs:
+                output = ci.parent_output
+                inputs.append(CoinOutputView.from_coin_output(co, senders, ratio=ratio))
+
+        # return transaction view
+        return cls(identifier, height, timestamp, blockid.__str__(), inputs, outputs)
 
     def __init__(self, identifier, height, timestamp, blockid, inputs, outputs):
         if not isinstance(identifier, str):
@@ -748,6 +710,15 @@ class CoinOutputView:
 
     NOTE: AtomicSwapConditioned outputs are not supported.
     """
+
+    @classmethod
+    def from_coin_output(cls, output, senders, ratio=None):
+        recipient = output.condition.unlockhash.__str__()
+        amount = output.value
+        if ratio is not None:
+            amount = amount.__mul__(ratio)
+        lock = output.lock
+        return cls(senders, recipient, amount, lock)
 
     def __init__(self, senders, recipient, amount, lock):
         self._senders = senders

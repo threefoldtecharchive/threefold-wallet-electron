@@ -90,6 +90,31 @@ export var Decimal =  __class__ ('Decimal', [object], {
 		var exponent = (exponent > 0 ? exponent * -(1) : 0);
 		return tuple ([sign, digits, exponent]);
 	});},
+	get to_nearest () {return __get__ (this, function (self, prec) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'prec': var prec = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (!(isinstance (prec, int))) {
+			var __except0__ = py_TypeError ('precision is to be of type int, not type {}'.format (py_typeof (prec)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		if (prec <= 0) {
+			return Decimal (self.value.toNearest ('1'));
+		}
+		return Decimal (self.value.toNearest (('.' + jsstr.repeat ('0', prec - 1)) + '1'));
+	});},
 	get str () {return __get__ (this, function (self, prec) {
 		if (typeof prec == 'undefined' || (prec != null && prec.hasOwnProperty ("__kwargtrans__"))) {;
 			var prec = null;
@@ -109,10 +134,7 @@ export var Decimal =  __class__ ('Decimal', [object], {
 		else {
 		}
 		if (isinstance (prec, int)) {
-			if (prec <= 0) {
-				return self.value.toNearest ('1').toString ();
-			}
-			var s = self.value.toNearest (('.' + jsstr.repeat ('0', prec - 1)) + '1').toString ();
+			var s = self.to_nearest (prec).value.toString ();
 			if (!__in__ ('.', s)) {
 				return (s + '.') + jsstr.repeat ('0', prec);
 			}

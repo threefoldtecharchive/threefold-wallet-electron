@@ -1740,14 +1740,14 @@ class CoinTransactionBuilder():
             txn.id = self._wallet._transaction_put(transaction=txn)
 
             # update balance
-            for ci in txn.coin_inputs:
-                balance.output_add(ci.parent_output, confirmed=False, spent=True)
+            for idx, ci in enumerate(txn.coin_inputs):
+                balance.output_add(txn, idx, confirmed=False, spent=True)
             addresses = jsarr.concat(self._wallet.addresses, balance.addresses_multisig)
             for idx, co in enumerate(txn.coin_outputs):
                 if co.condition.unlockhash.__str__() in addresses:
                     # add the id to the coin_output, so we can track it has been spent
                     co.id = txn.coin_outputid_new(idx)
-                    balance.output_add(co, confirmed=False, spent=False)
+                    balance.output_add(txn, idx, confirmed=False, spent=False)
             # and return the created/submitted transaction for optional user consumption
 
         return TransactionSendResult(txn, submit)

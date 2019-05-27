@@ -146,6 +146,11 @@ class TFChainClient:
             timestamp = int(rawblock['timestamp'])
             # get the block's identifier
             blockid = Hash.from_json(block['blockid'])
+            # for all transactions assign these properties
+            for transaction in transactions:
+                transaction.timestamp = timestamp
+                transaction.height = height
+                transaction.blockid = blockid
             # return the block, as reported by the explorer
             return ExplorerBlock(
                 id=blockid, parentid=parentid,
@@ -198,7 +203,17 @@ class TFChainClient:
             except KeyError as exc:
                 # return a KeyError as an invalid Explorer Response
                 raise tferrors.ExplorerInvalidResponse(str(exc), endpoint, result) from exc
-        return jsasync.chain(ec.explorer_get(endpoint=endpoint), cb)
+        # fetch timestamps seperately
+        # TODO: make a pull request in Rivine to return timestamp together with regular result,
+        #       as it is rediculous to have to do this
+        def fetch_transacton_timestamps(transaction):
+            p = ec._block_get_by_hash(transaction.blockid)
+            def aggregate(result):
+                _, block = result
+                transaction.timestamp = block.get_or('rawblock', jsobj.new_dict()).get_or('timestamp', 0)
+                return transaction
+            return jsasync.chain(p, aggregate)
+        return jsasync.chain(ec.explorer_get(endpoint=endpoint), cb, fetch_transacton_timestamps)
 
     # def transaction_put(self, transaction):
     #     """
@@ -255,6 +270,8 @@ class TFChainClient:
                 for etxn in resp['transactions']:
                     # parse the explorer transaction
                     transaction = ec._transaction_from_explorer_transaction(etxn, endpoint=endpoint, resp=resp)
+                    transaction.height = int(etxn.get_or('height', 0))
+                    transaction.blockid = etxn.get_or('parent', None)
                     # append the transaction to the list of transactions
                     transactions.append(transaction)
                 # collect all multisig addresses
@@ -289,8 +306,28 @@ class TFChainClient:
                 # return a KeyError as an invalid Explorer Response
                 raise tferrors.ExplorerInvalidResponse(str(exc), endpoint, resp) from exc
 
+        # fetch timestamps seperately
+        # TODO: make a pull request in Rivine to return timestamps together with regular results,
+        #       as it is rediculous to have to do this
+        def fetch_transacton_timestamps(result):
+            transactions = {}
+            for transaction in result.transactions:
+                if not transaction.unconfirmed:
+                    transactions[transaction.blockid.__str__()] = transaction
+            if len(transactions) == 0:
+                return result # return as is, nothing to do
+            def generator():
+                for blockid in jsobj.get_keys(transactions):
+                    yield ec._block_get_by_hash(blockid)
+            def result_cb(block_result):
+                _, block = block_result
+                transactions[block.get_or('blockid', '')].timestamp = block.get_or('rawblock', jsobj.new_dict()).get_or('timestamp', 0)
+            def aggregate():
+                return result
+            return jsasync.chain(jsasync.promise_pool_new(generator, cb=result_cb), aggregate)
+    
         return jsasync.catch_promise(
-            jsasync.chain(ec.explorer_get(endpoint=endpoint), cb),
+            jsasync.chain(ec.explorer_get(endpoint=endpoint), cb, fetch_transacton_timestamps),
             catch_no_content)
 
 
@@ -363,8 +400,35 @@ class TFChainClient:
             except KeyError as exc:
                 # return a KeyError as an invalid Explorer Response
                 raise tferrors.ExplorerInvalidResponse(str(exc), endpoint, result) from exc
+        # fetch timestamps seperately
+        # TODO: make a pull request in Rivine to return timestamps together with regular results,
+        #       as it is rediculous to have to do this
+        def fetch_transacton_timestamps(result):
+            if result.creation_transaction.unconfirmed:
+                return result # return as is
+            ps = [self._block_get_by_hash(result.creation_transaction.blockid)]
+            if result.spend_transaction is not None and not result.spend_transaction.unconfirmed:
+                ps.append(self._block_get_by_hash(result.spend_transaction.blockid))
+            p = jsasync.wait(*ps)
+            def aggregate(results):
+                if len(results) == 1:
+                    # assign just the creation transacton timestamp
+                    _, block = results[0]
+                    result.creation_transaction.timestamp = block.get_or('rawblock', jsobj.new_dict()).get_or('timestamp', 0)
+                    return result
+                # assign both creation- and spend transaction timestamp
+                _, block_a = results[0]
+                _, block_b = results[1]
+                if block_a.id.__eq__(result.creation_transaction.blockid):
+                    result.creation_transaction.timestamp = block_a.get_or('rawblock', jsobj.new_dict()).get_or('timestamp', 0)
+                    result.spend_transaction.timestamp = block_b.get_or('rawblock', jsobj.new_dict()).get_or('timestamp', 0)
+                else:
+                    result.creation_transaction.timestamp = block_b.get_or('rawblock', jsobj.new_dict()).get_or('timestamp', 0)
+                    result.spend_transaction.timestamp = block_a.get_or('rawblock', jsobj.new_dict()).get_or('timestamp', 0)
+                return result
+            return jsasync.chain(p, aggregate)
         # return as chained promise
-        return jsasync.chain(self.explorer_get(endpoint=endpoint), cb)
+        return jsasync.chain(self.explorer_get(endpoint=endpoint), cb, fetch_transacton_timestamps)
 
     def _transaction_from_explorer_transaction(self, etxn, endpoint="/?", resp=None): # keyword parameters for error handling purposes only
         if resp is None:
@@ -401,9 +465,10 @@ class TFChainClient:
             transaction.blockstake_outputs[idx].id = Hash.from_json(obj=id)
         # set the unconfirmed state
         transaction.unconfirmed = etxn.get_or('unconfirmed', False)
-        # set the height of the transaction only if confirmed
+        # set the blockid and height of the transaction only if confirmed
         if not transaction.unconfirmed:
             transaction.height = int(etxn.get_or('height', 0))
+            transaction.blockid = etxn.get_or('parent', None)
         # return the transaction
         return transaction
 
@@ -586,12 +651,12 @@ class ExplorerUnlockhashResult():
             # collect the balance
             address = self.unlockhash.__str__()
             for txn in self.transactions:
-                for ci in txn.coin_inputs:
+                for index, ci in enumerate(txn.coin_inputs):
                     if ci.parent_output.condition.unlockhash.__str__() == address:
-                        balance.output_add(ci.parent_output, confirmed=(not txn.unconfirmed), spent=True)
-                for co in txn.coin_outputs:
+                        balance.output_add(txn, index, confirmed=(not txn.unconfirmed), spent=True)
+                for index, co in enumerate(txn.coin_outputs):
                     if co.condition.unlockhash.__str__() == address:
-                        balance.output_add(co, confirmed=(not txn.unconfirmed), spent=False)
+                        balance.output_add(txn, index, confirmed=(not txn.unconfirmed), spent=False)
         # if a client is set, attach the current chain info to it
         if info is not None:
             balance.chain_height = info.height
@@ -602,24 +667,24 @@ class ExplorerUnlockhashResult():
     def _multisig_balance(self, info):
         balance = None
         # collect the balance
-        address = str(self.unlockhash)
+        address = self.unlockhash.__str__()
         for txn in self.transactions:
-            for ci in txn.coin_inputs:
-                if str(ci.parent_output.condition.unlockhash) == address:
+            for index, ci in enumerate(txn.coin_inputs):
+                if ci.parent_output.condition.unlockhash.__str__() == address:
                     oc = ci.parent_output.condition.unwrap()
                     if not isinstance(oc, ConditionMultiSignature):
                         raise TypeError("multi signature's output condition cannot be of type {} (expected: ConditionMultiSignature)".format(type(oc)))
                     if balance is None:
                         balance = MultiSigWalletBalance(owners=oc.unlockhashes, signature_count=oc.required_signatures)
-                    balance.output_add(ci.parent_output, confirmed=(not txn.unconfirmed), spent=True)
-            for co in txn.coin_outputs:
-                if str(co.condition.unlockhash) == address:
+                    balance.output_add(txn, index, confirmed=(not txn.unconfirmed), spent=True)
+            for index, co in enumerate(txn.coin_outputs):
+                if co.condition.unlockhash.__str__() == address:
                     oc = co.condition.unwrap()
                     if not isinstance(oc, ConditionMultiSignature):
                         raise TypeError("multi signature's output condition cannot be of type {} (expected: ConditionMultiSignature)".format(type(oc)))
                     if balance is None:
                         balance = MultiSigWalletBalance(owners=oc.unlockhashes, signature_count=oc.required_signatures)
-                    balance.output_add(co, confirmed=(not txn.unconfirmed), spent=False)
+                    balance.output_add(txn, index, confirmed=(not txn.unconfirmed), spent=False)
             if isinstance(txn, TransactionV128):
                 oc = txn.mint_condition
                 balance = MultiSigWalletBalance(owners=oc.unlockhashes, signature_count=oc.required_signatures)

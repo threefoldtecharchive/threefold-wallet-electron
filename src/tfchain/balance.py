@@ -20,7 +20,7 @@ class WalletBalance(object):
         self._outputs_unconfirmed = {}
         self._outputs_unconfirmed_spent = {}
         # transactions used by outputs
-        self._transactions = [] # TODO
+        self._transactions = {}
         # balance chain context
         self._chain_time = 0
         self._chain_height = 0
@@ -87,6 +87,19 @@ class WalletBalance(object):
         if not isinstance(value, int):
             raise TypeError("WalletBalance's chain height cannot be of type {} (expected: int)".format(type(value)))
         self._chain_height = int(value)
+
+    @property
+    def transactions(self):
+        """
+        Return all relevant transactions,
+        sorted by height
+        """
+        transactions = jsobj.dict_values(self._transactions)
+        def txn_arr_sort(a, b):
+            height_a = pow(2, 64) if a.height < 0 else a.height
+            height_b = pow(2, 64) if b.height < 0 else b.height
+            return height_a-height_b
+        return jsarr.sort(transactions, txn_arr_sort, reverse=True)
 
     @property
     def active(self):
@@ -176,10 +189,16 @@ class WalletBalance(object):
         else:
             return Currency() # impossible to know for sure without a complete context
 
-    def output_add(self, output, confirmed=True, spent=False):
+    def output_add(self, txn, index, confirmed=True, spent=False):
         """
         Add an output to the Wallet's balance.
         """
+        txnid = txn.id.__str__()
+        if spent:
+            output = txn.coin_inputs[index].parent_output
+        else:
+            output = txn.coin_outputs[index]
+
         strid = output.id.__str__()
         if confirmed: # confirmed outputs
             if spent:
@@ -200,7 +219,10 @@ class WalletBalance(object):
                 self._outputs.pop(strid, None)
             elif strid not in self._outputs_unconfirmed_spent:
                 self._outputs_unconfirmed[strid] = output
+        # add the address
         self._addresses.add(str(output.condition.unlockhash))
+        # add the transaction
+        self._transactions[txnid] = txn
 
     @property
     def _base(self):
@@ -212,6 +234,7 @@ class WalletBalance(object):
         b._outputs_spent = self._outputs_spent
         b._outputs_unconfirmed = self._outputs_unconfirmed
         b._outputs_unconfirmed_spent = self._outputs_unconfirmed_spent
+        b._transactions = self._transactions
         b._chain_blockid = self._chain_blockid
         b._chain_height = self._chain_height
         b._chain_time = self._chain_time
@@ -254,6 +277,9 @@ class WalletBalance(object):
             self._outputs_unconfirmed_spent[id] = output
         # merge the addresses
         self._addresses = self._addresses.union(other._addresses)
+        # merge the transactions
+        for (id, txn) in jsobj.get_items(other._transactions):
+            self._transactions[id] = txn
         # return the modified self
         return self
 
@@ -388,7 +414,7 @@ class WalletsBalance(WalletBalance):
         """
         return jsobj.get_keys(self.wallets)
 
-    def multisig_output_add(self, address, output, confirmed=True, spent=False):
+    def _multisig_output_add(self, address, output, txn, index, confirmed=True, spent=False):
         """
         Add an output to the MultiSignature Wallet's balance.
         """
@@ -399,17 +425,21 @@ class WalletsBalance(WalletBalance):
             self._wallets[address] = MultiSigWalletBalance(
                 owners=output.condition.unlockhashes,
                 signature_count=output.condition.required_signatures)
-        self._wallets[address].output_add(output, confirmed=confirmed, spent=spent)
+        self._wallets[address].output_add(txn, index, confirmed=confirmed, spent=spent)
 
-    def output_add(self, output, confirmed=True, spent=False):
+    def output_add(self, txn, index, confirmed=True, spent=False):
         """
         Add an output to the Wallet's balance.
         """
+        if spent:
+            output = txn.coin_inputs[index].parent_output
+        else:
+            output = txn.coin_outputs[index]
         uh = output.condition.unlockhash
         if uh.type.__eq__(UnlockHashType.MULTI_SIG):
-            return self.multisig_output_add(address=uh.__str__(), output=output, confirmed=confirmed, spent=spent)
+            return self._multisig_output_add(address=uh.__str__(), output=output, txn=txn, index=index, confirmed=confirmed, spent=spent)
         self._addresses.add(uh.__str__())
-        return super().output_add(output=output, confirmed=confirmed, spent=spent)
+        return super().output_add(txn=txn, index=index, confirmed=confirmed, spent=spent)
 
     def balance_add(self, other):
         """
