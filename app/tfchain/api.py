@@ -306,13 +306,7 @@ class Account:
         :returns: a promise that can be resolved in an async manner
         """
         def cb(info):
-            return ChainInfo(
-                info.constants.chain_name,
-                info.constants.chain_version,
-                info.constants.chain_network,
-                info.height,
-                info.timestamp,
-            )
+            return ChainInfo(info)
         return jsasync.chain(self._explorer_client.blockchain_info_get(), cb)
 
     @property
@@ -573,13 +567,71 @@ class Balance:
         return transactions
 
 
+class BlockView:
+    """
+    A human readable view of a transaction as filtered for a specific wallet in mind.
+    """
+
+    @classmethod
+    def from_block(cls, block, addresses=None):
+        # gather const information
+        height = block.height
+        timestamp = block.timestamp
+        identifier = block.id.__str__()
+        # gather transactions
+        transactions = []
+        for transaction in block.transactions:
+            transactions.append(TransactionView.from_transaction(transaction, addresses=addresses))
+        # return BlockView
+        return cls(identifier, height, timestamp, transactions)
+
+    def __init__(self, identifier, height, timestamp, transactions):
+        if not isinstance(identifier, str):
+            raise TypeError("identifier is expected to be of type str, not be of type {}".format(type(identifier)))
+        self._identifier = identifier
+        if not isinstance(height, int):
+            raise TypeError("height is expected to be of type int, not be of type {}".format(type(height)))
+        self._height = height
+        if not isinstance(timestamp, int):
+            raise TypeError("timestamp is expected to be of type int, not be of type {}".format(type(timestamp)))
+        self._timestamp = timestamp
+        for transaction in transactions:
+            if not isinstance(transaction, TransactionView):
+                raise TypeError("transaction was expexcted to be of type TransactionView, not of type {}".format(type(transaction)))
+        self._transactions = transactions
+
+    @property
+    def identifier(self):
+        """
+        :returns: the transaction identifier
+        """
+        return self._identifier
+    @property
+    def height(self):
+        """
+        :returns: the block's height
+        """
+        return self._height
+    @property
+    def timestamp(self):
+        """
+        :returns: the block's timestamp
+        """
+        return self._timestamp
+    @property
+    def transactions(self):
+        """
+        :returns: the block's transactions
+        """
+        return self._transactions
+
 class TransactionView:
     """
     A human readable view of a transaction as filtered for a specific wallet in mind.
     """
 
     @classmethod
-    def from_transaction(cls, transaction, addresses):
+    def from_transaction(cls, transaction, addresses=None):
         # gather const information
         identifier = transaction.id
         if transaction.unconfirmed:
@@ -590,44 +642,46 @@ class TransactionView:
             height = transaction.height
             timestamp = transaction.timestamp
             blockid = transaction.blockid.__str__()
-        # define the senders of this transaction
-        senders = set()
-        for ci in transaction.coin_inputs:
-            senders.add(ci.parent_output.condition.unlockhash.__str__())
-        addresses = set(addresses)
 
         # collect inputs/outputs
         inputs = []
         outputs = []
 
-        # if at least one filtered address is in the senders,
-        # we'll assume this is an outgoing transaction,
-        # otherwise it is is an incoming transaction
-        # NOTE: it could be that another senders is not us, in that case we'll need to define a ratio
-        if len(addresses.intersection(senders)) == 0:
-            senders = list(senders)
-            for co in transaction.coin_outputs:
-                if co.condition.unlockhash.__str__() in addresses:
-                    inputs.append(CoinOutputView.from_coin_output(co, senders))
-        else:
-            # gather address-filtered information
-            ratio = Currency("1.0")
-            if len(addresses.union(senders)) != len(addresses):
-                senders = addresses.intersection(senders)
-                v = Currency()
-                fv = Currency()
+        if addresses is not None:
+            addresses = set(addresses)
+            # define the senders of this transaction
+            senders = set()
+            for ci in transaction.coin_inputs:
+                senders.add(ci.parent_output.condition.unlockhash.__str__())
+
+            # if at least one filtered address is in the senders,
+            # we'll assume this is an outgoing transaction,
+            # otherwise it is is an incoming transaction
+            # NOTE: it could be that another senders is not us, in that case we'll need to define a ratio
+            if len(addresses.intersection(senders)) == 0:
+                senders = list(senders)
+                for co in transaction.coin_outputs:
+                    if co.condition.unlockhash.__str__() in addresses:
+                        inputs.append(CoinOutputView.from_coin_output(co, senders))
+            else:
+                # gather address-filtered information
+                ratio = Currency("1.0")
+                if len(addresses.union(senders)) != len(addresses):
+                    senders = addresses.intersection(senders)
+                    v = Currency()
+                    fv = Currency()
+                    for ci in transaction.coin_inputs:
+                        output = ci.parent_output
+                        v.__iadd__(output.value)
+                        if output.condition.unlockhash.__str__() in addresses:
+                            fv.__iadd__(output.value)
+                    ratio = Currency(fv.value.__truediv__(v.value.to_nearest(9)))
+                else:
+                    senders = list(senders)
+                # add all inputs
                 for ci in transaction.coin_inputs:
                     output = ci.parent_output
-                    v.__iadd__(output.value)
-                    if output.condition.unlockhash.__str__() in addresses:
-                        fv.__iadd__(output.value)
-                ratio = Currency(fv.value.__truediv__(v.value.to_nearest(9)))
-            else:
-                senders = list(senders)
-            # add all inputs
-            for ci in transaction.coin_inputs:
-                output = ci.parent_output
-                outputs.append(CoinOutputView.from_coin_output(co, senders, ratio=ratio))
+                    outputs.append(CoinOutputView.from_coin_output(co, senders, ratio=ratio))
 
         # return transaction view
         return cls(identifier, height, timestamp, blockid, inputs, outputs)
@@ -756,26 +810,13 @@ class ChainInfo:
     at this exact moment, as useful for the TF Desktop Wallet App.
     """
 
-    def __init__(self, chain_name, chain_version, chain_network, chain_height, chain_timestamp):
+    def __init__(self, tf_chain_info):
         """
         Create a new ChainInfo object.
-
-        :param chain_name: the name of the (block)chain
-        :type chain_nane: str
-        :param chain_version: the version of the (block)chain
-        :type chain_version: str
-        :param chain_network: the network type of the (block)chain (standard, testnet or devnet)
-        :type chain_network: str
-        :param chain_height: the height of the last block of the blockchain (>= 0)
-        :type chain_height: int
-        :param chain_timestap: the epoch (UNIX seconds) timestamp of the last block of the blockchain
-        :type chain_timestap: int
         """
-        self._chain_name = chain_name
-        self._chain_version = chain_version
-        self._chain_network = chain_network
-        self._chain_height = chain_height
-        self._chain_timestamp = chain_timestamp
+        if not isinstance(tf_chain_info, tfclient.ExplorerBlockchainInfo):
+            raise TypeError("tf chain info is of an invalid type {}".format(type(tf_chain_info)))
+        self._tf_chain_info = tf_chain_info
 
     @property
     def chain_name(self):
@@ -783,7 +824,7 @@ class ChainInfo:
         :returns: the name of the (block)chain
         :rtype: str
         """
-        return self._chain_name
+        return self._tf_chain_info.constants.chain_name
 
     @property
     def chain_version(self):
@@ -791,7 +832,7 @@ class ChainInfo:
         :returns: the version of the (block)chain
         :rtype: str
         """
-        return self._chain_version
+        return self._tf_chain_info.constants.chain_version
 
     @property
     def chain_network(self):
@@ -799,7 +840,7 @@ class ChainInfo:
         :returns: the network type of the (block)chain (standard, testnet or devnet)
         :rtype: str
         """
-        return self._chain_network
+        return self._tf_chain_info.constants.chain_network
 
     @property
     def chain_height(self):
@@ -807,7 +848,7 @@ class ChainInfo:
         :returns: the height of the last block of the blockchain (>= 0)
         :rtype: int
         """
-        return self._chain_height
+        return self._tf_chain_info.height
 
     @property
     def chain_timestamp(self):
@@ -815,7 +856,14 @@ class ChainInfo:
         :returns: the epoch (UNIX seconds) timestamp of the last block of the blockchain
         :rtype: int
         """
-        return self._chain_timestamp
+        return self._tf_chain_info.timestamp
+
+    def last_block_get(self, addresses=None):
+        """
+        :returns: the last block, optionally with transaction inputs and outputs filtered by addresses
+        :rtype: BlockView
+        """
+        return BlockView.from_block(self._tf_chain_info.last_block, addresses=addresses)
 
 
 def mnemonic_new():

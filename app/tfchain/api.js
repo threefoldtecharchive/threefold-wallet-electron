@@ -455,7 +455,7 @@ export var Account =  __class__ ('Account', [object], {
 			}
 			else {
 			}
-			return ChainInfo (info.constants.chain_name, info.constants.chain_version, info.constants.chain_network, info.height, info.timestamp);
+			return ChainInfo (info);
 		};
 		return jsasync.chain (self._explorer_client.blockchain_info_get (), cb);
 	});},
@@ -1038,9 +1038,156 @@ Object.defineProperty (Balance, 'transactions', property.call (Balance, Balance.
 Object.defineProperty (Balance, 'coins_total', property.call (Balance, Balance._get_coins_total));
 Object.defineProperty (Balance, 'coins_locked', property.call (Balance, Balance._get_coins_locked));
 Object.defineProperty (Balance, 'coins_unlocked', property.call (Balance, Balance._get_coins_unlocked));;
+export var BlockView =  __class__ ('BlockView', [object], {
+	__module__: __name__,
+	get from_block () {return __getcm__ (this, function (cls, block, addresses) {
+		if (typeof addresses == 'undefined' || (addresses != null && addresses.hasOwnProperty ("__kwargtrans__"))) {;
+			var addresses = null;
+		};
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+						case 'block': var block = __allkwargs0__ [__attrib0__]; break;
+						case 'addresses': var addresses = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var height = block.height;
+		var timestamp = block.timestamp;
+		var identifier = block.id.__str__ ();
+		var transactions = [];
+		for (var transaction of block.transactions) {
+			transactions.append (TransactionView.from_transaction (transaction, __kwargtrans__ ({addresses: addresses})));
+		}
+		return cls (identifier, height, timestamp, transactions);
+	});},
+	get __init__ () {return __get__ (this, function (self, identifier, height, timestamp, transactions) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'identifier': var identifier = __allkwargs0__ [__attrib0__]; break;
+						case 'height': var height = __allkwargs0__ [__attrib0__]; break;
+						case 'timestamp': var timestamp = __allkwargs0__ [__attrib0__]; break;
+						case 'transactions': var transactions = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (!(isinstance (identifier, str))) {
+			var __except0__ = py_TypeError ('identifier is expected to be of type str, not be of type {}'.format (py_typeof (identifier)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		self._identifier = identifier;
+		if (!(isinstance (height, int))) {
+			var __except0__ = py_TypeError ('height is expected to be of type int, not be of type {}'.format (py_typeof (height)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		self._height = height;
+		if (!(isinstance (timestamp, int))) {
+			var __except0__ = py_TypeError ('timestamp is expected to be of type int, not be of type {}'.format (py_typeof (timestamp)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		self._timestamp = timestamp;
+		for (var transaction of transactions) {
+			if (!(isinstance (transaction, TransactionView))) {
+				var __except0__ = py_TypeError ('transaction was expexcted to be of type TransactionView, not of type {}'.format (py_typeof (transaction)));
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
+		}
+		self._transactions = transactions;
+	});},
+	get _get_identifier () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._identifier;
+	});},
+	get _get_height () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._height;
+	});},
+	get _get_timestamp () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._timestamp;
+	});},
+	get _get_transactions () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._transactions;
+	});}
+});
+Object.defineProperty (BlockView, 'transactions', property.call (BlockView, BlockView._get_transactions));
+Object.defineProperty (BlockView, 'timestamp', property.call (BlockView, BlockView._get_timestamp));
+Object.defineProperty (BlockView, 'height', property.call (BlockView, BlockView._get_height));
+Object.defineProperty (BlockView, 'identifier', property.call (BlockView, BlockView._get_identifier));;
 export var TransactionView =  __class__ ('TransactionView', [object], {
 	__module__: __name__,
 	get from_transaction () {return __getcm__ (this, function (cls, transaction, addresses) {
+		if (typeof addresses == 'undefined' || (addresses != null && addresses.hasOwnProperty ("__kwargtrans__"))) {;
+			var addresses = null;
+		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -1067,42 +1214,44 @@ export var TransactionView =  __class__ ('TransactionView', [object], {
 			var timestamp = transaction.timestamp;
 			var blockid = transaction.blockid.__str__ ();
 		}
-		var senders = set ();
-		for (var ci of transaction.coin_inputs) {
-			senders.add (ci.parent_output.condition.unlockhash.__str__ ());
-		}
-		var addresses = set (addresses);
 		var inputs = [];
 		var outputs = [];
-		if (len (addresses.intersection (senders)) == 0) {
-			var senders = list (senders);
-			for (var co of transaction.coin_outputs) {
-				if (__in__ (co.condition.unlockhash.__str__ (), addresses)) {
-					inputs.append (CoinOutputView.from_coin_output (co, senders));
-				}
+		if (addresses !== null) {
+			var addresses = set (addresses);
+			var senders = set ();
+			for (var ci of transaction.coin_inputs) {
+				senders.add (ci.parent_output.condition.unlockhash.__str__ ());
 			}
-		}
-		else {
-			var ratio = Currency ('1.0');
-			if (len (addresses.union (senders)) != len (addresses)) {
-				var senders = addresses.intersection (senders);
-				var v = Currency ();
-				var fv = Currency ();
-				for (var ci of transaction.coin_inputs) {
-					var output = ci.parent_output;
-					v.__iadd__ (output.value);
-					if (__in__ (output.condition.unlockhash.__str__ (), addresses)) {
-						fv.__iadd__ (output.value);
+			if (len (addresses.intersection (senders)) == 0) {
+				var senders = list (senders);
+				for (var co of transaction.coin_outputs) {
+					if (__in__ (co.condition.unlockhash.__str__ (), addresses)) {
+						inputs.append (CoinOutputView.from_coin_output (co, senders));
 					}
 				}
-				var ratio = Currency (fv.value.__truediv__ (v.value.to_nearest (9)));
 			}
 			else {
-				var senders = list (senders);
-			}
-			for (var ci of transaction.coin_inputs) {
-				var output = ci.parent_output;
-				outputs.append (CoinOutputView.from_coin_output (co, senders, __kwargtrans__ ({ratio: ratio})));
+				var ratio = Currency ('1.0');
+				if (len (addresses.union (senders)) != len (addresses)) {
+					var senders = addresses.intersection (senders);
+					var v = Currency ();
+					var fv = Currency ();
+					for (var ci of transaction.coin_inputs) {
+						var output = ci.parent_output;
+						v.__iadd__ (output.value);
+						if (__in__ (output.condition.unlockhash.__str__ (), addresses)) {
+							fv.__iadd__ (output.value);
+						}
+					}
+					var ratio = Currency (fv.value.__truediv__ (v.value.to_nearest (9)));
+				}
+				else {
+					var senders = list (senders);
+				}
+				for (var ci of transaction.coin_inputs) {
+					var output = ci.parent_output;
+					outputs.append (CoinOutputView.from_coin_output (co, senders, __kwargtrans__ ({ratio: ratio})));
+				}
 			}
 		}
 		return cls (identifier, height, timestamp, blockid, inputs, outputs);
@@ -1398,7 +1547,7 @@ Object.defineProperty (CoinOutputView, 'recipient', property.call (CoinOutputVie
 Object.defineProperty (CoinOutputView, 'senders', property.call (CoinOutputView, CoinOutputView._get_senders));;
 export var ChainInfo =  __class__ ('ChainInfo', [object], {
 	__module__: __name__,
-	get __init__ () {return __get__ (this, function (self, chain_name, chain_version, chain_network, chain_height, chain_timestamp) {
+	get __init__ () {return __get__ (this, function (self, tf_chain_info) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -1406,22 +1555,19 @@ export var ChainInfo =  __class__ ('ChainInfo', [object], {
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'chain_name': var chain_name = __allkwargs0__ [__attrib0__]; break;
-						case 'chain_version': var chain_version = __allkwargs0__ [__attrib0__]; break;
-						case 'chain_network': var chain_network = __allkwargs0__ [__attrib0__]; break;
-						case 'chain_height': var chain_height = __allkwargs0__ [__attrib0__]; break;
-						case 'chain_timestamp': var chain_timestamp = __allkwargs0__ [__attrib0__]; break;
+						case 'tf_chain_info': var tf_chain_info = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
 		}
 		else {
 		}
-		self._chain_name = chain_name;
-		self._chain_version = chain_version;
-		self._chain_network = chain_network;
-		self._chain_height = chain_height;
-		self._chain_timestamp = chain_timestamp;
+		if (!(isinstance (tf_chain_info, tfclient.ExplorerBlockchainInfo))) {
+			var __except0__ = py_TypeError ('tf chain info is of an invalid type {}'.format (py_typeof (tf_chain_info)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		self._tf_chain_info = tf_chain_info;
 	});},
 	get _get_chain_name () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -1437,7 +1583,7 @@ export var ChainInfo =  __class__ ('ChainInfo', [object], {
 		}
 		else {
 		}
-		return self._chain_name;
+		return self._tf_chain_info.constants.chain_name;
 	});},
 	get _get_chain_version () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -1453,7 +1599,7 @@ export var ChainInfo =  __class__ ('ChainInfo', [object], {
 		}
 		else {
 		}
-		return self._chain_version;
+		return self._tf_chain_info.constants.chain_version;
 	});},
 	get _get_chain_network () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -1469,7 +1615,7 @@ export var ChainInfo =  __class__ ('ChainInfo', [object], {
 		}
 		else {
 		}
-		return self._chain_network;
+		return self._tf_chain_info.constants.chain_network;
 	});},
 	get _get_chain_height () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -1485,7 +1631,7 @@ export var ChainInfo =  __class__ ('ChainInfo', [object], {
 		}
 		else {
 		}
-		return self._chain_height;
+		return self._tf_chain_info.height;
 	});},
 	get _get_chain_timestamp () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -1501,7 +1647,27 @@ export var ChainInfo =  __class__ ('ChainInfo', [object], {
 		}
 		else {
 		}
-		return self._chain_timestamp;
+		return self._tf_chain_info.timestamp;
+	});},
+	get last_block_get () {return __get__ (this, function (self, addresses) {
+		if (typeof addresses == 'undefined' || (addresses != null && addresses.hasOwnProperty ("__kwargtrans__"))) {;
+			var addresses = null;
+		};
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'addresses': var addresses = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return BlockView.from_block (self._tf_chain_info.last_block, __kwargtrans__ ({addresses: addresses}));
 	});}
 });
 Object.defineProperty (ChainInfo, 'chain_timestamp', property.call (ChainInfo, ChainInfo._get_chain_timestamp));
