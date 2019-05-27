@@ -2,7 +2,7 @@
 import { connect } from 'react-redux'
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
-import { Segment, Button, Icon, Divider, Card, Dimmer, Loader } from 'semantic-ui-react'
+import { Segment, Button, Icon, Divider, Card, Loader } from 'semantic-ui-react'
 import routes from '../../constants/routes'
 import { selectWallet, setChainConstants } from '../../actions'
 import styles from '../home/Home.css'
@@ -36,7 +36,8 @@ class Account extends Component {
   async componentDidMount () {
     this.getAccountBalance()
     this.refreshWalletBalances()
-
+    // Unselect wallet from props
+    this.props.selectWallet([])
     // Every minut update the account total balance and seperate wallet balances
     this.interval = setInterval(() => {
       this.getAccountBalance()
@@ -110,9 +111,18 @@ class Account extends Component {
                     </div>
                   )
                   : (
-                    <Dimmer active>
-                      <Loader />
-                    </Dimmer>
+                    <div>
+                      <Icon name='chevron right' style={{ position: 'absolute', right: 20, top: 130, fontSize: 25, opacity: '0.3', color: 'white' }} />
+                      <Card.Description style={{ height: 60 }}>
+                        {/* <Dimmer active> */}
+                        <Loader inverted active style={{ marginTop: -40 }} content='Fetching balance' />
+                        {/* </Dimmer> */}
+                      </Card.Description>
+                      <Divider />
+                      <Card.Header style={{ textAlign: 'center', color: 'white', fontSize: 18, textTransform: 'uppercase', marginTop: 40, fontFamily: 'SF UI Text Light' }}>
+                        wallet {w._wallet_name}
+                      </Card.Header>
+                    </div>
                   )
                 }
 

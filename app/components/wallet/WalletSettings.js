@@ -2,7 +2,6 @@
 import { connect } from 'react-redux'
 import React, { Component } from 'react'
 import { Form, Button, Icon, Header } from 'semantic-ui-react'
-import routes from '../../constants/routes'
 import styles from '../home/Home.css'
 import { saveWallet, saveAccount, deleteWallet } from '../../actions'
 import DeleteModal from './DeleteWalletModal'
@@ -128,7 +127,7 @@ class WalletSettings extends Component {
               <label style={{ float: 'left', color: 'white' }}>Address length</label>
               <input type='number' placeholder='1' value={addressLength} onChange={this.handleAddressLengthChange} />
             </Form.Field>
-            <Button className={styles.cancelButton} size='big' style={{ marginTop: 10, marginRight: 10, background: 'none', color: 'white', width: 180 }} onClick={() => this.props.history.push(routes.WALLET)}>Cancel</Button>
+            <Button className={styles.cancelButton} size='big' style={{ marginTop: 10, marginRight: 10, background: 'none', color: 'white', width: 180 }} onClick={() => this.props.history.goBack()}>Cancel</Button>
             <Button className={styles.acceptButton} size='big' type='submit' onClick={this.saveWallet} style={{ marginTop: 10, margin: 'auto', color: 'white', width: 180 }}>Save</Button>
           </Form>
         </div>

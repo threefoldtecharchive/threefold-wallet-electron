@@ -27,6 +27,10 @@ class Wallet extends Component {
     this.interval = setInterval(this.getBalance(), 60000)
   }
 
+  componentWillUnmount () {
+    clearInterval(this.interval)
+  }
+
   getBalance = () => {
     if (this.props.wallet != null) {
       this.props.wallet.balance.then(info => {
@@ -51,7 +55,7 @@ class Wallet extends Component {
               return (
                 <List.Item style={{ borderBottom: '1px solid grey' }}>
                   <List.Content>
-                    <List.Header as='a' style={{ color: '#6647fe', display: 'flex' }}>TXID: {tx.identifier} {tx.confirmed ? (<p style={{ fontSize: 14, marginLeft: 80 }}>Confirmed at {moment(tx.timestamp).format('MMMM Do , HH:mm')}</p>) : (<p style={{ fontSize: 14, marginLeft: 80 }}>Unconfirmed</p>)}</List.Header>
+                    <List.Header as='a' style={{ color: '#6647fe', display: 'flex' }}>TXID: {tx.identifier} {tx.confirmed ? (<p style={{ fontSize: 14, marginLeft: 80 }}>Confirmed at {moment.unix(tx.timestamp).format('MMMM Do , HH:mm')}</p>) : (<p style={{ fontSize: 14, marginLeft: 80 }}>Unconfirmed</p>)}</List.Header>
                     {this.renderTransactionBody(tx)}
                   </List.Content>
                 </List.Item>

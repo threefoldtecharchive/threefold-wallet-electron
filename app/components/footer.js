@@ -19,7 +19,7 @@ class Footer extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      error: ''
+      error: false
     }
   }
 
@@ -43,6 +43,7 @@ class Footer extends Component {
           chainVersion: info._chain_version
         }
         this.props.setChainConstants(chainInfo)
+        this.setState({ error: false })
       })
         .catch(err => {
           this.setState({ error: err })
@@ -56,13 +57,15 @@ class Footer extends Component {
     const date = moment(chainConstants.chain_timestamp).format('MMMM Do , HH:mm')
 
     let chainError = false
-    if (error !== '') {
-      chainError = true
+    if (error) {
+      if (error.__args__.length > 0) {
+        chainError = true
+      }
     }
 
     return (
       <div style={{ position: 'absolute', height: 70, bottom: 35, width: '100%', background: '#131216', borderTopStyle: 'solid', borderTopWidth: 2, borderTopColor: '#1A253F', padding: 25 }}>
-        {chainError
+        {chainError || !chainConstants.chainNetwork
           ? <div>
             <Icon name='circle' style={{ color: 'red', marginLeft: 10 }} />
             <label>not connected</label>

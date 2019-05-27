@@ -8,20 +8,40 @@ import QRCode from 'qrcode.react'
 import { flatten, find } from 'lodash'
 import { CopyToClipboard } from 'react-copy-to-clipboard'
 import { toast } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
+import { selectWallet } from '../../actions'
 
 const mapStateToProps = state => ({
   wallet: state.wallet,
   account: state.account
 })
 
+const mapDispatchToProps = (dispatch) => ({
+  selectWallet: (wallet) => {
+    dispatch(selectWallet(wallet))
+  }
+})
+
 class WalletSettings extends Component {
   constructor (props) {
     super(props)
+    let selectedWallet
+    let selectedAddress
+    if (this.props.wallet instanceof Array) {
+      // If wallet in properties is array (means no global state for wallet is set, meaning coming from account page most likely)
+      // select the first wallet / address from the account props
+      selectedWallet = this.props.account.wallets[0]
+      selectedAddress = this.props.account.wallets[0].address
+    } else {
+      // If wallet in properties is selected (meaning coming from a wallet page)
+      // select this wallet as default value in dropdown
+      selectedWallet = this.props.wallet
+      selectedAddress = this.props.wallet.address
+    }
+
     this.state = {
       name: this.props.wallet._wallet_name,
-      selectedWallet: this.props.account.wallets[0],
-      selectedAddress: this.props.account.wallets[0].addresses[0],
+      selectedWallet,
+      selectedAddress,
       amount: 0,
       isOpen: false
     }
@@ -29,20 +49,19 @@ class WalletSettings extends Component {
 
   mapWalletsToDropdownOption = () => {
     const { wallets } = this.props.account
-    const options = wallets.map(w => {
+    return flatten(wallets.map(w => {
       return {
         key: w._wallet_name,
         text: w._wallet_name,
         value: w
       }
-    })
-    return flatten(options)
+    }))
   }
 
   mapAddressesToDropdownOption = () => {
     const { selectedWallet } = this.state
     if (selectedWallet) {
-      const wallet = find(this.props.account.wallets, w => w._wallet_name === selectedWallet._wallet_name)
+      const wallet = find(this.props.account.wallets, w => w.wallet_name === selectedWallet.wallet_name)
       return flatten(wallet.addresses.map(w => {
         return {
           key: w,
@@ -55,6 +74,7 @@ class WalletSettings extends Component {
 
   selectWallet = (event, data) => {
     this.setState({ selectedWallet: data.value, selectedAddress: data.value.addresses[0] })
+    this.props.selectWallet(data.value)
   }
 
   selectAddress = (event, data) => {
@@ -77,28 +97,26 @@ class WalletSettings extends Component {
 
   render () {
     const walletsOptions = this.mapWalletsToDropdownOption()
-    const addressOption = this.mapAddressesToDropdownOption()
-    const { amount, selectedAddress } = this.state
+    const addressOptions = this.mapAddressesToDropdownOption()
+    const { amount, selectedAddress, selectedWallet } = this.state
+
     return (
       <div>
         <div className={styles.container} >
           <h2>Receive</h2>
         </div>
         <Divider style={{ background: '#1A253F' }} />
-        {/* <Link to={routes.ACCOUNT}> */}
         <Icon onClick={() => this.props.history.goBack()} style={{ fontSize: 25, marginLeft: 15, marginTop: 15, cursor: 'pointer' }} name='chevron circle left' />
         <span onClick={() => this.props.history.goBack()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
-        {/* </Link> */}
         <div style={{ width: '50%', margin: 'auto' }}>
           <label style={{ color: 'white' }}>Wallet</label>
           <Dropdown
             style={{ width: 690, marginRight: 'auto', marginBottom: 20, marginTop: 10 }}
             placeholder='Select Wallet'
-            fluid
             selection
             options={walletsOptions}
             onChange={this.selectWallet}
-            value={walletsOptions[0].value}
+            value={selectedWallet}
           />
           <label style={{ color: 'white' }}>Address</label>
           <Dropdown
@@ -106,9 +124,9 @@ class WalletSettings extends Component {
             placeholder='Select Address'
             fluid
             selection
-            options={addressOption}
+            options={addressOptions}
             onChange={this.selectAddress}
-            value={addressOption[0].value}
+            value={selectedAddress}
           />
           {this.renderQRCode()}
           <CopyToClipboard text={selectedAddress}
@@ -127,5 +145,5 @@ class WalletSettings extends Component {
 
 export default connect(
   mapStateToProps,
-  null
+  mapDispatchToProps
 )(WalletSettings)
