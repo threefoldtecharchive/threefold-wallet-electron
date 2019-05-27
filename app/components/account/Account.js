@@ -66,7 +66,7 @@ class Account extends Component {
       // Set wallets into component state
       this.setState(state => {
         // refresh wallets in state instead of clearing them all
-        const index = findIndex(state.wallets, { '_wallet_name': w._wallet_name })
+        const index = findIndex(state.wallets, { '_wallet_name': w.wallet_name })
         state.wallets[index] = w
         const wallets = state.wallets
         return {
@@ -106,7 +106,7 @@ class Account extends Component {
                       </Card.Description>
                       <Divider />
                       <Card.Header style={{ textAlign: 'center', color: 'white', fontSize: 18, textTransform: 'uppercase', marginTop: 20, fontFamily: 'SF UI Text Light' }}>
-                        wallet {w._wallet_name}
+                        wallet {w.wallet_name}
                       </Card.Header>
                     </div>
                   )
@@ -120,7 +120,7 @@ class Account extends Component {
                       </Card.Description>
                       <Divider />
                       <Card.Header style={{ textAlign: 'center', color: 'white', fontSize: 18, textTransform: 'uppercase', marginTop: 40, fontFamily: 'SF UI Text Light' }}>
-                        wallet {w._wallet_name}
+                        wallet {w.wallet_name}
                       </Card.Header>
                     </div>
                   )

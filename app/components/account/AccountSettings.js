@@ -7,6 +7,7 @@ import styles from '../home/Home.css'
 import { saveAccount, deleteAccount, deleteWallet, selectWallet } from '../../actions'
 import DeleteModal from './DeleteAccountModal'
 import DeleteWalletModal from '../wallet/DeleteWalletModal'
+import ShowSeedModal from './ShowSeedModal'
 import Footer from '../footer'
 import { toast } from 'react-toastify'
 
@@ -41,7 +42,8 @@ class AccountSettings extends Component {
       deleteNameError: false,
       deleteWalletName: '',
       deleteWalletNameError: false,
-      walletToDelete: undefined
+      walletToDelete: undefined,
+      showSeedModal: false
     }
   }
 
@@ -132,6 +134,15 @@ class AccountSettings extends Component {
     this.setState({ openDeleteWalletModal: false })
   }
 
+  openShowSeedModal = () => {
+    const open = !this.state.openShowSeedModal
+    this.setState({ showSeedModal: open })
+  }
+
+  closeShowSeedModal = () => {
+    this.setState({ showSeedModal: false })
+  }
+
   handleDeleteWalletNameChange = ({ target }) => {
     this.setState({ deleteWalletName: target.value })
   }
@@ -142,7 +153,7 @@ class AccountSettings extends Component {
   }
 
   render () {
-    const { name, openDeleteModal, deleteName, deleteNameError, openDeleteWalletModal, deleteWalletName, deleteWalletNameError } = this.state
+    const { name, openDeleteModal, deleteName, deleteNameError, openDeleteWalletModal, deleteWalletName, deleteWalletNameError, showSeedModal } = this.state
     return (
       <div>
         <DeleteModal
@@ -161,16 +172,16 @@ class AccountSettings extends Component {
           deleteNameError={deleteWalletNameError}
           deleteWallet={this.deleteWallet}
         />
+        <ShowSeedModal
+          open={showSeedModal}
+          closeModal={this.closeShowSeedModal}
+          seed={this.props.account.mnemonic}
+        />
         <div style={{ position: 'absolute', top: 40, height: 50, width: '100%' }} data-tid='backButton'>
           <Icon onClick={() => this.props.history.goBack()} style={{ fontSize: 25, position: 'absolute', left: 15, top: 41, cursor: 'pointer' }} name='chevron circle left' />
           <span onClick={() => this.props.history.goBack()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'absolute', top: 42, left: 48 }}>Go Back</span>
           <Icon onClick={this.openDeleteModal} style={{ fontSize: 25, position: 'absolute', right: 70, top: 41, cursor: 'pointer' }} name='trash' />
         </div>
-        {/* <Breadcrumb style={{ position: 'absolute', top: 100, left: 50, color: 'white' }}>
-          <Breadcrumb.Section link style={{ color: 'white'}}>Account</Breadcrumb.Section>
-          <Breadcrumb.Divider style={{ color: 'white'}}/>
-          <Breadcrumb.Section link style={{ color: 'white'}}>Settings</Breadcrumb.Section>
-        </Breadcrumb> */}
         <div className={styles.container} >
           <Header as='h2' icon style={{ color: 'white', marginTop: 50 }}>
             <Icon name='settings' />
@@ -186,6 +197,7 @@ class AccountSettings extends Component {
             <Button className={styles.acceptButton} size='big' type='submit' onClick={this.saveAccount} style={{ marginTop: 10, margin: 'auto', background: '#015DE1', color: 'white', width: 180 }}>Save</Button>
           </Form>
           {this.renderWallets()}
+          <Button style={{ marginTop: 30 }} className={styles.cancelButton} size='small' onClick={() => this.openShowSeedModal()} >Show seed</Button>
         </div>
         <Footer />
       </div>

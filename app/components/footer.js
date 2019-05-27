@@ -36,11 +36,11 @@ class Footer extends Component {
     if (this.props.account.chain_info_get) {
       this.props.account.chain_info_get().then(info => {
         const chainInfo = {
-          chainHeight: info._chain_height,
-          chainName: info._chain_name,
-          chainNetwork: info._chain_network,
-          chainTimestamp: info._chain_timestamp,
-          chainVersion: info._chain_version
+          chainHeight: info.chain_height,
+          chainName: info.chain_name,
+          chainNetwork: info.chain_network,
+          chainTimestamp: info.chain_timestamp,
+          chainVersion: info.chain_version
         }
         this.props.setChainConstants(chainInfo)
         this.setState({ error: false })
