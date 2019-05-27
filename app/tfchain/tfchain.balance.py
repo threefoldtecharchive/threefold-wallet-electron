@@ -554,9 +554,9 @@ class WalletsBalance(WalletBalance):
     def _fund_individual(self, amount, addresses):
         outputs_available = [co for co in self.outputs_available if co.condition.unlockhash.__str__() in addresses]
         def sort_output_by_value(a, b):
-            if a.less_than(b.value):
+            if a.value.less_than(b.value):
                 return -1
-            if a.greater_than(b.value):
+            if a.value.greater_than(b.value):
                 return 1
             return 0
         outputs_available = jsarr.sort(outputs_available, sort_output_by_value)
@@ -607,9 +607,9 @@ class WalletsBalance(WalletBalance):
 
             outputs_available = wallet.outputs_available
             def sort_output_by_value(a, b):
-                if a.less_than(b.value):
+                if a.value.less_than(b.value):
                     return -1
-                if a.greater_than(b.value):
+                if a.value.greater_than(b.value):
                     return 1
                 return 0
             outputs_available = jsarr.sort(outputs_available, sort_output_by_value)

@@ -1,4 +1,6 @@
+var tfchain = {};
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __proxy__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, abs, all, any, assert, bool, bytearray, bytes, callable, chr, copy, deepcopy, delattr, dict, dir, divmod, enumerate, filter, float, getattr, hasattr, input, int, isinstance, issubclass, len, list, map, max, min, object, ord, pow, print, property, py_TypeError, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
+import * as jslog from './tfchain.polyfill.log.js';
 import {Currency} from './tfchain.types.PrimitiveTypes.js';
 import {UnlockHash, UnlockHashType} from './tfchain.types.ConditionTypes.js';
 import * as tfwallet from './tfchain.wallet.js';
@@ -13,7 +15,8 @@ import * as jshex from './tfchain.polyfill.encoding.hex.js';
 import * as jsjson from './tfchain.polyfill.encoding.json.js';
 import * as jsasync from './tfchain.polyfill.asynchronous.js';
 import * as jscrypto from './tfchain.polyfill.crypto.js';
-import * as jslog from './tfchain.polyfill.log.js';
+import * as __module_tfchain_polyfill_log__ from './tfchain.polyfill.log.js';
+__nest__ (tfchain, 'polyfill.log', __module_tfchain_polyfill_log__);
 var __name__ = '__main__';
 export var __bip39 = bip39.Mnemonic ();
 export var Account =  __class__ ('Account', [object], {
@@ -774,10 +777,8 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 		}
 		self._builder = wallet._tfwallet.coin_transaction_builder_new ();
 	});},
-	get output_add () {return __get__ (this, function (self, recipient, amount, lock) {
-		if (typeof lock == 'undefined' || (lock != null && lock.hasOwnProperty ("__kwargtrans__"))) {;
-			var lock = null;
-		};
+	get output_add () {return __get__ (this, function (self, recipient, amount) {
+		var kwargs = dict ();
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -787,26 +788,23 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
 						case 'recipient': var recipient = __allkwargs0__ [__attrib0__]; break;
 						case 'amount': var amount = __allkwargs0__ [__attrib0__]; break;
-						case 'lock': var lock = __allkwargs0__ [__attrib0__]; break;
+						default: kwargs [__attrib0__] = __allkwargs0__ [__attrib0__];
 					}
 				}
+				delete kwargs.__kwargtrans__;
 			}
 		}
 		else {
 		}
+		var lock = null;
+		if (__in__ ('lock', kwargs)) {
+			var lock = kwargs ['lock'];
+		}
 		self._builder.output_add (recipient, amount, __kwargtrans__ ({lock: lock}));
 		return self;
 	});},
-	get send () {return __get__ (this, function (self, source, refund, data) {
-		if (typeof source == 'undefined' || (source != null && source.hasOwnProperty ("__kwargtrans__"))) {;
-			var source = null;
-		};
-		if (typeof refund == 'undefined' || (refund != null && refund.hasOwnProperty ("__kwargtrans__"))) {;
-			var refund = null;
-		};
-		if (typeof data == 'undefined' || (data != null && data.hasOwnProperty ("__kwargtrans__"))) {;
-			var data = null;
-		};
+	get send () {return __get__ (this, function (self) {
+		var kwargs = dict ();
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -814,15 +812,29 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'source': var source = __allkwargs0__ [__attrib0__]; break;
-						case 'refund': var refund = __allkwargs0__ [__attrib0__]; break;
-						case 'data': var data = __allkwargs0__ [__attrib0__]; break;
+						default: kwargs [__attrib0__] = __allkwargs0__ [__attrib0__];
 					}
 				}
+				delete kwargs.__kwargtrans__;
 			}
 		}
 		else {
 		}
+		var source = null;
+		if (__in__ ('source', kwargs)) {
+			var source = kwargs ['source'];
+		}
+		var refund = null;
+		if (__in__ ('refund', kwargs)) {
+			var refund = kwargs ['refund'];
+		}
+		var data = null;
+		if (__in__ ('data', kwargs)) {
+			var data = kwargs ['data'];
+		}
+		jslog.info (source);
+		jslog.info (refund);
+		jslog.info (data);
 		return self._builder.send (__kwargtrans__ ({source: source, refund: refund, data: data}));
 	});}
 });

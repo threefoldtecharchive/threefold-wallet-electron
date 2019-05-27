@@ -456,7 +456,8 @@ class CoinTransactionBuilder:
     def __init__(self, wallet):
         self._builder = wallet._tfwallet.coin_transaction_builder_new()
 
-    def output_add(self, recipient, amount, lock=None):
+    # TODO: make kwargs work with an opt value
+    def output_add(self, recipient, amount, **kwargs):
         """
         Add an output to the transaction, returning the transaction
         itself to allow for chaining.
@@ -479,15 +480,31 @@ class CoinTransactionBuilder:
         @param amount: int or str that defines the amount of TFT to set, see explanation above
         @param lock: optional lock that can be used to lock the sent amount to a specific time or block height, see explation above
         """
+        lock = None
+        if 'lock' in kwargs:
+            lock = kwargs['lock']
         self._builder.output_add(recipient, amount, lock=lock)
         return self
 
-    def send(self, source=None, refund=None, data=None):
+    def send(self, **kwargs):
         """
         Sign and send the transaction.
 
         :returns: a promise that resolves with a transaction ID or rejects with an Exception
         """
+        source=None
+        if 'source' in kwargs:
+            source=kwargs['source']
+        refund=None
+        if 'refund' in kwargs:
+            refund=kwargs['refund']
+        data = None
+        if 'data' in kwargs:
+            data=kwargs['data']
+        import tfchain.polyfill.log as jslog
+        jslog.info(source)
+        jslog.info(refund)
+        jslog.info(data)
         return self._builder.send(source=source, refund=refund, data=data)
 
 

@@ -122,9 +122,10 @@ class Transfer extends Component {
       } else {
         builder.output_add(destination, amount.toString())
       }
-      builder.send({ data: description }).then(txid => {
+      builder.send({ data: description }).then(result => {
         this.setState({ destinationError, amountError, loader: false })
-        toast('Transaction submitted')
+        // TODO: handle result.submitted === false, as that can happen as well
+        toast('Transaction ' + result.transaction.id + ' submitted')
         return this.props.history.push('/wallet')
       }).catch(err => {
         toast('transaction failed')

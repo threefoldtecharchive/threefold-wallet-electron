@@ -1156,10 +1156,10 @@ export var WalletsBalance =  __class__ ('WalletsBalance', [WalletBalance], {
 			}
 			else {
 			}
-			if (a.less_than (b.value)) {
+			if (a.value.less_than (b.value)) {
 				return -(1);
 			}
-			if (a.greater_than (b.value)) {
+			if (a.value.greater_than (b.value)) {
 				return 1;
 			}
 			return 0;
@@ -1258,10 +1258,10 @@ export var WalletsBalance =  __class__ ('WalletsBalance', [WalletBalance], {
 				}
 				else {
 				}
-				if (a.less_than (b.value)) {
+				if (a.value.less_than (b.value)) {
 					return -(1);
 				}
-				if (a.greater_than (b.value)) {
+				if (a.value.greater_than (b.value)) {
 					return 1;
 				}
 				return 0;
