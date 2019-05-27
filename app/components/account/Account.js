@@ -57,21 +57,6 @@ class Account extends Component {
     })
   }
 
-  getWalletsBalances = () => {
-    this.props.account.wallets.map(async w => {
-      const balance = await w.balance
-      // Extend wallet object with a fullfilled promise of balance information to render in the cards
-      w._balance = balance
-      // Set wallets into component state
-      this.setState(state => {
-        const wallets = state.wallets.concat(w)
-        return {
-          wallets
-        }
-      })
-    })
-  }
-
   refreshWalletBalances = () => {
     this.props.account.wallets.map(async w => {
       const balance = await w.balance
