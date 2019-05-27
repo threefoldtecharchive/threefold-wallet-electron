@@ -47,7 +47,7 @@ export var assymetric_key_pair_generate = function (entropy, index) {
 	var entropy = jscrypto.blake2b (encoder.data);
 	return jscrypto.AssymetricSignKeyPair (entropy);
 };
-export var unlockhash_from_assymetric_key_pair = function (pair) {
+export var public_key_from_assymetric_key_pair = function (pair) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
 		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -66,7 +66,23 @@ export var unlockhash_from_assymetric_key_pair = function (pair) {
 		__except0__.__cause__ = null;
 		throw __except0__;
 	}
-	var pk = PublicKey (__kwargtrans__ ({specifier: PublicKeySpecifier.ED25519, hash: pair.key_public}));
+	return PublicKey (__kwargtrans__ ({specifier: PublicKeySpecifier.ED25519, hash: pair.key_public}));
+};
+export var unlockhash_from_assymetric_key_pair = function (pair) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'pair': var pair = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	var pk = public_key_from_assymetric_key_pair (pair);
 	return pk.unlockhash;
 };
 export var TFChainWallet =  __class__ ('TFChainWallet', [object], {
@@ -359,6 +375,22 @@ export var TFChainWallet =  __class__ ('TFChainWallet', [object], {
 		};
 		return jsasync.chain (p, cb);
 	});},
+	get coin_transaction_builder_new () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return CoinTransactionBuilder (self);
+	});},
 	get key_pair_get () {return __get__ (this, function (self, unlockhash) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -410,6 +442,23 @@ export var TFChainWallet =  __class__ ('TFChainWallet', [object], {
 		else {
 		}
 		return self._client.unlockhash_get (address);
+	});},
+	get _transaction_put () {return __get__ (this, function (self, transaction) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'transaction': var transaction = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._client.transaction_put (transaction);
 	});}
 });
 Object.defineProperty (TFChainWallet, 'transactions', property.call (TFChainWallet, TFChainWallet._get_transactions));
@@ -739,76 +788,116 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 		}
 		var txn = self._txn;
 		self._txn = null;
-		var amount = sum ((function () {
-			var __accu0__ = [];
-			for (var co of txn.coin_outputs) {
-				__accu0__.append (co.value);
-			}
-			return __accu0__;
-		}) ());
-		var balance = self._wallet.balance;
-		var miner_fee = self._wallet.client.minimum_miner_fee;
-		var __left0__ = balance.fund (amount.plus (miner_fee), __kwargtrans__ ({source: source}));
-		var inputs = __left0__ [0];
-		var remainder = __left0__ [1];
-		var suggested_refund = __left0__ [2];
-		if (refund === null) {
-			if (suggested_refund === null) {
-				var refund = ConditionTypes.unlockhash_new (__kwargtrans__ ({unlockhash: self._wallet.address}));
+		var wallet = self._wallet.clone ();
+		var balance_cb = function (balance) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'balance': var balance = __allkwargs0__ [__attrib0__]; break;
+						}
+					}
+				}
 			}
 			else {
-				var refund = suggested_refund;
 			}
-		}
-		else {
-			var refund = ConditionTypes.from_recipient (refund);
-		}
-		if (remainder > 0) {
-			txn.coin_output_add (__kwargtrans__ ({value: remainder, condition: refund}));
-		}
-		txn.miner_fee_add (miner_fee);
-		txn.coin_inputs = inputs;
-		if (data !== null) {
-			txn.data = data;
-		}
-		var sig_requests = txn.signature_requests_new ();
-		if (len (sig_requests) == 0) {
-			var __except0__ = Exception ('BUG: sig requests should not be empty at this point, please fix or report as an issue');
-			__except0__.__cause__ = null;
-			throw __except0__;
-		}
-		for (var request of sig_requests) {
-			try {
-				var key_pair = self._wallet.key_pair_get (request.wallet_address);
-				var pk = PublicKey (__kwargtrans__ ({specifier: PublicKeySpecifier.ED25519, hash: key_pair.key_public}));
-				var input_hash = request.input_hash_new (__kwargtrans__ ({public_key: pk}));
-				var signature = key_pair.sign (input_hash);
-				request.signature_fulfill (__kwargtrans__ ({public_key: pk, signature: signature}));
-			}
-			catch (__except0__) {
-				if (isinstance (__except0__, KeyError)) {
-					// pass;
+			var amount = Currency.sum (...(function () {
+				var __accu0__ = [];
+				for (var co of txn.coin_outputs) {
+					__accu0__.append (co.value);
+				}
+				return __accu0__;
+			}) ());
+			var miner_fee = wallet.network_type.minimum_miner_fee ();
+			var __left0__ = balance.fund (amount.plus (miner_fee), __kwargtrans__ ({source: source}));
+			var inputs = __left0__ [0];
+			var remainder = __left0__ [1];
+			var suggested_refund = __left0__ [2];
+			if (refund === null || jsobj.is_undefined (refund)) {
+				if (suggested_refund === null) {
+					var refund = ConditionTypes.unlockhash_new (__kwargtrans__ ({unlockhash: wallet.address}));
 				}
 				else {
-					throw __except0__;
+					var refund = suggested_refund;
 				}
 			}
-		}
-		var submit = txn.is_fulfilled ();
-		if (submit) {
-			txn.id = self._wallet._transaction_put (__kwargtrans__ ({transaction: txn}));
-			for (var [idx, ci] of enumerate (txn.coin_inputs)) {
-				balance.output_add (txn, idx, __kwargtrans__ ({confirmed: false, spent: true}));
+			else {
+				var refund = ConditionTypes.from_recipient (refund);
 			}
-			var addresses = jsarr.concat (self._wallet.addresses, balance.addresses_multisig);
-			for (var [idx, co] of enumerate (txn.coin_outputs)) {
-				if (__in__ (co.condition.unlockhash.__str__ (), addresses)) {
-					co.id = txn.coin_outputid_new (idx);
-					balance.output_add (txn, idx, __kwargtrans__ ({confirmed: false, spent: false}));
+			if (remainder.greater_than (0)) {
+				txn.coin_output_add (__kwargtrans__ ({value: remainder, condition: refund}));
+			}
+			txn.miner_fee_add (miner_fee);
+			txn.coin_inputs = inputs;
+			if (data !== null && !(jsobj.is_undefined (data))) {
+				txn.data = data;
+			}
+			var sig_requests = txn.signature_requests_new ();
+			if (len (sig_requests) == 0) {
+				var __except0__ = Exception ('BUG: sig requests should not be empty at this point, please fix or report as an issue');
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
+			for (var request of sig_requests) {
+				try {
+					var key_pair = wallet.key_pair_get (request.wallet_address);
+					var pk = public_key_from_assymetric_key_pair (key_pair);
+					var input_hash = request.input_hash_new (__kwargtrans__ ({public_key: pk}));
+					var signature = key_pair.sign (input_hash.value);
+					request.signature_fulfill (__kwargtrans__ ({public_key: pk, signature: signature}));
+				}
+				catch (__except0__) {
+					if (isinstance (__except0__, KeyError)) {
+						// pass;
+					}
+					else {
+						throw __except0__;
+					}
 				}
 			}
-		}
-		return TransactionSendResult (txn, submit);
+			var submit = txn.is_fulfilled ();
+			if (!(submit)) {
+				var stub_cb = function (resolve, reject) {
+					if (arguments.length) {
+						var __ilastarg0__ = arguments.length - 1;
+						if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+							var __allkwargs0__ = arguments [__ilastarg0__--];
+							for (var __attrib0__ in __allkwargs0__) {
+								switch (__attrib0__) {
+									case 'resolve': var resolve = __allkwargs0__ [__attrib0__]; break;
+									case 'reject': var reject = __allkwargs0__ [__attrib0__]; break;
+								}
+							}
+						}
+					}
+					else {
+					}
+					resolve (TransactionSendResult (txn, submit));
+				};
+				return jsasync.promise_new (stub_cb);
+			}
+			var id_cb = function (id) {
+				if (arguments.length) {
+					var __ilastarg0__ = arguments.length - 1;
+					if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+						var __allkwargs0__ = arguments [__ilastarg0__--];
+						for (var __attrib0__ in __allkwargs0__) {
+							switch (__attrib0__) {
+								case 'id': var id = __allkwargs0__ [__attrib0__]; break;
+							}
+						}
+					}
+				}
+				else {
+				}
+				txn.id = id;
+				return TransactionSendResult (txn, submit);
+			};
+			return jsasync.chain (wallet._transaction_put (__kwargtrans__ ({transaction: txn})), id_cb);
+		};
+		return jsasync.chain (wallet.balance, balance_cb);
 	});}
 });
 

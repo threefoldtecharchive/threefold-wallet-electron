@@ -224,7 +224,7 @@ class WalletBalance(object):
             elif strid not in self._outputs_unconfirmed_spent:
                 self._outputs_unconfirmed[strid] = output
         # add the address
-        self._addresses.add(str(output.condition.unlockhash))
+        self._addresses.add(output.condition.unlockhash.__str__())
         # add the transaction
         self._transactions[txnid] = txn
 
@@ -489,7 +489,8 @@ class WalletsBalance(WalletBalance):
         addresses = set()
         ms_addresses = set()
         refund = None
-        if source is None:
+        # TODO: ensure we do not require jsobj checks like this on such a low level code
+        if source is None or jsobj.is_undefined(source):
             for co in self.outputs_available:
                 addresses.add(co.condition.unlockhash.__str__())
             for co in self.outputs_unconfirmed_available:
@@ -551,14 +552,15 @@ class WalletsBalance(WalletBalance):
         return ([CoinInput.from_coin_output(co) for co in outputs], collected.minus(amount), refund)
 
     def _fund_individual(self, amount, addresses):
-        outputs_available = [co for co in self.outputs_available if co.condition.unlockhash in addresses]
+        outputs_available = [co for co in self.outputs_available if co.condition.unlockhash.__str__() in addresses]
         def sort_output_by_value(a, b):
-            if a.value.less_than(b.value):
+            if a.less_than(b.value):
                 return -1
-            if a.value.greater_than(b.value):
+            if a.greater_than(b.value):
                 return 1
             return 0
         outputs_available = jsarr.sort(outputs_available, sort_output_by_value)
+
         collected = Currency()
         outputs = []
         # try to fund only with confirmed outputs, if possible
@@ -578,7 +580,7 @@ class WalletsBalance(WalletBalance):
             return outputs, collected
 
         # use unconfirmed balance, not ideal, but acceptable
-        outputs_available = [co for co in self.outputs_unconfirmed_available if co.condition.unlockhash in addresses]
+        outputs_available = [co for co in self.outputs_unconfirmed_available if co.condition.unlockhash.__str__() in addresses]
         outputs_available = jsarr.sort(outputs_available, sort_output_by_value, reverse=True)
         for co in outputs_available:
             if co.value.greater_than_or_equal_to(amount):
@@ -605,9 +607,9 @@ class WalletsBalance(WalletBalance):
 
             outputs_available = wallet.outputs_available
             def sort_output_by_value(a, b):
-                if a.value.less_than(b.value):
+                if a.less_than(b.value):
                     return -1
-                if a.value.greater_than(b.value):
+                if a.greater_than(b.value):
                     return 1
                 return 0
             outputs_available = jsarr.sort(outputs_available, sort_output_by_value)

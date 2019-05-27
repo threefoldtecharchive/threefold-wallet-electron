@@ -215,22 +215,27 @@ class TFChainClient:
             return jsasync.chain(p, aggregate)
         return jsasync.chain(ec.explorer_get(endpoint=endpoint), cb, fetch_transacton_timestamps)
 
-    # def transaction_put(self, transaction):
-    #     """
-    #     Submit a transaction to an available explorer Node.
+    def transaction_put(self, transaction):
+        """
+        Submit a transaction to an available explorer Node.
 
-    #     @param transaction: the transaction to push to the client transaction pool
-    #     """
-    #     if isinstance(transaction, TransactionBaseClass):
-    #         transaction = transaction.json()
-    #     endpoint = "/transactionpool/transactions"
-    #     resp = self.explorer_post(endpoint=endpoint, data=transaction)
-    #     resp = json_loads(resp)
-    #     try:
-    #         return str(Hash(value=resp['transactionid']))
-    #     except KeyError as exc:
-    #         # return a KeyError as an invalid Explorer Response
-    #         raise tferrors.ExplorerInvalidResponse(str(exc), endpoint, resp) from exc
+        :param transaction: the transaction to push to the client transaction pool
+        """
+        if isinstance(transaction, TransactionBaseClass):
+            transaction = transaction.json()
+        if not jsobj.is_js_obj(transaction):
+            raise TypeError("transaction is of an invalid type {}".format(type(transaction)))
+        
+        endpoint = "/transactionpool/transactions"
+
+        def cb(transaction):
+            try:
+                return Hash(value=transaction['transactionid']).__str__()
+            except (KeyError, ValueError, TypeError) as exc:
+                # return a KeyError as an invalid Explorer Response
+                raise tferrors.ExplorerInvalidResponse(str(exc), endpoint, transaction) from exc
+
+        return jsasync.chain(self.explorer_post(endpoint=endpoint, data=transaction), cb)
 
     def unlockhash_get(self, target):
         """

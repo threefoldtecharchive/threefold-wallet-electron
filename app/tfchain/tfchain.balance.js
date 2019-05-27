@@ -502,7 +502,7 @@ export var WalletBalance =  __class__ ('WalletBalance', [object], {
 				self._outputs_unconfirmed [strid] = output;
 			}
 		}
-		self._addresses.add (str (output.condition.unlockhash));
+		self._addresses.add (output.condition.unlockhash.__str__ ());
 		self._transactions [txnid] = txn;
 	});},
 	get _get__base () {return __get__ (this, function (self) {
@@ -1017,7 +1017,7 @@ export var WalletsBalance =  __class__ ('WalletsBalance', [WalletBalance], {
 		var addresses = set ();
 		var ms_addresses = set ();
 		var refund = null;
-		if (source === null) {
+		if (source === null || jsobj.is_undefined (source)) {
 			for (var co of self.outputs_available) {
 				addresses.add (co.condition.unlockhash.__str__ ());
 			}
@@ -1135,7 +1135,7 @@ export var WalletsBalance =  __class__ ('WalletsBalance', [WalletBalance], {
 		var outputs_available = (function () {
 			var __accu0__ = [];
 			for (var co of self.outputs_available) {
-				if (__in__ (co.condition.unlockhash, addresses)) {
+				if (__in__ (co.condition.unlockhash.__str__ (), addresses)) {
 					__accu0__.append (co);
 				}
 			}
@@ -1156,10 +1156,10 @@ export var WalletsBalance =  __class__ ('WalletsBalance', [WalletBalance], {
 			}
 			else {
 			}
-			if (a.value.less_than (b.value)) {
+			if (a.less_than (b.value)) {
 				return -(1);
 			}
-			if (a.value.greater_than (b.value)) {
+			if (a.greater_than (b.value)) {
 				return 1;
 			}
 			return 0;
@@ -1186,7 +1186,7 @@ export var WalletsBalance =  __class__ ('WalletsBalance', [WalletBalance], {
 		var outputs_available = (function () {
 			var __accu0__ = [];
 			for (var co of self.outputs_unconfirmed_available) {
-				if (__in__ (co.condition.unlockhash, addresses)) {
+				if (__in__ (co.condition.unlockhash.__str__ (), addresses)) {
 					__accu0__.append (co);
 				}
 			}
@@ -1258,10 +1258,10 @@ export var WalletsBalance =  __class__ ('WalletsBalance', [WalletBalance], {
 				}
 				else {
 				}
-				if (a.value.less_than (b.value)) {
+				if (a.less_than (b.value)) {
 					return -(1);
 				}
-				if (a.value.greater_than (b.value)) {
+				if (a.greater_than (b.value)) {
 					return 1;
 				}
 				return 0;

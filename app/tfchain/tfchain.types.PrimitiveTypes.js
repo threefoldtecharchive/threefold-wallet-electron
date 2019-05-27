@@ -832,13 +832,14 @@ export var Currency =  __class__ ('Currency', [BaseDataTypeClass], {
 			return ;
 		}
 		if (isinstance (value, tuple ([int, str, jsdec.Decimal]))) {
-			if (isinstance (value, str)) {
-				var value = jsstr.String (value).upper ().strip ().value;
-				if (len (value) >= 4 && value.__getslice__ (-(3), null, 1) == 'TFT') {
-					var value = jsstr.rstrip (value.__getslice__ (0, -(3), 1));
+			var inner_value = value;
+			if (isinstance (inner_value, str)) {
+				var inner_value = jsstr.String (inner_value).upper ().strip ().value;
+				if (len (inner_value) >= 4 && inner_value.__getslice__ (-(3), null, 1) == 'TFT') {
+					var inner_value = jsstr.rstrip (inner_value.__getslice__ (0, -(3), 1));
 				}
 			}
-			var d = jsdec.Decimal (value);
+			var d = jsdec.Decimal (inner_value);
 			var __left0__ = d.as_tuple ();
 			var sign = __left0__ [0];
 			var _ = __left0__ [1];
@@ -856,7 +857,7 @@ export var Currency =  __class__ ('Currency', [BaseDataTypeClass], {
 			self._value = d;
 			return ;
 		}
-		var __except0__ = py_TypeError ('cannot set value of type {} as Currency (invalid type)'.format (py_typeof (value)));
+		var __except0__ = py_TypeError ('cannot set value of type {} as Currency (invalid type): {}'.format (py_typeof (value), value));
 		__except0__.__cause__ = null;
 		throw __except0__;
 	});},
@@ -1253,7 +1254,7 @@ export var Currency =  __class__ ('Currency', [BaseDataTypeClass], {
 		}
 		var s = self.value.str (9);
 		if (lowest_unit) {
-			var s = jsstr.py_replace (s, '.', '');
+			var s = jsstr.lstrip (jsstr.py_replace (s, '.', ''), '0');
 		}
 		else if (jsstr.contains (s, '.')) {
 			var s = jsstr.rstrip (jsstr.rstrip (s, '0 '), '.');

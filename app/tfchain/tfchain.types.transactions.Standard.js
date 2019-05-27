@@ -149,7 +149,7 @@ export var TransactionV1 =  __class__ ('TransactionV1', [TransactionBaseClass], 
 		else {
 		}
 		self._coin_inputs = [];
-		if (value === null || jsarr) {
+		if (jsarr.is_empty (value)) {
 			return ;
 		}
 		for (var ci of value) {

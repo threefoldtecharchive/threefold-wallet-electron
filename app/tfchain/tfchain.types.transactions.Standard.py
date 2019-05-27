@@ -117,7 +117,7 @@ class TransactionV1(TransactionBaseClass):
         return self._coin_inputs
     def _custom_coin_inputs_setter(self, value):
         self._coin_inputs = []
-        if value is None or jsarr:
+        if jsarr.is_empty(value):
             return
         for ci in value:
             self.coin_input_add(ci.parentid, ci.fulfillment,

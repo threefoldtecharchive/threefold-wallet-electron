@@ -480,6 +480,61 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 		};
 		return jsasync.chain (ec.explorer_get (__kwargtrans__ ({endpoint: endpoint})), cb, fetch_transacton_timestamps);
 	});},
+	get transaction_put () {return __get__ (this, function (self, transaction) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'transaction': var transaction = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (isinstance (transaction, TransactionBaseClass)) {
+			var transaction = transaction.json ();
+		}
+		if (!(jsobj.is_js_obj (transaction))) {
+			var __except0__ = py_TypeError ('transaction is of an invalid type {}'.format (py_typeof (transaction)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		var endpoint = '/transactionpool/transactions';
+		var cb = function (transaction) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'transaction': var transaction = __allkwargs0__ [__attrib0__]; break;
+						}
+					}
+				}
+			}
+			else {
+			}
+			try {
+				return Hash (__kwargtrans__ ({value: transaction ['transactionid']})).__str__ ();
+			}
+			catch (__except0__) {
+				if (isinstance (__except0__, tuple ([KeyError, ValueError, py_TypeError]))) {
+					var exc = __except0__;
+					var __except1__ = tferrors.ExplorerInvalidResponse (str (exc), endpoint, transaction);
+					__except1__.__cause__ = exc;
+					throw __except1__;
+				}
+				else {
+					throw __except0__;
+				}
+			}
+		};
+		return jsasync.chain (self.explorer_post (__kwargtrans__ ({endpoint: endpoint, data: transaction})), cb);
+	});},
 	get unlockhash_get () {return __get__ (this, function (self, target) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;

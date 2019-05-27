@@ -321,6 +321,26 @@ export var is_js_obj = function (obj) {
 	    
 	return result;
 };
+export var is_undefined = function (obj) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'obj': var obj = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	var result = null;
+	
+	    result = obj === undefined || obj === null;
+	    
+	return result;
+};
 export var is_js_arr = function (obj) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;

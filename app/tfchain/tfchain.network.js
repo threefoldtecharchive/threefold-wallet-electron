@@ -178,7 +178,7 @@ export var Type =  __class__ ('Type', [object], {
 		}
 		else {
 		}
-		if (self == Type.DEVNET) {
+		if (self.__eq__ (Type.DEVNET)) {
 			return Currency ('1.0');
 		}
 		return Currency ('0.1');

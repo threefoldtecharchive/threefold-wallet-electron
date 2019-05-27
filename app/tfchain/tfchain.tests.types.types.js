@@ -17,8 +17,10 @@ export var test_types = function () {
 	jsass.equals (Currency ().str (), '0');
 	jsass.equals (Currency (__kwargtrans__ ({value: 123})).str (), '123');
 	jsass.equals (Currency (__kwargtrans__ ({value: '1'})).str (), '1');
+	jsass.equals (Currency (__kwargtrans__ ({value: '0.1'})).json (), '100000000');
 	jsass.equals (Currency (__kwargtrans__ ({value: '1 TFT'})).str (), '1');
 	jsass.equals (Currency (__kwargtrans__ ({value: '0.123456789'})).str (), '0.123456789');
+	jsass.equals (Currency (__kwargtrans__ ({value: '0.123456789'})).json (), '123456789');
 	jsass.equals (Currency (__kwargtrans__ ({value: '9.123456789'})).str (), '9.123456789');
 	jsass.equals (Currency (__kwargtrans__ ({value: '1234.34'})).str (), '1234.34');
 	jsass.equals (Currency (__kwargtrans__ ({value: '1.00000'})).str (), '1');

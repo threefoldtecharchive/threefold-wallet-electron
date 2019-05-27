@@ -772,7 +772,7 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 		}
 		else {
 		}
-		self._wallet = wallet;
+		self._builder = wallet._tfwallet.coin_transaction_builder_new ();
 	});},
 	get output_add () {return __get__ (this, function (self, recipient, amount, lock) {
 		if (typeof lock == 'undefined' || (lock != null && lock.hasOwnProperty ("__kwargtrans__"))) {;
@@ -794,33 +794,8 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 		}
 		else {
 		}
-		if (!(recipient)) {
-			print ('send {} to free-for-all wallet'.format (amount));
-		}
-		else if (isinstance (recipient, str)) {
-			print ('send {} to personal wallet {}'.format (amount, recipient));
-		}
-		else if (isinstance (recipient, list)) {
-			if (len (recipient) == 2 && (isinstance (recipient [0], int) || isinstance (recipient [1], int))) {
-				var __left0__ = recipient;
-				var a = __left0__ [0];
-				var b = __left0__ [1];
-				if (isinstance (a, int)) {
-					print ('send {} to multisig wallet ({}, {})'.format (amount, a, b));
-				}
-				else {
-					print ('send {} to multisig wallet ({}, {})'.format (amount, b, a));
-				}
-			}
-			else {
-				print ('send {} to multisig wallet ({}, {})'.format (amount, len (recipient), recipient));
-			}
-		}
-		else {
-			var __except0__ = py_TypeError ('recipient is of an unsupported type {}'.format (py_typeof (recipient)));
-			__except0__.__cause__ = null;
-			throw __except0__;
-		}
+		self._builder.output_add (recipient, amount, __kwargtrans__ ({lock: lock}));
+		return self;
 	});},
 	get send () {return __get__ (this, function (self, source, refund, data) {
 		if (typeof source == 'undefined' || (source != null && source.hasOwnProperty ("__kwargtrans__"))) {;
@@ -848,26 +823,7 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 		}
 		else {
 		}
-		var wallet = self._wallet.clone ();
-		var cb = function (balance) {
-			if (arguments.length) {
-				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-					var __allkwargs0__ = arguments [__ilastarg0__--];
-					for (var __attrib0__ in __allkwargs0__) {
-						switch (__attrib0__) {
-							case 'balance': var balance = __allkwargs0__ [__attrib0__]; break;
-						}
-					}
-				}
-			}
-			else {
-			}
-			print ('Sent from wallet {} succesfully with an input balance of {} TFT!'.format (wallet.wallet_name, balance.coins_total));
-			return '66ccdf3a0bca58025be7fdc71f3f6bfbd6ed6287aa698a131734a947c71a3bbf';
-		};
-		print ('Sending from wallet {}...'.format (wallet.wallet_name));
-		return jsasync.chain (wallet.balance, cb);
+		return self._builder.send (__kwargtrans__ ({source: source, refund: refund, data: data}));
 	});}
 });
 export var Balance =  __class__ ('Balance', [object], {

@@ -389,7 +389,7 @@ export var SignatureRequest =  __class__ ('SignatureRequest', [object], {
 			throw __except0__;
 		}
 		var address = public_key.unlockhash.__str__ ();
-		if (self._unlockhash.py_metatype.__ne__ (UnlockHashType.NIL) && self.wallet_address != address) {
+		if (self._unlockhash.uhtype.__ne__ (UnlockHashType.NIL) && self.wallet_address != address) {
 			var __except0__ = ValueError ('signature request cannot be fulfilled using address {}, expected address {}'.format (address, self.wallet_address));
 			__except0__.__cause__ = null;
 			throw __except0__;

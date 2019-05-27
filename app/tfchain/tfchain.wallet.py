@@ -28,10 +28,13 @@ def assymetric_key_pair_generate(entropy, index):
     entropy = jscrypto.blake2b(encoder.data)
     return jscrypto.AssymetricSignKeyPair(entropy)
 
-def unlockhash_from_assymetric_key_pair(pair):
+def public_key_from_assymetric_key_pair(pair):
     if not isinstance(pair, jscrypto.AssymetricSignKeyPair):
         raise TypeError("pair is of an invalid type {}".format(type(pair)))
-    pk = PublicKey(specifier=PublicKeySpecifier.ED25519, hash=pair.key_public)
+    return PublicKey(specifier=PublicKeySpecifier.ED25519, hash=pair.key_public)
+
+def unlockhash_from_assymetric_key_pair(pair):
+    pk = public_key_from_assymetric_key_pair(pair)
     return pk.unlockhash
 
 class TFChainWallet:
@@ -254,7 +257,7 @@ class TFChainWallet:
 
     #     # fund amount
     #     balance = self.balance
-    #     miner_fee = self.client.minimum_miner_fee
+    #     miner_fee = self.network_type.minimum_miner_fee()
     #     inputs, remainder, suggested_refund = balance.fund(amount+miner_fee, source=source)
 
     #     # define the refund condition
@@ -318,14 +321,14 @@ class TFChainWallet:
 
     #     return TransactionSendResult(txn, submit)
 
-    # def coin_transaction_builder_new(self):
-    #     """
-    #     Create a transaction builder that can be used to
-    #     add multiple outputs, in a chained manner, and send them all at once.
+    def coin_transaction_builder_new(self):
+        """
+        Create a transaction builder that can be used to
+        add multiple outputs, in a chained manner, and send them all at once.
 
-    #     ERC20 coin outputs are not supported in the Coin Transaction Builder.
-    #     """
-    #     return CoinTransactionBuilder(self)
+        ERC20 coin outputs are not supported in the Coin Transaction Builder.
+        """
+        return CoinTransactionBuilder(self)
 
     # def transaction_sign(self, txn, submit=True):
     #     """
@@ -431,8 +434,8 @@ class TFChainWallet:
     def _unlockhash_get(self, address):
         return self._client.unlockhash_get(address)
 
-    # def _transaction_put(self, transaction):
-    #     return self._client.transaction_put(transaction)
+    def _transaction_put(self, transaction):
+        return self._client.transaction_put(transaction)
 
 # class TFChainMinter():
 #     """
@@ -594,7 +597,7 @@ class TFChainWallet:
 #         """
 #         Returns the minimum miner fee
 #         """
-#         return self._wallet.client.minimum_miner_fee
+#         return self._wallet.network_type.minimum_miner_fee()
 
 #     def _current_mint_condition_get(self):
 #         """
@@ -1047,7 +1050,7 @@ class TFChainWallet:
 #         """
 #         Returns the minimum miner fee
 #         """
-#         return self._wallet.client.minimum_miner_fee
+#         return self._wallet.network_type.minimum_miner_fee()
 
 #     def _output_get(self, outputid):
 #         """
@@ -1288,7 +1291,7 @@ class TFChainWallet:
 #         """
 #         Returns the minimum miner fee
 #         """
-#         return self._wallet.client.minimum_miner_fee
+#         return self._wallet.network_type.minimum_miner_fee()
 
 #     def _transaction_put(self, transaction):
 #         """
@@ -1518,7 +1521,7 @@ class TFChainWallet:
 #         """
 #         Returns the minimum miner fee
 #         """
-#         return self._wallet.client.minimum_miner_fee
+#         return self._wallet.network_type.minimum_miner_fee()
 
 #     def _transaction_put(self, transaction):
 #         """
@@ -1711,66 +1714,66 @@ class CoinTransactionBuilder():
         txn = self._txn
         self._txn = None
 
-        # fund amount
-        amount = sum([co.value for co in txn.coin_outputs])
-        balance = self._wallet.balance
-        miner_fee = self._wallet.client.minimum_miner_fee
-        inputs, remainder, suggested_refund = balance.fund(amount.plus(miner_fee), source=source)
+        wallet = self._wallet.clone()
 
-        # define the refund condition
-        if refund is None: # automatically choose a refund condition if none is given
-            if suggested_refund is None:
-                refund = ConditionTypes.unlockhash_new(unlockhash=self._wallet.address)
+        def balance_cb(balance):
+            # fund amount
+            amount = Currency.sum(*[co.value for co in txn.coin_outputs])
+            miner_fee = wallet.network_type.minimum_miner_fee()
+            inputs, remainder, suggested_refund = balance.fund(amount.plus(miner_fee), source=source)
+
+            # define the refund condition
+            # TODO: ensure we do not require jsobj checks like this on such a low level code
+            if refund is None or jsobj.is_undefined(refund): # automatically choose a refund condition if none is given
+                if suggested_refund is None:
+                    refund = ConditionTypes.unlockhash_new(unlockhash=wallet.address)
+                else:
+                    refund = suggested_refund
             else:
-                refund = suggested_refund
-        else:
-            # use the given refund condition (defined as a recipient)
-            refund = ConditionTypes.from_recipient(refund)
+                # use the given refund condition (defined as a recipient)
+                refund = ConditionTypes.from_recipient(refund)
 
-        # add refund coin output if needed
-        if remainder > 0:
-            txn.coin_output_add(value=remainder, condition=refund)
-        # add the miner fee
-        txn.miner_fee_add(miner_fee)
+            # add refund coin output if needed
+            if remainder.greater_than(0):
+                txn.coin_output_add(value=remainder, condition=refund)
+            # add the miner fee
+            txn.miner_fee_add(miner_fee)
 
-        # add the coin inputs
-        txn.coin_inputs = inputs
+            # add the coin inputs
+            txn.coin_inputs = inputs
 
-        # if there is data to be added, add it as well
-        if data is not None:
-            txn.data = data
+            # if there is data to be added, add it as well
+            # TODO: ensure we do not require jsobj checks like this on such a low level code
+            if data is not None and not jsobj.is_undefined(data):
+                txn.data = data
 
-        # generate the signature requests
-        sig_requests = txn.signature_requests_new()
-        if len(sig_requests) == 0:
-            raise Exception("BUG: sig requests should not be empty at this point, please fix or report as an issue")
+            # generate the signature requests
+            sig_requests = txn.signature_requests_new()
+            if len(sig_requests) == 0:
+                raise Exception("BUG: sig requests should not be empty at this point, please fix or report as an issue")
 
-        # fulfill the signature requests that we can fulfill
-        for request in sig_requests:
-            try:
-                key_pair = self._wallet.key_pair_get(request.wallet_address)
-                pk = PublicKey(specifier=PublicKeySpecifier.ED25519, hash=key_pair.key_public)
-                input_hash = request.input_hash_new(public_key=pk)
-                signature = key_pair.sign(input_hash)
-                request.signature_fulfill(public_key=pk, signature=signature)
-            except KeyError:
-                pass # this is acceptable due to how we directly try the key_pair_get method
+            # fulfill the signature requests that we can fulfill
+            for request in sig_requests:
+                try:
+                    key_pair = wallet.key_pair_get(request.wallet_address)
+                    pk = public_key_from_assymetric_key_pair(key_pair)
+                    input_hash = request.input_hash_new(public_key=pk)
+                    signature = key_pair.sign(input_hash.value)
+                    request.signature_fulfill(public_key=pk, signature=signature)
+                except KeyError:
+                    pass # this is acceptable due to how we directly try the key_pair_get method
 
-        # txn should be fulfilled now
-        submit = txn.is_fulfilled()
-        if submit:
-            # submit the transaction
-            txn.id = self._wallet._transaction_put(transaction=txn)
+            # txn should be fulfilled now
+            submit = txn.is_fulfilled()
+            if not submit: # return as-is
+                def stub_cb(resolve, reject):
+                    resolve(TransactionSendResult(txn, submit))
+                return jsasync.promise_new(stub_cb)
+            
+            # submit, and only then return
+            def id_cb(id):
+                txn.id = id
+                return TransactionSendResult(txn, submit)
+            return jsasync.chain(wallet._transaction_put(transaction=txn), id_cb)
 
-            # update balance
-            for idx, ci in enumerate(txn.coin_inputs):
-                balance.output_add(txn, idx, confirmed=False, spent=True)
-            addresses = jsarr.concat(self._wallet.addresses, balance.addresses_multisig)
-            for idx, co in enumerate(txn.coin_outputs):
-                if co.condition.unlockhash.__str__() in addresses:
-                    # add the id to the coin_output, so we can track it has been spent
-                    co.id = txn.coin_outputid_new(idx)
-                    balance.output_add(txn, idx, confirmed=False, spent=False)
-            # and return the created/submitted transaction for optional user consumption
-
-        return TransactionSendResult(txn, submit)
+        return jsasync.chain(wallet.balance, balance_cb)

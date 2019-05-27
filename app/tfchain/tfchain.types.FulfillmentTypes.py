@@ -159,7 +159,7 @@ class SignatureRequest:
         if not isinstance(public_key, PublicKey):
             raise TypeError("public key is expected to be of type PublicKey, not {}".format(type(public_key)))
         address = public_key.unlockhash.__str__()
-        if self._unlockhash.type.__ne__(UnlockHashType.NIL) and self.wallet_address != address: # only check if the request is not using a NIL Condition
+        if self._unlockhash.uhtype.__ne__(UnlockHashType.NIL) and self.wallet_address != address: # only check if the request is not using a NIL Condition
             raise ValueError("signature request cannot be fulfilled using address {}, expected address {}".format(address, self.wallet_address))
 
         # add the signature to the callback

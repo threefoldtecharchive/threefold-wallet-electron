@@ -103,6 +103,8 @@ class Client:
         def resolve(result):
             if result.code == 200:
                 return jsobj.as_dict(result.data)
+            if result.code == 400: # are there other error codes?
+                raise tferrors.ExplorerBadRequest("error (code: {}): {}".format(result.code, result.data), endpoint)
             raise tferrors.ExplorerServerPostError("POST: unexpected error (code: {}): {}".format(result.code, result.data), endpoint, data=data)
 
         headers = {

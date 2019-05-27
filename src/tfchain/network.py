@@ -50,7 +50,7 @@ class Type:
         raise ValueError(s + " is not a supported network type str")
 
     def minimum_miner_fee(self):
-        if self == Type.DEVNET:
+        if self.__eq__(Type.DEVNET):
             return Currency('1.0')
         return Currency('0.1')
 

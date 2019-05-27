@@ -246,11 +246,12 @@ class Currency(BaseDataTypeClass):
             self._value = value.value
             return
         if isinstance(value, (int, str, jsdec.Decimal)):
-            if isinstance(value, str):
-                value = jsstr.String(value).upper().strip().value
-                if len(value) >= 4 and value[-3:] == 'TFT':
-                    value = jsstr.rstrip(value[:-3])
-            d = jsdec.Decimal(value)
+            inner_value = value
+            if isinstance(inner_value, str):
+                inner_value = jsstr.String(inner_value).upper().strip().value
+                if len(inner_value) >= 4 and inner_value[-3:] == 'TFT':
+                    inner_value = jsstr.rstrip(inner_value[:-3])
+            d = jsdec.Decimal(inner_value)
             sign, _, exp = d.as_tuple()
             if exp < -9:
                 raise tferrors.CurrencyPrecisionOverflow(d.__str__())
@@ -259,7 +260,7 @@ class Currency(BaseDataTypeClass):
             self._value = d
             return
         raise TypeError(
-            "cannot set value of type {} as Currency (invalid type)".format(type(value)))
+            "cannot set value of type {} as Currency (invalid type): {}".format(type(value), value))
 
     # operator overloading to allow currencies to be summed
     def __add__(self, other):
@@ -364,7 +365,7 @@ class Currency(BaseDataTypeClass):
         """
         s = self.value.str(9)
         if lowest_unit:
-            s = jsstr.replace(s, ".", "")
+            s = jsstr.lstrip(jsstr.replace(s, ".", ""), "0")
         elif jsstr.contains(s, "."):
             s = jsstr.rstrip(jsstr.rstrip(s, "0 "), '.')
         if jsstr.isempty(s):

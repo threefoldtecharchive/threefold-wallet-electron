@@ -454,7 +454,7 @@ class CoinTransactionBuilder:
     Cloning only happens when doing the actual sending.
     """
     def __init__(self, wallet):
-        self._wallet = wallet
+        self._builder = wallet._tfwallet.coin_transaction_builder_new()
 
     def output_add(self, recipient, amount, lock=None):
         """
@@ -479,21 +479,8 @@ class CoinTransactionBuilder:
         @param amount: int or str that defines the amount of TFT to set, see explanation above
         @param lock: optional lock that can be used to lock the sent amount to a specific time or block height, see explation above
         """
-        if not recipient:
-            print("send {} to free-for-all wallet".format(amount))
-        elif isinstance(recipient, str):
-            print("send {} to personal wallet {}".format(amount, recipient))
-        elif isinstance(recipient, list):
-            if len(recipient) == 2 and (isinstance(recipient[0], int) or isinstance(recipient[1], int)):
-                a, b = recipient
-                if isinstance(a, int):
-                    print("send {} to multisig wallet ({}, {})".format(amount, a, b))
-                else:
-                    print("send {} to multisig wallet ({}, {})".format(amount, b, a))
-            else:
-                print("send {} to multisig wallet ({}, {})".format(amount, len(recipient), recipient))
-        else:
-            raise TypeError("recipient is of an unsupported type {}".format(type(recipient)))
+        self._builder.output_add(recipient, amount, lock=lock)
+        return self
 
     def send(self, source=None, refund=None, data=None):
         """
@@ -501,12 +488,7 @@ class CoinTransactionBuilder:
 
         :returns: a promise that resolves with a transaction ID or rejects with an Exception
         """
-        wallet = self._wallet.clone()
-        def cb(balance):
-            print("Sent from wallet {} succesfully with an input balance of {} TFT!".format(wallet.wallet_name, balance.coins_total))
-            return '66ccdf3a0bca58025be7fdc71f3f6bfbd6ed6287aa698a131734a947c71a3bbf'
-        print("Sending from wallet {}...".format(wallet.wallet_name))
-        return jsasync.chain(wallet.balance, cb)
+        return self._builder.send(source=source, refund=refund, data=data)
 
 
 class Balance:

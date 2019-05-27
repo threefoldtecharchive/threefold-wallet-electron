@@ -129,6 +129,13 @@ def is_js_obj(obj):
     """)
     return result
 
+def is_undefined(obj):
+    result = None
+    __pragma__("js", "{}", """
+    result = obj === undefined || obj === null;
+    """)
+    return result
+
 def is_js_arr(obj):
     result = None
     __pragma__("js", "{}", """

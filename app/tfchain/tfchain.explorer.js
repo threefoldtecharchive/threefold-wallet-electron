@@ -237,6 +237,11 @@ export var Client =  __class__ ('Client', [object], {
 			if (result.code == 200) {
 				return jsobj.as_dict (result.data);
 			}
+			if (result.code == 400) {
+				var __except0__ = tferrors.ExplorerBadRequest ('error (code: {}): {}'.format (result.code, result.data), endpoint);
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
 			var __except0__ = tferrors.ExplorerServerPostError ('POST: unexpected error (code: {}): {}'.format (result.code, result.data), endpoint, __kwargtrans__ ({data: data}));
 			__except0__.__cause__ = null;
 			throw __except0__;

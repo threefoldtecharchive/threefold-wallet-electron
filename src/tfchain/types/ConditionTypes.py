@@ -69,7 +69,7 @@ def from_recipient(recipient, lock=None):
             else:
                 condition = multi_signature_new(min_nr_sig=recipient[1], unlockhashes=recipient[0])
         else:
-            raise TypeError("invalid type for recipient parameter: {}", type(recipient))
+            raise TypeError("invalid type for recipient parameter: {}: {}", type(recipient), recipient)
     
     # if lock is defined, define it as a locktime value
     if lock is not None:
@@ -305,6 +305,8 @@ class UnlockHashType:
         if isinstance(other, UnlockHashType):
             return self.value == other.value
         return self.value == other
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
     def __int__(self):
         return self.value
