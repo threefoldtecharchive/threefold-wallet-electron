@@ -1250,7 +1250,7 @@ export var TransactionView =  __class__ ('TransactionView', [object], {
 				}
 				for (var ci of transaction.coin_inputs) {
 					var output = ci.parent_output;
-					outputs.append (CoinOutputView.from_coin_output (co, senders, __kwargtrans__ ({ratio: ratio})));
+					outputs.append (CoinOutputView.from_coin_output (output, senders, __kwargtrans__ ({ratio: ratio})));
 				}
 			}
 		}

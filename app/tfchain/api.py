@@ -681,7 +681,7 @@ class TransactionView:
                 # add all inputs
                 for ci in transaction.coin_inputs:
                     output = ci.parent_output
-                    outputs.append(CoinOutputView.from_coin_output(co, senders, ratio=ratio))
+                    outputs.append(CoinOutputView.from_coin_output(output, senders, ratio=ratio))
 
         # return transaction view
         return cls(identifier, height, timestamp, blockid, inputs, outputs)
