@@ -3,6 +3,7 @@ import tfchain.errors as tferrors
 import tfchain.polyfill.encoding.json as jsjson
 import tfchain.polyfill.encoding.object as jsobj
 import tfchain.polyfill.http as jshttp
+import tfchain.polyfill.log as jslog
 import tfchain.polyfill.asynchronous as jsasync
 
 class Client:
@@ -49,25 +50,32 @@ class Client:
                 raise tferrors.ExplorerBadRequest("error (code: {}): {}".format(result.code, result.data), endpoint)
             raise tferrors.ExplorerServerError("error (code: {}): {}".format(result.code, result.data), endpoint)
 
-        address = self._addresses[0]
+        address = self._addresses[indices[0]]
         if not isinstance(address, str):
             raise TypeError("explorer address expected to be a string, not {}".format(type(address)))
         resource = address+endpoint
         # do the request and check the response
         p = jsasync.chain(jshttp.http_get(resource), resolve)
 
+        # factory for our fallback callbacks
+        # called to try on another server in case
+        # a non-user error occured on the previous one
+        def create_fallback_catch_cb(address):
+            resource = address+endpoint
+            def f(reason):
+                if isinstance(reason, tferrors.ExplorerUserError):
+                    raise reason # no need to retry user errors
+                jslog.debug("retrying on another server, previous GET call failed: {}".format(reason))
+                # do the request and check the response
+                return jsasync.chain(jshttp.http_get(resource), resolve)
+            return f
+
         # for any remaining index, do the same logic, but as a chained catch
         for idx in indices[1:]:
             address = self._addresses[idx]
             if not isinstance(address, str):
                 raise TypeError("explorer address expected to be a string, not {}".format(type(address)))
-            resource = address+endpoint
-            def cb(reason):
-                if isinstance(reason, tferrors.ExplorerUserError):
-                    raise reason # no need to retry user errors
-                print("retrying on another server, previous GET call failed: {}".format(reason))
-                # do the request and check the response
-                return jsasync.chain(jshttp.http_get(resource), resolve)
+            cb = create_fallback_catch_cb(address)
             p = jsasync.catch_promise(p, cb)
 
         # define final catch cb, as a last fallback
@@ -75,7 +83,7 @@ class Client:
             # pass on user errors
             if isinstance(reason, tferrors.ExplorerUserError):
                 raise reason # no need to retry user errors
-            print("servers exhausted, previous GET call failed as well: {}".format(reason))
+            jslog.debug("servers exhausted, previous GET call failed as well: {}".format(reason))
             raise tferrors.ExplorerNotAvailable("no explorer was available", endpoint, self._addresses)
 
         # return the final promise chain
@@ -104,28 +112,37 @@ class Client:
         if not isinstance(s, str):
             s = jsjson.json_dumps(s)
         
-        address = self._addresses[0]
+        address = self._addresses[indices[0]]
         if not isinstance(address, str):
             raise TypeError("explorer address expected to be a string, not {}".format(type(address)))
         resource = address+endpoint
          # do the request and check the response
         p = jsasync.chain(jshttp.http_post(resource, s, headers), resolve)
 
+        # factory for our fallback callbacks
+        # called to try on another server in case
+        # a non-user error occured on the previous one
+        def create_fallback_catch_cb(address):
+            resource = address+endpoint
+            def f(reason):
+                if isinstance(reason, tferrors.ExplorerUserError):
+                    raise reason # no need to retry user errors
+                jslog.debug("retrying on another server, previous POST call failed: {}".format(reason))
+                # do the request and check the response
+                return jsasync.chain(jshttp.http_post(resource, s, headers), resolve)
+            return f
+
         # for any remaining index, do the same logic, but as a chained catch
         for idx in indices[1:]:
             address = self._addresses[idx]
             if not isinstance(address, str):
                 raise TypeError("explorer address expected to be a string, not {}".format(type(address)))
-            resource = address+endpoint
-            def cb(reason):
-                print("retrying on another server, previous POST call failed: {}".format(reason))
-                # do the request and check the response
-                return jsasync.chain(jshttp.http_post(resource, s, headers), resolve)
+            cb = create_fallback_catch_cb(address)
             p = jsasync.catch_promise(p, cb)
 
         # define final catch cb, as a last fallback
         def final_catch(reason):
-            print("servers exhausted, previous POST call failed as well: {}".format(reason))
+            jslog.debug("servers exhausted, previous POST call failed as well: {}".format(reason))
             raise tferrors.ExplorerNotAvailable("no explorer was available", endpoint, self._addresses)
 
         # return the final promise chain

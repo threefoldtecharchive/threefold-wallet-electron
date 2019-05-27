@@ -3,6 +3,7 @@ Contains the public Python API for the TFChain Wallet Desktop App,
 converted into Javascript (ES6) using Transcrypt.
 """
 
+import tfchain.polyfill.log as jslog
 import tfchain.polyfill.crypto as jscrypto
 import tfchain.polyfill.asynchronous as jsasync
 import tfchain.polyfill.encoding.json as jsjson
@@ -894,7 +895,7 @@ def mnemonic_is_valid(mnemonic):
     try:
         return __bip39.check(mnemonic)
     except Exception as e:
-        print(e)
+        jslog.debug(e)
         return False
 
 def wallet_address_is_valid(address, multisig=True):

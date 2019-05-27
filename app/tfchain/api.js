@@ -13,6 +13,7 @@ import * as jshex from './tfchain.polyfill.encoding.hex.js';
 import * as jsjson from './tfchain.polyfill.encoding.json.js';
 import * as jsasync from './tfchain.polyfill.asynchronous.js';
 import * as jscrypto from './tfchain.polyfill.crypto.js';
+import * as jslog from './tfchain.polyfill.log.js';
 var __name__ = '__main__';
 export var __bip39 = bip39.Mnemonic ();
 export var Account =  __class__ ('Account', [object], {
@@ -1478,7 +1479,7 @@ export var mnemonic_is_valid = function (mnemonic) {
 	catch (__except0__) {
 		if (isinstance (__except0__, Exception)) {
 			var e = __except0__;
-			print (e);
+			jslog.debug (e);
 			return false;
 		}
 		else {
