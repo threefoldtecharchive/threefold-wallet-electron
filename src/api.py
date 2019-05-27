@@ -562,10 +562,17 @@ class Balance:
     def coins_total(self):
         return self.coins_unlocked.plus(self.coins_locked)
 
-    def address_filter(self, address):
-        # TODO: replace with real logic
-        UnlockHash.from_str(address)
-        return Balance(self._network_type, self._tfbalance)
+    @property
+    def unconfirmed_coins_unlocked(self):
+        return self._tfbalance.unconfirmed
+
+    @property
+    def unconfirmed_coins_locked(self):
+        return self._tfbalance.unconfirmed_locked
+
+    @property
+    def unconfirmed_coins_total(self):
+        return self.unconfirmed_coins_unlocked.plus(self.unconfirmed_coins_locked)
 
     @property
     def transactions(self):

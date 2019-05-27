@@ -1012,7 +1012,7 @@ export var Balance =  __class__ ('Balance', [object], {
 		}
 		return self.coins_unlocked.plus (self.coins_locked);
 	});},
-	get address_filter () {return __get__ (this, function (self, address) {
+	get _get_unconfirmed_coins_unlocked () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -1020,15 +1020,45 @@ export var Balance =  __class__ ('Balance', [object], {
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'address': var address = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
 		}
 		else {
 		}
-		UnlockHash.from_str (address);
-		return Balance (self._network_type, self._tfbalance);
+		return self._tfbalance.unconfirmed;
+	});},
+	get _get_unconfirmed_coins_locked () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._tfbalance.unconfirmed_locked;
+	});},
+	get _get_unconfirmed_coins_total () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self.unconfirmed_coins_unlocked.plus (self.unconfirmed_coins_locked);
 	});},
 	get _get_transactions () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -1052,6 +1082,9 @@ export var Balance =  __class__ ('Balance', [object], {
 	});}
 });
 Object.defineProperty (Balance, 'transactions', property.call (Balance, Balance._get_transactions));
+Object.defineProperty (Balance, 'unconfirmed_coins_total', property.call (Balance, Balance._get_unconfirmed_coins_total));
+Object.defineProperty (Balance, 'unconfirmed_coins_locked', property.call (Balance, Balance._get_unconfirmed_coins_locked));
+Object.defineProperty (Balance, 'unconfirmed_coins_unlocked', property.call (Balance, Balance._get_unconfirmed_coins_unlocked));
 Object.defineProperty (Balance, 'coins_total', property.call (Balance, Balance._get_coins_total));
 Object.defineProperty (Balance, 'coins_locked', property.call (Balance, Balance._get_coins_locked));
 Object.defineProperty (Balance, 'coins_unlocked', property.call (Balance, Balance._get_coins_unlocked));;
