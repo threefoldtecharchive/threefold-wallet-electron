@@ -175,6 +175,14 @@ class Account:
         return self._seed
 
     @property
+    def password(self):
+        """
+        :returns: the password used to encrypt the wallet at serialization time
+        :rtype: str
+        """
+        return self._symmetric_key.password
+
+    @property
     def wallet(self):
         """
         :returns: the default wallet (the first one), or None if no wallet has been created for this account (instance)

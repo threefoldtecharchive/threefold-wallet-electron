@@ -202,6 +202,22 @@ export var Account =  __class__ ('Account', [object], {
 		}
 		return self._seed;
 	});},
+	get _get_password () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._symmetric_key.password;
+	});},
 	get _get_wallet () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -533,6 +549,7 @@ Object.defineProperty (Account, 'wallet_count', property.call (Account, Account.
 Object.defineProperty (Account, 'wallets', property.call (Account, Account._get_wallets));
 Object.defineProperty (Account, 'explorer', property.call (Account, Account._get_explorer));
 Object.defineProperty (Account, 'wallet', property.call (Account, Account._get_wallet));
+Object.defineProperty (Account, 'password', property.call (Account, Account._get_password));
 Object.defineProperty (Account, 'seed', property.call (Account, Account._get_seed));
 Object.defineProperty (Account, 'mnemonic', property.call (Account, Account._get_mnemonic));
 Object.defineProperty (Account, 'account_name', property.call (Account, Account._get_account_name));;
