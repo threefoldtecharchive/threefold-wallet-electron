@@ -42,7 +42,7 @@ class Wallet extends Component {
   }
 
   getBalance = () => {
-    if (this.props.wallet != null) {
+    if (!(this.props.wallet instanceof Array)) {
       this.setState({ loader: true })
       this.props.wallet.balance.then(info => {
         if (this.mounted) {
