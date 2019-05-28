@@ -103,7 +103,7 @@ class Transfer extends Component {
       const concatDate = datelock + ' ' + timelock
       const dateLockDate = new Date(concatDate)
       const dateLockTimeZone = dateLockDate.getTimezoneOffset()
-      timestamp = moment(dateLockDate).zone(dateLockTimeZone).unix()
+      timestamp = moment(dateLockDate).utcOffset(dateLockTimeZone).unix()
     }
     // if (description === '') {
     //   descriptionError = true

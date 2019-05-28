@@ -19,27 +19,33 @@ class Wallet extends Component {
       coinsLocked: 0,
       coinsUnlocked: 0,
       coinsTotal: 0,
-      transactions: []
+      transactions: [],
+      intervalId: undefined
     }
   }
 
   componentDidMount () {
-    this.interval = setInterval(this.getBalance(), 60000)
+    const intervalId = setInterval(this.getBalance(), 60000)
+    this.mounted = true
+    this.setState({ intervalId })
   }
 
   componentWillUnmount () {
-    clearInterval(this.interval)
+    clearInterval(this.state.intervalId)
+    this.mounted = false
   }
 
   getBalance = () => {
     if (this.props.wallet != null) {
       this.props.wallet.balance.then(info => {
-        this.setState({
-          coinsLocked: info.coins_locked.str(),
-          coinsUnlocked: info.coins_unlocked.str(),
-          coinsTotal: info.coins_total.str(),
-          transactions: info.transactions
-        })
+        if (this.mounted) {
+          this.setState({
+            coinsLocked: info.coins_locked.str(),
+            coinsUnlocked: info.coins_unlocked.str(),
+            coinsTotal: info.coins_total.str(),
+            transactions: info.transactions
+          })
+        }
       })
     }
   }
@@ -53,7 +59,7 @@ class Wallet extends Component {
           <List style={{ marginLeft: 50, overflow: 'auto', color: 'white' }} divided relaxed>
             {transactions.map(tx => {
               return (
-                <List.Item style={{ borderBottom: '1px solid grey' }}>
+                <List.Item key={tx.identifier} style={{ borderBottom: '1px solid grey' }}>
                   <List.Content>
                     <List.Header as='a' style={{ color: '#6647fe', display: 'flex' }}>TXID: {tx.identifier} {tx.confirmed ? (<p style={{ fontSize: 14, marginLeft: 80 }}>Confirmed at {moment.unix(tx.timestamp).format('MMMM Do , HH:mm')}</p>) : (<p style={{ fontSize: 14, marginLeft: 80 }}>Unconfirmed</p>)}</List.Header>
                     {this.renderTransactionBody(tx)}
@@ -75,8 +81,8 @@ class Wallet extends Component {
     if (tx.inputs.length > 0) {
       return tx.inputs.map(input => {
         return (
-          <div style={{ marginTop: 5, marginBottom: 5 }}>
-            <List.Description style={{ color: 'white' }} as='a'>{input.senders.map(sender => { return (<p style={{ fontSize: 14, marginBottom: 0 }}>From: {sender} </p>) })}</List.Description>
+          <div key={tx.identifier} style={{ marginTop: 5, marginBottom: 5 }}>
+            <List.Description style={{ color: 'white' }} as='a'>{input.senders.map(sender => { return (<p key={tx.identifier} style={{ fontSize: 14, marginBottom: 0 }}>From: {sender} </p>) })}</List.Description>
             <List.Description style={{ color: 'white' }} as='a'>Amount: <span style={{ color: 'green' }}>+ {input.amount.str()}</span> TFT</List.Description>
             <List.Description style={{ color: 'white' }} as='a'>To: {input.recipient}</List.Description>
           </div>
@@ -85,7 +91,7 @@ class Wallet extends Component {
     } else if (tx.outputs.length > 0) {
       return tx.outputs.map(out => {
         return (
-          <div style={{ marginTop: 5, marginBottom: 5 }}>
+          <div key={tx.identifier} style={{ marginTop: 5, marginBottom: 5 }}>
             <List.Description style={{ color: 'white' }} as='a'>To: {out.recipient}</List.Description>
             <List.Description style={{ color: 'white' }} as='a'>Amount: <span style={{ color: 'red' }}>- {out.amount.str()}</span> TFT</List.Description>
           </div>

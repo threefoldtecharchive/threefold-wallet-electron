@@ -19,17 +19,21 @@ class Footer extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      error: false
+      error: false,
+      intervalId: undefined
     }
   }
 
   componentDidMount () {
+    this.mounted = true
     this.getChainInfo()
-    this.interval = setInterval(() => { this.getChainInfo() }, 60000)
+    const intervalId = setInterval(() => { this.getChainInfo() }, 60000)
+    this.setState({ intervalId })
   }
 
   componentWillUnmount () {
-    clearInterval(this.interval)
+    clearInterval(this.state.intervalId)
+    this.mounted = false
   }
 
   getChainInfo = () => {
@@ -42,8 +46,10 @@ class Footer extends Component {
           chainTimestamp: info.chain_timestamp,
           chainVersion: info.chain_version
         }
-        this.props.setChainConstants(chainInfo)
-        this.setState({ error: false })
+        if (this.mounted) {
+          this.props.setChainConstants(chainInfo)
+          this.setState({ error: false })
+        }
       })
         .catch(err => {
           this.setState({ error: err })

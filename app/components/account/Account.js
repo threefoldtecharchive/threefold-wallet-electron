@@ -29,24 +29,28 @@ class Account extends Component {
       totalCoins: 0,
       totalCoinLocked: 0,
       totalCoinUnlocked: 0,
-      wallets: this.props.account.wallets
+      wallets: this.props.account.wallets,
+      intervalId: undefined
     }
   }
 
-  async componentDidMount () {
+  componentDidMount () {
+    this.mounted = true
     this.getAccountBalance()
     this.refreshWalletBalances()
     // Unselect wallet from props
     this.props.selectWallet([])
     // Every minut update the account total balance and seperate wallet balances
-    this.interval = setInterval(() => {
+    const intervalId = setInterval(() => {
       this.getAccountBalance()
       this.refreshWalletBalances()
     }, 60000)
+    this.setState({ intervalId })
   }
 
   componentWillUnmount () {
-    clearInterval(this.interval)
+    clearInterval(this.state.intervalId)
+    this.mounted = false
   }
 
   getAccountBalance = () => {
@@ -54,7 +58,9 @@ class Account extends Component {
       const totalSum = info.coins_total.str()
       const totalUnlockedSum = info.coins_unlocked.str()
       const totalLockedSum = info.coins_locked.str()
-      this.setState({ totalCoins: totalSum, totalCoinLocked: totalLockedSum, totalCoinUnlocked: totalUnlockedSum })
+      if (this.mounted) {
+        this.setState({ totalCoins: totalSum, totalCoinLocked: totalLockedSum, totalCoinUnlocked: totalUnlockedSum })
+      }
     })
   }
 
@@ -64,15 +70,17 @@ class Account extends Component {
       // Extend wallet object with a fullfilled promise of balance information to render in the cards
       w._balance = balance
       // Set wallets into component state
-      this.setState(state => {
-        // refresh wallets in state instead of clearing them all
-        const index = findIndex(state.wallets, { '_wallet_name': w.wallet_name })
-        state.wallets[index] = w
-        const wallets = state.wallets
-        return {
-          wallets
-        }
-      })
+      if (this.mounted) {
+        this.setState(state => {
+          // refresh wallets in state instead of clearing them all
+          const index = findIndex(state.wallets, { '_wallet_name': w.wallet_name })
+          state.wallets[index] = w
+          const wallets = state.wallets
+          return {
+            wallets
+          }
+        })
+      }
     })
   }
 
