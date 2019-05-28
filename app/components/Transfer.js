@@ -39,12 +39,6 @@ class Transfer extends Component {
     }
   }
 
-  // when component re-renders
-  componentDidUpdate (prevProps, prevState) {
-    console.log(prevProps)
-    console.log(prevState)
-  }
-
   handleDestinationChange = ({ target }) => {
     if (!tfchain.wallet_address_is_valid(target.value) && target.value !== '') {
       this.setState({ destinationError: true })
@@ -107,7 +101,9 @@ class Transfer extends Component {
     let timestamp
     if (datelock !== '') {
       const concatDate = datelock + ' ' + timelock
-      timestamp = moment(concatDate).unix()
+      const dateLockDate = new Date(concatDate)
+      const dateLockTimeZone = dateLockDate.getTimezoneOffset()
+      timestamp = moment(dateLockDate).zone(dateLockTimeZone).unix()
     }
     // if (description === '') {
     //   descriptionError = true
@@ -118,7 +114,7 @@ class Transfer extends Component {
 
       const builder = selectedWallet.transaction_new()
       if (timestamp) {
-        builder.output_add(destination, amount.toString(), {lock: timestamp})
+        builder.output_add(destination, amount.toString(), { lock: timestamp })
       } else {
         builder.output_add(destination, amount.toString())
       }
