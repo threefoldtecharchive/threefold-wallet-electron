@@ -9,7 +9,8 @@ import Footer from '../footer'
 import moment from 'moment'
 
 const mapStateToProps = state => ({
-  wallet: state.wallet
+  wallet: state.wallet,
+  routerLocations: state.routerLocations
 })
 
 class Wallet extends Component {
@@ -100,6 +101,19 @@ class Wallet extends Component {
     }
   }
 
+  // implement goBack ourselfs, if a user has made a transaction and he presses go back then he should route to account
+  // instead of going back to transfer (default behaviour of react router 'goBack' function)
+  goBack = () => {
+    const { routerLocations } = this.props
+    const previousLocation = routerLocations[routerLocations.length - 1]
+    switch (previousLocation) {
+      case '/transfer':
+        return this.props.history.push(routes.ACCOUNT)
+      default:
+        return this.props.history.push(routes.ACCOUNT)
+    }
+  }
+
   render () {
     const { wallet } = this.props
     const { coinsLocked, coinsUnlocked, coinsTotal } = this.state
@@ -119,8 +133,8 @@ class Wallet extends Component {
         </div>
         <Divider style={{ background: '#1A253F' }} />
         <div>
-          <Icon onClick={() => this.props.history.goBack()} style={{ fontSize: 25, marginLeft: 15, marginTop: 15, cursor: 'pointer', zIndex: 5 }} name='chevron circle left' />
-          <span onClick={() => this.props.history.goBack()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
+          <Icon onClick={() => this.goBack()} style={{ fontSize: 25, marginLeft: 15, marginTop: 15, cursor: 'pointer', zIndex: 5 }} name='chevron circle left' />
+          <span onClick={() => this.goBack()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
           <Grid centered columns={2} style={{ marginBottom: 10, marginTop: -20 }}>
             <GridColumn style={{ height: 200, marginTop: 0, width: '40%' }}>
               <Segment style={{ marginTop: 20, background: '#29272E' }}>

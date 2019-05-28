@@ -5,6 +5,7 @@ import { account, accounts } from './account'
 import { wallet } from './wallet'
 import { client } from './client'
 import { chainConstants } from './chain'
+import { routerLocations } from './router'
 
 export default function createRootReducer (history) {
   return combineReducers({
@@ -13,6 +14,7 @@ export default function createRootReducer (history) {
     wallet,
     client,
     accounts,
-    chainConstants
+    chainConstants,
+    routerLocations
   })
 }
