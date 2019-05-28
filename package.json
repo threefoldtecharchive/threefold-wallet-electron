@@ -274,7 +274,8 @@
     "redux": "^4.0.1",
     "redux-thunk": "^2.3.0",
     "semantic-ui-react": "^0.87.1",
-    "source-map-support": "^0.5.9"
+    "source-map-support": "^0.5.9",
+    "uuid": "^3.3.2"
   },
   "devEngines": {
     "node": ">=7.x",

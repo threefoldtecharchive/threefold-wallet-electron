@@ -29,6 +29,9 @@ class Account extends Component {
       totalCoins: 0,
       totalCoinLocked: 0,
       totalCoinUnlocked: 0,
+      unconfirmedTotalCoins: 0,
+      unconfirmedLockedCoins: 0,
+      unconfirmedUnlockedCoins: 0,
       wallets: this.props.account.wallets,
       intervalId: undefined
     }
@@ -55,11 +58,21 @@ class Account extends Component {
 
   getAccountBalance = () => {
     this.props.account.balance.then(info => {
-      const totalSum = info.coins_total.str()
-      const totalUnlockedSum = info.coins_unlocked.str()
-      const totalLockedSum = info.coins_locked.str()
+      const totalCoins = info.coins_total.str()
+      const totalCoinLocked = info.coins_unlocked.str()
+      const totalCoinUnlocked = info.coins_locked.str()
+      const unconfirmedTotalCoins = info.unconfirmed_coins_total.str()
+      const unconfirmedLockedCoins = info.unconfirmed_coins_locked.str()
+      const unconfirmedUnlockedCoins = info.unconfirmed_coins_unlocked.str()
       if (this.mounted) {
-        this.setState({ totalCoins: totalSum, totalCoinLocked: totalLockedSum, totalCoinUnlocked: totalUnlockedSum })
+        this.setState({
+          totalCoins,
+          totalCoinLocked,
+          totalCoinUnlocked,
+          unconfirmedTotalCoins,
+          unconfirmedLockedCoins,
+          unconfirmedUnlockedCoins
+        })
       }
     })
   }
@@ -177,10 +190,15 @@ class Account extends Component {
             <Segment style={{ background: '#29272E', width: '90%', margin: 'auto' }}>
               <h3 style={{ color: 'white' }}>Total Balance</h3>
               <h4 style={{ color: 'white', marginTop: 0 }}>{this.state.totalCoins} TFT</h4>
+              {this.state.unconfirmedTotalCoins > 0 ? (<span style={{ color: 'white', marginTop: 0, fontSize: 12 }}>unconfirmed: {this.state.unconfirmedTotalCoins} TFT</span>) : (<p />)}
+
               <h4 style={{ color: 'white' }}><Icon name='lock' />Locked Balance</h4>
               <h4 style={{ color: 'white', marginTop: 0 }}>{this.state.totalCoinLocked}  TFT</h4>
+              {this.state.unconfirmedLockedCoins > 0 ? (<span style={{ color: 'white', marginTop: 0, fontSize: 12 }}>unconfirmed: {this.state.unconfirmedLockedCoins} TFT</span>) : (<p />)}
+
               <h4 style={{ color: 'white' }}><Icon name='unlock' />Unlocked Balance</h4>
               <h4 style={{ color: 'white', marginTop: 0 }}>{this.state.totalCoinUnlocked}  TFT</h4>
+              {this.state.unconfirmedUnlockedCoins > 0 ? (<span style={{ color: 'white', marginTop: 0, fontSize: 12 }}>unconfirmed: {this.state.unconfirmedUnlockedCoins} TFT </span>) : (<p />)}
             </Segment>
           </div>
         </div>

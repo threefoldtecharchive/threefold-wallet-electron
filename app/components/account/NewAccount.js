@@ -180,7 +180,7 @@ class NewAccount extends Component {
       // create account
       const account = new tfchain.Account(name, password, {
         seed: seed,
-        network: network,
+        network: network
       })
       // create wallet
       account.wallet_new('default', 0, 1)
@@ -213,8 +213,9 @@ class NewAccount extends Component {
 
   handleSeedWordsChange = ({ target }) => {
     if (target.value !== '') {
-      this.setState({ seedConfirmation: target.value, seedConfirmationError: false })
+      this.setState({ seedConfirmationError: false })
     }
+    this.setState({ seedConfirmation: target.value })
   }
 
   render () {

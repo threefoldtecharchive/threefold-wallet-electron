@@ -10,6 +10,7 @@ import DeleteWalletModal from '../wallet/DeleteWalletModal'
 import ShowSeedModal from './ShowSeedModal'
 import Footer from '../footer'
 import { toast } from 'react-toastify'
+import uuid from 'uuid'
 
 const mapStateToProps = state => ({
   account: state.account
@@ -97,7 +98,7 @@ class AccountSettings extends Component {
           <List divided verticalAlign='middle' style={{ marginTop: 40 }}>
             {this.props.account.wallets.map(w => {
               return (
-                <List.Item>
+                <List.Item key={uuid.v4()}>
                   <Divider />
                   <List.Content floated='right'>
                     <Icon name='settings'style={{ color: 'white', marginRight: 30, cursor: 'pointer' }} onClick={() => this.goToWalletSettings(w)} />

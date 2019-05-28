@@ -7,6 +7,7 @@ import routes from '../../constants/routes'
 import styles from '../home/Home.css'
 import Footer from '../footer'
 import moment from 'moment'
+import uuid from 'uuid'
 
 const mapStateToProps = state => ({
   wallet: state.wallet,
@@ -20,6 +21,9 @@ class Wallet extends Component {
       coinsLocked: 0,
       coinsUnlocked: 0,
       coinsTotal: 0,
+      unconfirmedTotalCoins: 0,
+      unconfirmedLockedCoins: 0,
+      unconfirmedUnlockedCoins: 0,
       transactions: [],
       intervalId: undefined
     }
@@ -44,7 +48,10 @@ class Wallet extends Component {
             coinsLocked: info.coins_locked.str(),
             coinsUnlocked: info.coins_unlocked.str(),
             coinsTotal: info.coins_total.str(),
-            transactions: info.transactions
+            transactions: info.transactions,
+            unconfirmedTotalCoins: info.unconfirmed_coins_total.str(),
+            unconfirmedLockedCoins: info.unconfirmed_coins_locked.str(),
+            unconfirmedUnlockedCoins: info.unconfirmed_coins_unlocked.str()
           })
         }
       })
@@ -60,7 +67,7 @@ class Wallet extends Component {
           <List style={{ marginLeft: 50, overflow: 'auto', color: 'white' }} divided relaxed>
             {transactions.map(tx => {
               return (
-                <List.Item key={tx.identifier} style={{ borderBottom: '1px solid grey' }}>
+                <List.Item key={uuid.v4()} style={{ borderBottom: '1px solid grey' }}>
                   <List.Content>
                     <List.Header as='a' style={{ color: '#6647fe', display: 'flex' }}>TXID: {tx.identifier} {tx.confirmed ? (<p style={{ fontSize: 14, marginLeft: 80 }}>Confirmed at {moment.unix(tx.timestamp).format('MMMM Do , HH:mm')}</p>) : (<p style={{ fontSize: 14, marginLeft: 80 }}>Unconfirmed</p>)}</List.Header>
                     {this.renderTransactionBody(tx)}
@@ -82,7 +89,7 @@ class Wallet extends Component {
     if (tx.inputs.length > 0) {
       return tx.inputs.map(input => {
         return (
-          <div key={tx.identifier} style={{ marginTop: 5, marginBottom: 5 }}>
+          <div key={uuid.v4()} style={{ marginTop: 5, marginBottom: 5 }}>
             <List.Description style={{ color: 'white' }} as='a'>{input.senders.map(sender => { return (<p key={tx.identifier} style={{ fontSize: 14, marginBottom: 0 }}>From: {sender} </p>) })}</List.Description>
             <List.Description style={{ color: 'white' }} as='a'>Amount: <span style={{ color: 'green' }}>+ {input.amount.str()}</span> TFT</List.Description>
             <List.Description style={{ color: 'white' }} as='a'>To: {input.recipient}</List.Description>
@@ -92,7 +99,7 @@ class Wallet extends Component {
     } else if (tx.outputs.length > 0) {
       return tx.outputs.map(out => {
         return (
-          <div key={tx.identifier} style={{ marginTop: 5, marginBottom: 5 }}>
+          <div key={uuid.v4()} style={{ marginTop: 5, marginBottom: 5 }}>
             <List.Description style={{ color: 'white' }} as='a'>To: {out.recipient}</List.Description>
             <List.Description style={{ color: 'white' }} as='a'>Amount: <span style={{ color: 'red' }}>- {out.amount.str()}</span> TFT</List.Description>
           </div>
@@ -139,8 +146,14 @@ class Wallet extends Component {
             <GridColumn style={{ height: 200, marginTop: 0, width: '40%' }}>
               <Segment style={{ marginTop: 20, background: '#29272E' }}>
                 <h3 style={{ color: 'white' }}>Total Balance: {coinsTotal} TFT</h3>
+                {this.state.unconfirmedTotalCoins > 0 ? (<span style={{ color: 'white', marginTop: 0, fontSize: 12 }}>unconfirmed: {this.state.unconfirmedTotalCoins} TFT</span>) : (<p />)}
+
                 <h4 style={{ color: 'white' }}><Icon name='lock' />Locked Balance: {coinsLocked} TFT</h4>
+                {this.state.unconfirmedLockedCoins > 0 ? (<span style={{ color: 'white', marginTop: 0, fontSize: 12 }}>unconfirmed: {this.state.unconfirmedLockedCoins} TFT</span>) : (<p />)}
+
                 <h4 style={{ color: 'white' }}><Icon name='unlock' />Unlocked Balance: {coinsUnlocked} TFT</h4>
+                {this.state.unconfirmedUnlockedCoins > 0 ? (<span style={{ color: 'white', marginTop: 0, fontSize: 12 }}>unconfirmed: {this.state.unconfirmedUnlockedCoins} TFT </span>) : (<p />)}
+
               </Segment>
             </GridColumn>
             <GridColumn>
@@ -150,7 +163,7 @@ class Wallet extends Component {
               </div>
             </GridColumn>
           </Grid>
-          <Segment style={{ width: '90%', height: '46vh', overflow: 'auto', overflowY: 'scroll', margin: 'auto', background: '#29272E' }}>
+          <Segment style={{ width: '90%', height: '40vh', overflow: 'auto', overflowY: 'scroll', margin: 'auto', background: '#29272E', marginTop: 60 }}>
             {this.renderTransactions()}
           </Segment>
         </div>
