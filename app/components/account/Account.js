@@ -2,7 +2,7 @@
 import { connect } from 'react-redux'
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
-import { Segment, Button, Icon, Divider, Card, Loader } from 'semantic-ui-react'
+import { Segment, Button, Icon, Divider, Card, Loader, Dimmer } from 'semantic-ui-react'
 import routes from '../../constants/routes'
 import { selectWallet, setChainConstants } from '../../actions'
 import styles from '../home/Home.css'
@@ -33,7 +33,8 @@ class Account extends Component {
       unconfirmedLockedCoins: 0,
       unconfirmedUnlockedCoins: 0,
       wallets: this.props.account.wallets,
-      intervalId: undefined
+      intervalId: undefined,
+      accountBalanceLoader: false
     }
   }
 
@@ -57,6 +58,7 @@ class Account extends Component {
   }
 
   getAccountBalance = () => {
+    this.setState({ accountBalanceLoader: true })
     this.props.account.balance.then(info => {
       const totalCoins = info.coins_total.str()
       const totalCoinLocked = info.coins_unlocked.str()
@@ -71,7 +73,8 @@ class Account extends Component {
           totalCoinUnlocked,
           unconfirmedTotalCoins,
           unconfirmedLockedCoins,
-          unconfirmedUnlockedCoins
+          unconfirmedUnlockedCoins,
+          accountBalanceLoader: false
         })
       }
     })
@@ -188,6 +191,9 @@ class Account extends Component {
           </div>
           <div style={{ width: '35%', height: '100vh', marginTop: 20 }}>
             <Segment style={{ background: '#29272E', width: '90%', margin: 'auto' }}>
+              <Dimmer active={this.state.accountBalanceLoader}>
+                <Loader />
+              </Dimmer>
               <h3 style={{ color: 'white' }}>Total Balance</h3>
               <h4 style={{ color: 'white', marginTop: 0 }}>{this.state.totalCoins} TFT</h4>
               {this.state.unconfirmedTotalCoins > 0 ? (<span style={{ color: 'white', marginTop: 0, fontSize: 12 }}>unconfirmed: {this.state.unconfirmedTotalCoins} TFT</span>) : (<p />)}
