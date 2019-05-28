@@ -2,7 +2,7 @@
 import { connect } from 'react-redux'
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
-import { List, Segment, Grid, GridColumn, Button, Icon, Divider } from 'semantic-ui-react'
+import { List, Segment, Grid, GridColumn, Button, Icon, Divider, Dimmer, Loader } from 'semantic-ui-react'
 import routes from '../../constants/routes'
 import styles from '../home/Home.css'
 import Footer from '../footer'
@@ -25,7 +25,8 @@ class Wallet extends Component {
       unconfirmedLockedCoins: 0,
       unconfirmedUnlockedCoins: 0,
       transactions: [],
-      intervalId: undefined
+      intervalId: undefined,
+      loader: false
     }
   }
 
@@ -42,6 +43,7 @@ class Wallet extends Component {
 
   getBalance = () => {
     if (this.props.wallet != null) {
+      this.setState({ loader: true })
       this.props.wallet.balance.then(info => {
         if (this.mounted) {
           this.setState({
@@ -51,7 +53,8 @@ class Wallet extends Component {
             transactions: info.transactions,
             unconfirmedTotalCoins: info.unconfirmed_coins_total.str(),
             unconfirmedLockedCoins: info.unconfirmed_coins_locked.str(),
-            unconfirmedUnlockedCoins: info.unconfirmed_coins_unlocked.str()
+            unconfirmedUnlockedCoins: info.unconfirmed_coins_unlocked.str(),
+            loader: false
           })
         }
       })
@@ -60,9 +63,20 @@ class Wallet extends Component {
 
   renderTransactions = () => {
     const { transactions } = this.state
+    if (this.state.loader) {
+      return (
+        <Dimmer active={this.state.loader} >
+          <Loader />
+        </Dimmer>
+      )
+    }
+
     if (transactions.length > 0) {
       return (
         <div>
+          <Dimmer active={this.state.loader} >
+            <Loader />
+          </Dimmer>
           <h3 style={{ color: 'white' }}>Transactions</h3>
           <List style={{ marginLeft: 50, overflow: 'auto', color: 'white' }} divided relaxed>
             {transactions.map(tx => {
