@@ -63,18 +63,11 @@ class Footer extends Component {
     const { chainConstants } = this.props
     const { error } = this.state
     const timezone = new Date().getTimezoneOffset()
-    const date = moment(chainConstants.chain_timestamp).zone(timezone).format('MMMM Do , HH:mm')
-
-    let chainError = false
-    if (error) {
-      if (error.__args__.length > 0) {
-        chainError = true
-      }
-    }
+    const date = moment(chainConstants.chain_timestamp).utcOffset(timezone).format('MMMM Do , HH:mm')
 
     return (
       <div style={{ position: 'absolute', height: 70, bottom: 35, width: '100%', background: '#131216', borderTopStyle: 'solid', borderTopWidth: 2, borderTopColor: '#1A253F', padding: 25 }}>
-        {chainError || !chainConstants.chainNetwork
+        {error || !chainConstants.chainNetwork
           ? <div>
             <Icon name='circle' style={{ color: 'red', marginLeft: 10 }} />
             <label>not connected</label>

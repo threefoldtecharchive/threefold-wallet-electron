@@ -5,7 +5,24 @@ import moment from 'moment'
 
 const confirmedStyle = {
   fontSize: 14,
-  marginLeft: 80
+  marginLeft: 80,
+  fontFamily: 'SF UI Text Light',
+  position: 'relative',
+  top: 0,
+  right: 10,
+  textAlign: 'right'
+}
+
+const listDescriptionStyle = {
+  color: 'white'
+}
+
+const hashFont = {
+  fontFamily: 'Lucida Typewriter',
+  fontSize: 14,
+  marginLeft: 5,
+  position: 'relative',
+  left: 32
 }
 
 const TransactionList = ({ loader, transactions }) => {
@@ -30,7 +47,8 @@ const TransactionList = ({ loader, transactions }) => {
               <List.Item key={uuid.v4()} style={{ borderBottom: '1px solid grey' }}>
                 <List.Content>
                   <List.Header as='a' style={{ color: '#6647fe', display: 'flex' }}>
-                    TXID: {tx.identifier}
+                  TXID {tx.identifier}
+                  :
                     {tx.confirmed
                       ? (<p style={confirmedStyle}>
                         Confirmed at {moment.unix(tx.timestamp).format('MMMM Do , HH:mm')}
@@ -59,9 +77,25 @@ function renderTransactionBody (tx) {
     return tx.inputs.map(input => {
       return (
         <div key={uuid.v4()} style={{ marginTop: 5, marginBottom: 5 }}>
-          <List.Description style={{ color: 'white' }} as='a'>{input.senders.map(sender => { return (<p key={tx.identifier} style={{ fontSize: 14, marginBottom: 0 }}>From: {sender} </p>) })}</List.Description>
-          <List.Description style={{ color: 'white' }} as='a'>Amount: <span style={{ color: 'green' }}>+ {input.amount.str()}</span> TFT</List.Description>
-          <List.Description style={{ color: 'white' }} as='a'>To: {input.recipient}</List.Description>
+          <List.Description style={listDescriptionStyle} as='a'>
+            Amount: <span style={{ color: 'green' }}>+ {input.amount.str()}</span> TFT
+          </List.Description>
+          <List.Description style={listDescriptionStyle} as='a'>
+            {input.senders.map(sender => {
+              return (
+                <div key={tx.identifier} style={{ display: 'flex', marginTop: 5 }}>
+                  From:
+                  <p style={{ fontSize: 14, marginBottom: 0, fontFamily: 'Lucida Typewriter', position: 'relative', left: 19 }}>
+                    {sender}
+                  </p>
+                </div>
+              )
+            })}
+          </List.Description>
+          <List.Description style={{ color: 'white', display: 'flex', marginTop: 3 }} as='a'>
+            To:
+            <p style={hashFont}>{input.recipient}</p>
+          </List.Description>
         </div>
       )
     })
@@ -69,8 +103,13 @@ function renderTransactionBody (tx) {
     return tx.outputs.map(out => {
       return (
         <div key={uuid.v4()} style={{ marginTop: 5, marginBottom: 5 }}>
-          <List.Description style={{ color: 'white' }} as='a'>To: {out.recipient}</List.Description>
-          <List.Description style={{ color: 'white' }} as='a'>Amount: <span style={{ color: 'red' }}>- {out.amount.str()}</span> TFT</List.Description>
+          <List.Description style={listDescriptionStyle} as='a'>
+            Amount: <span style={{ color: 'red' }}>- {out.amount.str()}</span> TFT
+          </List.Description>
+          <List.Description style={{ color: 'white', display: 'flex', marginTop: 3 }} as='a'>
+            To:
+            <p style={hashFont}>{out.recipient}</p>
+          </List.Description>
         </div>
       )
     })
