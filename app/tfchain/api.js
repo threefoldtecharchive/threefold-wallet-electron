@@ -1793,6 +1793,22 @@ export var ChainInfo =  __class__ ('ChainInfo', [object], {
 		}
 		return self._tf_chain_info.timestamp;
 	});},
+	get _get_explorer_address () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._tf_chain_info.explorer_address;
+	});},
 	get last_block_get () {return __get__ (this, function (self, opts) {
 		if (typeof opts == 'undefined' || (opts != null && opts.hasOwnProperty ("__kwargtrans__"))) {;
 			var opts = null;
@@ -1815,6 +1831,7 @@ export var ChainInfo =  __class__ ('ChainInfo', [object], {
 		return BlockView.from_block (self._tf_chain_info.last_block, __kwargtrans__ ({addresses: addresses}));
 	});}
 });
+Object.defineProperty (ChainInfo, 'explorer_address', property.call (ChainInfo, ChainInfo._get_explorer_address));
 Object.defineProperty (ChainInfo, 'chain_timestamp', property.call (ChainInfo, ChainInfo._get_chain_timestamp));
 Object.defineProperty (ChainInfo, 'chain_height', property.call (ChainInfo, ChainInfo._get_chain_height));
 Object.defineProperty (ChainInfo, 'chain_network', property.call (ChainInfo, ChainInfo._get_chain_network));

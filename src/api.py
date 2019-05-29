@@ -922,6 +922,14 @@ class ChainInfo:
         """
         return self._tf_chain_info.timestamp
 
+    @property
+    def explorer_address(self):
+        """
+        :returns: the address of the explorer used to fetch the constants
+        :rtype: str
+        """
+        return self._tf_chain_info.explorer_address
+
     def last_block_get(self, opts=None):
         """
         :returns: the last block, optionally with transaction inputs and outputs filtered by addresses

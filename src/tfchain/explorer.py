@@ -43,7 +43,7 @@ class Client:
 
         def resolve(result):
             if result.code == 200:
-                return jsobj.as_dict(result.data)
+                return (result.address, jsobj.as_dict(result.data))
             if result.code == 204 or (result.code == 400 and ('unrecognized hash' in result.data or 'not found' in result.data)):
                 raise tferrors.ExplorerNoContent("GET: no content available (code: 204)", endpoint)
             if result.code == 400: # are there other error codes?
@@ -53,21 +53,19 @@ class Client:
         address = self._addresses[indices[0]]
         if not isinstance(address, str):
             raise TypeError("explorer address expected to be a string, not {}".format(type(address)))
-        resource = address+endpoint
         # do the request and check the response
-        p = jsasync.chain(jshttp.http_get(resource), resolve)
+        p = jsasync.chain(jshttp.http_get(address, endpoint), resolve)
 
         # factory for our fallback callbacks
         # called to try on another server in case
         # a non-user error occured on the previous one
         def create_fallback_catch_cb(address):
-            resource = address+endpoint
             def f(reason):
                 if isinstance(reason, tferrors.ExplorerUserError):
                     raise reason # no need to retry user errors
                 jslog.debug("retrying on another server, previous GET call failed: {}".format(reason))
                 # do the request and check the response
-                return jsasync.chain(jshttp.http_get(resource), resolve)
+                return jsasync.chain(jshttp.http_get(address, endpoint), resolve)
             return f
 
         # for any remaining index, do the same logic, but as a chained catch
@@ -109,7 +107,7 @@ class Client:
 
         def resolve(result):
             if result.code == 200:
-                return jsobj.as_dict(result.data)
+                return (result.address, jsobj.as_dict(result.data))
             if result.code == 400: # are there other error codes?
                 jslog.warning("invalid data object posted to {}:".format(endpoint), s)
                 raise tferrors.ExplorerBadRequest("error (code: {}): {}".format(result.code, result.data), endpoint)
@@ -118,21 +116,19 @@ class Client:
         address = self._addresses[indices[0]]
         if not isinstance(address, str):
             raise TypeError("explorer address expected to be a string, not {}".format(type(address)))
-        resource = address+endpoint
          # do the request and check the response
-        p = jsasync.chain(jshttp.http_post(resource, s, headers), resolve)
+        p = jsasync.chain(jshttp.http_post(address, endpoint, s, headers), resolve)
 
         # factory for our fallback callbacks
         # called to try on another server in case
         # a non-user error occured on the previous one
         def create_fallback_catch_cb(address):
-            resource = address+endpoint
             def f(reason):
                 if isinstance(reason, tferrors.ExplorerUserError):
                     raise reason # no need to retry user errors
                 jslog.debug("retrying on another server, previous POST call failed: {}".format(reason))
                 # do the request and check the response
-                return jsasync.chain(jshttp.http_post(resource, s, headers), resolve)
+                return jsasync.chain(jshttp.http_post(address, endpoint, s, headers), resolve)
             return f
 
         # for any remaining index, do the same logic, but as a chained catch

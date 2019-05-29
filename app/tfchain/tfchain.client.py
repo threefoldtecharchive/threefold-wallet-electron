@@ -71,7 +71,8 @@ class TFChainClient:
         """
         c = self.clone()
         def get_block(result):
-            blockid = Hash.from_json(obj=result['blockid'])
+            _, raw_block = result
+            blockid = Hash.from_json(obj=raw_block['blockid'])
             return c._block_get(blockid)
         def get_block_with_tag(result):
             return ('b', result)
@@ -81,13 +82,19 @@ class TFChainClient:
             if len(results) != 2:
                 raise RuntimeError("expected 2 values as result, but received: {}".format(results))
             d = dict(results)
-            info = d['c']['chaininfo']
+            address, raw_constants = d['c']
+            info = raw_constants['chaininfo']
             constants = BlockchainConstants(
                 info['Name'],
                 info['ChainVersion'],
                 info['NetworkName'],
             )
-            return ExplorerBlockchainInfo(constants=constants, last_block=d['b'])
+            last_block = d['b']
+            return ExplorerBlockchainInfo(
+                constants=constants,
+                last_block=last_block,
+                explorer_address=address,
+            )
         return jsasync.chain(
             jsasync.wait(
                 jsasync.chain(c.explorer_get(endpoint="/explorer"), get_block, get_block_with_tag),
@@ -162,6 +169,7 @@ class TFChainClient:
     def _block_get_by_height(self, value):
         endpoint = "/explorer/blocks/{}".format(value)
         def get_block_prop(result):
+            _, result = result
             block = result.get_or('block', None)
             if block == None:
                 raise tferrors.ExplorerInvalidResponse("block property is undefined", endpoint, result)
@@ -172,6 +180,7 @@ class TFChainClient:
         blockid = self._normalize_id(value)
         endpoint = "/explorer/hashes/"+blockid
         def get_block_prop(result):
+            _, result = result
             try:
                 if result['hashtype'] != 'blockid':
                     raise tferrors.ExplorerInvalidResponse("expected hash type 'blockid' not '{}'".format(result['hashtype']), endpoint, result)
@@ -193,6 +202,7 @@ class TFChainClient:
         txid = ec._normalize_id(txid)
         endpoint = "/explorer/hashes/"+txid
         def cb(result):
+            _, result = result
             try:
                 if result['hashtype'] != 'transactionid':
                     raise tferrors.ExplorerInvalidResponse("expected hash type 'transactionid' not '{}'".format(result['hashtype']), endpoint, result)
@@ -206,7 +216,8 @@ class TFChainClient:
         # fetch timestamps seperately
         # TODO: make a pull request in Rivine to return timestamp together with regular result,
         #       as it is rediculous to have to do this
-        def fetch_transacton_timestamps(transaction):
+        def fetch_transacton_timestamps(result):
+            _, transaction = result
             p = ec._block_get_by_hash(transaction.blockid)
             def aggregate(result):
                 _, block = result
@@ -228,7 +239,8 @@ class TFChainClient:
         
         endpoint = "/transactionpool/transactions"
 
-        def cb(transaction):
+        def cb(result):
+            _, transaction = result
             try:
                 return Hash(value=transaction['transactionid']).__str__()
             except (KeyError, ValueError, TypeError) as exc:
@@ -266,7 +278,8 @@ class TFChainClient:
             # pass on any other reason
             raise reason
 
-        def cb(resp):
+        def cb(result):
+            _, resp = result
             try:
                 if resp['hashtype'] != 'unlockhash':
                     raise tferrors.ExplorerInvalidResponse("expected hash type 'unlockhash' not '{}'".format(resp['hashtype']), endpoint, resp)
@@ -374,6 +387,7 @@ class TFChainClient:
         id = self._normalize_id(id)
         endpoint = "/explorer/hashes/"+id
         def cb(result):
+            _, result = result
             try:
                 hash_type = result['hashtype']
                 if hash_type != expected_hash_type:
@@ -522,13 +536,23 @@ class ExplorerOutputResult():
 
 
 class ExplorerBlockchainInfo():
-    def __init__(self, constants, last_block):
+    def __init__(self, constants, last_block, explorer_address):
         if not isinstance(constants, BlockchainConstants):
             raise TypeError("expected constants to be of type BlockchainConstants, not type {}".format(type(constants)))
         self._constants = constants
         if not isinstance(last_block, ExplorerBlock):
             raise TypeError("expected constants to be of type ExplorerBlock, not type {}".format(type(constants)))
         self._last_block = last_block
+        if not isinstance(explorer_address, str) or explorer_address == "":
+            raise TypeError("expected explorer address to be a non-empty str, not be {} ({})".format(explorer_address, type(explorer_address)))
+        self._explorer_address = explorer_address
+
+    @property
+    def explorer_address(self):
+        """
+        Explorer address.
+        """
+        return self._explorer_address
 
     @property
     def constants(self):
@@ -846,7 +870,8 @@ class TFChainMinterClient():
             endpoint += "/{}".format(height)
 
         # define the cb to get the mint condition
-        def cb(resp):
+        def cb(result):
+            _, resp = result
             try:
                 # return the decoded mint condition
                 return ConditionTypes.from_json(obj=resp['mintcondition'])

@@ -103,7 +103,7 @@ export var Client =  __class__ ('Client', [object], {
 			else {
 			}
 			if (result.code == 200) {
-				return jsobj.as_dict (result.data);
+				return tuple ([result.address, jsobj.as_dict (result.data)]);
 			}
 			if (result.code == 204 || result.code == 400 && (__in__ ('unrecognized hash', result.data) || __in__ ('not found', result.data))) {
 				var __except0__ = tferrors.ExplorerNoContent ('GET: no content available (code: 204)', endpoint);
@@ -125,8 +125,7 @@ export var Client =  __class__ ('Client', [object], {
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		var resource = address + endpoint;
-		var p = jsasync.chain (jshttp.http_get (resource), resolve);
+		var p = jsasync.chain (jshttp.http_get (address, endpoint), resolve);
 		var create_fallback_catch_cb = function (address) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
@@ -141,7 +140,6 @@ export var Client =  __class__ ('Client', [object], {
 			}
 			else {
 			}
-			var resource = address + endpoint;
 			var f = function (reason) {
 				if (arguments.length) {
 					var __ilastarg0__ = arguments.length - 1;
@@ -162,7 +160,7 @@ export var Client =  __class__ ('Client', [object], {
 					throw __except0__;
 				}
 				jslog.debug ('retrying on another server, previous GET call failed: {}'.format (reason));
-				return jsasync.chain (jshttp.http_get (resource), resolve);
+				return jsasync.chain (jshttp.http_get (address, endpoint), resolve);
 			};
 			return f;
 		};
@@ -240,7 +238,7 @@ export var Client =  __class__ ('Client', [object], {
 			else {
 			}
 			if (result.code == 200) {
-				return jsobj.as_dict (result.data);
+				return tuple ([result.address, jsobj.as_dict (result.data)]);
 			}
 			if (result.code == 400) {
 				jslog.warning ('invalid data object posted to {}:'.format (endpoint), s);
@@ -258,8 +256,7 @@ export var Client =  __class__ ('Client', [object], {
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		var resource = address + endpoint;
-		var p = jsasync.chain (jshttp.http_post (resource, s, headers), resolve);
+		var p = jsasync.chain (jshttp.http_post (address, endpoint, s, headers), resolve);
 		var create_fallback_catch_cb = function (address) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
@@ -274,7 +271,6 @@ export var Client =  __class__ ('Client', [object], {
 			}
 			else {
 			}
-			var resource = address + endpoint;
 			var f = function (reason) {
 				if (arguments.length) {
 					var __ilastarg0__ = arguments.length - 1;
@@ -295,7 +291,7 @@ export var Client =  __class__ ('Client', [object], {
 					throw __except0__;
 				}
 				jslog.debug ('retrying on another server, previous POST call failed: {}'.format (reason));
-				return jsasync.chain (jshttp.http_post (resource, s, headers), resolve);
+				return jsasync.chain (jshttp.http_post (address, endpoint, s, headers), resolve);
 			};
 			return f;
 		};

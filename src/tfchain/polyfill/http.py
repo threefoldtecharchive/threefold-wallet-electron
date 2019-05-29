@@ -1,5 +1,6 @@
-def http_get(resource, headers=None):
+def http_get(address, endpoint, headers=None):
     request = None
+    resource = address+endpoint
     __pragma__("js", "{}", """
     request = new Request(resource, {method: 'GET'});
     """)
@@ -15,6 +16,8 @@ def http_get(resource, headers=None):
             return response.json().then(function(data) {
                 return {
                     code: 200,
+                    address: address,
+                    endpoint: endpoint,
                     data: data,
                 };
             });
@@ -33,8 +36,9 @@ def http_get(resource, headers=None):
     """)
     return p
 
-def http_post(resource, data, headers=None):
+def http_post(address, endpoint, data, headers=None):
     request = None
+    resource = address+endpoint
     __pragma__("js", "{}", """
     request = new Request(resource, {method: 'POST', body: data});
     """)
@@ -50,6 +54,8 @@ def http_post(resource, data, headers=None):
             return response.json().then(function(data) {
                 return {
                     code: 200,
+                    address: address,
+                    endpoint: endpoint,
                     data: data,
                 };
             });
@@ -57,6 +63,8 @@ def http_post(resource, data, headers=None):
         return response.json().then(function(data) {
             return {
                 code: response.status,
+                address: address,
+                endpoint: endpoint,
                 data: data.message || ("POST request to " + resource + " failed with status code " + response.status),
             };
         });
