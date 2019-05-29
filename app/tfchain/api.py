@@ -454,7 +454,6 @@ class CoinTransactionBuilder:
     def __init__(self, wallet):
         self._builder = wallet._tfwallet.coin_transaction_builder_new()
 
-    # TODO: make kwargs work with an opt value
     def output_add(self, recipient, amount, opts=None):
         """
         Add an output to the transaction, returning the transaction

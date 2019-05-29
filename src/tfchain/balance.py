@@ -489,7 +489,6 @@ class WalletsBalance(WalletBalance):
         addresses = set()
         ms_addresses = set()
         refund = None
-        # TODO: ensure we do not require jsobj checks like this on such a low level code
         if source == None:
             for co in self.outputs_available:
                 addresses.add(co.condition.unlockhash.__str__())
