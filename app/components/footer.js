@@ -45,7 +45,9 @@ class Footer extends Component {
     if (this.props.account.chain_info_get) {
       this.props.account.chain_info_get().then(info => {
         this.props.account.wallets.map(w => {
-          const block = info.last_block_get(w.addresses)
+          const block = info.last_block_get({
+            addresses: w.addresses
+          })
           if (block.transactions.length > 0) {
             block.transactions.forEach(tx => {
               if (tx.inputs.length > 0) {

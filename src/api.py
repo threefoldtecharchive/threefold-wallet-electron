@@ -561,7 +561,6 @@ class Balance:
         transactions = []
         for transaction in self._tfbalance.transactions:
             transactions.append(TransactionView.from_transaction(transaction, self._tfbalance.addresses))
-        jslog.info(transactions)
         return transactions
 
 

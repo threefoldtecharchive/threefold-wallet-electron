@@ -1031,7 +1031,6 @@ export var Balance =  __class__ ('Balance', [object], {
 		for (var transaction of self._tfbalance.transactions) {
 			transactions.append (TransactionView.from_transaction (transaction, self._tfbalance.addresses));
 		}
-		jslog.info (transactions);
 		return transactions;
 	});}
 });
