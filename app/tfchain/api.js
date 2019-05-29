@@ -1031,6 +1031,7 @@ export var Balance =  __class__ ('Balance', [object], {
 		for (var transaction of self._tfbalance.transactions) {
 			transactions.append (TransactionView.from_transaction (transaction, self._tfbalance.addresses));
 		}
+		jslog.info (transactions);
 		return transactions;
 	});}
 });
@@ -1453,7 +1454,7 @@ export var CoinOutputView =  __class__ ('CoinOutputView', [object], {
 		if (ratio != null) {
 			var amount = amount.__mul__ (ratio);
 		}
-		var lock = output.lock;
+		var lock = output.condition.lock.value;
 		return cls (senders, recipient, amount, lock);
 	});},
 	get __init__ () {return __get__ (this, function (self, senders, recipient, amount, lock) {

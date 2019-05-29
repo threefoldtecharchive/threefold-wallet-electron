@@ -562,6 +562,7 @@ class Balance:
         transactions = []
         for transaction in self._tfbalance.transactions:
             transactions.append(TransactionView.from_transaction(transaction, self._tfbalance.addresses))
+        jslog.info(transactions)
         return transactions
 
 
@@ -763,7 +764,7 @@ class CoinOutputView:
         amount = output.value
         if ratio != None:
             amount = amount.__mul__(ratio)
-        lock = output.lock
+        lock = output.condition.lock.value
         return cls(senders, recipient, amount, lock)
 
     def __init__(self, senders, recipient, amount, lock):
