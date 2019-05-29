@@ -63,6 +63,7 @@ export var Account =  __class__ ('Account', [object], {
 			throw __except0__;
 		}
 		if (data.version != 1) {
+			jslog.warning ('data object with invalid version:', data);
 			var __except0__ = ValueError ('account data of version {} is not supported'.format (data.version));
 			__except0__.__cause__ = null;
 			throw __except0__;

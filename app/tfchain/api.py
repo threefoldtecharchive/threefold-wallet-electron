@@ -62,6 +62,7 @@ class Account:
 
         # ensure the data version is correct, we currently only supported one version (1)
         if data.version != 1:
+            jslog.warning("data object with invalid version:", data)
             raise ValueError("account data of version {} is not supported".format(data.version))
         data = data.data
 
