@@ -4,7 +4,7 @@ import * as jsjson from './tfchain.polyfill.encoding.object.js';
 import {json_loads} from './tfchain.polyfill.encoding.json.js';
 import {TransactionV128, TransactionV129} from './tfchain.types.transactions.Minting.js';
 import {TransactionV1} from './tfchain.types.transactions.Standard.js';
-import {TransactionBaseClass, TransactionVersion} from './tfchain.types.transactions.Base.js';
+import {OpaqueTransaction, TransactionBaseClass, TransactionVersion} from './tfchain.types.transactions.Base.js';
 var __name__ = 'tfchain.types.transactions.Transactions';
 export var py_new = function () {
 	if (arguments.length) {
@@ -89,9 +89,9 @@ export var from_json = function (obj, id) {
 		txn.id = id;
 		return txn;
 	}
-	var __except0__ = UnknownTransansactionVersion ('transaction version {} is unknown'.format (tt));
-	__except0__.__cause__ = null;
-	throw __except0__;
+	var txn = OpaqueTransaction.from_json (obj);
+	txn.version_set (tt);
+	return txn;
 };
 
 //# sourceMappingURL=tfchain.types.transactions.Transactions.map

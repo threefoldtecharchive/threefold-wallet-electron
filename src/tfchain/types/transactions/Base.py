@@ -404,3 +404,26 @@ class InputSignatureHashFactory:
         objects = list(self._extra_objects)
         objects = jsarr.concat(objects, extra_objects)
         return self._txn.signature_hash_get(*objects)
+
+
+class OpaqueTransaction(TransactionBaseClass):
+    def __init__(self):
+        self._version = -1
+        self._raw_json_data = {}
+        super().__init__()
+
+    def _from_json_data_object(self, data):
+        if not jsobj.is_js_obj(data):
+            raise TypeError("data requires to be a JS object: invalid: {} ({})".format(data, type(data)))
+        self._raw_json_data = data
+
+    def _json_data_object(self):
+        return self._raw_json_data
+
+    def version_set(self, version):
+        if not isinstance(version, int):
+            raise TypeError("version is of wrong type: invalid: {} ({})".format(version, type(version)))
+        self._version = version
+
+    def _custom_version_getter(self):
+        return self._version

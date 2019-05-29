@@ -1293,5 +1293,102 @@ export var InputSignatureHashFactory =  __class__ ('InputSignatureHashFactory', 
 		return self._txn.signature_hash_get (...objects);
 	});}
 });
+export var OpaqueTransaction =  __class__ ('OpaqueTransaction', [TransactionBaseClass], {
+	__module__: __name__,
+	get __init__ () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		self._version = -(1);
+		self._raw_json_data = dict ({});
+		__super__ (OpaqueTransaction, '__init__') (self);
+	});},
+	get _from_json_data_object () {return __get__ (this, function (self, data) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'data': var data = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (!(jsobj.is_js_obj (data))) {
+			var __except0__ = py_TypeError ('data requires to be a JS object: invalid: {} ({})'.format (data, py_typeof (data)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		self._raw_json_data = data;
+	});},
+	get _json_data_object () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._raw_json_data;
+	});},
+	get version_set () {return __get__ (this, function (self, version) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'version': var version = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (!(isinstance (version, int))) {
+			var __except0__ = py_TypeError ('version is of wrong type: invalid: {} ({})'.format (version, py_typeof (version)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		self._version = version;
+	});},
+	get _custom_version_getter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._version;
+	});}
+});
 
 //# sourceMappingURL=tfchain.types.transactions.Base.map

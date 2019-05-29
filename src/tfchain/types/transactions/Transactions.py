@@ -1,4 +1,4 @@
-from tfchain.types.transactions.Base import TransactionBaseClass, TransactionVersion
+from tfchain.types.transactions.Base import TransactionBaseClass, TransactionVersion, OpaqueTransaction
 from tfchain.types.transactions.Standard import TransactionV1
 from tfchain.types.transactions.Minting import TransactionV128, TransactionV129
 # from tfchain.types.transactions.ThreeBot import TransactionV144, TransactionV145, TransactionV146
@@ -101,4 +101,8 @@ def from_json(obj, id=None):
         txn.id = id
         return txn
 
-    raise UnknownTransansactionVersion("transaction version {} is unknown".format(tt))
+    # return as opaque transaction,
+    # not usuable for anything but consumption
+    txn = OpaqueTransaction.from_json(obj)
+    txn.version_set(tt)
+    return txn
