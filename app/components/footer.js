@@ -4,6 +4,7 @@ import { connect } from 'react-redux'
 import { setChainConstants } from '../actions'
 import moment from 'moment'
 import { toast } from 'react-toastify'
+import momentTz from 'moment-timezone'
 
 const mapStateToProps = state => ({
   account: state.account,
@@ -97,8 +98,8 @@ class Footer extends Component {
   render () {
     const { chainConstants } = this.props
     const { error } = this.state
-    const timezone = new Date().getTimezoneOffset()
-    const date = moment(chainConstants.chain_timestamp).utcOffset(timezone).format('MMMM Do , HH:mm')
+    const date = moment(chainConstants.chain_timestamp).format('MMMM Do , HH:mm')
+    const tz = momentTz.tz.guess()
 
     return (
       <div style={{ position: 'absolute', height: 70, bottom: 35, width: '100%', background: '#131216', borderTopStyle: 'solid', borderTopWidth: 2, borderTopColor: '#1A253F', padding: 25 }}>
@@ -110,7 +111,7 @@ class Footer extends Component {
           : <div>
             <Icon name='circle' style={{ color: 'green', marginLeft: 10 }} />
             <label>connected to {chainConstants.chainNetwork}</label>
-            <label style={{ position: 'absolute', right: 500 }}><Icon name='h square' /> {chainConstants.chainHeight} @ {date} UTC</label>
+            <label style={{ position: 'absolute', right: 500 }}><Icon name='h square' /> {chainConstants.chainHeight} @ {date} {tz}</label>
             <label style={{ position: 'absolute', right: 50 }}>version 0.1.0</label>
           </div>
         }

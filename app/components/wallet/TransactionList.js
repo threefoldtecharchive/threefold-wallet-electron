@@ -10,7 +10,9 @@ const confirmedStyle = {
   position: 'relative',
   top: 0,
   right: 10,
-  textAlign: 'right'
+  textAlign: 'right',
+  float: 'right',
+  color: '#5E49F0'
 }
 
 const listDescriptionStyle = {
@@ -46,12 +48,11 @@ const TransactionList = ({ loader, transactions }) => {
             return (
               <List.Item key={uuid.v4()} style={{ borderBottom: '1px solid grey' }}>
                 <List.Content>
-                  <List.Header as='a' style={{ color: '#6647fe', display: 'flex' }}>
-                  TXID {tx.identifier}
-                  :
+                  <List.Header as='a' style={{ color: 'white' + '!important', display: 'flex' }}>
+                    <span style={{ color: '#4B38BE' }}>TXID {tx.identifier}:</span>
                     {tx.confirmed
                       ? (<p style={confirmedStyle}>
-                        Confirmed at {moment.unix(tx.timestamp).format('MMMM Do , HH:mm')}
+                        Confirmed at {moment.unix(tx.timestamp).format('MMMM Do YYYY, HH:mm')}
                       </p>)
                       : (<p style={confirmedStyle}>Unconfirmed</p>)}
                   </List.Header>
@@ -78,7 +79,8 @@ function renderTransactionBody (tx) {
       return (
         <div key={uuid.v4()} style={{ marginTop: 5, marginBottom: 5 }}>
           <List.Description style={listDescriptionStyle} as='a'>
-            Amount: <span style={{ color: 'green' }}>+ {input.amount.str()}</span> TFT
+            Amount: <span style={{ color: '#77dd77' }}>+ {input.amount.str(true)}</span>
+            {renderLockedValue(input.lock)}
           </List.Description>
           <List.Description style={listDescriptionStyle} as='a'>
             {input.senders.map(sender => {
@@ -104,7 +106,8 @@ function renderTransactionBody (tx) {
       return (
         <div key={uuid.v4()} style={{ marginTop: 5, marginBottom: 5 }}>
           <List.Description style={listDescriptionStyle} as='a'>
-            Amount: <span style={{ color: 'red' }}>- {out.amount.str()}</span> TFT
+            Amount: <span style={{ color: '#ff6961' }}>- {out.amount.str(true)}</span>
+            {renderLockedValue(out.lock)}
           </List.Description>
           <List.Description style={{ color: 'white', display: 'flex', marginTop: 3 }} as='a'>
             To:
@@ -113,6 +116,22 @@ function renderTransactionBody (tx) {
         </div>
       )
     })
+  }
+}
+
+function renderLockedValue (lockValue) {
+  if (lockValue) {
+    if (lockValue < 500000000) {
+      return null
+    } else {
+      const lockDate = new Date(lockValue * 1000)
+      const formattedDate = moment(lockDate).format('MMMM Do YYYY, HH:mm z')
+      return (
+        <span style={{ marginLeft: 30 }}>
+          Locked until {formattedDate}
+        </span>
+      )
+    }
   }
 }
 
