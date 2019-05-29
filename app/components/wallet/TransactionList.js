@@ -2,6 +2,7 @@ import React from 'react'
 import { Dimmer, Loader, List } from 'semantic-ui-react'
 import uuid from 'uuid'
 import moment from 'moment'
+const { shell } = require('electron')
 
 const confirmedStyle = {
   fontSize: 14,
@@ -27,7 +28,7 @@ const hashFont = {
   left: 32
 }
 
-const TransactionList = ({ loader, transactions }) => {
+const TransactionList = ({ loader, transactions, chainInfo }) => {
   if (loader) {
     return (
       <Dimmer active={loader} >
@@ -35,6 +36,8 @@ const TransactionList = ({ loader, transactions }) => {
       </Dimmer>
     )
   }
+
+  const explorerAddress = chainInfo.explorerAddress
 
   if (transactions.length > 0) {
     return (
@@ -48,7 +51,7 @@ const TransactionList = ({ loader, transactions }) => {
             return (
               <List.Item key={uuid.v4()} style={{ borderBottom: '1px solid grey' }}>
                 <List.Content>
-                  <List.Header as='a' style={{ color: 'white' + '!important', display: 'flex' }}>
+                  <List.Header as='a' style={{ color: 'white' + '!important', display: 'flex' }} onClick={() => shell.openExternal(`${explorerAddress}/hash.html?hash=${tx.identifier}`)}>
                     <span style={{ color: '#4B38BE' }}>TXID {tx.identifier}:</span>
                     {tx.confirmed
                       ? (<p style={confirmedStyle}>
@@ -56,7 +59,7 @@ const TransactionList = ({ loader, transactions }) => {
                       </p>)
                       : (<p style={confirmedStyle}>Unconfirmed</p>)}
                   </List.Header>
-                  {renderTransactionBody(tx)}
+                  {renderTransactionBody(tx, explorerAddress)}
                 </List.Content>
               </List.Item>
             )
@@ -73,7 +76,7 @@ const TransactionList = ({ loader, transactions }) => {
   }
 }
 
-function renderTransactionBody (tx) {
+function renderTransactionBody (tx, explorerAddress) {
   if (tx.inputs.length > 0) {
     return tx.inputs.map(input => {
       return (
@@ -85,7 +88,7 @@ function renderTransactionBody (tx) {
           <List.Description style={listDescriptionStyle} as='a'>
             {input.senders.map(sender => {
               return (
-                <div key={tx.identifier} style={{ display: 'flex', marginTop: 5 }}>
+                <div key={tx.identifier} style={{ display: 'flex', marginTop: 5 }} onClick={() => shell.openExternal(`${explorerAddress}/hash.html?hash=${sender}`)}>
                   From:
                   <p style={{ fontSize: 14, marginBottom: 0, fontFamily: 'Lucida Typewriter', position: 'relative', left: 19 }}>
                     {sender}
@@ -97,7 +100,7 @@ function renderTransactionBody (tx) {
           <List.Description style={{ color: 'white', display: 'flex', marginTop: 3 }} as='a'>
             {input.recipients.map(recipient => {
               return (
-                <div key={tx.identifier} style={{ display: 'flex', marginTop: 5 }}>
+                <div key={tx.identifier} style={{ display: 'flex', marginTop: 5 }} onClick={() => shell.openExternal(`${explorerAddress}/hash.html?hash=${recipient}`)}>
                   To:
                   <p style={{ fontSize: 14, marginBottom: 0, fontFamily: 'Lucida Typewriter', position: 'relative', left: 19 }}>
                     {recipient}
@@ -120,7 +123,7 @@ function renderTransactionBody (tx) {
           <List.Description style={listDescriptionStyle} as='a'>
             {out.senders.map(sender => {
               return (
-                <div key={tx.identifier} style={{ display: 'flex', marginTop: 5 }}>
+                <div key={tx.identifier} style={{ display: 'flex', marginTop: 5 }} onClick={() => shell.openExternal(`${explorerAddress}/hash.html?hash=${sender}`)}>
                   From:
                   <p style={{ fontSize: 14, marginBottom: 0, fontFamily: 'Lucida Typewriter', position: 'relative', left: 19 }}>
                     {sender}
@@ -132,7 +135,7 @@ function renderTransactionBody (tx) {
           <List.Description style={{ color: 'white', display: 'flex', marginTop: 3 }} as='a'>
             {out.recipients.map(recipient => {
               return (
-                <div key={tx.identifier} style={{ display: 'flex', marginTop: 5 }}>
+                <div key={tx.identifier} style={{ display: 'flex', marginTop: 5 }} onClick={() => shell.openExternal(`${explorerAddress}/hash.html?hash=${recipient}`)}>
                   To:
                   <p style={hashFont}>{recipient}</p>
                 </div>

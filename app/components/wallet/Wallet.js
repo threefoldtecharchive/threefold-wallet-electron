@@ -12,7 +12,8 @@ import TransactionsList from './TransactionList'
 
 const mapStateToProps = state => ({
   wallet: state.wallet,
-  routerLocations: state.routerLocations
+  routerLocations: state.routerLocations,
+  chainInfo: state.chainConstants
 })
 
 class Wallet extends Component {
@@ -119,7 +120,7 @@ class Wallet extends Component {
           <span onClick={() => this.goBack()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
           {this.renderWalletBalanceGrid()}
           <Segment style={{ width: '90%', height: '37vh', overflow: 'auto', overflowY: 'scroll', margin: 'auto', background: '#29272E', marginTop: 150 }}>
-            <TransactionsList loader={this.state.loader} transactions={this.state.transactions} />
+            <TransactionsList loader={this.state.loader} transactions={this.state.transactions} chainInfo={this.props.chainInfo} />
           </Segment>
         </div>
         <Footer />

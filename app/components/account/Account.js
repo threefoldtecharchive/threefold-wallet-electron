@@ -190,11 +190,11 @@ class Account extends Component {
             {this.renderWallets()}
           </div>
           <div style={{ width: '35%', height: '100vh', marginTop: 20 }}>
-            <Segment style={{ background: '#29272E', width: '90%', margin: 'auto' }}>
+            <Segment style={{ background: '#29272E', width: '90%', margin: 'auto', marginTop: 0 }}>
               <Dimmer active={this.state.accountBalanceLoader}>
                 <Loader />
               </Dimmer>
-              <h3 style={{ color: 'white' }}>Total Balance</h3>
+              <h3 style={{ color: 'white', marginTop: 0 }}>Total Balance</h3>
               <h4 style={{ color: 'white', marginTop: 0 }}>{this.state.totalCoins} TFT</h4>
               {this.state.unconfirmedTotalCoins > 0 ? (<span style={{ color: 'white', marginTop: 0, fontSize: 12 }}>unconfirmed: {this.state.unconfirmedTotalCoins} TFT</span>) : (<p />)}
 
@@ -203,7 +203,7 @@ class Account extends Component {
               {this.state.unconfirmedLockedCoins > 0 ? (<span style={{ color: 'white', marginTop: 0, fontSize: 12 }}>unconfirmed: {this.state.unconfirmedLockedCoins} TFT</span>) : (<p />)}
 
               <h4 style={{ color: 'white' }}><Icon name='unlock' />Unlocked Balance</h4>
-              <h4 style={{ color: 'white', marginTop: 0 }}>{this.state.totalCoinUnlocked}  TFT</h4>
+              <h4 style={{ color: 'white', marginTop: 0, marginBottom: 0 }}>{this.state.totalCoinUnlocked}  TFT</h4>
               {this.state.unconfirmedUnlockedCoins > 0 ? (<span style={{ color: 'white', marginTop: 0, fontSize: 12 }}>unconfirmed: {this.state.unconfirmedUnlockedCoins} TFT </span>) : (<p />)}
             </Segment>
           </div>

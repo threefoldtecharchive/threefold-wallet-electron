@@ -80,7 +80,8 @@ class Footer extends Component {
           chainName: info.chain_name,
           chainNetwork: info.chain_network,
           chainTimestamp: info.chain_timestamp,
-          chainVersion: info.chain_version
+          chainVersion: info.chain_version,
+          explorerAddress: info.explorer_address
         }
         if (this.mounted) {
           this.props.setChainConstants(chainInfo)
