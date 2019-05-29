@@ -8,6 +8,8 @@ from tfchain.polyfill.encoding.json import json_loads
 import tfchain.polyfill.encoding.object as jsjson
 from tfchain.errors import UnknownTransansactionVersion
 
+import tfchain.polyfill.log as jslog
+
 def new():
     """
     Creates and returns a default transaction.
@@ -103,6 +105,9 @@ def from_json(obj, id=None):
 
     # return as opaque transaction,
     # not usuable for anything but consumption
+    jslog.warning(
+        "transaction of version {} not recognised and rendered as an opaque transaction:".format(tt),
+        obj)
     txn = OpaqueTransaction.from_json(obj)
     txn.version_set(tt)
     return txn
