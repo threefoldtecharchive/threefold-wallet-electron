@@ -3,6 +3,7 @@ import { Icon } from 'semantic-ui-react'
 import { connect } from 'react-redux'
 import { setChainConstants } from '../actions'
 import moment from 'moment'
+import { toast } from 'react-toastify'
 
 const mapStateToProps = state => ({
   account: state.account,
@@ -27,13 +28,45 @@ class Footer extends Component {
   componentDidMount () {
     this.mounted = true
     this.getChainInfo()
-    const intervalId = setInterval(() => { this.getChainInfo() }, 60000)
+    this.getTransactionsForWallet()
+    const intervalId = setInterval(() => {
+      this.getChainInfo()
+      this.getTransactionsForWallet()
+    }, 60000)
     this.setState({ intervalId })
   }
 
   componentWillUnmount () {
     clearInterval(this.state.intervalId)
     this.mounted = false
+  }
+
+  getTransactionsForWallet = () => {
+    if (this.props.account.chain_info_get) {
+      this.props.account.chain_info_get().then(info => {
+        this.props.account.wallets.map(w => {
+          const block = info.last_block_get(w.addresses)
+          if (block.transactions.length > 0) {
+            block.transactions.forEach(tx => {
+              if (tx.inputs.length > 0) {
+                toast('Incomming transaction received')
+              }
+              if (tx.outputs.length > 0) {
+                toast('Outgoing transaction received')
+              }
+            })
+          }
+        })
+        if (this.mounted) {
+          this.setState({ error: false })
+        }
+      })
+        .catch(err => {
+          if (this.mounted) {
+            this.setState({ error: err.str() })
+          }
+        })
+    }
   }
 
   getChainInfo = () => {
