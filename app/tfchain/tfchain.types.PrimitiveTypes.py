@@ -237,6 +237,9 @@ class Currency(BaseDataTypeClass):
     def greater_than_or_equal_to(self, other):
         return self.__ge__(other)
 
+    def negate(self):
+        return Currency(self.value.negate())
+
     @value.setter
     def value(self, value):
         if value == None:
@@ -252,11 +255,11 @@ class Currency(BaseDataTypeClass):
                 if len(inner_value) >= 4 and inner_value[-3:] == 'TFT':
                     inner_value = jsstr.rstrip(inner_value[:-3])
             d = jsdec.Decimal(inner_value)
-            sign, _, exp = d.as_tuple()
+            _, _, exp = d.as_tuple() # sign is first return value
             if exp < -9:
                 raise tferrors.CurrencyPrecisionOverflow(d.__str__())
-            if sign != 0:
-                raise tferrors.CurrencyNegativeValue(d.__str__())
+            # if sign != 0: # allow negative values for intermediate computations
+            #     raise tferrors.CurrencyNegativeValue(d.__str__())
             self._value = d
             return
         raise TypeError(

@@ -80,7 +80,7 @@ function renderTransactionBody (tx) {
         <div key={uuid.v4()} style={{ marginTop: 5, marginBottom: 5 }}>
           <List.Description style={listDescriptionStyle} as='a'>
             Amount: <span style={{ color: '#77dd77' }}>+ {input.amount.str(true)}</span>
-            {renderLockedValue(input.lock)}
+            {renderLockedValue(input.lock, input.lock_is_timestamp)}
           </List.Description>
           <List.Description style={listDescriptionStyle} as='a'>
             {input.senders.map(sender => {
@@ -95,8 +95,16 @@ function renderTransactionBody (tx) {
             })}
           </List.Description>
           <List.Description style={{ color: 'white', display: 'flex', marginTop: 3 }} as='a'>
-            To:
-            <p style={hashFont}>{input.recipient}</p>
+            {input.recipients.map(recipient => {
+              return (
+                <div key={tx.identifier} style={{ display: 'flex', marginTop: 5 }}>
+                  To:
+                  <p style={{ fontSize: 14, marginBottom: 0, fontFamily: 'Lucida Typewriter', position: 'relative', left: 19 }}>
+                    {recipient}
+                  </p>
+                </div>
+              )
+            })}
           </List.Description>
         </div>
       )
@@ -107,11 +115,29 @@ function renderTransactionBody (tx) {
         <div key={uuid.v4()} style={{ marginTop: 5, marginBottom: 5 }}>
           <List.Description style={listDescriptionStyle} as='a'>
             Amount: <span style={{ color: '#ff6961' }}>- {out.amount.str(true)}</span>
-            {renderLockedValue(out.lock)}
+            {renderLockedValue(out.lock, out.lock_is_timestamp)}
+          </List.Description>
+          <List.Description style={listDescriptionStyle} as='a'>
+            {out.senders.map(sender => {
+              return (
+                <div key={tx.identifier} style={{ display: 'flex', marginTop: 5 }}>
+                  From:
+                  <p style={{ fontSize: 14, marginBottom: 0, fontFamily: 'Lucida Typewriter', position: 'relative', left: 19 }}>
+                    {sender}
+                  </p>
+                </div>
+              )
+            })}
           </List.Description>
           <List.Description style={{ color: 'white', display: 'flex', marginTop: 3 }} as='a'>
-            To:
-            <p style={hashFont}>{out.recipient}</p>
+            {out.recipients.map(recipient => {
+              return (
+                <div key={tx.identifier} style={{ display: 'flex', marginTop: 5 }}>
+                  To:
+                  <p style={hashFont}>{recipient}</p>
+                </div>
+              )
+            })}
           </List.Description>
         </div>
       )
@@ -119,16 +145,20 @@ function renderTransactionBody (tx) {
   }
 }
 
-function renderLockedValue (lockValue) {
+function renderLockedValue (lockValue, isTimestamp) {
   if (lockValue) {
-    if (lockValue < 500000000) {
-      return null
-    } else {
+    if (isTimestamp) {
       const lockDate = new Date(lockValue * 1000)
       const formattedDate = moment(lockDate).format('MMMM Do YYYY, HH:mm z')
       return (
         <span style={{ marginLeft: 30 }}>
           Locked until {formattedDate}
+        </span>
+      )
+    } else {
+      return (
+        <span style={{ marginLeft: 30 }}>
+          Locked until block {lockValue}
         </span>
       )
     }

@@ -1,6 +1,6 @@
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __proxy__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, abs, all, any, assert, bool, bytearray, bytes, callable, chr, copy, deepcopy, delattr, dict, dir, divmod, enumerate, filter, float, getattr, hasattr, input, int, isinstance, issubclass, len, list, map, max, min, object, ord, pow, print, property, py_TypeError, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
 import {Currency} from './tfchain.types.PrimitiveTypes.js';
-import {UnlockHash, UnlockHashType} from './tfchain.types.ConditionTypes.js';
+import {OutputLock, UnlockHash, UnlockHashType} from './tfchain.types.ConditionTypes.js';
 import * as tfwallet from './tfchain.wallet.js';
 import * as tfclient from './tfchain.client.js';
 import * as wbalance from './tfchain.balance.js';
@@ -1261,43 +1261,54 @@ export var TransactionView =  __class__ ('TransactionView', [object], {
 		}
 		var inputs = [];
 		var outputs = [];
-		if (addresses != null) {
-			var addresses = set (addresses);
-			var senders = set ();
-			for (var ci of transaction.coin_inputs) {
-				senders.add (ci.parent_output.condition.unlockhash.__str__ ());
-			}
-			if (len (addresses.intersection (senders)) == 0) {
-				var senders = list (senders);
-				for (var co of transaction.coin_outputs) {
-					if (__in__ (co.condition.unlockhash.__str__ (), addresses)) {
-						inputs.append (CoinOutputView.from_coin_output (co, senders));
+		if (addresses == null) {
+			return cls (identifier, height, timestamp, blockid, inputs, outputs);
+		}
+		var intermediate_outputs = dict ({});
+		var senders = set ();
+		var recipients = set ();
+		var intermediate_output_get = function (address) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'address': var address = __allkwargs0__ [__attrib0__]; break;
+						}
 					}
 				}
 			}
 			else {
-				var ratio = Currency ('1.0');
-				if (len (addresses.union (senders)) != len (addresses)) {
-					var senders = addresses.intersection (senders);
-					var v = Currency ();
-					var fv = Currency ();
-					for (var ci of transaction.coin_inputs) {
-						var output = ci.parent_output;
-						v.__iadd__ (output.value);
-						if (__in__ (output.condition.unlockhash.__str__ (), addresses)) {
-							fv.__iadd__ (output.value);
-						}
-					}
-					var ratio = Currency (fv.value.__truediv__ (v.value.to_nearest (9)));
-				}
-				else {
-					var senders = list (senders);
-				}
-				for (var ci of transaction.coin_inputs) {
-					var output = ci.parent_output;
-					outputs.append (CoinOutputView.from_coin_output (output, senders, __kwargtrans__ ({ratio: ratio})));
-				}
 			}
+			if (!__in__ (address, intermediate_outputs)) {
+				intermediate_outputs [address] = OutputAggregator (address);
+			}
+			return intermediate_outputs [address];
+		};
+		for (var co of transaction.coin_outputs) {
+			var address = co.condition.unlockhash.__str__ ();
+			if (!__in__ (address, addresses)) {
+				recipients.add (address);
+				continue;
+			}
+			var output = intermediate_output_get (address);
+			output.receive (__kwargtrans__ ({amount: co.value, lock: co.condition.lock.value}));
+		}
+		for (var ci of transaction.coin_inputs) {
+			var co = ci.parent_output;
+			var address = co.condition.unlockhash.__str__ ();
+			if (!__in__ (address, addresses)) {
+				senders.add (address);
+				continue;
+			}
+			var output = intermediate_output_get (address);
+			output.send (__kwargtrans__ ({amount: co.value}));
+		}
+		var senders = list (senders);
+		var recipients = list (recipients);
+		for (var intermediate_output of jsobj.dict_values (intermediate_outputs)) {
+			intermediate_output.inputs_outputs_collect (senders, recipients, inputs, outputs);
 		}
 		return cls (identifier, height, timestamp, blockid, inputs, outputs);
 	});},
@@ -1468,38 +1479,74 @@ Object.defineProperty (TransactionView, 'timestamp', property.call (TransactionV
 Object.defineProperty (TransactionView, 'height', property.call (TransactionView, TransactionView._get_height));
 Object.defineProperty (TransactionView, 'confirmed', property.call (TransactionView, TransactionView._get_confirmed));
 Object.defineProperty (TransactionView, 'identifier', property.call (TransactionView, TransactionView._get_identifier));;
-export var CoinOutputView =  __class__ ('CoinOutputView', [object], {
+export var OutputAggregator =  __class__ ('OutputAggregator', [object], {
 	__module__: __name__,
-	get from_coin_output () {return __getcm__ (this, function (cls, output, senders, ratio) {
-		if (typeof ratio == 'undefined' || (ratio != null && ratio.hasOwnProperty ("__kwargtrans__"))) {;
-			var ratio = null;
-		};
+	get __init__ () {return __get__ (this, function (self, address) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
-						case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
-						case 'output': var output = __allkwargs0__ [__attrib0__]; break;
-						case 'senders': var senders = __allkwargs0__ [__attrib0__]; break;
-						case 'ratio': var ratio = __allkwargs0__ [__attrib0__]; break;
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'address': var address = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
 		}
 		else {
 		}
-		var recipient = output.condition.unlockhash.__str__ ();
-		var amount = output.value;
-		if (ratio != null) {
-			var amount = amount.__mul__ (ratio);
-		}
-		var lock = output.condition.lock.value;
-		var lock_is_timestamp = output.condition.lock.is_timestamp;
-		return cls (senders, recipient, amount, lock, lock_is_timestamp);
+		self._address = address;
+		self._locked_outputs = dict ({});
+		self._amount = Currency ();
 	});},
-	get __init__ () {return __get__ (this, function (self, senders, recipient, amount, lock, lock_is_timestamp) {
+	get receive () {return __get__ (this, function (self, amount, lock) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'amount': var amount = __allkwargs0__ [__attrib0__]; break;
+						case 'lock': var lock = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (lock > 0) {
+			var slock = jsstr.from_int (lock);
+			if (!__in__ (lock, self._locked_outputs)) {
+				self._locked_outputs [slock] = amount;
+			}
+			else {
+				self._locked_outputs [slock] = self._locked_outputs [slock].plus (amount);
+			}
+		}
+		else {
+			self._amount = self._amount.plus (amount);
+		}
+	});},
+	get send () {return __get__ (this, function (self, amount) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'amount': var amount = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		self._amount = self._amount.minus (amount);
+	});},
+	get inputs_outputs_collect () {return __get__ (this, function (self, senders, recipients, inputs, outputs) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -1508,7 +1555,39 @@ export var CoinOutputView =  __class__ ('CoinOutputView', [object], {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
 						case 'senders': var senders = __allkwargs0__ [__attrib0__]; break;
-						case 'recipient': var recipient = __allkwargs0__ [__attrib0__]; break;
+						case 'recipients': var recipients = __allkwargs0__ [__attrib0__]; break;
+						case 'inputs': var inputs = __allkwargs0__ [__attrib0__]; break;
+						case 'outputs': var outputs = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (self._amount.less_than (0)) {
+			outputs.append (CoinOutputView (__kwargtrans__ ({senders: [self._address], recipients: recipients, amount: self._amount.negate (), lock: 0, lock_is_timestamp: false})));
+		}
+		else if (self._amount.greater_than (0)) {
+			inputs.append (CoinOutputView (__kwargtrans__ ({senders: senders, recipients: [self._address], amount: self._amount, lock: 0, lock_is_timestamp: false})));
+		}
+		for (var [lock_value, amount] of jsobj.get_items (self._locked_outputs)) {
+			var lock = jsstr.to_int (lock_value);
+			inputs.append (CoinOutputView (__kwargtrans__ ({senders: senders, recipients: [self._address], amount: amount, lock: lock, lock_is_timestamp: OutputLock (lock).is_timestamp})));
+		}
+	});}
+});
+export var CoinOutputView =  __class__ ('CoinOutputView', [object], {
+	__module__: __name__,
+	get __init__ () {return __get__ (this, function (self, senders, recipients, amount, lock, lock_is_timestamp) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'senders': var senders = __allkwargs0__ [__attrib0__]; break;
+						case 'recipients': var recipients = __allkwargs0__ [__attrib0__]; break;
 						case 'amount': var amount = __allkwargs0__ [__attrib0__]; break;
 						case 'lock': var lock = __allkwargs0__ [__attrib0__]; break;
 						case 'lock_is_timestamp': var lock_is_timestamp = __allkwargs0__ [__attrib0__]; break;
@@ -1519,7 +1598,7 @@ export var CoinOutputView =  __class__ ('CoinOutputView', [object], {
 		else {
 		}
 		self._senders = senders;
-		self._recipient = recipient;
+		self._recipients = recipients;
 		self._amount = amount;
 		self._lock = lock;
 		self._lock_is_timestamp = lock_is_timestamp;
@@ -1540,7 +1619,7 @@ export var CoinOutputView =  __class__ ('CoinOutputView', [object], {
 		}
 		return self._senders;
 	});},
-	get _get_recipient () {return __get__ (this, function (self) {
+	get _get_recipients () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -1554,7 +1633,7 @@ export var CoinOutputView =  __class__ ('CoinOutputView', [object], {
 		}
 		else {
 		}
-		return self._recipient;
+		return self._recipients;
 	});},
 	get _get_amount () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -1608,7 +1687,7 @@ export var CoinOutputView =  __class__ ('CoinOutputView', [object], {
 Object.defineProperty (CoinOutputView, 'lock_is_timestamp', property.call (CoinOutputView, CoinOutputView._get_lock_is_timestamp));
 Object.defineProperty (CoinOutputView, 'lock', property.call (CoinOutputView, CoinOutputView._get_lock));
 Object.defineProperty (CoinOutputView, 'amount', property.call (CoinOutputView, CoinOutputView._get_amount));
-Object.defineProperty (CoinOutputView, 'recipient', property.call (CoinOutputView, CoinOutputView._get_recipient));
+Object.defineProperty (CoinOutputView, 'recipients', property.call (CoinOutputView, CoinOutputView._get_recipients));
 Object.defineProperty (CoinOutputView, 'senders', property.call (CoinOutputView, CoinOutputView._get_senders));;
 export var ChainInfo =  __class__ ('ChainInfo', [object], {
 	__module__: __name__,

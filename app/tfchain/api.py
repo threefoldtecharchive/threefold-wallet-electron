@@ -20,7 +20,7 @@ import tfchain.balance as wbalance
 import tfchain.client as tfclient
 import tfchain.wallet as tfwallet
 
-from tfchain.types.ConditionTypes import UnlockHash, UnlockHashType
+from tfchain.types.ConditionTypes import UnlockHash, UnlockHashType, OutputLock
 from tfchain.types.PrimitiveTypes import Currency
 
 # BIP39 state object used for all Mnemonic purposes of this API
@@ -666,43 +666,41 @@ class TransactionView:
         inputs = []
         outputs = []
 
-        if addresses != None:
-            addresses = set(addresses)
-            # define the senders of this transaction
-            senders = set()
-            for ci in transaction.coin_inputs:
-                senders.add(ci.parent_output.condition.unlockhash.__str__())
+        if addresses == None:
+            # return early
+            return cls(identifier, height, timestamp, blockid, inputs, outputs)
 
-            # if at least one filtered address is in the senders,
-            # we'll assume this is an outgoing transaction,
-            # otherwise it is is an incoming transaction
-            # NOTE: it could be that another senders is not us, in that case we'll need to define a ratio
-            if len(addresses.intersection(senders)) == 0:
-                senders = list(senders)
-                for co in transaction.coin_outputs:
-                    if co.condition.unlockhash.__str__() in addresses:
-                        inputs.append(CoinOutputView.from_coin_output(co, senders))
-            else:
-                # gather address-filtered information
-                ratio = Currency("1.0")
-                if len(addresses.union(senders)) != len(addresses):
-                    senders = addresses.intersection(senders)
-                    v = Currency()
-                    fv = Currency()
-                    for ci in transaction.coin_inputs:
-                        output = ci.parent_output
-                        v.__iadd__(output.value)
-                        if output.condition.unlockhash.__str__() in addresses:
-                            fv.__iadd__(output.value)
-                    ratio = Currency(fv.value.__truediv__(v.value.to_nearest(9)))
-                else:
-                    senders = list(senders)
-                # add all inputs
-                for ci in transaction.coin_inputs:
-                    output = ci.parent_output
-                    outputs.append(CoinOutputView.from_coin_output(output, senders, ratio=ratio))
+        # go through all outputs and inputs and keep track of the addresses, locks and amounts
+        intermediate_outputs = {}
+        senders = set()
+        recipients = set()
+        def intermediate_output_get(address):
+            if address not in intermediate_outputs:
+                intermediate_outputs[address] = OutputAggregator(address)
+            return intermediate_outputs[address]
+        for co in transaction.coin_outputs:
+            address = co.condition.unlockhash.__str__()
+            if address not in addresses:
+                recipients.add(address)
+                continue
+            output = intermediate_output_get(address)
+            output.receive(amount=co.value, lock=co.condition.lock.value)
+        for ci in transaction.coin_inputs:
+            co = ci.parent_output
+            address = co.condition.unlockhash.__str__()
+            if address not in addresses:
+                senders.add(address)
+                continue
+            output = intermediate_output_get(address)
+            output.send(amount=co.value)
 
-        # return transaction view
+        # gather all inputs and outputs
+        senders = list(senders)
+        recipients = list(recipients)
+        for intermediate_output in jsobj.dict_values(intermediate_outputs):
+            intermediate_output.inputs_outputs_collect(senders, recipients, inputs, outputs)
+
+        # return it all as a single view
         return cls(identifier, height, timestamp, blockid, inputs, outputs)
 
     def __init__(self, identifier, height, timestamp, blockid, inputs, outputs):
@@ -771,6 +769,54 @@ class TransactionView:
         return self._outputs
 
 
+class OutputAggregator:
+    def __init__(self, address):
+        self._address = address
+        self._locked_outputs = {}
+        self._amount = Currency()
+
+    def receive(self, amount, lock):
+        if lock > 0:
+            slock = jsstr.from_int(lock)
+            if lock not in self._locked_outputs:
+                self._locked_outputs[slock] = amount
+            else:
+                self._locked_outputs[slock] = self._locked_outputs[slock].plus(amount)
+        else:
+            self._amount = self._amount.plus(amount)
+
+    def send(self, amount):
+        self._amount = self._amount.minus(amount)
+
+    def inputs_outputs_collect(self, senders, recipients, inputs, outputs):
+        # add unlocked amount (if it exists)
+        if self._amount.less_than(0):
+            outputs.append(CoinOutputView(
+                senders=[self._address],
+                recipients=recipients,
+                amount=self._amount.negate(),
+                lock=0,
+                lock_is_timestamp=False,
+            ))
+        elif self._amount.greater_than(0):
+            inputs.append(CoinOutputView(
+                senders=senders,
+                recipients=[self._address],
+                amount=self._amount,
+                lock=0,
+                lock_is_timestamp=False,
+            ))
+        # add all locked outputs
+        for (lock_value, amount) in jsobj.get_items(self._locked_outputs):
+            lock = jsstr.to_int(lock_value)
+            inputs.append(CoinOutputView(
+                senders=senders,
+                recipients=[self._address],
+                amount=amount,
+                lock=lock,
+                lock_is_timestamp=OutputLock(lock).is_timestamp,
+            ))
+
 class CoinOutputView:
     """
     A human readable view of a CoinOutput.
@@ -778,19 +824,9 @@ class CoinOutputView:
     NOTE: AtomicSwapConditioned outputs are not supported.
     """
 
-    @classmethod
-    def from_coin_output(cls, output, senders, ratio=None):
-        recipient = output.condition.unlockhash.__str__()
-        amount = output.value
-        if ratio != None:
-            amount = amount.__mul__(ratio)
-        lock = output.condition.lock.value
-        lock_is_timestamp = output.condition.lock.is_timestamp
-        return cls(senders, recipient, amount, lock, lock_is_timestamp)
-
-    def __init__(self, senders, recipient, amount, lock, lock_is_timestamp):
+    def __init__(self, senders, recipients, amount, lock, lock_is_timestamp):
         self._senders = senders
-        self._recipient = recipient
+        self._recipients = recipients
         self._amount = amount
         self._lock = lock
         self._lock_is_timestamp = lock_is_timestamp
@@ -803,12 +839,12 @@ class CoinOutputView:
         """
         return self._senders
     @property
-    def recipient(self):
+    def recipients(self):
         """
-        :returns: the address of the recipient (always 1)
+        :returns: the address(es) of the recipients
         :rtype: str
         """
-        return self._recipient
+        return self._recipients
     @property
     def amount(self):
         """

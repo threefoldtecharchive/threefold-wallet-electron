@@ -115,6 +115,22 @@ export var Decimal =  __class__ ('Decimal', [object], {
 		}
 		return Decimal (self.value.toNearest (('.' + jsstr.repeat ('0', prec - 1)) + '1'));
 	});},
+	get negate () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return Decimal (self._value.negated ());
+	});},
 	get str () {return __get__ (this, function (self, prec) {
 		if (typeof prec == 'undefined' || (prec != null && prec.hasOwnProperty ("__kwargtrans__"))) {;
 			var prec = null;

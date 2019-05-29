@@ -46,6 +46,9 @@ class Decimal:
             return Decimal(self.value.toNearest('1'))
         return Decimal(self.value.toNearest('.' + jsstr.repeat('0', prec-1) + '1'))
 
+    def negate(self):
+        return Decimal(self._value.negated())
+
     def str(self, prec=None):
         if isinstance(prec, int):
             s = self.to_nearest(prec).value.toString()
