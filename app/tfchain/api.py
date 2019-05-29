@@ -213,6 +213,28 @@ class Account:
         """
         return len(self._wallets)
 
+    @property
+    def address(self):
+        """
+        :returns: the default wallet address
+        :rtype: str
+        """
+        wallet = self.wallet
+        if wallet == None:
+            return None
+        return wallet.address
+
+    @property
+    def addresses(self):
+        """
+        :returns: the list of addresses linked to this account
+        :rtype: list
+        """
+        addresses = []
+        for wallet in self._wallets:
+            addresses.append(wallet.addresses)
+        return addresses
+
     def wallet_new(self, wallet_name, start_index, address_count):
         """
         Create a new wallet with a unique name, and a unique set of addresses.
@@ -763,13 +785,15 @@ class CoinOutputView:
         if ratio != None:
             amount = amount.__mul__(ratio)
         lock = output.condition.lock.value
-        return cls(senders, recipient, amount, lock)
+        lock_is_timestamp = output.condition.lock.is_timestamp
+        return cls(senders, recipient, amount, lock, lock_is_timestamp)
 
-    def __init__(self, senders, recipient, amount, lock):
+    def __init__(self, senders, recipient, amount, lock, lock_is_timestamp):
         self._senders = senders
         self._recipient = recipient
         self._amount = amount
         self._lock = lock
+        self._lock_is_timestamp = lock_is_timestamp
 
     @property
     def senders(self):
@@ -795,10 +819,17 @@ class CoinOutputView:
     @property
     def lock(self):
         """
-        :returns: the lock value: block height if value < 500000000 else unix epoch seconds timestamp
+        :returns: the lock value: unix epoch seconds timestamp if self.lock_is_timestamp else block height
         :rtype: int
         """
         return self._lock
+    @property
+    def lock_is_timestamp(self):
+        """
+        :returns: true if the self.lock value represents a timestamp (unix epoch seconds)
+        :rtype: bool
+        """
+        return self._lock_is_timestamp
 
 
 class ChainInfo:

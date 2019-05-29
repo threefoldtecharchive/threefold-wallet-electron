@@ -284,6 +284,46 @@ export var Account =  __class__ ('Account', [object], {
 		}
 		return len (self._wallets);
 	});},
+	get _get_address () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var wallet = self.wallet;
+		if (wallet == null) {
+			return null;
+		}
+		return wallet.address;
+	});},
+	get _get_addresses () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var addresses = [];
+		for (var wallet of self._wallets) {
+			addresses.append (wallet.addresses);
+		}
+		return addresses;
+	});},
 	get wallet_new () {return __get__ (this, function (self, wallet_name, start_index, address_count) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -544,6 +584,8 @@ export var Account =  __class__ ('Account', [object], {
 	});}
 });
 Object.defineProperty (Account, 'balance', property.call (Account, Account._get_balance));
+Object.defineProperty (Account, 'addresses', property.call (Account, Account._get_addresses));
+Object.defineProperty (Account, 'address', property.call (Account, Account._get_address));
 Object.defineProperty (Account, 'wallet_count', property.call (Account, Account._get_wallet_count));
 Object.defineProperty (Account, 'wallets', property.call (Account, Account._get_wallets));
 Object.defineProperty (Account, 'explorer', property.call (Account, Account._get_explorer));
@@ -1454,9 +1496,10 @@ export var CoinOutputView =  __class__ ('CoinOutputView', [object], {
 			var amount = amount.__mul__ (ratio);
 		}
 		var lock = output.condition.lock.value;
-		return cls (senders, recipient, amount, lock);
+		var lock_is_timestamp = output.condition.lock.is_timestamp;
+		return cls (senders, recipient, amount, lock, lock_is_timestamp);
 	});},
-	get __init__ () {return __get__ (this, function (self, senders, recipient, amount, lock) {
+	get __init__ () {return __get__ (this, function (self, senders, recipient, amount, lock, lock_is_timestamp) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -1468,6 +1511,7 @@ export var CoinOutputView =  __class__ ('CoinOutputView', [object], {
 						case 'recipient': var recipient = __allkwargs0__ [__attrib0__]; break;
 						case 'amount': var amount = __allkwargs0__ [__attrib0__]; break;
 						case 'lock': var lock = __allkwargs0__ [__attrib0__]; break;
+						case 'lock_is_timestamp': var lock_is_timestamp = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
@@ -1478,6 +1522,7 @@ export var CoinOutputView =  __class__ ('CoinOutputView', [object], {
 		self._recipient = recipient;
 		self._amount = amount;
 		self._lock = lock;
+		self._lock_is_timestamp = lock_is_timestamp;
 	});},
 	get _get_senders () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -1542,8 +1587,25 @@ export var CoinOutputView =  __class__ ('CoinOutputView', [object], {
 		else {
 		}
 		return self._lock;
+	});},
+	get _get_lock_is_timestamp () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._lock_is_timestamp;
 	});}
 });
+Object.defineProperty (CoinOutputView, 'lock_is_timestamp', property.call (CoinOutputView, CoinOutputView._get_lock_is_timestamp));
 Object.defineProperty (CoinOutputView, 'lock', property.call (CoinOutputView, CoinOutputView._get_lock));
 Object.defineProperty (CoinOutputView, 'amount', property.call (CoinOutputView, CoinOutputView._get_amount));
 Object.defineProperty (CoinOutputView, 'recipient', property.call (CoinOutputView, CoinOutputView._get_recipient));
