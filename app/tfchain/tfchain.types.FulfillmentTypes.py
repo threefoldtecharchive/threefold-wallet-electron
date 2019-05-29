@@ -26,7 +26,7 @@ def from_condition(condition):
     """
     Create a fresh fulfillment from its parent condition.
     """
-    if condition is None:
+    if condition == None:
         return FulfillmentSingleSignature()
     if isinstance(condition, ConditionAtomicSwap):
         return FulfillmentAtomicSwap()
@@ -72,7 +72,7 @@ class ED25519Signature(BinaryData):
 
     @classmethod
     def from_json(cls, obj, as_array=False):
-        if obj is not None and not isinstance(obj, str):
+        if obj != None and not isinstance(obj, str):
             raise TypeError("ed25519 signature is expected to be an encoded string when part of a JSON object, not {}".format(type(obj)))
         if obj == '':
             obj = None
@@ -243,16 +243,16 @@ class FulfillmentSingleSignature(FulfillmentBaseClass):
 
     @property
     def fulfilled(self):
-        return self._signature is not None
+        return self._signature != None
 
     @property
     def public_key(self):
-        if self._pub_key is None:
+        if self._pub_key == None:
             return PublicKey()
         return self._pub_key
     @public_key.setter
     def public_key(self, value):
-        if value is None:
+        if value == None:
             self._pub_key = None
             return
         if not isinstance(value, PublicKey):
@@ -261,12 +261,12 @@ class FulfillmentSingleSignature(FulfillmentBaseClass):
     
     @property
     def signature(self):
-        if self._signature is None:
+        if self._signature == None:
             return ED25519Signature()
         return self._signature
     @signature.setter
     def signature(self, value):
-        if value is None:
+        if value == None:
             self._signature = None
         else:
             self._signature = ED25519Signature(value=value)
@@ -314,7 +314,7 @@ class FulfillmentSingleSignature(FulfillmentBaseClass):
         parent_condition = parent_condition.unwrap()
         if not isinstance(parent_condition, (ConditionNil, ConditionUnlockHash)):
             raise TypeError("parent condition of FulfillmentSingleSignature cannot be of type {}".format(type(parent_condition)))
-        return self._signature is not None
+        return self._signature != None
 
 
 class FulfillmentMultiSignature(FulfillmentBaseClass):
@@ -413,12 +413,12 @@ class PublicKeySignaturePair(BaseDataTypeClass):
 
     @property
     def public_key(self):
-        if self._public_key is None:
+        if self._public_key == None:
             return PublicKey()
         return self._public_key
     @public_key.setter
     def public_key(self, pk):
-        if pk is None:
+        if pk == None:
             self._public_key = None
             return
         if not isinstance(pk, PublicKey):
@@ -427,12 +427,12 @@ class PublicKeySignaturePair(BaseDataTypeClass):
 
     @property
     def signature(self):
-        if self._signature is None:
+        if self._signature == None:
             return ED25519Signature()
         return self._signature
     @signature.setter
     def signature(self, value):
-        if value is None:
+        if value == None:
             self._signature = None
         else:
             self._signature = ED25519Signature(value=value)
@@ -477,12 +477,12 @@ class FulfillmentAtomicSwap(FulfillmentBaseClass):
 
     @property
     def public_key(self):
-        if self._pub_key is None:
+        if self._pub_key == None:
             return PublicKey()
         return self._pub_key
     @public_key.setter
     def public_key(self, value):
-        if value is None:
+        if value == None:
             self._pub_key = None
             return
         if not isinstance(value, PublicKey):
@@ -491,24 +491,24 @@ class FulfillmentAtomicSwap(FulfillmentBaseClass):
 
     @property
     def signature(self):
-        if self._signature is None:
+        if self._signature == None:
             return ED25519Signature()
         return self._signature
     @signature.setter
     def signature(self, value):
-        if value is None:
+        if value == None:
             self._signature = None
         else:
             self._signature = ED25519Signature(value=value)
 
     @property
     def secret(self):
-        if self._secret is None:
+        if self._secret == None:
             return AtomicSwapSecret()
         return self._secret
     @secret.setter
     def secret(self, value):
-        if value is None:
+        if value == None:
             self._secret = None
         else:
             self._secret = AtomicSwapSecret(value=value)
@@ -532,7 +532,7 @@ class FulfillmentAtomicSwap(FulfillmentBaseClass):
             'publickey': self.public_key.json(),
             'signature': self.signature.json(),
         }
-        if self._secret is not None:
+        if self._secret != None:
             obj['secret'] = self.secret.json()
         return obj
 
@@ -552,7 +552,7 @@ class FulfillmentAtomicSwap(FulfillmentBaseClass):
         # define the input_hash_new generator function,
         # used to create the input hash for creating the signature
         def input_hash_gen(public_key):
-            if self._secret is not None:
+            if self._secret != None:
                 return input_hash_func(public_key, self.secret)
             return input_hash_func(public_key)
         # create a signature hash for all signees that haven't signed yet
@@ -564,4 +564,4 @@ class FulfillmentAtomicSwap(FulfillmentBaseClass):
     def is_fulfilled(self, parent_condition):
         if not isinstance(parent_condition, ConditionAtomicSwap):
             raise TypeError("parent condition of FulfillmentAtomicSwap cannot be of type {}".format(type(parent_condition)))
-        return self._signature is not None
+        return self._signature != None

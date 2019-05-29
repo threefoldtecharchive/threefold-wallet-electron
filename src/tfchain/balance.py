@@ -253,7 +253,7 @@ class WalletBalance(object):
         Always assign the result, as it could other than self,
         should the class type be changed in order to add all content correctly.
         """
-        if other is None:
+        if other == None:
             return self
         if isinstance(other, (WalletsBalance, MultiSigWalletBalance)):
             return WalletsBalance().balance_add(self).balance_add(other)
@@ -382,7 +382,7 @@ class MultiSigWalletBalance(WalletBalance):
         Always assign the result, as it could other than self,
         should the class type be changed in order to add all content correctly.
         """
-        if other is None:
+        if other == None:
             return self
         if not isinstance(other, MultiSigWalletBalance):
             if isinstance(other, (WalletBalance, WalletsBalance)):
@@ -453,7 +453,7 @@ class WalletsBalance(WalletBalance):
         Always assign the result, as it could other than self,
         should the class type be changed in order to add all content correctly.
         """
-        if other is None:
+        if other == None:
             return self
         if not isinstance(other, WalletBalance):
             raise TypeError("other balance has to be of type wallet balance")
@@ -490,7 +490,7 @@ class WalletsBalance(WalletBalance):
         ms_addresses = set()
         refund = None
         # TODO: ensure we do not require jsobj checks like this on such a low level code
-        if source is None or jsobj.is_undefined(source):
+        if source == None:
             for co in self.outputs_available:
                 addresses.add(co.condition.unlockhash.__str__())
             for co in self.outputs_unconfirmed_available:
@@ -597,9 +597,9 @@ class WalletsBalance(WalletBalance):
         return outputs, collected
 
     def _fund_multisig(self, amount, addresses, outputs=None, collected=None):
-        if outputs is None:
+        if outputs == None:
             outputs = []
-        if collected is None:
+        if collected == None:
             collected = Currency()
         for address, wallet in self.wallets.items():
             if UnlockHash.from_json(address).__str__() not in addresses:

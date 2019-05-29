@@ -111,7 +111,7 @@ class Account:
         # define seed and matching mnemonic based on the given information,
         # generating it randomly if it is not given 
         mnemonic = None
-        if seed is None:
+        if seed == None:
             mnemonic = mnemonic_new()
             seed = mnemonic_to_entropy(mnemonic)
         else:
@@ -121,9 +121,9 @@ class Account:
             else:
                 mnemonic = entropy_to_mnemonic(seed)
         # define explorer addresses and network type
-        if explorer_addresses is None:
+        if explorer_addresses == None:
             # no explorer addresses are given, get the default ones based on the network type
-            if network_type is None:
+            if network_type == None:
                 network_type = tfnetwork.Type.STANDARD
             network_type = tfnetwork.Type(network_type)
             explorer_addresses = network_type.default_explorer_addresses()
@@ -133,7 +133,7 @@ class Account:
             # explorer addresses are given, create the client
             self._explorer_client = tfexplorer.Client(explorer_addresses)
             self._explorer_client = tfclient.TFChainClient(self._explorer_client)
-            if network_type is None:
+            if network_type == None:
                 # if no network type is given, get it from one of the used explorer addresses
                 # NOTE: it is possible that in theory not all explorers used return the same network type,
                 #       this case is not handled (on purpose)
@@ -496,7 +496,7 @@ class Balance:
         if not isinstance(network_type, tfnetwork.Type):
             raise TypeError("network_type has to be of type tfchain.network.Type, not be of type {}".format(type(network_type)))
         self._network_type = network_type
-        if tfbalance is None:
+        if tfbalance == None:
             self._tfbalance = wbalance.WalletBalance()
         else:
             if not isinstance(tfbalance, wbalance.WalletBalance):
@@ -645,7 +645,7 @@ class TransactionView:
         inputs = []
         outputs = []
 
-        if addresses is not None:
+        if addresses != None:
             addresses = set(addresses)
             # define the senders of this transaction
             senders = set()
@@ -691,7 +691,7 @@ class TransactionView:
             raise TypeError("height is expected to be of type int, not be of type {}".format(type(height)))
         if not isinstance(timestamp, int):
             raise TypeError("timestamp is expected to be of type int, not be of type {}".format(type(timestamp)))
-        if blockid is not None and not isinstance(blockid, str):
+        if blockid != None and not isinstance(blockid, str):
             raise TypeError("blockid is expected to be None or of type str, not be of type {}".format(type(blockid)))
         self._identifier = identifier
         self._height = height
@@ -711,7 +711,7 @@ class TransactionView:
         """
         :returns: True if confirmed, False otherwise
         """
-        return self.blockid is not None
+        return self.blockid != None
     @property
     def height(self):
         """
@@ -761,7 +761,7 @@ class CoinOutputView:
     def from_coin_output(cls, output, senders, ratio=None):
         recipient = output.condition.unlockhash.__str__()
         amount = output.value
-        if ratio is not None:
+        if ratio != None:
             amount = amount.__mul__(ratio)
         lock = output.lock
         return cls(senders, recipient, amount, lock)

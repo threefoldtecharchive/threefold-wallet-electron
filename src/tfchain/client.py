@@ -163,7 +163,7 @@ class TFChainClient:
         endpoint = "/explorer/blocks/{}".format(value)
         def get_block_prop(result):
             block = result.get_or('block', None)
-            if block is None:
+            if block == None:
                 raise tferrors.ExplorerInvalidResponse("block property is undefined", endpoint, result)
             return (endpoint, block)
         return jsasync.chain(self.explorer_get(endpoint=endpoint), get_block_prop)
@@ -392,7 +392,7 @@ class TFChainClient:
                         spend_txn = creation_txn
                         creation_txn = tresp[1]
                 creation_txn = self._transaction_from_explorer_transaction(creation_txn, endpoint=endpoint, resp=result)
-                if spend_txn is not None:
+                if spend_txn != None:
                     spend_txn = self._transaction_from_explorer_transaction(spend_txn, endpoint=endpoint, resp=result)
                 # collect the output
                 output = None
@@ -400,7 +400,7 @@ class TFChainClient:
                     if str(out.id) == id:
                         output = out
                         break
-                if output is None:
+                if output == None:
                     raise tferrors.ExplorerInvalidResponse("expected output {} to be part of creation Tx, but it wasn't".format(id), endpoint, result)
                 # return the output and related transaction(s)
                 return ExplorerOutputResult(output, creation_txn, spend_txn)
@@ -414,7 +414,7 @@ class TFChainClient:
             if result.creation_transaction.unconfirmed:
                 return result # return as is
             ps = [self._block_get_by_hash(result.creation_transaction.blockid)]
-            if result.spend_transaction is not None and not result.spend_transaction.unconfirmed:
+            if result.spend_transaction != None and not result.spend_transaction.unconfirmed:
                 ps.append(self._block_get_by_hash(result.spend_transaction.blockid))
             p = jsasync.wait(*ps)
             def aggregate(results):
@@ -438,7 +438,7 @@ class TFChainClient:
         return jsasync.chain(self.explorer_get(endpoint=endpoint), cb, fetch_transacton_timestamps)
 
     def _transaction_from_explorer_transaction(self, etxn, endpoint="/?", resp=None): # keyword parameters for error handling purposes only
-        if resp is None:
+        if resp == None:
             resp = jsobj.new_dict()
         # parse the transactions
         transaction = transactions.from_json(obj=etxn['rawtransaction'], id=etxn['id'])
@@ -504,7 +504,7 @@ class ExplorerOutputResult():
         if not isinstance(creation_tx, TransactionBaseClass):
             raise TypeError("creation tx has to be of type TransactionBaseClass, not be of type {}".format(type(creation_tx)))
         self._creation_tx = creation_tx
-        if spend_tx is not None and not isinstance(spend_tx, TransactionBaseClass):
+        if spend_tx != None and not isinstance(spend_tx, TransactionBaseClass):
             raise TypeError("spend tx has to be None or be of type TransactionBaseClass, not be of type {}".format(type(spend_tx)))
         self._spend_tx = spend_tx
 
@@ -665,7 +665,7 @@ class ExplorerUnlockhashResult():
                     if co.condition.unlockhash.__str__() == address:
                         balance.output_add(txn, index, confirmed=(not txn.unconfirmed), spent=False)
         # if a client is set, attach the current chain info to it
-        if info is not None:
+        if info != None:
             balance.chain_height = info.height
             balance.chain_time = info.timestamp
             balance.chain_blockid = info.blockid
@@ -681,7 +681,7 @@ class ExplorerUnlockhashResult():
                     oc = ci.parent_output.condition.unwrap()
                     if not isinstance(oc, ConditionMultiSignature):
                         raise TypeError("multi signature's output condition cannot be of type {} (expected: ConditionMultiSignature)".format(type(oc)))
-                    if balance is None:
+                    if balance == None:
                         balance = MultiSigWalletBalance(owners=oc.unlockhashes, signature_count=oc.required_signatures)
                     balance.output_add(txn, index, confirmed=(not txn.unconfirmed), spent=True)
             for index, co in enumerate(txn.coin_outputs):
@@ -689,13 +689,13 @@ class ExplorerUnlockhashResult():
                     oc = co.condition.unwrap()
                     if not isinstance(oc, ConditionMultiSignature):
                         raise TypeError("multi signature's output condition cannot be of type {} (expected: ConditionMultiSignature)".format(type(oc)))
-                    if balance is None:
+                    if balance == None:
                         balance = MultiSigWalletBalance(owners=oc.unlockhashes, signature_count=oc.required_signatures)
                     balance.output_add(txn, index, confirmed=(not txn.unconfirmed), spent=False)
             if isinstance(txn, TransactionV128):
                 oc = txn.mint_condition
                 balance = MultiSigWalletBalance(owners=oc.unlockhashes, signature_count=oc.required_signatures)
-        if balance is None:
+        if balance == None:
             return WalletBalance() # return empty balance
         return balance
 
@@ -838,7 +838,7 @@ class TFChainMinterClient():
 
         # define the endpoint
         endpoint = "/explorer/mintcondition"
-        if height is not None:
+        if height != None:
             if not isinstance(height, (int, str)):
                 raise TypeError("invalid block height given")
             if isinstance(height, str):
@@ -881,7 +881,7 @@ class TFChainMinterClient():
 #         elif isinstance(identifier, PublicKey):
 #             identifier = str(identifier)
 #         elif isinstance(identifier, str):
-#             if BotName.REGEXP.match(identifier) is not None:
+#             if BotName.REGEXP.match(identifier) != None:
 #                 endpoint = "/explorer/whois/3bot"
 #             else:
 #                 try:

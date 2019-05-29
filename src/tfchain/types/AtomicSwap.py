@@ -30,7 +30,7 @@ class AtomicSwapContract:
             raise TypeError(
                 "unspent status is expected to be of type bool, not {}".format(type(unspent)))
         self._unspent = unspent_bool
-        if current_timestamp is None:
+        if current_timestamp == None:
             current_timestamp = int(datetime.now().timestamp())
         elif not isinstance(current_timestamp, int):
             raise TypeError("current timestamp has to be of type integer, not {}".format(

@@ -102,7 +102,7 @@ class TransactionBaseClass():
         self._id = Hash(value=id)
 
     def __hash__(self):
-        if self._id is None:
+        if self._id == None:
             return hash(jsjson.json_dumps(self.json()))
         return hash(self.id)
 

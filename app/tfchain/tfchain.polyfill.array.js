@@ -141,7 +141,7 @@ export var slice_array = function (arr, begin, end) {
 	else {
 	}
 	var out = null;
-	if (end === null) {
+	if (end == null) {
 		
 		        out = arr.slice(begin);
 		        
@@ -265,7 +265,7 @@ export var py_pop = function (arr, index) {
 	if (isinstance (arr, list)) {
 		return arr.py_pop (index);
 	}
-	if (index === null) {
+	if (index == null) {
 		var val = null;
 		
 		        val = arr.pop();

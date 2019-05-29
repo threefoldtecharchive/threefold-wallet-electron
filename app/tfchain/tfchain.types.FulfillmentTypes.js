@@ -51,7 +51,7 @@ export var from_condition = function (condition) {
 	}
 	else {
 	}
-	if (condition === null) {
+	if (condition == null) {
 		return FulfillmentSingleSignature ();
 	}
 	if (isinstance (condition, ConditionAtomicSwap)) {
@@ -189,7 +189,7 @@ export var ED25519Signature =  __class__ ('ED25519Signature', [BinaryData], {
 		}
 		else {
 		}
-		if (obj !== null && !(isinstance (obj, str))) {
+		if (obj != null && !(isinstance (obj, str))) {
 			var __except0__ = py_TypeError ('ed25519 signature is expected to be an encoded string when part of a JSON object, not {}'.format (py_typeof (obj)));
 			__except0__.__cause__ = null;
 			throw __except0__;
@@ -692,7 +692,7 @@ export var FulfillmentSingleSignature =  __class__ ('FulfillmentSingleSignature'
 		}
 		else {
 		}
-		return self._signature !== null;
+		return self._signature != null;
 	});},
 	get _get_public_key () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -708,7 +708,7 @@ export var FulfillmentSingleSignature =  __class__ ('FulfillmentSingleSignature'
 		}
 		else {
 		}
-		if (self._pub_key === null) {
+		if (self._pub_key == null) {
 			return PublicKey ();
 		}
 		return self._pub_key;
@@ -728,7 +728,7 @@ export var FulfillmentSingleSignature =  __class__ ('FulfillmentSingleSignature'
 		}
 		else {
 		}
-		if (value === null) {
+		if (value == null) {
 			self._pub_key = null;
 			return ;
 		}
@@ -753,7 +753,7 @@ export var FulfillmentSingleSignature =  __class__ ('FulfillmentSingleSignature'
 		}
 		else {
 		}
-		if (self._signature === null) {
+		if (self._signature == null) {
 			return ED25519Signature ();
 		}
 		return self._signature;
@@ -773,7 +773,7 @@ export var FulfillmentSingleSignature =  __class__ ('FulfillmentSingleSignature'
 		}
 		else {
 		}
-		if (value === null) {
+		if (value == null) {
 			self._signature = null;
 		}
 		else {
@@ -937,7 +937,7 @@ export var FulfillmentSingleSignature =  __class__ ('FulfillmentSingleSignature'
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		return self._signature !== null;
+		return self._signature != null;
 	});}
 });
 Object.defineProperty (FulfillmentSingleSignature, 'signature', property.call (FulfillmentSingleSignature, FulfillmentSingleSignature._get_signature, FulfillmentSingleSignature._set_signature));
@@ -1288,7 +1288,7 @@ export var PublicKeySignaturePair =  __class__ ('PublicKeySignaturePair', [BaseD
 		}
 		else {
 		}
-		if (self._public_key === null) {
+		if (self._public_key == null) {
 			return PublicKey ();
 		}
 		return self._public_key;
@@ -1308,7 +1308,7 @@ export var PublicKeySignaturePair =  __class__ ('PublicKeySignaturePair', [BaseD
 		}
 		else {
 		}
-		if (pk === null) {
+		if (pk == null) {
 			self._public_key = null;
 			return ;
 		}
@@ -1333,7 +1333,7 @@ export var PublicKeySignaturePair =  __class__ ('PublicKeySignaturePair', [BaseD
 		}
 		else {
 		}
-		if (self._signature === null) {
+		if (self._signature == null) {
 			return ED25519Signature ();
 		}
 		return self._signature;
@@ -1353,7 +1353,7 @@ export var PublicKeySignaturePair =  __class__ ('PublicKeySignaturePair', [BaseD
 		}
 		else {
 		}
-		if (value === null) {
+		if (value == null) {
 			self._signature = null;
 		}
 		else {
@@ -1478,7 +1478,7 @@ export var FulfillmentAtomicSwap =  __class__ ('FulfillmentAtomicSwap', [Fulfill
 		}
 		else {
 		}
-		if (self._pub_key === null) {
+		if (self._pub_key == null) {
 			return PublicKey ();
 		}
 		return self._pub_key;
@@ -1498,7 +1498,7 @@ export var FulfillmentAtomicSwap =  __class__ ('FulfillmentAtomicSwap', [Fulfill
 		}
 		else {
 		}
-		if (value === null) {
+		if (value == null) {
 			self._pub_key = null;
 			return ;
 		}
@@ -1523,7 +1523,7 @@ export var FulfillmentAtomicSwap =  __class__ ('FulfillmentAtomicSwap', [Fulfill
 		}
 		else {
 		}
-		if (self._signature === null) {
+		if (self._signature == null) {
 			return ED25519Signature ();
 		}
 		return self._signature;
@@ -1543,7 +1543,7 @@ export var FulfillmentAtomicSwap =  __class__ ('FulfillmentAtomicSwap', [Fulfill
 		}
 		else {
 		}
-		if (value === null) {
+		if (value == null) {
 			self._signature = null;
 		}
 		else {
@@ -1564,7 +1564,7 @@ export var FulfillmentAtomicSwap =  __class__ ('FulfillmentAtomicSwap', [Fulfill
 		}
 		else {
 		}
-		if (self._secret === null) {
+		if (self._secret == null) {
 			return AtomicSwapSecret ();
 		}
 		return self._secret;
@@ -1584,7 +1584,7 @@ export var FulfillmentAtomicSwap =  __class__ ('FulfillmentAtomicSwap', [Fulfill
 		}
 		else {
 		}
-		if (value === null) {
+		if (value == null) {
 			self._secret = null;
 		}
 		else {
@@ -1647,7 +1647,7 @@ export var FulfillmentAtomicSwap =  __class__ ('FulfillmentAtomicSwap', [Fulfill
 		else {
 		}
 		var obj = dict ({'publickey': self.public_key.json (), 'signature': self.signature.json ()});
-		if (self._secret !== null) {
+		if (self._secret != null) {
 			obj ['secret'] = self.secret.json ();
 		}
 		return obj;
@@ -1728,7 +1728,7 @@ export var FulfillmentAtomicSwap =  __class__ ('FulfillmentAtomicSwap', [Fulfill
 			}
 			else {
 			}
-			if (self._secret !== null) {
+			if (self._secret != null) {
 				return input_hash_func (public_key, self.secret);
 			}
 			return input_hash_func (public_key);
@@ -1760,7 +1760,7 @@ export var FulfillmentAtomicSwap =  __class__ ('FulfillmentAtomicSwap', [Fulfill
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		return self._signature !== null;
+		return self._signature != null;
 	});}
 });
 Object.defineProperty (FulfillmentAtomicSwap, 'secret', property.call (FulfillmentAtomicSwap, FulfillmentAtomicSwap._get_secret, FulfillmentAtomicSwap._set_secret));

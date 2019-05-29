@@ -113,7 +113,7 @@ export var ERC20Address =  __class__ ('ERC20Address', [BinaryData], {
 		}
 		else {
 		}
-		if (obj !== null && !(isinstance (obj, str))) {
+		if (obj != null && !(isinstance (obj, str))) {
 			var __except0__ = py_TypeError ('ERC20 address is expected to be an encoded string when part of a JSON object, not {}'.format (py_typeof (obj)));
 			__except0__.__cause__ = null;
 			throw __except0__;
@@ -162,7 +162,7 @@ export var ERC20Hash =  __class__ ('ERC20Hash', [BinaryData], {
 		}
 		else {
 		}
-		if (obj !== null && !(isinstance (obj, str))) {
+		if (obj != null && !(isinstance (obj, str))) {
 			var __except0__ = py_TypeError ('ERC20 hash is expected to be an encoded string when part of a JSON object, not {}'.format (py_typeof (obj)));
 			__except0__.__cause__ = null;
 			throw __except0__;

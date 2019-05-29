@@ -5,7 +5,7 @@ import tfchain.polyfill.encoding.hex as jshex
 
 class Decimal:
     def __init__(self, value=None):
-        if value is None:
+        if value == None:
             value = '0'
         if isinstance(value, Decimal):
             self._value = value.value
@@ -19,7 +19,7 @@ class Decimal:
                 error = e;
             }
             """)
-            if error is not None:
+            if error != None:
                 raise ValueError(error)
             self._value = output
 

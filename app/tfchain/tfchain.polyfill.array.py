@@ -52,7 +52,7 @@ def concat(a, b):
 
 def slice_array(arr, begin, end=None):
     out = None
-    if end is None:
+    if end == None:
         __pragma__("js", "{}", """
         out = arr.slice(begin);
         """)
@@ -97,7 +97,7 @@ def sort(arr, f, reverse=False):
 def pop(arr, index=None):
     if isinstance(arr, list):
         return arr.pop(index)
-    if index is None:
+    if index == None:
         val = None
         __pragma__("js", "{}", """
         val = arr.pop();

@@ -220,6 +220,11 @@ export var Client =  __class__ ('Client', [object], {
 		}
 		var indices = list (range (len (self._addresses)));
 		random.shuffle (indices);
+		var headers = dict ({'Content-Type': 'Application/json;charset=UTF-8'});
+		var s = data;
+		if (!(isinstance (s, str))) {
+			var s = jsjson.json_dumps (s);
+		}
 		var resolve = function (result) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
@@ -238,6 +243,7 @@ export var Client =  __class__ ('Client', [object], {
 				return jsobj.as_dict (result.data);
 			}
 			if (result.code == 400) {
+				jslog.warning ('invalid data object posted to {}:'.format (endpoint), s);
 				var __except0__ = tferrors.ExplorerBadRequest ('error (code: {}): {}'.format (result.code, result.data), endpoint);
 				__except0__.__cause__ = null;
 				throw __except0__;
@@ -246,11 +252,6 @@ export var Client =  __class__ ('Client', [object], {
 			__except0__.__cause__ = null;
 			throw __except0__;
 		};
-		var headers = dict ({'Content-Type': 'Application/json;charset=UTF-8'});
-		var s = data;
-		if (!(isinstance (s, str))) {
-			var s = jsjson.json_dumps (s);
-		}
 		var address = self._addresses [indices [0]];
 		if (!(isinstance (address, str))) {
 			var __except0__ = py_TypeError ('explorer address expected to be a string, not {}'.format (py_typeof (address)));
@@ -321,6 +322,11 @@ export var Client =  __class__ ('Client', [object], {
 				}
 			}
 			else {
+			}
+			if (isinstance (reason, tferrors.ExplorerUserError)) {
+				var __except0__ = reason;
+				__except0__.__cause__ = null;
+				throw __except0__;
 			}
 			jslog.debug ('servers exhausted, previous POST call failed as well: {}'.format (reason));
 			var __except0__ = tferrors.ExplorerNotAvailable ('no explorer was available', endpoint, self._addresses);

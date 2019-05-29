@@ -35,12 +35,12 @@ export var BinaryData =  __class__ ('BinaryData', [BaseDataTypeClass], {
 		}
 		else {
 		}
-		if (strencoding !== null && !(isinstance (strencoding, str))) {
+		if (strencoding != null && !(isinstance (strencoding, str))) {
 			var __except0__ = py_TypeError ('strencoding should be None or a str, not be of type {}'.format (strencoding));
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		if (strencoding === null || jsstr.String (strencoding).lower ().strip ().__eq__ ('hex')) {
+		if (strencoding == null || jsstr.String (strencoding).lower ().strip ().__eq__ ('hex')) {
 			self._from_str = (function __lambda__ (s) {
 				if (arguments.length) {
 					var __ilastarg0__ = arguments.length - 1;
@@ -148,7 +148,7 @@ export var BinaryData =  __class__ ('BinaryData', [BaseDataTypeClass], {
 			throw __except0__;
 		}
 		self._strencoding = strencoding;
-		if (fixed_size !== null) {
+		if (fixed_size != null) {
 			if (!(isinstance (fixed_size, int))) {
 				var __except0__ = py_TypeError ('fixed size should be None or int, not be of type {}'.format (py_typeof (fixed_size)));
 				__except0__.__cause__ = null;
@@ -195,7 +195,7 @@ export var BinaryData =  __class__ ('BinaryData', [BaseDataTypeClass], {
 		}
 		else {
 		}
-		if (obj !== null && !(isinstance (obj, str))) {
+		if (obj != null && !(isinstance (obj, str))) {
 			var __except0__ = py_TypeError ('binary data is expected to be an encoded string when part of a JSON object');
 			__except0__.__cause__ = null;
 			throw __except0__;
@@ -239,7 +239,7 @@ export var BinaryData =  __class__ ('BinaryData', [BaseDataTypeClass], {
 		if (isinstance (value, BinaryData)) {
 			var value = value.value;
 		}
-		else if (value === null) {
+		else if (value == null) {
 			var value = bytes (jsarray.new_array (0));
 		}
 		else if (isinstance (value, str)) {
@@ -254,7 +254,7 @@ export var BinaryData =  __class__ ('BinaryData', [BaseDataTypeClass], {
 			throw __except0__;
 		}
 		var lvalue = len (value);
-		if (self._fixed_size !== null && lvalue != 0 && lvalue != self._fixed_size) {
+		if (self._fixed_size != null && lvalue != 0 && lvalue != self._fixed_size) {
 			var __except0__ = ValueError ('binary data was expected to be of fixed size {}, length {} is not allowed'.format (self._fixed_size, len (value)));
 			__except0__.__cause__ = null;
 			throw __except0__;
@@ -443,7 +443,7 @@ export var BinaryData =  __class__ ('BinaryData', [BaseDataTypeClass], {
 		}
 		else {
 		}
-		if (self._fixed_size === null) {
+		if (self._fixed_size == null) {
 			encoder.add_slice (self._value);
 		}
 		else {
@@ -465,7 +465,7 @@ export var BinaryData =  __class__ ('BinaryData', [BaseDataTypeClass], {
 		}
 		else {
 		}
-		if (self._fixed_size === null) {
+		if (self._fixed_size == null) {
 			encoder.add_slice (self._value);
 		}
 		else {
@@ -512,7 +512,7 @@ export var Hash =  __class__ ('Hash', [BinaryData], {
 		}
 		else {
 		}
-		if (obj !== null && !(isinstance (obj, str))) {
+		if (obj != null && !(isinstance (obj, str))) {
 			var __except0__ = py_TypeError ('hash is expected to be an encoded string when part of a JSON object, not {}'.format (py_typeof (obj)));
 			__except0__.__cause__ = null;
 			throw __except0__;
@@ -607,7 +607,7 @@ export var Currency =  __class__ ('Currency', [BaseDataTypeClass], {
 		}
 		else {
 		}
-		if (obj !== null && !(isinstance (obj, str))) {
+		if (obj != null && !(isinstance (obj, str))) {
 			var __except0__ = py_TypeError ('currency is expected to be a string , not type {}'.format (py_typeof (obj)));
 			__except0__.__cause__ = null;
 			throw __except0__;
@@ -823,7 +823,7 @@ export var Currency =  __class__ ('Currency', [BaseDataTypeClass], {
 		}
 		else {
 		}
-		if (value === null) {
+		if (value == null) {
 			self._value = jsdec.Decimal ();
 			return ;
 		}
@@ -1375,7 +1375,7 @@ export var Blockstake =  __class__ ('Blockstake', [BaseDataTypeClass], {
 		}
 		else {
 		}
-		if (obj !== null && !(isinstance (obj, str))) {
+		if (obj != null && !(isinstance (obj, str))) {
 			var __except0__ = py_TypeError ('block stake is expected to be a string when part of a JSON object, not type {}'.format (py_typeof (obj)));
 			__except0__.__cause__ = null;
 			throw __except0__;

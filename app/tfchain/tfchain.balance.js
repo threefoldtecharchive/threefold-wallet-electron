@@ -546,7 +546,7 @@ export var WalletBalance =  __class__ ('WalletBalance', [object], {
 		}
 		else {
 		}
-		if (other === null) {
+		if (other == null) {
 			return self;
 		}
 		if (isinstance (other, tuple ([WalletsBalance, MultiSigWalletBalance]))) {
@@ -785,7 +785,7 @@ export var MultiSigWalletBalance =  __class__ ('MultiSigWalletBalance', [WalletB
 		}
 		else {
 		}
-		if (other === null) {
+		if (other == null) {
 			return self;
 		}
 		if (!(isinstance (other, MultiSigWalletBalance))) {
@@ -947,7 +947,7 @@ export var WalletsBalance =  __class__ ('WalletsBalance', [WalletBalance], {
 		}
 		else {
 		}
-		if (other === null) {
+		if (other == null) {
 			return self;
 		}
 		if (!(isinstance (other, WalletBalance))) {
@@ -1017,7 +1017,7 @@ export var WalletsBalance =  __class__ ('WalletsBalance', [WalletBalance], {
 		var addresses = set ();
 		var ms_addresses = set ();
 		var refund = null;
-		if (source === null || jsobj.is_undefined (source)) {
+		if (source == null) {
 			for (var co of self.outputs_available) {
 				addresses.add (co.condition.unlockhash.__str__ ());
 			}
@@ -1232,10 +1232,10 @@ export var WalletsBalance =  __class__ ('WalletsBalance', [WalletBalance], {
 		}
 		else {
 		}
-		if (outputs === null) {
+		if (outputs == null) {
 			var outputs = [];
 		}
-		if (collected === null) {
+		if (collected == null) {
 			var collected = Currency ();
 		}
 		for (var [address, wallet] of self.wallets.py_items ()) {

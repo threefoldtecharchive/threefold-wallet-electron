@@ -299,7 +299,7 @@ export var try_as_bool = function (obj) {
 	        result = f;
 	    }
 	    
-	return tuple ([result, result !== null]);
+	return tuple ([result, result != null]);
 };
 export var is_js_obj = function (obj) {
 	if (arguments.length) {

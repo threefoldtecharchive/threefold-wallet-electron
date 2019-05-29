@@ -42,11 +42,11 @@ class TransactionV128(TransactionBaseClass):
         Optional binary data attached to this Transaction,
         with a max length of 83 bytes.
         """
-        if self._data is None:
+        if self._data == None:
             return BinaryData(strencoding='base64')
         return self._data
     def _custom_data_setter(self, value):
-        if value is None:
+        if value == None:
             self._data = None
             return
         if isinstance(value, BinaryData):
@@ -63,13 +63,13 @@ class TransactionV128(TransactionBaseClass):
         """
         Retrieve the new mint condition which will be set
         """
-        if self._mint_condition is None:
+        if self._mint_condition == None:
             return ConditionNil()
         return self._mint_condition
 
     @mint_condition.setter
     def mint_condition(self, value):
-        if value is None:
+        if value == None:
             self._mint_condition = None
             return
         if not isinstance(value, ConditionBaseClass):
@@ -82,13 +82,13 @@ class TransactionV128(TransactionBaseClass):
         """
         Retrieve the parent mint condition which will be set
         """
-        if self._parent_mint_condition is None:
+        if self._parent_mint_condition == None:
             return ConditionNil()
         return self._parent_mint_condition
 
     @parent_mint_condition.setter
     def parent_mint_condition(self, value):
-        if value is None:
+        if value == None:
             self._parent_mint_condition = None
             return
         if not isinstance(value, ConditionBaseClass):
@@ -97,20 +97,20 @@ class TransactionV128(TransactionBaseClass):
         self._parent_mint_condition = value
 
     def mint_fulfillment_defined(self):
-        return self._mint_fulfillment is not None
+        return self._mint_fulfillment != None
 
     @property
     def mint_fulfillment(self):
         """
         Retrieve the current mint fulfillment
         """
-        if self._mint_fulfillment is None:
+        if self._mint_fulfillment == None:
             return FulfillmentSingleSignature()
         return self._mint_fulfillment
 
     @mint_fulfillment.setter
     def mint_fulfillment(self, value):
-        if value is None:
+        if value == None:
             self._mint_fulfillment = None
             return
         if not isinstance(value, FulfillmentBaseClass):
@@ -186,7 +186,7 @@ class TransactionV128(TransactionBaseClass):
         }
 
     def _extra_signature_requests_new(self):
-        if self._parent_mint_condition is None:
+        if self._parent_mint_condition == None:
             return []  # nothing to be signed
         return self._mint_fulfillment.signature_requests_new(
             # no extra objects are to be included within txn scope
@@ -195,7 +195,7 @@ class TransactionV128(TransactionBaseClass):
         )
 
     def _extra_is_fulfilled(self):
-        if self._parent_mint_condition is None:
+        if self._parent_mint_condition == None:
             return False
         return self.mint_fulfillment.is_fulfilled(parent_condition=self._parent_mint_condition)
 
@@ -230,11 +230,11 @@ class TransactionV129(TransactionBaseClass):
         Optional binary data attached to this Transaction,
         with a max length of 83 bytes.
         """
-        if self._data is None:
+        if self._data == None:
             return BinaryData(strencoding='base64')
         return self._data
     def _custom_data_setter(self, value):
-        if value is None:
+        if value == None:
             self._data = None
             return
         if isinstance(value, BinaryData):
@@ -268,20 +268,20 @@ class TransactionV129(TransactionBaseClass):
         self._miner_fees.append(Currency(value=value))
 
     def mint_fulfillment_defined(self):
-        return self._mint_fulfillment is not None
+        return self._mint_fulfillment != None
 
     @property
     def mint_fulfillment(self):
         """
         Retrieve the current mint fulfillment
         """
-        if self._mint_fulfillment is None:
+        if self._mint_fulfillment == None:
             return FulfillmentSingleSignature()
         return self._mint_fulfillment
 
     @mint_fulfillment.setter
     def mint_fulfillment(self, value):
-        if value is None:
+        if value == None:
             self._mint_fulfillment = None
             return
         if not isinstance(value, FulfillmentBaseClass):
@@ -294,13 +294,13 @@ class TransactionV129(TransactionBaseClass):
         """
         Retrieve the parent mint condition which will be set
         """
-        if self._parent_mint_condition is None:
+        if self._parent_mint_condition == None:
             return ConditionNil()
         return self._parent_mint_condition
 
     @parent_mint_condition.setter
     def parent_mint_condition(self, value):
-        if value is None:
+        if value == None:
             self._parent_mint_condition = None
             return
         if not isinstance(value, ConditionBaseClass):
@@ -372,7 +372,7 @@ class TransactionV129(TransactionBaseClass):
         }
 
     def _extra_signature_requests_new(self):
-        if self._parent_mint_condition is None:
+        if self._parent_mint_condition == None:
             return []  # nothing to be signed
         return self._mint_fulfillment.signature_requests_new(
             # no extra objects are to be included within txn scope
@@ -381,6 +381,6 @@ class TransactionV129(TransactionBaseClass):
         )
 
     def _extra_is_fulfilled(self):
-        if self._parent_mint_condition is None:
+        if self._parent_mint_condition == None:
             return False
         return self.mint_fulfillment.is_fulfilled(parent_condition=self._parent_mint_condition)

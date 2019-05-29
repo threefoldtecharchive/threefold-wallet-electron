@@ -62,7 +62,7 @@ class NetworkAddress(BaseDataTypeClass):
         self._address = None
         self.value = address
         # if network type is defined, validate it now
-        if network_type is not None:
+        if network_type != None:
             if not isinstance(network_type, NetworkAddress.Type):
                 raise TypeError("network type is to be of type NetworkAddress.Type, not {}".format(
                     type(network_type)))
@@ -72,7 +72,7 @@ class NetworkAddress(BaseDataTypeClass):
 
     @classmethod
     def from_json(cls, obj):
-        if obj is not None and not isinstance(obj, str):
+        if obj != None and not isinstance(obj, str):
             raise TypeError(
                 "network address is expected to be an encoded string when part of a JSON object, not {}".format(type(obj)))
         if obj == '':
@@ -94,10 +94,10 @@ class NetworkAddress(BaseDataTypeClass):
         Set the NetworkAddress either from another NetworkAddress or
         more likely a string value (representing a Hostname, IPv4- or IPv6 address).
         """
-        if value is None:
+        if value == None:
             self._type = NetworkAddress.Type.HOSTNAME
             self._address = bytes()
-        elif isinstance(value, str) and NetworkAddress.HOSTNAME_REGEXP.match(value) is not None:
+        elif isinstance(value, str) and NetworkAddress.HOSTNAME_REGEXP.match(value) != None:
             if len(value) > NetworkAddress.HOSTNAME_LENGTH_MAX:
                 raise ValueError("the length of a hostname can maximum be {} bytes long".format(
                     NetworkAddress.HOSTNAME_LENGTH_MAX))
@@ -157,7 +157,7 @@ class BotName(BaseDataTypeClass):
 
     @classmethod
     def from_json(cls, obj):
-        if obj is not None and not isinstance(obj, str):
+        if obj != None and not isinstance(obj, str):
             raise TypeError(
                 "bot name is expected to be an encoded string when part of a JSON object")
         if obj == '':
@@ -169,7 +169,7 @@ class BotName(BaseDataTypeClass):
         """
         The internal bot name value (a string).
         """
-        if self._value is None:
+        if self._value == None:
             return ''
         return self._value
 
@@ -178,13 +178,13 @@ class BotName(BaseDataTypeClass):
         """
         Set the internal bot name value (as None or as a string).
         """
-        if value is None:
+        if value == None:
             self._value = None
         elif isinstance(value, str):
             if len(value) > BotName.LENGTH_MAX:
                 raise ValueError("the length of a botname can maximum be {} characters long".format(
                     BotName.LENGTH_MAX))
-            if BotName.REGEXP.match(value) is None:
+            if BotName.REGEXP.match(value) == None:
                 raise ValueError("bot name '{}' is not valid".format(value))
             self._value = value
         elif isinstance(value, BotName):

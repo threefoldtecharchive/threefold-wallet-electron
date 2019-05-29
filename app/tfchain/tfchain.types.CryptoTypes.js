@@ -262,7 +262,7 @@ export var PublicKey =  __class__ ('PublicKey', [BaseDataTypeClass], {
 		}
 		else {
 		}
-		if (value === null) {
+		if (value == null) {
 			var value = PublicKeySpecifier.NIL;
 		}
 		else if (!(isinstance (value, PublicKeySpecifier))) {
@@ -286,7 +286,7 @@ export var PublicKey =  __class__ ('PublicKey', [BaseDataTypeClass], {
 		}
 		else {
 		}
-		if (self._hash === null) {
+		if (self._hash == null) {
 			return Hash ();
 		}
 		return self._hash;
@@ -306,7 +306,7 @@ export var PublicKey =  __class__ ('PublicKey', [BaseDataTypeClass], {
 		}
 		else {
 		}
-		if (value === null) {
+		if (value == null) {
 			self._hash = null;
 		}
 		else if (isinstance (value, Hash)) {

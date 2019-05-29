@@ -13,7 +13,7 @@ class IPAddress:
                 err = e;
             }
             """)
-            if err is not None:
+            if err != None:
                 raise ValueError("invalid str value {}: {}".format(value, err))
             self._value = v
         elif isinstance(value, (bytes, bytearray)) or jsarr.is_uint8_array(value):
@@ -26,7 +26,7 @@ class IPAddress:
                 err = e;
             }
             """)
-            if err is not None:
+            if err != None:
                 raise ValueError("invalid raw value {}: {}".format(value, err))
             self._value = v
         elif isinstance(value, IPAddress):

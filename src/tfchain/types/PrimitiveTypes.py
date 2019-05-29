@@ -15,10 +15,10 @@ class BinaryData(BaseDataTypeClass):
 
     def __init__(self, value=None, fixed_size=None, strencoding=None):
         # define string encoding
-        if strencoding is not None and not isinstance(strencoding, str):
+        if strencoding != None and not isinstance(strencoding, str):
             raise TypeError(
                 "strencoding should be None or a str, not be of type {}".format(strencoding))
-        if strencoding is None or jsstr.String(strencoding).lower().strip().__eq__('hex'):
+        if strencoding == None or jsstr.String(strencoding).lower().strip().__eq__('hex'):
             self._from_str = lambda s: jshex.bytes_from_hex(s)
             self._to_str = lambda value: jshex.bytes_to_hex(value)
         elif jsstr.String(strencoding).lower().strip().__eq__('base64'):
@@ -34,7 +34,7 @@ class BinaryData(BaseDataTypeClass):
         self._strencoding = strencoding
 
         # define fixed size
-        if fixed_size is not None:
+        if fixed_size != None:
             if not isinstance(fixed_size, int):
                 raise TypeError(
                     "fixed size should be None or int, not be of type {}".format(type(fixed_size)))
@@ -57,7 +57,7 @@ class BinaryData(BaseDataTypeClass):
 
     @classmethod
     def from_json(cls, obj, fixed_size=None, strencoding=None):
-        if obj is not None and not isinstance(obj, str):
+        if obj != None and not isinstance(obj, str):
             raise TypeError(
                 "binary data is expected to be an encoded string when part of a JSON object")
         if obj == '':
@@ -73,7 +73,7 @@ class BinaryData(BaseDataTypeClass):
         # normalize the value
         if isinstance(value, BinaryData):
             value = value.value
-        elif value is None:
+        elif value == None:
             value = bytes(jsarray.new_array(0))
         elif isinstance(value, str):
             value = self._from_str(value)
@@ -84,7 +84,7 @@ class BinaryData(BaseDataTypeClass):
                 "binary data can only be set to a BinaryData, str, bytes or bytearray, not {}".format(type(value)))
         # if fixed size, check this now
         lvalue = len(value)
-        if self._fixed_size is not None and lvalue != 0 and lvalue != self._fixed_size:
+        if self._fixed_size != None and lvalue != 0 and lvalue != self._fixed_size:
             raise ValueError(
                 "binary data was expected to be of fixed size {}, length {} is not allowed".format(
                     self._fixed_size, len(value)))
@@ -139,7 +139,7 @@ class BinaryData(BaseDataTypeClass):
         Encode this binary data according to the Sia Binary Encoding format.
         Either encoded as a slice or an array, depending on whether or not it is fixed sized.
         """
-        if self._fixed_size is None:
+        if self._fixed_size == None:
             encoder.add_slice(self._value)
         else:
             encoder.add_array(self._value)
@@ -149,7 +149,7 @@ class BinaryData(BaseDataTypeClass):
         Encode this binary data according to the Rivine Binary Encoding format.
         Either encoded as a slice or an array, depending on whether or not it is fixed sized.
         """
-        if self._fixed_size is None:
+        if self._fixed_size == None:
             encoder.add_slice(self._value)
         else:
             encoder.add_array(self._value)
@@ -167,7 +167,7 @@ class Hash(BinaryData):
 
     @classmethod
     def from_json(cls, obj):
-        if obj is not None and not isinstance(obj, str):
+        if obj != None and not isinstance(obj, str):
             raise TypeError(
                 "hash is expected to be an encoded string when part of a JSON object, not {}".format(type(obj)))
         if obj == '':
@@ -198,7 +198,7 @@ class Currency(BaseDataTypeClass):
 
     @classmethod
     def from_str(cls, obj, lowest_unit=False):
-        if obj is not None and not isinstance(obj, str):
+        if obj != None and not isinstance(obj, str):
             raise TypeError(
                 "currency is expected to be a string , not type {}".format(type(obj)))
         if obj == '':
@@ -239,7 +239,7 @@ class Currency(BaseDataTypeClass):
 
     @value.setter
     def value(self, value):
-        if value is None:
+        if value == None:
             self._value = jsdec.Decimal()
             return
         if isinstance(value, Currency):
@@ -406,7 +406,7 @@ class Blockstake(BaseDataTypeClass):
 
     @classmethod
     def from_json(cls, obj):
-        if obj is not None and not isinstance(obj, str):
+        if obj != None and not isinstance(obj, str):
             raise TypeError(
                 "block stake is expected to be a string when part of a JSON object, not type {}".format(type(obj)))
         if obj == '':

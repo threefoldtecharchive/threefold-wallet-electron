@@ -416,7 +416,7 @@ export var TransactionV1 =  __class__ ('TransactionV1', [TransactionBaseClass], 
 		}
 		else {
 		}
-		if (self._data === null) {
+		if (self._data == null) {
 			return BinaryData (__kwargtrans__ ({strencoding: 'base64'}));
 		}
 		return self._data;
@@ -436,7 +436,7 @@ export var TransactionV1 =  __class__ ('TransactionV1', [TransactionBaseClass], 
 		}
 		else {
 		}
-		if (value === null) {
+		if (value == null) {
 			self._data = null;
 			return ;
 		}

@@ -42,7 +42,7 @@ export var opts_get_with_defaults = function (opts, argv) {
 	else {
 	}
 	var args = [];
-	if (opts === null) {
+	if (opts == null) {
 		var opts = dict ({});
 	}
 	for (var [arg, py_default] of jsobj.get_items (argv)) {

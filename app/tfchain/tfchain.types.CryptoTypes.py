@@ -88,7 +88,7 @@ class PublicKey(BaseDataTypeClass):
 
     @specifier.setter
     def specifier(self, value):
-        if value is None:
+        if value == None:
             value = PublicKeySpecifier.NIL
         elif not isinstance(value, PublicKeySpecifier):
             raise TypeError("expected value to be a PublicKeySpecifier, not {}".format(type(value)))
@@ -96,13 +96,13 @@ class PublicKey(BaseDataTypeClass):
 
     @property
     def hash(self):
-        if self._hash is None:
+        if self._hash == None:
             return Hash()
         return self._hash
 
     @hash.setter
     def hash(self, value):
-        if value is None:
+        if value == None:
             self._hash = None
         elif isinstance(value, Hash):
             self._hash = value

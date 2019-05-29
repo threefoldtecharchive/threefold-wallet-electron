@@ -195,7 +195,7 @@ export var promise_pool_new = function (generator, limit, cb) {
 	}
 	else {
 	}
-	if (limit === null || !(isinstance (limit, int))) {
+	if (limit == null || !(isinstance (limit, int))) {
 		var limit = 8;
 	}
 	else if (limit < 1) {
@@ -228,7 +228,7 @@ export var promise_pool_new = function (generator, limit, cb) {
 	};
 	var pool = jspromisepool.Pool (producer, limit);
 	var results = null;
-	if (cb === null) {
+	if (cb == null) {
 		var results = [];
 		var cb = (function __lambda__ (result) {
 			if (arguments.length) {
@@ -265,7 +265,7 @@ export var promise_pool_new = function (generator, limit, cb) {
 	};
 	pool.addEventListener ('fulfilled', fulfilled_cb);
 	var p = pool.start ();
-	if (results === null) {
+	if (results == null) {
 		return p;
 	}
 	return chain (p, (function __lambda__ (_) {

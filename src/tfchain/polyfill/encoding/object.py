@@ -120,7 +120,7 @@ def try_as_bool(obj):
         result = f;
     }
     """)
-    return (result, (result is not None))
+    return (result, (result != None))
 
 def is_js_obj(obj):
     result = None

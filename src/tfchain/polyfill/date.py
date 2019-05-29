@@ -48,7 +48,7 @@ def parse_duration(v):
         if v.isdigit():
             return jsstr.to_int(v) # shortcut for when string is an integer
         parts = _duration_re.match(v.value)
-        if parts is None:
+        if parts == None:
             raise ValueError(
                 "Could not parse any time information from '{}'.  Examples of valid strings: '8h', '2d8h5m20s', '2m4s'".format(v.value))
         time_params = {name: jsdec.Decimal(param).__float__() for name, param in parts.groupdict().items() if param}

@@ -315,7 +315,7 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 			else {
 			}
 			var block = result.get_or ('block', null);
-			if (block === null) {
+			if (block == null) {
 				var __except0__ = tferrors.ExplorerInvalidResponse ('block property is undefined', endpoint, result);
 				__except0__.__cause__ = null;
 				throw __except0__;
@@ -831,7 +831,7 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 					}
 				}
 				var creation_txn = self._transaction_from_explorer_transaction (creation_txn, __kwargtrans__ ({endpoint: endpoint, resp: result}));
-				if (spend_txn !== null) {
+				if (spend_txn != null) {
 					var spend_txn = self._transaction_from_explorer_transaction (spend_txn, __kwargtrans__ ({endpoint: endpoint, resp: result}));
 				}
 				var output = null;
@@ -841,7 +841,7 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 						break;
 					}
 				}
-				if (output === null) {
+				if (output == null) {
 					var __except0__ = tferrors.ExplorerInvalidResponse ("expected output {} to be part of creation Tx, but it wasn't".format (id), endpoint, result);
 					__except0__.__cause__ = null;
 					throw __except0__;
@@ -878,7 +878,7 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 				return result;
 			}
 			var ps = [self._block_get_by_hash (result.creation_transaction.blockid)];
-			if (result.spend_transaction !== null && !(result.spend_transaction.unconfirmed)) {
+			if (result.spend_transaction != null && !(result.spend_transaction.unconfirmed)) {
 				ps.append (self._block_get_by_hash (result.spend_transaction.blockid));
 			}
 			var p = jsasync.wait (...ps);
@@ -946,7 +946,7 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 		}
 		else {
 		}
-		if (resp === null) {
+		if (resp == null) {
 			var resp = jsobj.new_dict ();
 		}
 		var transaction = transactions.from_json (__kwargtrans__ ({obj: etxn ['rawtransaction'], id: etxn ['id']}));
@@ -1083,7 +1083,7 @@ export var ExplorerOutputResult =  __class__ ('ExplorerOutputResult', [object], 
 			throw __except0__;
 		}
 		self._creation_tx = creation_tx;
-		if (spend_tx !== null && !(isinstance (spend_tx, TransactionBaseClass))) {
+		if (spend_tx != null && !(isinstance (spend_tx, TransactionBaseClass))) {
 			var __except0__ = py_TypeError ('spend tx has to be None or be of type TransactionBaseClass, not be of type {}'.format (py_typeof (spend_tx)));
 			__except0__.__cause__ = null;
 			throw __except0__;
@@ -1460,7 +1460,7 @@ export var ExplorerUnlockhashResult =  __class__ ('ExplorerUnlockhashResult', [o
 				}
 			}
 		}
-		if (info !== null) {
+		if (info != null) {
 			balance.chain_height = info.height;
 			balance.chain_time = info.timestamp;
 			balance.chain_blockid = info.blockid;
@@ -1493,7 +1493,7 @@ export var ExplorerUnlockhashResult =  __class__ ('ExplorerUnlockhashResult', [o
 						__except0__.__cause__ = null;
 						throw __except0__;
 					}
-					if (balance === null) {
+					if (balance == null) {
 						var balance = MultiSigWalletBalance (__kwargtrans__ ({owners: oc.unlockhashes, signature_count: oc.required_signatures}));
 					}
 					balance.output_add (txn, index, __kwargtrans__ ({confirmed: !(txn.unconfirmed), spent: true}));
@@ -1507,7 +1507,7 @@ export var ExplorerUnlockhashResult =  __class__ ('ExplorerUnlockhashResult', [o
 						__except0__.__cause__ = null;
 						throw __except0__;
 					}
-					if (balance === null) {
+					if (balance == null) {
 						var balance = MultiSigWalletBalance (__kwargtrans__ ({owners: oc.unlockhashes, signature_count: oc.required_signatures}));
 					}
 					balance.output_add (txn, index, __kwargtrans__ ({confirmed: !(txn.unconfirmed), spent: false}));
@@ -1518,7 +1518,7 @@ export var ExplorerUnlockhashResult =  __class__ ('ExplorerUnlockhashResult', [o
 				var balance = MultiSigWalletBalance (__kwargtrans__ ({owners: oc.unlockhashes, signature_count: oc.required_signatures}));
 			}
 		}
-		if (balance === null) {
+		if (balance == null) {
 			return WalletBalance ();
 		}
 		return balance;
@@ -1935,7 +1935,7 @@ export var TFChainMinterClient =  __class__ ('TFChainMinterClient', [object], {
 		}
 		var tfmc = self.clone ();
 		var endpoint = '/explorer/mintcondition';
-		if (height !== null) {
+		if (height != null) {
 			if (!(isinstance (height, tuple ([int, str])))) {
 				var __except0__ = py_TypeError ('invalid block height given');
 				__except0__.__cause__ = null;

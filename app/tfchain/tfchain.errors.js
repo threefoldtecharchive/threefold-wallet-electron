@@ -2,16 +2,35 @@ import {AssertionError, AttributeError, BaseException, DeprecationWarning, Excep
 import {datetime} from './datetime.js';
 import * as jsobj from './tfchain.polyfill.encoding.object.js';
 var __name__ = 'tfchain.errors';
-export var InvalidPublicKeySpecifier =  __class__ ('InvalidPublicKeySpecifier', [Exception], {
+export var TFChainBaseException =  __class__ ('TFChainBaseException', [Exception], {
+	__module__: __name__,
+	get str () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self.__str__ ();
+	});}
+});
+export var InvalidPublicKeySpecifier =  __class__ ('InvalidPublicKeySpecifier', [TFChainBaseException], {
 	__module__: __name__,
 });
-export var UnknownTransansactionVersion =  __class__ ('UnknownTransansactionVersion', [Exception], {
+export var UnknownTransansactionVersion =  __class__ ('UnknownTransansactionVersion', [TFChainBaseException], {
 	__module__: __name__,
 });
-export var InsufficientFunds =  __class__ ('InsufficientFunds', [Exception], {
+export var InsufficientFunds =  __class__ ('InsufficientFunds', [TFChainBaseException], {
 	__module__: __name__,
 });
-export var CurrencyPrecisionOverflow =  __class__ ('CurrencyPrecisionOverflow', [Exception], {
+export var CurrencyPrecisionOverflow =  __class__ ('CurrencyPrecisionOverflow', [TFChainBaseException], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, value) {
 		if (arguments.length) {
@@ -70,7 +89,7 @@ export var CurrencyPrecisionOverflow =  __class__ ('CurrencyPrecisionOverflow', 
 });
 Object.defineProperty (CurrencyPrecisionOverflow, 'value', property.call (CurrencyPrecisionOverflow, CurrencyPrecisionOverflow._get_value));
 Object.defineProperty (CurrencyPrecisionOverflow, 'precision', property.call (CurrencyPrecisionOverflow, CurrencyPrecisionOverflow._get_precision));;
-export var CurrencyNegativeValue =  __class__ ('CurrencyNegativeValue', [Exception], {
+export var CurrencyNegativeValue =  __class__ ('CurrencyNegativeValue', [TFChainBaseException], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, value) {
 		if (arguments.length) {
@@ -108,7 +127,7 @@ export var CurrencyNegativeValue =  __class__ ('CurrencyNegativeValue', [Excepti
 	});}
 });
 Object.defineProperty (CurrencyNegativeValue, 'value', property.call (CurrencyNegativeValue, CurrencyNegativeValue._get_value));;
-export var ExplorerError =  __class__ ('ExplorerError', [Exception], {
+export var ExplorerError =  __class__ ('ExplorerError', [TFChainBaseException], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, message, endpoint) {
 		if (arguments.length) {
@@ -294,10 +313,10 @@ export var ExplorerInvalidResponse =  __class__ ('ExplorerInvalidResponse', [Exp
 	});}
 });
 Object.defineProperty (ExplorerInvalidResponse, 'response', property.call (ExplorerInvalidResponse, ExplorerInvalidResponse._get_response));;
-export var DoubleSignError =  __class__ ('DoubleSignError', [Exception], {
+export var DoubleSignError =  __class__ ('DoubleSignError', [TFChainBaseException], {
 	__module__: __name__,
 });
-export var AtomicSwapInsufficientAmountError =  __class__ ('AtomicSwapInsufficientAmountError', [Exception], {
+export var AtomicSwapInsufficientAmountError =  __class__ ('AtomicSwapInsufficientAmountError', [TFChainBaseException], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, amount, minimum_miner_fee) {
 		if (arguments.length) {
@@ -354,7 +373,7 @@ export var AtomicSwapInsufficientAmountError =  __class__ ('AtomicSwapInsufficie
 });
 Object.defineProperty (AtomicSwapInsufficientAmountError, 'minimum_miner_fee', property.call (AtomicSwapInsufficientAmountError, AtomicSwapInsufficientAmountError._get_minimum_miner_fee));
 Object.defineProperty (AtomicSwapInsufficientAmountError, 'amount', property.call (AtomicSwapInsufficientAmountError, AtomicSwapInsufficientAmountError._get_amount));;
-export var AtomicSwapContractError =  __class__ ('AtomicSwapContractError', [Exception], {
+export var AtomicSwapContractError =  __class__ ('AtomicSwapContractError', [TFChainBaseException], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, message, contract) {
 		if (arguments.length) {
@@ -459,7 +478,7 @@ export var AtomicSwapContractSpent =  __class__ ('AtomicSwapContractSpent', [Ato
 	});}
 });
 Object.defineProperty (AtomicSwapContractSpent, 'transaction', property.call (AtomicSwapContractSpent, AtomicSwapContractSpent._get_transaction));;
-export var AtomicSwapContractNotFound =  __class__ ('AtomicSwapContractNotFound', [Exception], {
+export var AtomicSwapContractNotFound =  __class__ ('AtomicSwapContractNotFound', [TFChainBaseException], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, outputid) {
 		if (arguments.length) {
@@ -497,7 +516,7 @@ export var AtomicSwapContractNotFound =  __class__ ('AtomicSwapContractNotFound'
 	});}
 });
 Object.defineProperty (AtomicSwapContractNotFound, 'outputid', property.call (AtomicSwapContractNotFound, AtomicSwapContractNotFound._get_outputid));;
-export var ThreeBotNotFound =  __class__ ('ThreeBotNotFound', [Exception], {
+export var ThreeBotNotFound =  __class__ ('ThreeBotNotFound', [TFChainBaseException], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, identifier) {
 		if (arguments.length) {
@@ -535,7 +554,7 @@ export var ThreeBotNotFound =  __class__ ('ThreeBotNotFound', [Exception], {
 	});}
 });
 Object.defineProperty (ThreeBotNotFound, 'identifier', property.call (ThreeBotNotFound, ThreeBotNotFound._get_identifier));;
-export var ThreeBotInactive =  __class__ ('ThreeBotInactive', [Exception], {
+export var ThreeBotInactive =  __class__ ('ThreeBotInactive', [TFChainBaseException], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, identifier, expiration) {
 		if (arguments.length) {
@@ -592,7 +611,7 @@ export var ThreeBotInactive =  __class__ ('ThreeBotInactive', [Exception], {
 });
 Object.defineProperty (ThreeBotInactive, 'expiration', property.call (ThreeBotInactive, ThreeBotInactive._get_expiration));
 Object.defineProperty (ThreeBotInactive, 'identifier', property.call (ThreeBotInactive, ThreeBotInactive._get_identifier));;
-export var AddressNotInWallet =  __class__ ('AddressNotInWallet', [Exception], {
+export var AddressNotInWallet =  __class__ ('AddressNotInWallet', [TFChainBaseException], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, address) {
 		if (arguments.length) {
@@ -630,7 +649,7 @@ export var AddressNotInWallet =  __class__ ('AddressNotInWallet', [Exception], {
 	});}
 });
 Object.defineProperty (AddressNotInWallet, 'address', property.call (AddressNotInWallet, AddressNotInWallet._get_address));;
-export var ERC20RegistrationForbidden =  __class__ ('ERC20RegistrationForbidden', [Exception], {
+export var ERC20RegistrationForbidden =  __class__ ('ERC20RegistrationForbidden', [TFChainBaseException], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, address) {
 		if (arguments.length) {

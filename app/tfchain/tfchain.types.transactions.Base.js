@@ -284,7 +284,7 @@ export var TransactionBaseClass =  __class__ ('TransactionBaseClass', [object], 
 		}
 		else {
 		}
-		if (self._id === null) {
+		if (self._id == null) {
 			return hash (jsjson.json_dumps (self.json ()));
 		}
 		return hash (self.id);

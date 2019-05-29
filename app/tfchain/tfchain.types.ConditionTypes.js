@@ -75,10 +75,18 @@ export var from_recipient = function (recipient, lock) {
 	}
 	else {
 		var condition = null;
-		if (recipient === null) {
+		if (recipient == null) {
 			var condition = nil_new ();
 		}
-		else if (isinstance (recipient, tuple ([UnlockHash, str]))) {
+		else if (isinstance (recipient, str)) {
+			if (recipient == jsstr.repeat ('0', 78)) {
+				var condition = nil_new ();
+			}
+			else {
+				var condition = unlockhash_new (__kwargtrans__ ({unlockhash: recipient}));
+			}
+		}
+		else if (isinstance (recipient, UnlockHash)) {
 			var condition = unlockhash_new (__kwargtrans__ ({unlockhash: recipient}));
 		}
 		else if (isinstance (recipient, tuple ([bytes, bytearray])) || jsarr.is_uint8_array (recipient)) {
@@ -106,7 +114,7 @@ export var from_recipient = function (recipient, lock) {
 			throw __except0__;
 		}
 	}
-	if (lock !== null) {
+	if (lock != null) {
 		var condition = locktime_new (__kwargtrans__ ({lock: lock, condition: condition}));
 	}
 	return condition;
@@ -261,7 +269,7 @@ export var OutputLock =  __class__ ('OutputLock', [object], {
 		}
 		else {
 		}
-		if (current_timestamp === null) {
+		if (current_timestamp == null) {
 			var current_timestamp = int (datetime.now ().timestamp ());
 		}
 		else if (!(isinstance (current_timestamp, int))) {
@@ -269,7 +277,7 @@ export var OutputLock =  __class__ ('OutputLock', [object], {
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		if (value === null) {
+		if (value == null) {
 			self._value = 0;
 		}
 		else if (isinstance (value, OutputLock)) {
@@ -1085,7 +1093,7 @@ export var UnlockHash =  __class__ ('UnlockHash', [BaseDataTypeClass], {
 		}
 		else {
 		}
-		if (value === null) {
+		if (value == null) {
 			var value = UnlockHashType.NIL;
 		}
 		else if (!(isinstance (value, UnlockHashType))) {
@@ -1479,7 +1487,7 @@ export var ConditionUnlockHash =  __class__ ('ConditionUnlockHash', [ConditionBa
 		}
 		else {
 		}
-		if (self._unlockhash === null) {
+		if (self._unlockhash == null) {
 			return UnlockHash ();
 		}
 		return self._unlockhash;
@@ -1499,7 +1507,7 @@ export var ConditionUnlockHash =  __class__ ('ConditionUnlockHash', [ConditionBa
 		}
 		else {
 		}
-		if (value === null) {
+		if (value == null) {
 			self._unlockhash = null;
 			return ;
 		}
@@ -1800,7 +1808,7 @@ export var ConditionAtomicSwap =  __class__ ('ConditionAtomicSwap', [ConditionBa
 		}
 		else {
 		}
-		if (self._sender === null) {
+		if (self._sender == null) {
 			return UnlockHash ();
 		}
 		return self._sender;
@@ -1820,7 +1828,7 @@ export var ConditionAtomicSwap =  __class__ ('ConditionAtomicSwap', [ConditionBa
 		}
 		else {
 		}
-		if (value === null) {
+		if (value == null) {
 			self._sender = null;
 		}
 		else {
@@ -1854,7 +1862,7 @@ export var ConditionAtomicSwap =  __class__ ('ConditionAtomicSwap', [ConditionBa
 		}
 		else {
 		}
-		if (self._receiver === null) {
+		if (self._receiver == null) {
 			return UnlockHash ();
 		}
 		return self._receiver;
@@ -1874,7 +1882,7 @@ export var ConditionAtomicSwap =  __class__ ('ConditionAtomicSwap', [ConditionBa
 		}
 		else {
 		}
-		if (value === null) {
+		if (value == null) {
 			self._receiver = null;
 		}
 		else {
@@ -1908,7 +1916,7 @@ export var ConditionAtomicSwap =  __class__ ('ConditionAtomicSwap', [ConditionBa
 		}
 		else {
 		}
-		if (self._hashed_secret === null) {
+		if (self._hashed_secret == null) {
 			return BinaryData ();
 		}
 		return self._hashed_secret;
@@ -1928,7 +1936,7 @@ export var ConditionAtomicSwap =  __class__ ('ConditionAtomicSwap', [ConditionBa
 		}
 		else {
 		}
-		if (value === null) {
+		if (value == null) {
 			self._hashed_secret = null;
 		}
 		else {
@@ -1966,7 +1974,7 @@ export var ConditionAtomicSwap =  __class__ ('ConditionAtomicSwap', [ConditionBa
 		}
 		else {
 		}
-		if (value === null) {
+		if (value == null) {
 			self._lock_time = 0;
 		}
 		else {
@@ -2129,7 +2137,7 @@ export var ConditionLockTime =  __class__ ('ConditionLockTime', [ConditionBaseCl
 		}
 		else {
 		}
-		if (self._lock === null) {
+		if (self._lock == null) {
 			return OutputLock ();
 		}
 		return self._lock;
@@ -2165,7 +2173,7 @@ export var ConditionLockTime =  __class__ ('ConditionLockTime', [ConditionBaseCl
 		}
 		else {
 		}
-		if (self._condition === null) {
+		if (self._condition == null) {
 			return ConditionUnlockHash ();
 		}
 		return self._condition;
@@ -2185,7 +2193,7 @@ export var ConditionLockTime =  __class__ ('ConditionLockTime', [ConditionBaseCl
 		}
 		else {
 		}
-		if (value === null) {
+		if (value == null) {
 			self._condition = null;
 			return ;
 		}
@@ -2425,7 +2433,7 @@ export var ConditionMultiSignature =  __class__ ('ConditionMultiSignature', [Con
 		}
 		else {
 		}
-		if (uh === null) {
+		if (uh == null) {
 			self._unlockhashes.append (UnlockHash ());
 		}
 		else if (isinstance (uh, UnlockHash)) {
@@ -2471,7 +2479,7 @@ export var ConditionMultiSignature =  __class__ ('ConditionMultiSignature', [Con
 		}
 		else {
 		}
-		if (value === null) {
+		if (value == null) {
 			self._min_nr_sig = 0;
 			return ;
 		}

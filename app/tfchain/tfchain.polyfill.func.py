@@ -6,7 +6,7 @@ def opts_get(opts, *argv):
 
 def opts_get_with_defaults(opts, argv):
     args = []
-    if opts is None:
+    if opts == None:
         opts = {}
     for arg, default in jsobj.get_items(argv):
         args.append(opts[arg] if arg in opts else default)

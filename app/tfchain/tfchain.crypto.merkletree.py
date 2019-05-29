@@ -40,7 +40,7 @@ class Tree:
         # // Insert the subTree into the Tree. As long as the height of the next
         # // subTree is the same as the height of the current subTree, the two will
         # // be combined into a single subTree of height n+1.
-        while self.head.next is not None and self.head.height == self.head.next.height:
+        while self.head.next != None and self.head.height == self.head.next.height:
             # // Join the two subTrees into one subTree with a greater height. Then
             # // compare the new subTree to the next subTree.
             self.head = join_subtree(self.hash_func, self.head.next, self.head)
@@ -49,14 +49,14 @@ class Tree:
         """
         // Root returns the Merkle root of the data that has been pushed.
         """
-        if self.head is None:
+        if self.head == None:
             return sum(self.hash_func, bytearray())
 
         # // The root is formed by hashing together subTrees in order from least in
         # // height to greatest in height. The taller subtree is the first subtree in
         # // the join.
         current = self.head
-        while current.next is not None:
+        while current.next != None:
             current = join_subtree(self.hash_func, current.next, current)
         return current.sum
 
@@ -78,7 +78,7 @@ def sum_(hash_func, data):
     """
     // sum returns the hash of the input data using the specified algorithm.
     """
-    if data is None:
+    if data == None:
         return None
     result = hash_func(data)
     if hasattr(result, 'digest'):

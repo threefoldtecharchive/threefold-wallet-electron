@@ -53,7 +53,7 @@ class Footer extends Component {
       })
         .catch(err => {
           if (this.mounted) {
-            this.setState({ error: err })
+            this.setState({ error: err.str() })
           }
         })
     }

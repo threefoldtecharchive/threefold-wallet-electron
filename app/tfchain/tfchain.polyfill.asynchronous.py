@@ -57,7 +57,7 @@ def wait(*promises):
 
 def promise_pool_new(generator, limit=None, cb=None):
     # fix limit param
-    if limit is None or not isinstance(limit, int):
+    if limit == None or not isinstance(limit, int):
         limit = 8
     elif limit < 1:
         limit = 1
@@ -80,7 +80,7 @@ def promise_pool_new(generator, limit=None, cb=None):
     # create the pool, start it and return as a promise
     pool = jspromisepool.Pool(producer, limit)
     results = None
-    if cb is None:
+    if cb == None:
         results = []
         cb = lambda result: results.append(result)
     def fulfilled_cb(event):
@@ -92,6 +92,6 @@ def promise_pool_new(generator, limit=None, cb=None):
 
     # if a cb was defined, do not chain,
     # otherwise chain a cb to return the kept results
-    if results is None:
+    if results == None:
         return p
     return chain(p, lambda _: results)

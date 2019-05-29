@@ -40,7 +40,7 @@ class ConfigurationError(Exception):
 def _bisect_left(a, x, lo=0, hi=None):
     if lo < 0:
         raise ValueError('lo must be non-negative')
-    if hi is None:
+    if hi == None:
         hi = len(a)
     while lo < hi:
         mid = (lo+hi)//2
@@ -50,7 +50,7 @@ def _bisect_left(a, x, lo=0, hi=None):
 
 # From <http://tinyurl.com/p54ocsk>
 def binary_search(a, x, lo=0, hi=None):                # can't use a to specify default for hi
-    hi = hi if hi is not None else len(a)              # hi defaults to len(a)
+    hi = hi if hi != None else len(a)              # hi defaults to len(a)
     pos = _bisect_left(a, x, lo, hi)             # find insertion position
     return (pos if pos != hi and a[pos] == x else -1)  # don't walk off the end
 

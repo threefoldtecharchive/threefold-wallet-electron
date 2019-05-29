@@ -23,7 +23,7 @@ export var Decimal =  __class__ ('Decimal', [object], {
 		}
 		else {
 		}
-		if (value === null) {
+		if (value == null) {
 			var value = '0';
 		}
 		if (isinstance (value, Decimal)) {
@@ -39,7 +39,7 @@ export var Decimal =  __class__ ('Decimal', [object], {
 			                error = e;
 			            }
 			            
-			if (error !== null) {
+			if (error != null) {
 				var __except0__ = ValueError (error);
 				__except0__.__cause__ = null;
 				throw __except0__;

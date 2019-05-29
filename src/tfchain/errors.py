@@ -6,25 +6,29 @@ import tfchain.polyfill.encoding.object as jsobj
 
 from datetime import datetime
 
-class InvalidPublicKeySpecifier(Exception):
+class TFChainBaseException(Exception):
+    def str(self):
+        return self.__str__()
+
+class InvalidPublicKeySpecifier(TFChainBaseException):
     """
     InvalidPublicKeySpecifier error
     """
 
 
-class UnknownTransansactionVersion(Exception):
+class UnknownTransansactionVersion(TFChainBaseException):
     """
     UnknownTransansactionVersion error
     """
 
 
-class InsufficientFunds(Exception):
+class InsufficientFunds(TFChainBaseException):
     """
     InsufficientFunds error
     """
 
 
-class CurrencyPrecisionOverflow(Exception):
+class CurrencyPrecisionOverflow(TFChainBaseException):
     """
     CurrencyPrecisionOverflow error, caused when the value is too precise
     """
@@ -47,7 +51,7 @@ class CurrencyPrecisionOverflow(Exception):
         """
         return self._value
 
-class CurrencyNegativeValue(Exception):
+class CurrencyNegativeValue(TFChainBaseException):
     """
     CurrencyNegativeValue error, caused when the value is negative
     """
@@ -63,7 +67,7 @@ class CurrencyNegativeValue(Exception):
         return self._value
 
 
-class ExplorerError(Exception):
+class ExplorerError(TFChainBaseException):
     """
     Generic Explorer error
     """
@@ -151,13 +155,13 @@ class ExplorerInvalidResponse(ExplorerError):
         return self._response
 
 
-class DoubleSignError(Exception):
+class DoubleSignError(TFChainBaseException):
     """
     DoubleSignError error
     """
 
 
-class AtomicSwapInsufficientAmountError(Exception):
+class AtomicSwapInsufficientAmountError(TFChainBaseException):
     """
     AtomicSwapInsufficientAmountError error,
     triggered when creating a contract with an amount equal or lower than
@@ -185,7 +189,7 @@ class AtomicSwapInsufficientAmountError(Exception):
         return self._minimum_miner_fee
 
 
-class AtomicSwapContractError(Exception):
+class AtomicSwapContractError(TFChainBaseException):
     """
     AtomicSwapError generic Base error,
     containing the contract that went wrong.
@@ -238,7 +242,7 @@ class AtomicSwapContractSpent(AtomicSwapContractError):
         """
         return self._transaction
 
-class AtomicSwapContractNotFound(Exception):
+class AtomicSwapContractNotFound(TFChainBaseException):
     """
     AtomicSwapContractNotFound error, caused when
     a callee tried to get an atomic swap contract that could not be found.
@@ -255,7 +259,7 @@ class AtomicSwapContractNotFound(Exception):
         return self._outputid
 
 
-class ThreeBotNotFound(Exception):
+class ThreeBotNotFound(TFChainBaseException):
     """
     ThreeBotNotFound error, triggered when a 3Bot was not found.
     """
@@ -271,7 +275,7 @@ class ThreeBotNotFound(Exception):
         return self._identifier
 
 
-class ThreeBotInactive(Exception):
+class ThreeBotInactive(TFChainBaseException):
     """
     ThreeBotInactive error, triggered when a 3Bot is an active,
     and the operation to be applied to the 3Bot would not change that fact.
@@ -296,7 +300,7 @@ class ThreeBotInactive(Exception):
         return self._expiration
 
 
-class AddressNotInWallet(Exception):
+class AddressNotInWallet(TFChainBaseException):
     """
     AddressNotInWallet error, triggered
     when trying to use an address on a wallet that does not own it
@@ -313,7 +317,7 @@ class AddressNotInWallet(Exception):
         return self._address
 
 
-class ERC20RegistrationForbidden(Exception):
+class ERC20RegistrationForbidden(TFChainBaseException):
     """
     ERC20RegistrationForbidden error, triggered
     when trying to register an ERC20 address not owned by the used wallet.

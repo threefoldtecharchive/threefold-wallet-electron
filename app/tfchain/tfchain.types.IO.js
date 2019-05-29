@@ -150,7 +150,7 @@ export var CoinInput =  __class__ ('CoinInput', [BaseDataTypeClass], {
 		}
 		else {
 		}
-		if (value === null) {
+		if (value == null) {
 			self._fulfillment = FulfillmentSingleSignature ();
 			return ;
 		}
@@ -192,7 +192,7 @@ export var CoinInput =  __class__ ('CoinInput', [BaseDataTypeClass], {
 		}
 		else {
 		}
-		if (value === null) {
+		if (value == null) {
 			self._parent_output = null;
 			return ;
 		}
@@ -268,7 +268,7 @@ export var CoinInput =  __class__ ('CoinInput', [BaseDataTypeClass], {
 		}
 		else {
 		}
-		if (self._parent_output === null) {
+		if (self._parent_output == null) {
 			return [];
 		}
 		return self._fulfillment.signature_requests_new (__kwargtrans__ ({input_hash_func: input_hash_func, parent_condition: self._parent_output.condition}));
@@ -287,7 +287,7 @@ export var CoinInput =  __class__ ('CoinInput', [BaseDataTypeClass], {
 		}
 		else {
 		}
-		if (self._parent_output === null) {
+		if (self._parent_output == null) {
 			return false;
 		}
 		return self._fulfillment.is_fulfilled (self._parent_output.condition);
@@ -416,7 +416,7 @@ export var CoinOutput =  __class__ ('CoinOutput', [BaseDataTypeClass], {
 		}
 		else {
 		}
-		if (value === null) {
+		if (value == null) {
 			self._condition = ConditionNil ();
 			return ;
 		}
@@ -662,7 +662,7 @@ export var BlockstakeInput =  __class__ ('BlockstakeInput', [BaseDataTypeClass],
 		}
 		else {
 		}
-		if (value === null) {
+		if (value == null) {
 			self._fulfillment = FulfillmentSingleSignature ();
 			return ;
 		}
@@ -704,7 +704,7 @@ export var BlockstakeInput =  __class__ ('BlockstakeInput', [BaseDataTypeClass],
 		}
 		else {
 		}
-		if (value === null) {
+		if (value == null) {
 			self._parent_output = BlockstakeOutput ();
 			return ;
 		}
@@ -780,7 +780,7 @@ export var BlockstakeInput =  __class__ ('BlockstakeInput', [BaseDataTypeClass],
 		}
 		else {
 		}
-		if (self._parent_output === null) {
+		if (self._parent_output == null) {
 			return [];
 		}
 		return self._fulfillment.signature_requests_new (__kwargtrans__ ({input_hash_func: input_hash_func, parent_condition: self._parent_output.condition}));
@@ -799,7 +799,7 @@ export var BlockstakeInput =  __class__ ('BlockstakeInput', [BaseDataTypeClass],
 		}
 		else {
 		}
-		if (self._parent_output === null) {
+		if (self._parent_output == null) {
 			return false;
 		}
 		return self._fulfillment.is_fulfilled (self._parent_output.condition);
@@ -928,7 +928,7 @@ export var BlockstakeOutput =  __class__ ('BlockstakeOutput', [BaseDataTypeClass
 		}
 		else {
 		}
-		if (value === null) {
+		if (value == null) {
 			self._condition = ConditionNil ();
 			return ;
 		}

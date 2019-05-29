@@ -95,7 +95,7 @@ export var parse_duration = function (v) {
 			return jsstr.to_int (v);
 		}
 		var parts = _duration_re.match (v.value);
-		if (parts === null) {
+		if (parts == null) {
 			var __except0__ = ValueError ("Could not parse any time information from '{}'.  Examples of valid strings: '8h', '2d8h5m20s', '2m4s'".format (v.value));
 			__except0__.__cause__ = null;
 			throw __except0__;

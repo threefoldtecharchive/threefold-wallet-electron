@@ -196,11 +196,11 @@ class TransactionV1(TransactionBaseClass):
         Optional binary data attached to this Transaction,
         with a max length of 83 bytes.
         """
-        if self._data is None:
+        if self._data == None:
             return BinaryData(strencoding='base64')
         return self._data
     def _custom_data_setter(self, value):
-        if value is None:
+        if value == None:
             self._data = None
             return
         if isinstance(value, BinaryData):

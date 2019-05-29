@@ -119,7 +119,7 @@ export var Account =  __class__ ('Account', [object], {
 		}
 		self._symmetric_key = jscrypto.SymmetricKey (password);
 		var mnemonic = null;
-		if (seed === null) {
+		if (seed == null) {
 			var mnemonic = mnemonic_new ();
 			var seed = mnemonic_to_entropy (mnemonic);
 		}
@@ -130,8 +130,8 @@ export var Account =  __class__ ('Account', [object], {
 		else {
 			var mnemonic = entropy_to_mnemonic (seed);
 		}
-		if (explorer_addresses === null) {
-			if (network_type === null) {
+		if (explorer_addresses == null) {
+			if (network_type == null) {
 				var network_type = tfnetwork.Type.STANDARD;
 			}
 			var network_type = tfnetwork.Type (network_type);
@@ -142,7 +142,7 @@ export var Account =  __class__ ('Account', [object], {
 		else {
 			self._explorer_client = tfexplorer.Client (explorer_addresses);
 			self._explorer_client = tfclient.TFChainClient (self._explorer_client);
-			if (network_type === null) {
+			if (network_type == null) {
 				var info = self.chain_info_get ();
 				var network_type = info.chain_network;
 			}
@@ -849,7 +849,7 @@ export var Balance =  __class__ ('Balance', [object], {
 			throw __except0__;
 		}
 		self._network_type = network_type;
-		if (tfbalance === null) {
+		if (tfbalance == null) {
 			self._tfbalance = wbalance.WalletBalance ();
 		}
 		else {
@@ -1219,7 +1219,7 @@ export var TransactionView =  __class__ ('TransactionView', [object], {
 		}
 		var inputs = [];
 		var outputs = [];
-		if (addresses !== null) {
+		if (addresses != null) {
 			var addresses = set (addresses);
 			var senders = set ();
 			for (var ci of transaction.coin_inputs) {
@@ -1294,7 +1294,7 @@ export var TransactionView =  __class__ ('TransactionView', [object], {
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		if (blockid !== null && !(isinstance (blockid, str))) {
+		if (blockid != null && !(isinstance (blockid, str))) {
 			var __except0__ = py_TypeError ('blockid is expected to be None or of type str, not be of type {}'.format (py_typeof (blockid)));
 			__except0__.__cause__ = null;
 			throw __except0__;
@@ -1336,7 +1336,7 @@ export var TransactionView =  __class__ ('TransactionView', [object], {
 		}
 		else {
 		}
-		return self.blockid !== null;
+		return self.blockid != null;
 	});},
 	get _get_height () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -1450,7 +1450,7 @@ export var CoinOutputView =  __class__ ('CoinOutputView', [object], {
 		}
 		var recipient = output.condition.unlockhash.__str__ ();
 		var amount = output.value;
-		if (ratio !== null) {
+		if (ratio != null) {
 			var amount = amount.__mul__ (ratio);
 		}
 		var lock = output.lock;

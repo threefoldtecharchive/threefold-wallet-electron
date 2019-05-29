@@ -241,9 +241,9 @@ class TFChainWallet:
     #     @param data: optional data that can be attached ot the sent transaction (str or bytes), with a max length of 83
     #     """
     #     if ERC20Address.is_valid_value(recipient):
-    #         if lock is not None:
+    #         if lock != None:
     #             raise ValueError("a lock cannot be applied when sending coins to an ERC20 Address")
-    #         if data is not None:
+    #         if data != None:
     #             raise ValueError("data cannot be added to the transaction when sending coins to an ERC20 Address")
     #         # all good, try to send to the ERC20 address
     #         return self.erc20.coins_send(address=recipient, amount=amount, source=source, refund=refund)
@@ -261,8 +261,8 @@ class TFChainWallet:
     #     inputs, remainder, suggested_refund = balance.fund(amount+miner_fee, source=source)
 
     #     # define the refund condition
-    #     if refund is None: # automatically choose a refund condition if none is given
-    #         if suggested_refund is None:
+    #     if refund == None: # automatically choose a refund condition if none is given
+    #         if suggested_refund == None:
     #             refund = ConditionTypes.unlockhash_new(unlockhash=self.address)
     #         else:
     #             refund = suggested_refund
@@ -476,7 +476,7 @@ class TFChainWallet:
 #             raise ValueError("{} is an invalid unlock hash type and cannot be used for a minter definition".format(ut))
 
 #         # optionally set the data
-#         if data is not None:
+#         if data != None:
 #             txn.data = data
 
 #         # get and set the current mint condition
@@ -555,7 +555,7 @@ class TFChainWallet:
 #         txn.coin_output_add(value=amount, condition=recipient)
 
 #         # optionally set the data
-#         if data is not None:
+#         if data != None:
 #             txn.data = data
 
 #         # get and set the current mint condition
@@ -725,7 +725,7 @@ class TFChainWallet:
 #         @param receiver: if True it is expected that this wallet is registered as the receiver of this contract
 #         @param contract: if contract fetched in a previous call already, one can verify it also by directly passing it to this method
 #         """
-#         if contract is None:
+#         if contract == None:
 #             co = None
 #             spend_txn = None
 #             # try to fetch the contract
@@ -735,7 +735,7 @@ class TFChainWallet:
 #             except tfchain.errors.ExplorerNoContent as exc:
 #                 raise tfchain.errors.AtomicSwapContractNotFound(outputid=outputid) from exc
 #             # check if the contract hasn't been spent already
-#             if spend_txn is not None:
+#             if spend_txn != None:
 #                 # if a spend transaction exists,
 #                 # it means the contract was already spend, and can therefore no longer be redeemed
 #                 raise tfchain.errors.AtomicSwapContractSpent(contract=AtomicSwapContract(
@@ -753,7 +753,7 @@ class TFChainWallet:
 #                     contract=contract)
 
 #         # if amount is given verify it
-#         if amount is not None:
+#         if amount != None:
 #             amount = Currency(value=amount)
 #             if amount != contract.amount:
 #                 raise tfchain.errors.AtomicSwapContractInvalid(
@@ -761,7 +761,7 @@ class TFChainWallet:
 #                     contract=contract)
 
 #         # if secret hash is given verify it
-#         if secret_hash is not None:
+#         if secret_hash != None:
 #             # normalize secret hash
 #             secret_hash = AtomicSwapSecretHash(value=secret_hash)
 #             if secret_hash != contract.secret_hash:
@@ -770,7 +770,7 @@ class TFChainWallet:
 #                     contract=contract)
 
 #         # if min_refund_time is given verify it
-#         if min_refund_time is not None:
+#         if min_refund_time != None:
 #             chain_time = self._chain_time
 #             if isinstance(min_refund_time, str):
 #                 min_refund_time = OutputLock(value=min_refund_time, current_timestamp=chain_time).value
@@ -834,7 +834,7 @@ class TFChainWallet:
 #         # generate the contract
 #         contract = AtomicSwapContract(coinoutput=co, unspent=False, current_timestamp=self._chain_time) # either it is spent already or we'll spend it
 #         # check if the contract hasn't been spent already
-#         if spend_txn is not None:
+#         if spend_txn != None:
 #             # if a spend transaction exists,
 #             # it means the contract was already spend, and can therefore no longer be redeemed
 #             raise tfchain.errors.AtomicSwapContractSpent(contract=contract, transaction=spend_txn)
@@ -872,7 +872,7 @@ class TFChainWallet:
 #         # generate the contract
 #         contract = AtomicSwapContract(coinoutput=co, unspent=False, current_timestamp=self._chain_time) # either it is spent already or we'll spend it
 #         # check if the contract hasn't been spent already
-#         if spend_txn is not None:
+#         if spend_txn != None:
 #             # if a spend transaction exists,
 #             # it means the contract was already spend, and can therefore no longer be redeemed
 #             raise tfchain.errors.AtomicSwapContractSpent(contract=contract, transaction=spend_txn)
@@ -917,9 +917,9 @@ class TFChainWallet:
 #         inputs, remainder, suggested_refund = balance.fund(amount+miner_fee, source=source)
 
 #         # define the refund
-#         if refund is not None:
+#         if refund != None:
 #             refund = ConditionTypes.from_recipient(refund)
-#         elif suggested_refund is not None:
+#         elif suggested_refund != None:
 #             refund = ConditionTypes.from_recipient(suggested_refund)
 #         else:
 #             refund = ConditionTypes.from_recipient(self._wallet.address)
@@ -1103,7 +1103,7 @@ class TFChainWallet:
 #         # create the txn and fill the easiest properties already
 #         txn = tftransactions.threebot_registration_new()
 #         txn.number_of_months = months
-#         if names is None and addresses is None:
+#         if names == None and addresses == None:
 #             raise ValueError("at least one name or one address is to be given, none is defined")
 #         txn.names = names
 #         txn.addresses = addresses
@@ -1113,7 +1113,7 @@ class TFChainWallet:
 
 #         # if the key_index is not defined, generate a new public key,
 #         # otherwise use the key_index given
-#         if key_index is None:
+#         if key_index == None:
 #             txn.public_key = self._wallet.public_key_new()
 #         else:
 #             if not isinstance(key_index, int):
@@ -1144,7 +1144,7 @@ class TFChainWallet:
 #         @param source: one or multiple addresses/unlockhashes from which to fund this coin send transaction, by default all personal wallet addresses are used, only known addresses can be used
 #         @param refund: optional refund address, by default is uses the source if it specifies a single address otherwise it uses the default wallet address (recipient type, with None being the exception in its interpretation)
 #         """
-#         if months < 1 and not reduce((lambda r, v: r or (v is not None)), [names_to_add, names_to_remove, addresses_to_add, addresses_to_remove], False):
+#         if months < 1 and not reduce((lambda r, v: r or (v != None)), [names_to_add, names_to_remove, addresses_to_add, addresses_to_remove], False):
 #             raise ValueError("extra months is to be given or one name/address is to be added/removed, none is defined")
 
 #         # create the txn and fill the easiest properties already
@@ -1234,8 +1234,8 @@ class TFChainWallet:
 #         # add refund coin output if needed
 #         if remainder > 0:
 #             # define the refund condition
-#             if refund is None: # automatically choose a refund condition if none is given
-#                 if suggested_refund is None:
+#             if refund == None: # automatically choose a refund condition if none is given
+#                 if suggested_refund == None:
 #                     refund = ConditionTypes.unlockhash_new(unlockhash=self._wallet.address)
 #                 else:
 #                     refund = suggested_refund
@@ -1367,7 +1367,7 @@ class TFChainWallet:
 #         @param source: one or multiple addresses/unlockhashes from which to fund this coin send transaction, by default all personal wallet addresses are used, only known addresses can be used
 #         @param refund: optional refund address, by default is uses the source if it specifies a single address otherwise it uses the default wallet address (recipient type, with None being the exception in its interpretation)
 #         """
-#         if value is None:
+#         if value == None:
 #             public_key = self._wallet.public_key_new()
 #         elif isinstance(value, (str, UnlockHash)):
 #             try:
@@ -1406,7 +1406,7 @@ class TFChainWallet:
 
 #         @param value: index of the TFT address or address itself, the address has to be owned by this wallet
 #         """
-#         if value is None:
+#         if value == None:
 #             public_key = self._wallet.key_pair_get(unlockhash=self._wallet.address).public_key
 #         elif isinstance(value, (str, UnlockHash)):
 #             try:
@@ -1462,8 +1462,8 @@ class TFChainWallet:
 #         # add refund coin output if needed
 #         if remainder > 0:
 #             # define the refund condition
-#             if refund is None: # automatically choose a refund condition if none is given
-#                 if suggested_refund is None:
+#             if refund == None: # automatically choose a refund condition if none is given
+#                 if suggested_refund == None:
 #                     refund = ConditionTypes.unlockhash_new(unlockhash=self._wallet.address)
 #                 else:
 #                     refund = suggested_refund
@@ -1700,7 +1700,7 @@ class CoinTransactionBuilder():
         @param amount: int or str that defines the amount of TFT to set, see explanation above
         @param lock: optional lock that can be used to lock the sent amount to a specific time or block height, see explation above
         """
-        if self._txn is None:
+        if self._txn == None:
             raise RuntimeError("coin transaction builder is already consumed")
 
         amount = Currency(value=amount)
@@ -1723,9 +1723,8 @@ class CoinTransactionBuilder():
             inputs, remainder, suggested_refund = balance.fund(amount.plus(miner_fee), source=source)
 
             # define the refund condition
-            # TODO: ensure we do not require jsobj checks like this on such a low level code
-            if refund is None or jsobj.is_undefined(refund): # automatically choose a refund condition if none is given
-                if suggested_refund is None:
+            if refund == None: # automatically choose a refund condition if none is given
+                if suggested_refund == None:
                     refund = ConditionTypes.unlockhash_new(unlockhash=wallet.address)
                 else:
                     refund = suggested_refund
@@ -1743,8 +1742,7 @@ class CoinTransactionBuilder():
             txn.coin_inputs = inputs
 
             # if there is data to be added, add it as well
-            # TODO: ensure we do not require jsobj checks like this on such a low level code
-            if data is not None and not jsobj.is_undefined(data):
+            if data == None:
                 txn.data = data
 
             # generate the signature requests

@@ -745,7 +745,7 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 		}
 		else {
 		}
-		if (self._txn === null) {
+		if (self._txn == null) {
 			var __except0__ = RuntimeError ('coin transaction builder is already consumed');
 			__except0__.__cause__ = null;
 			throw __except0__;
@@ -815,8 +815,8 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 			var inputs = __left0__ [0];
 			var remainder = __left0__ [1];
 			var suggested_refund = __left0__ [2];
-			if (refund === null || jsobj.is_undefined (refund)) {
-				if (suggested_refund === null) {
+			if (refund == null) {
+				if (suggested_refund == null) {
 					var refund = ConditionTypes.unlockhash_new (__kwargtrans__ ({unlockhash: wallet.address}));
 				}
 				else {
@@ -831,7 +831,7 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 			}
 			txn.miner_fee_add (miner_fee);
 			txn.coin_inputs = inputs;
-			if (data !== null && !(jsobj.is_undefined (data))) {
+			if (data == null) {
 				txn.data = data;
 			}
 			var sig_requests = txn.signature_requests_new ();

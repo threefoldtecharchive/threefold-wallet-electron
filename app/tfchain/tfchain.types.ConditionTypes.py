@@ -47,10 +47,15 @@ def from_recipient(recipient, lock=None):
         condition = recipient
     else:
         condition = None
-        if recipient is None:
+        if recipient == None:
             # free-for-all wallet
             condition = nil_new()
-        elif isinstance(recipient, (UnlockHash, str)):
+        elif isinstance(recipient, str):
+            if recipient == jsstr.repeat('0', 78): # nil wallet
+                condition = nil_new()
+            else: # single sig wallet
+                condition = unlockhash_new(unlockhash=recipient)
+        elif isinstance(recipient, UnlockHash):
             # single sig wallet
             condition = unlockhash_new(unlockhash=recipient)
         elif isinstance(recipient, (bytes, bytearray)) or jsarr.is_uint8_array(recipient):
@@ -72,7 +77,7 @@ def from_recipient(recipient, lock=None):
             raise TypeError("invalid type for recipient parameter: {}: {}", type(recipient), recipient)
     
     # if lock is defined, define it as a locktime value
-    if lock is not None:
+    if lock != None:
         condition = locktime_new(lock=lock, condition=condition)
 
     # return condition
@@ -125,12 +130,12 @@ class OutputLock:
     _MIN_TIMESTAMP_VALUE = 500 * 1000 * 1000
 
     def __init__(self, value=None, current_timestamp=None):
-        if current_timestamp is None:
+        if current_timestamp == None:
             current_timestamp = int(datetime.now().timestamp())
         elif not isinstance(current_timestamp, int):
             raise TypeError("current timestamp has to be an integer")
 
-        if value is None:
+        if value == None:
             self._value = 0
         elif isinstance(value, OutputLock):
             self._value = value.value
@@ -364,7 +369,7 @@ class UnlockHash(BaseDataTypeClass):
         return self._type
     @uhtype.setter
     def uhtype(self, value):
-        if value is None:
+        if value == None:
             value = UnlockHashType.NIL
         elif not isinstance(value, UnlockHashType):
             raise TypeError("UnlockHash's type has to be of type UnlockHashType, not {}".format(type(value)))
@@ -472,11 +477,11 @@ class ConditionUnlockHash(ConditionBaseClass):
         return _CONDITION_TYPE_UNLOCK_HASH
 
     def _custom_unlockhash_getter(self):
-        if self._unlockhash is None:
+        if self._unlockhash == None:
             return UnlockHash()
         return self._unlockhash
     def _custom_unlockhash_setter(self, value):
-        if value is None:
+        if value == None:
             self._unlockhash = None
             return
         if isinstance(value, UnlockHash):
@@ -570,12 +575,12 @@ class ConditionAtomicSwap(ConditionBaseClass):
 
     @property
     def sender(self):
-        if self._sender is None:
+        if self._sender == None:
             return UnlockHash()
         return self._sender
     @sender.setter
     def sender(self, value):
-        if value is None:
+        if value == None:
             self._sender = None
         else:
             if isinstance(value, str):
@@ -588,12 +593,12 @@ class ConditionAtomicSwap(ConditionBaseClass):
 
     @property
     def receiver(self):
-        if self._receiver is None:
+        if self._receiver == None:
             return UnlockHash()
         return self._receiver
     @receiver.setter
     def receiver(self, value):
-        if value is None:
+        if value == None:
             self._receiver = None
         else:
             if isinstance(value, str):
@@ -606,12 +611,12 @@ class ConditionAtomicSwap(ConditionBaseClass):
     
     @property
     def hashed_secret(self):
-        if self._hashed_secret is None:
+        if self._hashed_secret == None:
             return BinaryData()
         return self._hashed_secret
     @hashed_secret.setter
     def hashed_secret(self, value):
-        if value is None:
+        if value == None:
             self._hashed_secret = None
         else:
             self._hashed_secret = AtomicSwapSecretHash(value=value)
@@ -621,7 +626,7 @@ class ConditionAtomicSwap(ConditionBaseClass):
         return self._lock_time
     @lock_time.setter
     def lock_time(self, value):
-        if value is None:
+        if value == None:
             self._lock_time = 0
         else:
             lock = OutputLock(value=value)
@@ -667,7 +672,7 @@ class ConditionLockTime(ConditionBaseClass):
         return self.condition.unlockhash
 
     def _custom_lock_getter(self):
-        if self._lock is None:
+        if self._lock == None:
             return OutputLock()
         return self._lock
     def _custom_lock_setter(self, value):
@@ -675,12 +680,12 @@ class ConditionLockTime(ConditionBaseClass):
 
     @property
     def condition(self):
-        if self._condition is None:
+        if self._condition == None:
             return ConditionUnlockHash()
         return self._condition
     @condition.setter
     def condition(self, value):
-        if value is None:
+        if value == None:
             self._condition = None
             return
         if not isinstance(value, ConditionBaseClass):
@@ -742,7 +747,7 @@ class ConditionMultiSignature(ConditionBaseClass):
         return self._unlockhashes
         
     def add_unlockhash(self, uh):
-        if uh is None:
+        if uh == None:
             self._unlockhashes.append(UnlockHash())
         elif isinstance(uh, UnlockHash):
             self._unlockhashes.append(uh)
@@ -756,7 +761,7 @@ class ConditionMultiSignature(ConditionBaseClass):
         return self._min_nr_sig
     @required_signatures.setter
     def required_signatures(self, value):
-        if value is None:
+        if value == None:
             self._min_nr_sig = 0
             return
         if not isinstance(value, int):

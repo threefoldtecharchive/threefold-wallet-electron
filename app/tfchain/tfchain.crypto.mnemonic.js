@@ -41,7 +41,7 @@ export var _bisect_left = function (a, x, lo, hi) {
 		__except0__.__cause__ = null;
 		throw __except0__;
 	}
-	if (hi === null) {
+	if (hi == null) {
 		var hi = len (a);
 	}
 	while (lo < hi) {
@@ -78,7 +78,7 @@ export var binary_search = function (a, x, lo, hi) {
 	}
 	else {
 	}
-	var hi = (hi !== null ? hi : len (a));
+	var hi = (hi != null ? hi : len (a));
 	var pos = _bisect_left (a, x, lo, hi);
 	return (pos != hi && a [pos] == x ? pos : -(1));
 };

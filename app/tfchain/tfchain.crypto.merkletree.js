@@ -38,7 +38,7 @@ export var Tree =  __class__ ('Tree', [object], {
 		}
 		self.head = SubTree (__kwargtrans__ ({py_next: self.head, height: 0}));
 		self.head.sum = leaf_sum (self.hash_func, data);
-		while (self.head.py_next !== null && self.head.height == self.head.py_next.height) {
+		while (self.head.py_next != null && self.head.height == self.head.py_next.height) {
 			self.head = join_subtree (self.hash_func, self.head.py_next, self.head);
 		}
 	});},
@@ -56,11 +56,11 @@ export var Tree =  __class__ ('Tree', [object], {
 		}
 		else {
 		}
-		if (self.head === null) {
+		if (self.head == null) {
 			return sum (self.hash_func, bytearray ());
 		}
 		var current = self.head;
-		while (current.py_next !== null) {
+		while (current.py_next != null) {
 			var current = join_subtree (self.hash_func, current.py_next, current);
 		}
 		return current.sum;
@@ -104,7 +104,7 @@ export var sum_ = function (hash_func, data) {
 	}
 	else {
 	}
-	if (data === null) {
+	if (data == null) {
 		return null;
 	}
 	var result = hash_func (data);

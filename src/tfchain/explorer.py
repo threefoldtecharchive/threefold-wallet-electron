@@ -100,19 +100,20 @@ class Client:
         indices = list(range(len(self._addresses)))
         random.shuffle(indices)
 
-        def resolve(result):
-            if result.code == 200:
-                return jsobj.as_dict(result.data)
-            if result.code == 400: # are there other error codes?
-                raise tferrors.ExplorerBadRequest("error (code: {}): {}".format(result.code, result.data), endpoint)
-            raise tferrors.ExplorerServerPostError("POST: unexpected error (code: {}): {}".format(result.code, result.data), endpoint, data=data)
-
         headers = {
             'Content-Type': 'Application/json;charset=UTF-8',
         }
         s = data
         if not isinstance(s, str):
             s = jsjson.json_dumps(s)
+
+        def resolve(result):
+            if result.code == 200:
+                return jsobj.as_dict(result.data)
+            if result.code == 400: # are there other error codes?
+                jslog.warning("invalid data object posted to {}:".format(endpoint), s)
+                raise tferrors.ExplorerBadRequest("error (code: {}): {}".format(result.code, result.data), endpoint)
+            raise tferrors.ExplorerServerPostError("POST: unexpected error (code: {}): {}".format(result.code, result.data), endpoint, data=data)
         
         address = self._addresses[indices[0]]
         if not isinstance(address, str):
@@ -144,6 +145,9 @@ class Client:
 
         # define final catch cb, as a last fallback
         def final_catch(reason):
+            # pass on user errors
+            if isinstance(reason, tferrors.ExplorerUserError):
+                raise reason # no need to retry user errors
             jslog.debug("servers exhausted, previous POST call failed as well: {}".format(reason))
             raise tferrors.ExplorerNotAvailable("no explorer was available", endpoint, self._addresses)
 

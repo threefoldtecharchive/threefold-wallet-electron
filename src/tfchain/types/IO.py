@@ -52,7 +52,7 @@ class CoinInput(BaseDataTypeClass):
 
     @fulfillment.setter
     def fulfillment(self, value):
-        if value is None:
+        if value == None:
             self._fulfillment = FulfillmentSingleSignature()
             return
         if not isinstance(value, FulfillmentBaseClass):
@@ -66,7 +66,7 @@ class CoinInput(BaseDataTypeClass):
 
     @parent_output.setter
     def parent_output(self, value):
-        if value is None:
+        if value == None:
             self._parent_output = None
             return
         if not isinstance(value, CoinOutput):
@@ -98,7 +98,7 @@ class CoinInput(BaseDataTypeClass):
         only possible if the parent (coin) output is defined and when there
         are still signatures required.
         """
-        if self._parent_output is None:
+        if self._parent_output == None:
             # no requestsd get created if the parent output is not set,
             # this allows for partial Tx signings
             return []
@@ -111,7 +111,7 @@ class CoinInput(BaseDataTypeClass):
         """
         Returns true if this CoinInput is fulfilled.
         """
-        if self._parent_output is None:
+        if self._parent_output == None:
             return False
         return self._fulfillment.is_fulfilled(self._parent_output.condition)
 
@@ -153,7 +153,7 @@ class CoinOutput(BaseDataTypeClass):
 
     @condition.setter
     def condition(self, value):
-        if value is None:
+        if value == None:
             self._condition = ConditionNil()
             return
         if not isinstance(value, ConditionBaseClass):
@@ -239,7 +239,7 @@ class BlockstakeInput(BaseDataTypeClass):
 
     @fulfillment.setter
     def fulfillment(self, value):
-        if value is None:
+        if value == None:
             self._fulfillment = FulfillmentSingleSignature()
             return
         if not isinstance(value, FulfillmentBaseClass):
@@ -253,7 +253,7 @@ class BlockstakeInput(BaseDataTypeClass):
 
     @parent_output.setter
     def parent_output(self, value):
-        if value is None:
+        if value == None:
             self._parent_output = BlockstakeOutput()
             return
         if not isinstance(value, BlockstakeOutput):
@@ -285,7 +285,7 @@ class BlockstakeInput(BaseDataTypeClass):
         only possible if the parent (blockstake) output is defined and when there
         are still signatures required.
         """
-        if self._parent_output is None:
+        if self._parent_output == None:
             # no requestsd get created if the parent output is not set,
             # this allows for partial Tx signings
             return []
@@ -298,7 +298,7 @@ class BlockstakeInput(BaseDataTypeClass):
         """
         Returns true if this BlockstakeInput is fulfilled.
         """
-        if self._parent_output is None:
+        if self._parent_output == None:
             return False
         return self._fulfillment.is_fulfilled(self._parent_output.condition)
 
@@ -340,7 +340,7 @@ class BlockstakeOutput(BaseDataTypeClass):
 
     @condition.setter
     def condition(self, value):
-        if value is None:
+        if value == None:
             self._condition = ConditionNil()
             return
         if not isinstance(value, ConditionBaseClass):
