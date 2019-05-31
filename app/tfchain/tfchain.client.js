@@ -700,7 +700,11 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 			var transactions = dict ({});
 			for (var transaction of result.transactions) {
 				if (!(transaction.unconfirmed)) {
-					transactions [transaction.blockid.__str__ ()] = transaction;
+					var bid = transaction.blockid.__str__ ();
+					if (!__in__ (bid, transactions)) {
+						transactions [bid] = [];
+					}
+					transactions [bid].append (transaction);
 				}
 			}
 			if (len (transactions) == 0) {
@@ -738,7 +742,9 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 				var __left0__ = block_result;
 				var _ = __left0__ [0];
 				var block = __left0__ [1];
-				transactions [block.get_or ('blockid', '')].timestamp = block.get_or ('rawblock', jsobj.new_dict ()).get_or ('timestamp', 0);
+				for (var transaction of transactions [block.get_or ('blockid', '')]) {
+					transaction.timestamp = block.get_or ('rawblock', jsobj.new_dict ()).get_or ('timestamp', 0);
+				}
 			};
 			var aggregate = function () {
 				if (arguments.length) {

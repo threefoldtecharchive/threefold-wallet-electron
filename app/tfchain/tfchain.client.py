@@ -333,7 +333,10 @@ class TFChainClient:
             transactions = {}
             for transaction in result.transactions:
                 if not transaction.unconfirmed:
-                    transactions[transaction.blockid.__str__()] = transaction
+                    bid = transaction.blockid.__str__()
+                    if bid not in transactions:
+                        transactions[bid] = []
+                    transactions[bid].append(transaction)
             if len(transactions) == 0:
                 return result # return as is, nothing to do
             def generator():
@@ -341,7 +344,8 @@ class TFChainClient:
                     yield ec._block_get_by_hash(blockid)
             def result_cb(block_result):
                 _, block = block_result
-                transactions[block.get_or('blockid', '')].timestamp = block.get_or('rawblock', jsobj.new_dict()).get_or('timestamp', 0)
+                for transaction in transactions[block.get_or('blockid', '')]:
+                    transaction.timestamp = block.get_or('rawblock', jsobj.new_dict()).get_or('timestamp', 0)
             def aggregate():
                 return result
             return jsasync.chain(jsasync.promise_pool_new(generator, cb=result_cb), aggregate)
