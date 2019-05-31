@@ -98,16 +98,8 @@ function renderTransactionBody (tx, explorerAddress) {
             })}
           </List.Description>
           <List.Description style={{ color: 'white', display: 'flex', marginTop: 3 }} as='a'>
-            {input.recipients.map(recipient => {
-              return (
-                <div key={tx.identifier} style={{ display: 'flex', marginTop: 5 }} onClick={() => shell.openExternal(`${explorerAddress}/hash.html?hash=${recipient}`)}>
-                  To:
-                  <p style={{ fontSize: 14, marginBottom: 0, fontFamily: 'Lucida Typewriter', position: 'relative', left: 19 }}>
-                    {recipient}
-                  </p>
-                </div>
-              )
-            })}
+            To:
+            <p style={hashFont}>{input.recipient}</p>
           </List.Description>
         </div>
       )
@@ -133,14 +125,8 @@ function renderTransactionBody (tx, explorerAddress) {
             })}
           </List.Description>
           <List.Description style={{ color: 'white', display: 'flex', marginTop: 3 }} as='a'>
-            {out.recipients.map(recipient => {
-              return (
-                <div key={tx.identifier} style={{ display: 'flex', marginTop: 5 }} onClick={() => shell.openExternal(`${explorerAddress}/hash.html?hash=${recipient}`)}>
-                  To:
-                  <p style={hashFont}>{recipient}</p>
-                </div>
-              )
-            })}
+            To:
+            <p style={hashFont}>{out.recipient}</p>
           </List.Description>
         </div>
       )

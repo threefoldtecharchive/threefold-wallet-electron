@@ -1695,8 +1695,6 @@ export var TransactionView =  __class__ ('TransactionView', [object], {
 			return cls (identifier, height, timestamp, blockid, inputs, outputs);
 		}
 		var intermediate_outputs = dict ({});
-		var senders = set ();
-		var recipients = set ();
 		var intermediate_output_get = function (address) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
@@ -1716,10 +1714,53 @@ export var TransactionView =  __class__ ('TransactionView', [object], {
 			}
 			return intermediate_outputs [address];
 		};
+		var senders = set ();
+		var recipient_mapping = dict ({});
+		var recipient_add = function (address, lock) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'address': var address = __allkwargs0__ [__attrib0__]; break;
+							case 'lock': var lock = __allkwargs0__ [__attrib0__]; break;
+						}
+					}
+				}
+			}
+			else {
+			}
+			if (!__in__ (address, recipient_mapping)) {
+				recipient_mapping [address] = set ([lock]);
+			}
+			else {
+				recipient_mapping [address].add (lock);
+			}
+		};
+		var recipient_lock_pairs_get = function () {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+					}
+				}
+			}
+			else {
+			}
+			var pairs = [];
+			for (var [address, locks] of jsobj.get_items (recipient_mapping)) {
+				for (var lock of locks) {
+					pairs.append (tuple ([address, lock]));
+				}
+			}
+			return pairs;
+		};
 		for (var co of transaction.coin_outputs) {
 			var address = co.condition.unlockhash.__str__ ();
 			if (!__in__ (address, addresses)) {
-				recipients.add (address);
+				recipient_add (address, co.condition.lock.value);
 				continue;
 			}
 			var output = intermediate_output_get (address);
@@ -1736,9 +1777,9 @@ export var TransactionView =  __class__ ('TransactionView', [object], {
 			output.send (__kwargtrans__ ({amount: co.value}));
 		}
 		var senders = list (senders);
-		var recipients = list (recipients);
+		var recipient_lock_pairs = recipient_lock_pairs_get ();
 		for (var intermediate_output of jsobj.dict_values (intermediate_outputs)) {
-			intermediate_output.inputs_outputs_collect (senders, recipients, inputs, outputs);
+			intermediate_output.inputs_outputs_collect (senders, recipient_lock_pairs, inputs, outputs);
 		}
 		return cls (identifier, height, timestamp, blockid, inputs, outputs);
 	});},
@@ -1976,7 +2017,7 @@ export var OutputAggregator =  __class__ ('OutputAggregator', [object], {
 		}
 		self._amount = self._amount.minus (amount);
 	});},
-	get inputs_outputs_collect () {return __get__ (this, function (self, senders, recipients, inputs, outputs) {
+	get inputs_outputs_collect () {return __get__ (this, function (self, senders, recipient_lock_pairs, inputs, outputs) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -1985,7 +2026,7 @@ export var OutputAggregator =  __class__ ('OutputAggregator', [object], {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
 						case 'senders': var senders = __allkwargs0__ [__attrib0__]; break;
-						case 'recipients': var recipients = __allkwargs0__ [__attrib0__]; break;
+						case 'recipient_lock_pairs': var recipient_lock_pairs = __allkwargs0__ [__attrib0__]; break;
 						case 'inputs': var inputs = __allkwargs0__ [__attrib0__]; break;
 						case 'outputs': var outputs = __allkwargs0__ [__attrib0__]; break;
 					}
@@ -1995,20 +2036,23 @@ export var OutputAggregator =  __class__ ('OutputAggregator', [object], {
 		else {
 		}
 		if (self._amount.less_than (0)) {
-			outputs.append (CoinOutputView (__kwargtrans__ ({senders: [self._address], recipients: recipients, amount: self._amount.negate (), lock: 0, lock_is_timestamp: false})));
+			var amount = self._amount.negate ().divided_by (len (recipient_lock_pairs));
+			for (var [recipient, lock] of recipient_lock_pairs) {
+				outputs.append (CoinOutputView (__kwargtrans__ ({senders: [self._address], recipient: recipient, amount: self._amount.negate (), lock: lock, lock_is_timestamp: (lock == 0 ? false : OutputLock (lock).is_timestamp)})));
+			}
 		}
 		else if (self._amount.greater_than (0)) {
-			inputs.append (CoinOutputView (__kwargtrans__ ({senders: senders, recipients: [self._address], amount: self._amount, lock: 0, lock_is_timestamp: false})));
+			inputs.append (CoinOutputView (__kwargtrans__ ({senders: senders, recipient: self._address, amount: self._amount, lock: 0, lock_is_timestamp: false})));
 		}
 		for (var [lock_value, amount] of jsobj.get_items (self._locked_outputs)) {
 			var lock = jsstr.to_int (lock_value);
-			inputs.append (CoinOutputView (__kwargtrans__ ({senders: senders, recipients: [self._address], amount: amount, lock: lock, lock_is_timestamp: OutputLock (lock).is_timestamp})));
+			inputs.append (CoinOutputView (__kwargtrans__ ({senders: senders, recipient: self._address, amount: amount, lock: lock, lock_is_timestamp: OutputLock (lock).is_timestamp})));
 		}
 	});}
 });
 export var CoinOutputView =  __class__ ('CoinOutputView', [object], {
 	__module__: __name__,
-	get __init__ () {return __get__ (this, function (self, senders, recipients, amount, lock, lock_is_timestamp) {
+	get __init__ () {return __get__ (this, function (self, senders, recipient, amount, lock, lock_is_timestamp) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -2017,7 +2061,7 @@ export var CoinOutputView =  __class__ ('CoinOutputView', [object], {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
 						case 'senders': var senders = __allkwargs0__ [__attrib0__]; break;
-						case 'recipients': var recipients = __allkwargs0__ [__attrib0__]; break;
+						case 'recipient': var recipient = __allkwargs0__ [__attrib0__]; break;
 						case 'amount': var amount = __allkwargs0__ [__attrib0__]; break;
 						case 'lock': var lock = __allkwargs0__ [__attrib0__]; break;
 						case 'lock_is_timestamp': var lock_is_timestamp = __allkwargs0__ [__attrib0__]; break;
@@ -2028,7 +2072,7 @@ export var CoinOutputView =  __class__ ('CoinOutputView', [object], {
 		else {
 		}
 		self._senders = senders;
-		self._recipients = recipients;
+		self._recipient = recipient;
 		self._amount = amount;
 		self._lock = lock;
 		self._lock_is_timestamp = lock_is_timestamp;
@@ -2049,7 +2093,7 @@ export var CoinOutputView =  __class__ ('CoinOutputView', [object], {
 		}
 		return self._senders;
 	});},
-	get _get_recipients () {return __get__ (this, function (self) {
+	get _get_recipient () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -2063,7 +2107,7 @@ export var CoinOutputView =  __class__ ('CoinOutputView', [object], {
 		}
 		else {
 		}
-		return self._recipients;
+		return self._recipient;
 	});},
 	get _get_amount () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -2117,7 +2161,7 @@ export var CoinOutputView =  __class__ ('CoinOutputView', [object], {
 Object.defineProperty (CoinOutputView, 'lock_is_timestamp', property.call (CoinOutputView, CoinOutputView._get_lock_is_timestamp));
 Object.defineProperty (CoinOutputView, 'lock', property.call (CoinOutputView, CoinOutputView._get_lock));
 Object.defineProperty (CoinOutputView, 'amount', property.call (CoinOutputView, CoinOutputView._get_amount));
-Object.defineProperty (CoinOutputView, 'recipients', property.call (CoinOutputView, CoinOutputView._get_recipients));
+Object.defineProperty (CoinOutputView, 'recipient', property.call (CoinOutputView, CoinOutputView._get_recipient));
 Object.defineProperty (CoinOutputView, 'senders', property.call (CoinOutputView, CoinOutputView._get_senders));;
 export var ChainInfo =  __class__ ('ChainInfo', [object], {
 	__module__: __name__,
