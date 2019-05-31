@@ -88,7 +88,7 @@ function renderTransactionBody (tx, explorerAddress) {
           <List.Description style={listDescriptionStyle} as='a'>
             {input.senders.map(sender => {
               return (
-                <div key={tx.identifier} style={{ display: 'flex', marginTop: 5 }} onClick={() => shell.openExternal(`${explorerAddress}/hash.html?hash=${sender}`)}>
+                <div key={tx.identifier + '_in_' + sender} style={{ display: 'flex', marginTop: 5 }} onClick={() => shell.openExternal(`${explorerAddress}/hash.html?hash=${sender}`)}>
                   From:
                   <p style={{ fontSize: 14, marginBottom: 0, fontFamily: 'Lucida Typewriter', position: 'relative', left: 19 }}>
                     {sender}
@@ -98,8 +98,10 @@ function renderTransactionBody (tx, explorerAddress) {
             })}
           </List.Description>
           <List.Description style={{ color: 'white', display: 'flex', marginTop: 3 }} as='a'>
-            To:
-            <p style={hashFont}>{input.recipient}</p>
+            <div key={tx.identifier + '_in_' + input.recipient} style={{ display: 'flex', marginTop: 5 }} onClick={() => shell.openExternal(`${explorerAddress}/hash.html?hash=${input.recipient}`)}>
+              To:
+              <p style={hashFont}>{input.recipient}</p>
+            </div>
           </List.Description>
         </div>
       )
@@ -115,7 +117,7 @@ function renderTransactionBody (tx, explorerAddress) {
           <List.Description style={listDescriptionStyle} as='a'>
             {out.senders.map(sender => {
               return (
-                <div key={tx.identifier} style={{ display: 'flex', marginTop: 5 }} onClick={() => shell.openExternal(`${explorerAddress}/hash.html?hash=${sender}`)}>
+                <div key={tx.identifier + '_out_' + sender} style={{ display: 'flex', marginTop: 5 }} onClick={() => shell.openExternal(`${explorerAddress}/hash.html?hash=${sender}`)}>
                   From:
                   <p style={{ fontSize: 14, marginBottom: 0, fontFamily: 'Lucida Typewriter', position: 'relative', left: 19 }}>
                     {sender}
@@ -125,8 +127,10 @@ function renderTransactionBody (tx, explorerAddress) {
             })}
           </List.Description>
           <List.Description style={{ color: 'white', display: 'flex', marginTop: 3 }} as='a'>
-            To:
-            <p style={hashFont}>{out.recipient}</p>
+            <div key={tx.identifier + '_out_' + out.recipient} style={{ display: 'flex', marginTop: 5 }} onClick={() => shell.openExternal(`${explorerAddress}/hash.html?hash=${out.recipient}`)}>
+              To:
+              <p style={hashFont}>{out.recipient}</p>
+            </div>
           </List.Description>
         </div>
       )

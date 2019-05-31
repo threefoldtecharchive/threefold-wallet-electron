@@ -1023,28 +1023,7 @@ export var Currency =  __class__ ('Currency', [BaseDataTypeClass], {
 		if (!(isinstance (other, Currency))) {
 			return self.__truediv__ (Currency (other));
 		}
-		return Currency (self.value.__truediv__ (other.value));
-	});},
-	get __itruediv__ () {return __get__ (this, function (self, other) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (!(isinstance (other, Currency))) {
-			return self.__itruediv__ (Currency (other));
-		}
-		self._value.__itruediv__ (other.value);
-		return self;
+		return Currency (self.value.__truediv__ (other.value).to_nearest (9));
 	});},
 	get __sub__ () {return __get__ (this, function (self, other) {
 		if (arguments.length) {

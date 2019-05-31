@@ -299,12 +299,7 @@ class Currency(BaseDataTypeClass):
     def __truediv__(self, other):
         if not isinstance(other, Currency):
             return self.__truediv__(Currency(other))
-        return Currency(self.value.__truediv__(other.value))
-    def __itruediv__(self, other):
-        if not isinstance(other, Currency):
-            return self.__itruediv__(Currency(other))
-        self._value.__itruediv__(other.value)
-        return self
+        return Currency(self.value.__truediv__(other.value).to_nearest(9))
 
     # operator overloading to allow currencies to be subtracted
     def __sub__(self, other):
