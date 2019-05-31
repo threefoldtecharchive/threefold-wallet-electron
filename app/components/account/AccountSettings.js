@@ -55,13 +55,10 @@ class AccountSettings extends Component {
   saveAccount = () => {
     const { name } = this.state
 
-    const previousName = this.props.account.account_name
     let newAccount = this.props.account
+    newAccount.account_name = name
 
-    newAccount._account_name = name
-    newAccount._previous_name = previousName
-
-    this.props.saveAccount(newAccount, previousName)
+    this.props.saveAccount(newAccount)
     toast('Account saved')
     return this.props.history.push('/account')
   }

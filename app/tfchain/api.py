@@ -79,7 +79,7 @@ class Account:
         account = cls(account_name, password, opts={
             'seed': jshex.bytes_from_hex(payload['seed']),
             'network': payload['network_type'],
-            'addresses': payload['explorer_addresses'],
+            'addresses': payload.get_or('explorer_addresses', None),
         })
         # restore all wallets for the account
         for data in payload['wallets']:
@@ -105,9 +105,11 @@ class Account:
         # validate params
         if not account_name:
             raise ValueError("no account_name is given, while it is required")
+        self._previous_account_name = None
         self._account_name = account_name
         if not password:
             raise ValueError("no password is given, while it is required")
+
         self._symmetric_key = jscrypto.SymmetricKey(password)
         # define seed and matching mnemonic based on the given information,
         # generating it randomly if it is not given 
@@ -121,8 +123,53 @@ class Account:
                 seed = mnemonic_to_entropy(mnemonic)
             else:
                 mnemonic = entropy_to_mnemonic(seed)
-        # define explorer addresses and network type
-        if explorer_addresses == None:
+
+        # define explorer addresses network type and explorer client
+        self.explorer_update(network_type, {
+            'addresses': explorer_addresses
+        })
+
+        # assign all remaining properties
+        self._mnemonic = mnemonic
+        self._seed = seed
+        self._wallets = [] # start with no wallets, can be created using the `wallet_new` instance method
+
+    @property
+    def previous_account_name(self):
+        """
+        :returns: Returns the previous account name of this instance, a human-friendly label
+        :rtype: str (or None)
+        """
+        return self._previous_account_name
+
+    @property
+    def account_name(self):
+        """
+        :returns: Returns the account name of this instance, a human-friendly label
+        :rtype: str
+        """
+        return self._account_name
+    @account_name.setter
+    def account_name(self, value):
+        if not isinstance(value, str) or value == '':
+            raise TypeError("value has to be a non-empty str, invalid: {} ({})".format(value, type(value)))
+        self._previous_account_name = self._account_name
+        self._account_name = value
+
+    @property
+    def default_explorer_addresses_used(self):
+        """
+        :returns: True if the default explorer addresses based on the network type are used, False otherwise
+        """
+        return self._use_default_explorer_addresses
+
+    def explorer_update(self, network_type, opts=None):
+        """
+        Update the explorer settings
+        """
+        explorer_addresses = jsfunc.opts_get(opts, 'addresses')
+        self._use_default_explorer_addresses = (explorer_addresses == None)
+        if self._use_default_explorer_addresses:
             # no explorer addresses are given, get the default ones based on the network type
             if network_type == None:
                 network_type = tfnetwork.Type.STANDARD
@@ -142,20 +189,8 @@ class Account:
                 network_type = info.chain_network
         # ensure the network type is using the internal network type
         network_type = tfnetwork.Type(network_type)
-
         # assign all remaining properties
         self._network_type = network_type
-        self._mnemonic = mnemonic
-        self._seed = seed
-        self._wallets = [] # start with no wallets, can be created using the `wallet_new` instance method
-
-    @property
-    def account_name(self):
-        """
-        :returns: Returns the account name of this instance, a human-friendly label
-        :rtype: str
-        """
-        return self._account_name
 
     @property
     def mnemonic(self):
@@ -190,6 +225,13 @@ class Account:
         if not self._wallets:
             return None
         return self._wallets[0]
+
+    @property
+    def network_type(self):
+        """
+        :returns: the network type in str format
+        """
+        return self._network_type.__str__()
 
     @property
     def explorer(self):
@@ -233,7 +275,7 @@ class Account:
         """
         addresses = []
         for wallet in self._wallets:
-            addresses.append(wallet.addresses)
+            addresses = jsarr.concat(addresses, wallet.addresses)
         return addresses
 
     def wallet_new(self, wallet_name, start_index, address_count):
@@ -254,6 +296,8 @@ class Account:
     def wallet_update(self, wallet_index, wallet_name, start_index, address_count):
         if not isinstance(wallet_index, int):
             raise TypeError("wallet index has to be an integer, not be of type {}".format(type(wallet_index)))
+        if not isinstance(wallet_name, str) or wallet_name == '':
+            raise TypeError("wallet name has to be an non empty str, invalid: {} ({})".format(wallet_name, type(wallet_name)))
         if wallet_index < 0 or wallet_index >= self.wallet_count:
             raise ValueError("wallet index {} is out of range".format(wallet_index))
         wallet = self._wallet_new(wallet_index, wallet_name, start_index, address_count)
@@ -311,10 +355,10 @@ class Account:
                 'address_count': wallet.address_count,
             })
         payload = {
-            'account_name': self._account_name,
-            'network_type': self._network_type.__str__(),
-            'explorer_addresses': self._explorer_client.explorer_addresses,
-            'seed': jshex.bytes_to_hex(self._seed),
+            'account_name': self.account_name,
+            'network_type': self.network_type,
+            'explorer_addresses': None if self.default_explorer_addresses_used else self.explorer.explorer_addresses,
+            'seed': jshex.bytes_to_hex(self.seed),
             'wallets': wallets,
         }
         # encrypt it using the internal symmetric key

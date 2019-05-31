@@ -18,9 +18,11 @@ export const account = (state = [], action) => {
       return null
     case 'SAVE_ACCOUNT':
       // first delete account
-      storage.remove(action.account._previous_name, function (err) {
-        if (err) console.log(err)
-      })
+      if (action.account.previous_account_name) {
+        storage.remove(action.account.previous_account_name, function (err) {
+          if (err) console.log(err)
+        })
+      }
       // add the newly saved account
       storage.set(action.account.account_name, action.account.serialize(), function (err) {
         if (err) console.log(err)

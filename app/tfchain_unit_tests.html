@@ -1,5 +1,14 @@
 <html>
     <head>
-        <script type="module">import * as tftests from './tfchain/tests.js'; tftests.tests();</script>
+        <script type="module">
+            import * as tftests from './tfchain/tests.js'
+            console.log("Running TrythonScript unit tests...")
+            tftests.tests()
+            console.log("All TrythonScript unit tests passed :)")
+        </script>
+        <script type="module">
+            import * as tfjstests from '../tests/tfchain/tfchain.js'
+            tfjstests.tests()
+        </script>
     </head>
 </html>

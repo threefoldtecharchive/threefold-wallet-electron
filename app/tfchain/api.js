@@ -77,7 +77,7 @@ export var Account =  __class__ ('Account', [object], {
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		var account = cls (account_name, password, __kwargtrans__ ({opts: dict ({'seed': jshex.bytes_from_hex (payload ['seed']), 'network': payload ['network_type'], 'addresses': payload ['explorer_addresses']})}));
+		var account = cls (account_name, password, __kwargtrans__ ({opts: dict ({'seed': jshex.bytes_from_hex (payload ['seed']), 'network': payload ['network_type'], 'addresses': payload.get_or ('explorer_addresses', null)})}));
 		for (var data of payload ['wallets']) {
 			account.wallet_new (data.wallet_name, data.start_index, data.address_count);
 		}
@@ -112,6 +112,7 @@ export var Account =  __class__ ('Account', [object], {
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
+		self._previous_account_name = null;
 		self._account_name = account_name;
 		if (!(password)) {
 			var __except0__ = ValueError ('no password is given, while it is required');
@@ -131,7 +132,104 @@ export var Account =  __class__ ('Account', [object], {
 		else {
 			var mnemonic = entropy_to_mnemonic (seed);
 		}
-		if (explorer_addresses == null) {
+		self.explorer_update (network_type, dict ({'addresses': explorer_addresses}));
+		self._mnemonic = mnemonic;
+		self._seed = seed;
+		self._wallets = [];
+	});},
+	get _get_previous_account_name () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._previous_account_name;
+	});},
+	get _get_account_name () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._account_name;
+	});},
+	get _set_account_name () {return __get__ (this, function (self, value) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (!(isinstance (value, str)) || value == '') {
+			var __except0__ = py_TypeError ('value has to be a non-empty str, invalid: {} ({})'.format (value, py_typeof (value)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		self._previous_account_name = self._account_name;
+		self._account_name = value;
+	});},
+	get _get_default_explorer_addresses_used () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._use_default_explorer_addresses;
+	});},
+	get explorer_update () {return __get__ (this, function (self, network_type, opts) {
+		if (typeof opts == 'undefined' || (opts != null && opts.hasOwnProperty ("__kwargtrans__"))) {;
+			var opts = null;
+		};
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'network_type': var network_type = __allkwargs0__ [__attrib0__]; break;
+						case 'opts': var opts = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var explorer_addresses = jsfunc.opts_get (opts, 'addresses');
+		self._use_default_explorer_addresses = explorer_addresses == null;
+		if (self._use_default_explorer_addresses) {
 			if (network_type == null) {
 				var network_type = tfnetwork.Type.STANDARD;
 			}
@@ -150,25 +248,6 @@ export var Account =  __class__ ('Account', [object], {
 		}
 		var network_type = tfnetwork.Type (network_type);
 		self._network_type = network_type;
-		self._mnemonic = mnemonic;
-		self._seed = seed;
-		self._wallets = [];
-	});},
-	get _get_account_name () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		return self._account_name;
 	});},
 	get _get_mnemonic () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -236,6 +315,22 @@ export var Account =  __class__ ('Account', [object], {
 			return null;
 		}
 		return self._wallets [0];
+	});},
+	get _get_network_type () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._network_type.__str__ ();
 	});},
 	get _get_explorer () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -321,7 +416,7 @@ export var Account =  __class__ ('Account', [object], {
 		}
 		var addresses = [];
 		for (var wallet of self._wallets) {
-			addresses.append (wallet.addresses);
+			var addresses = jsarr.concat (addresses, wallet.addresses);
 		}
 		return addresses;
 	});},
@@ -366,6 +461,11 @@ export var Account =  __class__ ('Account', [object], {
 		}
 		if (!(isinstance (wallet_index, int))) {
 			var __except0__ = py_TypeError ('wallet index has to be an integer, not be of type {}'.format (py_typeof (wallet_index)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		if (!(isinstance (wallet_name, str)) || wallet_name == '') {
+			var __except0__ = py_TypeError ('wallet name has to be an non empty str, invalid: {} ({})'.format (wallet_name, py_typeof (wallet_name)));
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
@@ -477,7 +577,7 @@ export var Account =  __class__ ('Account', [object], {
 		for (var wallet of self.wallets) {
 			wallets.append (dict ({'wallet_name': wallet.wallet_name, 'start_index': wallet.start_index, 'address_count': wallet.address_count}));
 		}
-		var payload = dict ({'account_name': self._account_name, 'network_type': self._network_type.__str__ (), 'explorer_addresses': self._explorer_client.explorer_addresses, 'seed': jshex.bytes_to_hex (self._seed), 'wallets': wallets});
+		var payload = dict ({'account_name': self.account_name, 'network_type': self.network_type, 'explorer_addresses': (self.default_explorer_addresses_used ? null : self.explorer.explorer_addresses), 'seed': jshex.bytes_to_hex (self.seed), 'wallets': wallets});
 		var __left0__ = self._symmetric_key.encrypt (payload);
 		var ct = __left0__ [0];
 		var rsei = __left0__ [1];
@@ -586,11 +686,14 @@ Object.defineProperty (Account, 'address', property.call (Account, Account._get_
 Object.defineProperty (Account, 'wallet_count', property.call (Account, Account._get_wallet_count));
 Object.defineProperty (Account, 'wallets', property.call (Account, Account._get_wallets));
 Object.defineProperty (Account, 'explorer', property.call (Account, Account._get_explorer));
+Object.defineProperty (Account, 'network_type', property.call (Account, Account._get_network_type));
 Object.defineProperty (Account, 'wallet', property.call (Account, Account._get_wallet));
 Object.defineProperty (Account, 'password', property.call (Account, Account._get_password));
 Object.defineProperty (Account, 'seed', property.call (Account, Account._get_seed));
 Object.defineProperty (Account, 'mnemonic', property.call (Account, Account._get_mnemonic));
-Object.defineProperty (Account, 'account_name', property.call (Account, Account._get_account_name));;
+Object.defineProperty (Account, 'default_explorer_addresses_used', property.call (Account, Account._get_default_explorer_addresses_used));
+Object.defineProperty (Account, 'account_name', property.call (Account, Account._get_account_name, Account._set_account_name));
+Object.defineProperty (Account, 'previous_account_name', property.call (Account, Account._get_previous_account_name));;
 export var Wallet =  __class__ ('Wallet', [object], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, network_type, explorer_client, wallet_index, wallet_name, start_index, pairs) {
