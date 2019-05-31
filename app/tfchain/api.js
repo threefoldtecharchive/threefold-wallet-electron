@@ -1,5 +1,5 @@
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __proxy__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, abs, all, any, assert, bool, bytearray, bytes, callable, chr, copy, deepcopy, delattr, dict, dir, divmod, enumerate, filter, float, getattr, hasattr, input, int, isinstance, issubclass, len, list, map, max, min, object, ord, pow, print, property, py_TypeError, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
-import {Currency} from './tfchain.types.PrimitiveTypes.js';
+import {Currency as TFCurrency} from './tfchain.types.PrimitiveTypes.js';
 import {OutputLock, UnlockHash, UnlockHashType} from './tfchain.types.ConditionTypes.js';
 import * as tfwallet from './tfchain.wallet.js';
 import * as tfclient from './tfchain.client.js';
@@ -13,6 +13,7 @@ import * as jsobj from './tfchain.polyfill.encoding.object.js';
 import * as jsstr from './tfchain.polyfill.encoding.str.js';
 import * as jshex from './tfchain.polyfill.encoding.hex.js';
 import * as jsjson from './tfchain.polyfill.encoding.json.js';
+import * as jsdec from './tfchain.polyfill.encoding.decimal.js';
 import * as jsfunc from './tfchain.polyfill.func.js';
 import * as jsasync from './tfchain.polyfill.asynchronous.js';
 import * as jscrypto from './tfchain.polyfill.crypto.js';
@@ -1478,7 +1479,7 @@ export var Balance =  __class__ ('Balance', [object], {
 		}
 		else {
 		}
-		return self._tfbalance.available;
+		return Currency (self._tfbalance.available);
 	});},
 	get _get_coins_locked () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -1494,7 +1495,7 @@ export var Balance =  __class__ ('Balance', [object], {
 		}
 		else {
 		}
-		return self._tfbalance.locked;
+		return Currency (self._tfbalance.locked);
 	});},
 	get _get_coins_total () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -1526,7 +1527,7 @@ export var Balance =  __class__ ('Balance', [object], {
 		}
 		else {
 		}
-		return self._tfbalance.unconfirmed;
+		return Currency (self._tfbalance.unconfirmed);
 	});},
 	get _get_unconfirmed_coins_locked () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -1542,7 +1543,7 @@ export var Balance =  __class__ ('Balance', [object], {
 		}
 		else {
 		}
-		return self._tfbalance.unconfirmed_locked;
+		return Currency (self._tfbalance.unconfirmed_locked);
 	});},
 	get _get_unconfirmed_coins_total () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -2414,6 +2415,447 @@ Object.defineProperty (ChainInfo, 'chain_height', property.call (ChainInfo, Chai
 Object.defineProperty (ChainInfo, 'chain_network', property.call (ChainInfo, ChainInfo._get_chain_network));
 Object.defineProperty (ChainInfo, 'chain_version', property.call (ChainInfo, ChainInfo._get_chain_version));
 Object.defineProperty (ChainInfo, 'chain_name', property.call (ChainInfo, ChainInfo._get_chain_name));;
+export var Currency =  __class__ ('Currency', [object], {
+	__module__: __name__,
+	get _parse_opts () {return function (opts) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'opts': var opts = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var __left0__ = jsfunc.opts_get_with_defaults (opts, dict ({'unit': null, 'group': ',', 'decimal': '.'}));
+		var unit = __left0__ [0];
+		var group = __left0__ [1];
+		var decimal = __left0__ [2];
+		if (unit != null && !(isinstance (unit, tuple ([bool, str])))) {
+			var __except0__ = py_TypeError ('unit has to be None, a bool or a non-empty str, invalid type: {}'.format (py_typeof (unit)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		else if (isinstance (unit, bool)) {
+			var unit = (unit ? 'TFT' : null);
+		}
+		else if (unit == '') {
+			var unit = null;
+		}
+		if (group == null) {
+			var group = '';
+		}
+		else if (!(isinstance (group, str))) {
+			var __except0__ = py_TypeError ('group (seperator) has to be None or a str, invalid type: {}'.format (py_typeof (group)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		if (decimal != null && !(isinstance (decimal, str))) {
+			var __except0__ = py_TypeError ('decimal (separator) has to be None or a non-empty str, invalid type: {}'.format (py_typeof (decimal)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		else if (decimal == null || decimal == '') {
+			var decimal = '.';
+		}
+		if (group == decimal) {
+			var __except0__ = ValueError ('group- and decimal separator cannot be the same character');
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		return tuple ([unit, group, decimal]);
+	};},
+	get sum () {return __getcm__ (this, function (cls) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+			var py_values = tuple ([].slice.apply (arguments).slice (1, __ilastarg0__ + 1));
+		}
+		else {
+			var py_values = tuple ();
+		}
+		var s = TFCurrency ();
+		for (var value of py_values) {
+			if (!(isinstance (value, Currency))) {
+				var value = Currency (value);
+			}
+			s.__iadd__ (value._value);
+		}
+		return Currency (s);
+	});},
+	get from_str () {return __getcm__ (this, function (cls, s, opts) {
+		if (typeof opts == 'undefined' || (opts != null && opts.hasOwnProperty ("__kwargtrans__"))) {;
+			var opts = null;
+		};
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+						case 's': var s = __allkwargs0__ [__attrib0__]; break;
+						case 'opts': var opts = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (!(isinstance (s, str))) {
+			var __except0__ = py_TypeError ('s has to be a str, not be of type {}'.format (py_typeof (str)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		var __left0__ = Currency._parse_opts (opts);
+		var unit = __left0__ [0];
+		var group = __left0__ [1];
+		var decimal = __left0__ [2];
+		var s = jsstr.strip (s);
+		if (unit != null) {
+			var s = jsstr.rstrip (jsstr.rstrip (s, unit));
+		}
+		if (__in__ (decimal, s)) {
+			var parts = jsstr.py_split (s, __kwargtrans__ ({c: decimal}));
+			if (len (parts) != 2) {
+				var __except0__ = ValueError ('invalid str {}'.format (s));
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
+			var __left0__ = parts;
+			var integer = __left0__ [0];
+			var fraction = __left0__ [1];
+		}
+		else {
+			var integer = s;
+			var fraction = '0';
+		}
+		if (group != '') {
+			var integer = jsstr.py_replace (integer, group, '');
+		}
+		return cls (jsstr.sprintf ('%s.%s', integer, fraction));
+	});},
+	get __init__ () {return __get__ (this, function (self, value) {
+		if (typeof value == 'undefined' || (value != null && value.hasOwnProperty ("__kwargtrans__"))) {;
+			var value = null;
+		};
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (value == null) {
+			self._value = TFCurrency ();
+		}
+		else if (isinstance (value, tuple ([int, str, TFCurrency]))) {
+			self._value = TFCurrency (__kwargtrans__ ({value: value}));
+		}
+		else if (isinstance (value, Currency)) {
+			self._value = TFCurrency (__kwargtrans__ ({value: value._value}));
+		}
+		else {
+			self._value = TFCurrency (__kwargtrans__ ({value: jsdec.Decimal (value)}));
+		}
+	});},
+	get str () {return __get__ (this, function (self, opts) {
+		if (typeof opts == 'undefined' || (opts != null && opts.hasOwnProperty ("__kwargtrans__"))) {;
+			var opts = null;
+		};
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'opts': var opts = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var __left0__ = Currency._parse_opts (opts);
+		var unit = __left0__ [0];
+		var group = __left0__ [1];
+		var decimal = __left0__ [2];
+		var s = self._value.str ();
+		if (__in__ ('.', s)) {
+			var parts = jsstr.py_split (s, __kwargtrans__ ({c: '.'}));
+			if (len (parts) != 2) {
+				var __except0__ = ValueError ('invalid str {}'.format (s));
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
+			var __left0__ = parts;
+			var integer = __left0__ [0];
+			var fraction = __left0__ [1];
+		}
+		else {
+			var integer = s;
+			var fraction = null;
+		}
+		var lint = len (integer);
+		if (lint > 3 && group != null) {
+			var offset = __mod__ (lint, 3);
+			if (offset > 0) {
+				var parts = [integer.slice (0, offset)];
+				var integer = integer.slice (offset);
+			}
+			else {
+				var parts = [];
+			}
+			var parts = jsarr.concat (parts, jsstr.splitn (integer, 3));
+			var integer = jsstr.join (parts, group);
+		}
+		if (fraction == null) {
+			var s = integer;
+		}
+		else {
+			var s = jsstr.sprintf ('%s%s%s', integer, decimal, fraction);
+		}
+		if (unit != null) {
+			var s = jsstr.sprintf ('%s %s', s, unit);
+		}
+		return s;
+	});},
+	get plus () {return __get__ (this, function (self, other) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (!(isinstance (other, Currency))) {
+			return self.plus (Currency (other));
+		}
+		return Currency (self._value.plus (other._value));
+	});},
+	get minus () {return __get__ (this, function (self, other) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (!(isinstance (other, Currency))) {
+			return self.minus (Currency (other));
+		}
+		return Currency (self._value.minus (other._value));
+	});},
+	get times () {return __get__ (this, function (self, other) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (!(isinstance (other, Currency))) {
+			return self.times (Currency (other));
+		}
+		return Currency (self._value.times (other._value));
+	});},
+	get divided_by () {return __get__ (this, function (self, other) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (!(isinstance (other, Currency))) {
+			return self.divided_by (Currency (other));
+		}
+		return Currency (self._value.divided_by (other._value));
+	});},
+	get equal_to () {return __get__ (this, function (self, other) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (!(isinstance (other, Currency))) {
+			return self.equal_to (Currency (other));
+		}
+		return self._value.equal_to (other._value);
+	});},
+	get not_equal_to () {return __get__ (this, function (self, other) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (!(isinstance (other, Currency))) {
+			return self.not_equal_to (Currency (other));
+		}
+		return self._value.not_equal_to (other._value);
+	});},
+	get less_than () {return __get__ (this, function (self, other) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (!(isinstance (other, Currency))) {
+			return self.less_than (Currency (other));
+		}
+		return self._value.less_than (other._value);
+	});},
+	get greater_than () {return __get__ (this, function (self, other) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (!(isinstance (other, Currency))) {
+			return self.greater_than (Currency (other));
+		}
+		return self._value.greater_than (other._value);
+	});},
+	get less_than_or_equal_to () {return __get__ (this, function (self, other) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (!(isinstance (other, Currency))) {
+			return self.less_than_or_equal_to (Currency (other));
+		}
+		return self._value.less_than_or_equal_to (other._value);
+	});},
+	get greater_than_or_equal_to () {return __get__ (this, function (self, other) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (!(isinstance (other, Currency))) {
+			return self.greater_than_or_equal_to (Currency (other));
+		}
+		return self._value.greater_than_or_equal_to (other._value);
+	});},
+	get negate () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return Currency (self._value.negate ());
+	});}
+});
 export var mnemonic_new = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;

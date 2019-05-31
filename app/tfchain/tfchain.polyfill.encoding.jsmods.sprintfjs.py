@@ -228,5 +228,5 @@ if (typeof window !== 'undefined') {
 """)
 
 __pragma__("js", "{}", """
-export const api = vsprintf;
+export const api = sprintf;
 """)

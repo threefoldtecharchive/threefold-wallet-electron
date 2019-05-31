@@ -82,7 +82,9 @@ function renderTransactionBody (tx, explorerAddress) {
       return (
         <div key={uuid.v4()} style={{ marginTop: 5, marginBottom: 5 }}>
           <List.Description style={listDescriptionStyle} as='a'>
-            Amount: <span style={{ color: '#77dd77' }}>+ {input.amount.str(true)}</span>
+            Amount: <span style={{ color: '#77dd77' }}>+ {input.amount.str({
+              unit: true
+            })}</span>
             {renderLockedValue(input.lock, input.lock_is_timestamp)}
           </List.Description>
           <List.Description style={listDescriptionStyle} as='a'>
@@ -111,7 +113,9 @@ function renderTransactionBody (tx, explorerAddress) {
       return (
         <div key={uuid.v4()} style={{ marginTop: 5, marginBottom: 5 }}>
           <List.Description style={listDescriptionStyle} as='a'>
-            Amount: <span style={{ color: '#ff6961' }}>- {out.amount.str(true)}</span>
+            Amount: <span style={{ color: '#ff6961' }}>- {out.amount.str({
+              unit: true
+            })}</span>
             {renderLockedValue(out.lock, out.lock_is_timestamp)}
           </List.Description>
           <List.Description style={listDescriptionStyle} as='a'>

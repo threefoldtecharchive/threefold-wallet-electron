@@ -7,6 +7,7 @@ import tfchain.polyfill.log as jslog
 import tfchain.polyfill.crypto as jscrypto
 import tfchain.polyfill.asynchronous as jsasync
 import tfchain.polyfill.func as jsfunc
+import tfchain.polyfill.encoding.decimal as jsdec
 import tfchain.polyfill.encoding.json as jsjson
 import tfchain.polyfill.encoding.hex as jshex
 import tfchain.polyfill.encoding.str as jsstr
@@ -22,7 +23,7 @@ import tfchain.client as tfclient
 import tfchain.wallet as tfwallet
 
 from tfchain.types.ConditionTypes import UnlockHash, UnlockHashType, OutputLock
-from tfchain.types.PrimitiveTypes import Currency
+from tfchain.types.PrimitiveTypes import Currency as TFCurrency
 
 # BIP39 state object used for all Mnemonic purposes of this API
 __bip39 = bip39.Mnemonic()
@@ -711,11 +712,11 @@ class Balance:
 
     @property
     def coins_unlocked(self):
-        return self._tfbalance.available
+        return Currency(self._tfbalance.available)
 
     @property
     def coins_locked(self):
-        return self._tfbalance.locked
+        return Currency(self._tfbalance.locked)
 
     @property
     def coins_total(self):
@@ -723,11 +724,11 @@ class Balance:
 
     @property
     def unconfirmed_coins_unlocked(self):
-        return self._tfbalance.unconfirmed
+        return Currency(self._tfbalance.unconfirmed)
 
     @property
     def unconfirmed_coins_locked(self):
-        return self._tfbalance.unconfirmed_locked
+        return Currency(self._tfbalance.unconfirmed_locked)
 
     @property
     def unconfirmed_coins_total(self):
@@ -1115,6 +1116,163 @@ class ChainInfo:
         """
         addresses = jsfunc.opts_get(opts, 'addresses')
         return BlockView.from_block(self._tf_chain_info.last_block, addresses=addresses)
+
+
+class Currency:
+    @staticmethod
+    def _parse_opts(opts):
+        # get options
+        unit, group, decimal = jsfunc.opts_get_with_defaults(opts, {
+            'unit': None,
+            'group': ',',
+            'decimal': '.',
+        })
+        # validate unit option
+        if unit != None and not isinstance(unit, (bool, str)):
+            raise TypeError("unit has to be None, a bool or a non-empty str, invalid type: {}".format(type(unit)))
+        elif isinstance(unit, bool):
+            unit = 'TFT' if unit else None
+        elif unit == '':
+            unit = None
+        # validate group option
+        if group == None:
+            group = ''
+        elif not isinstance(group, str):
+            raise TypeError("group (seperator) has to be None or a str, invalid type: {}".format(type(group)))
+        # validate the decimal option
+        if decimal != None and not isinstance(decimal, str):
+            raise TypeError("decimal (separator) has to be None or a non-empty str, invalid type: {}".format(type(decimal)))
+        elif decimal == None or decimal == '':
+            decimal = '.'
+        if group == decimal:
+            raise ValueError("group- and decimal separator cannot be the same character")
+        # return the options
+        return (unit, group, decimal)
+
+    @classmethod
+    def sum(cls, *values):
+        s = TFCurrency()
+        for value in values:
+            if not isinstance(value, Currency):
+                value = Currency(value)
+            s.__iadd__(value._value)
+        return Currency(s)
+
+    @classmethod
+    def from_str(cls, s, opts=None):
+        if not isinstance(s, str):
+            raise TypeError("s has to be a str, not be of type {}".format(type(str)))
+        # parse options
+        unit, group, decimal = Currency._parse_opts(opts)
+        # remove spaces
+        s = jsstr.strip(s)
+        # remove unit if exists
+        if unit != None:
+            s = jsstr.rstrip(jsstr.rstrip(s, unit)) # unit and space
+        # split into its integer and fraction part 
+        if decimal in s:
+            parts = jsstr.split(s, c=decimal)
+            if len(parts) != 2:
+                raise ValueError("invalid str {}".format(s))
+            integer, fraction = parts
+        else:
+            integer = s
+            fraction = '0'
+        # remove group operator if it exists
+        if group != '':
+            integer = jsstr.replace(integer, group, '')
+        # piggy-back on the regular TFCurrency logic
+        return cls(jsstr.sprintf('%s.%s', integer, fraction))
+
+    def __init__(self, value=None):
+        if value == None:
+            self._value = TFCurrency()
+        elif isinstance(value, (int, str, TFCurrency)):
+            self._value = TFCurrency(value=value)
+        elif isinstance(value, Currency):
+            self._value = TFCurrency(value=value._value)
+        else:
+            self._value = TFCurrency(value=jsdec.Decimal(value))
+
+    def str(self, opts=None):
+        # parse options
+        unit, group, decimal = Currency._parse_opts(opts)
+        # get integer and whole part
+        s = self._value.str()
+        if '.' in s:
+            parts = jsstr.split(s, c='.')
+            if len(parts) != 2:
+                raise ValueError("invalid str {}".format(s))
+            integer, fraction = parts
+        else:
+            integer = s
+            fraction = None
+        # add group separator to integer if required
+        lint = len(integer)
+        if lint > 3 and group != None:
+            offset = lint%3
+            if offset > 0:
+                parts = [integer.slice(0, offset)]
+                integer = integer.slice(offset)
+            else:
+                parts = []
+            parts = jsarr.concat(parts, jsstr.splitn(integer, 3))
+            integer = jsstr.join(parts, group)
+        # join fraction and integer
+        if fraction == None:
+            s = integer
+        else:
+            s = jsstr.sprintf("%s%s%s", integer, decimal, fraction)
+        # add unit if required
+        if unit != None:
+            s = jsstr.sprintf("%s %s", s, unit)
+        # return it all
+        return s
+
+    def plus(self, other):
+        if not isinstance(other, Currency):
+            return self.plus(Currency(other))
+        return Currency(self._value.plus(other._value))
+    def minus(self, other):
+        if not isinstance(other, Currency):
+            return self.minus(Currency(other))
+        return Currency(self._value.minus(other._value))
+    def times(self, other):
+        if not isinstance(other, Currency):
+            return self.times(Currency(other))
+        return Currency(self._value.times(other._value))
+    def divided_by(self, other):
+        if not isinstance(other, Currency):
+            return self.divided_by(Currency(other))
+        return Currency(self._value.divided_by(other._value))
+
+    def equal_to(self, other):
+        if not isinstance(other, Currency):
+            return self.equal_to(Currency(other))
+        return self._value.equal_to(other._value)
+    def not_equal_to(self, other):
+        if not isinstance(other, Currency):
+            return self.not_equal_to(Currency(other))
+        return self._value.not_equal_to(other._value)
+    def less_than(self, other):
+        if not isinstance(other, Currency):
+            return self.less_than(Currency(other))
+        return self._value.less_than(other._value)
+    def greater_than(self, other):
+        if not isinstance(other, Currency):
+            return self.greater_than(Currency(other))
+        return self._value.greater_than(other._value)
+    def less_than_or_equal_to(self, other):
+        if not isinstance(other, Currency):
+            return self.less_than_or_equal_to(Currency(other))
+        return self._value.less_than_or_equal_to(other._value)
+    def greater_than_or_equal_to(self, other):
+        if not isinstance(other, Currency):
+            return self.greater_than_or_equal_to(Currency(other))
+        return self._value.greater_than_or_equal_to(other._value)
+
+    def negate(self):
+        return Currency(self._value.negate())
 
 
 def mnemonic_new():

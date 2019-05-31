@@ -227,7 +227,7 @@ if (typeof window !== 'undefined') {
 }
 
 
-export const api = vsprintf;
+export const api = sprintf;
 
 
 //# sourceMappingURL=tfchain.polyfill.encoding.jsmods.sprintfjs.map

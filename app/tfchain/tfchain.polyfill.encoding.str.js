@@ -504,6 +504,49 @@ export var isempty = function (s) {
 	    
 	return result;
 };
+export var splitn = function (s, n) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 's': var s = __allkwargs0__ [__attrib0__]; break;
+					case 'n': var n = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	var out = null;
+	
+	    const regexp = new RegExp('.{1,' + n + '}', 'g');
+	    out = s.match(regexp) || [];
+	    
+	return out;
+};
+export var join = function (arr, sep) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'arr': var arr = __allkwargs0__ [__attrib0__]; break;
+					case 'sep': var sep = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	var s = null;
+	
+	    s = arr.join(sep);
+	    
+	return s;
+};
 export var String =  __class__ ('String', [object], {
 	__module__: __name__,
 	get from_utf8 () {return __getcm__ (this, function (cls, b) {

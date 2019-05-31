@@ -164,7 +164,7 @@ def isdigit(s):
         raise TypeError("s has to be a str, not be of type {}".format(type(s)))
     result = False
     __pragma__("js", "{}", """
-    result = /^-{0,1}\d+$/.test(s);
+    result = /^-{0,1}\\d+$/.test(s);
     """)
     return result
 
@@ -174,6 +174,22 @@ def isempty(s):
     result = (!s || 0 === s.length);
     """)
     return result
+
+def splitn(s, n):
+    out = None
+    __pragma__("js", "{}", """
+    const regexp = new RegExp('.{1,' + n + '}', 'g');
+    out = s.match(regexp) || [];
+    """)
+    return out
+
+def join(arr, sep):
+    s = None
+    __pragma__("js", "{}", """
+    s = arr.join(sep);
+    """)
+    return s
+
 
 class String:
     """

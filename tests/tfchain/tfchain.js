@@ -263,6 +263,62 @@ const _all = {
     assert.equal(account.wallet.wallet_name, 'default')
     assert.equal(account.wallet.start_index, 0)
     assert.equal(account.wallet.address_count, 1)
+  },
+
+  jscurrency: (assert) => {
+    // a currency can created from many different types
+    assert.equal((new tfchain.Currency()).str(), '0')
+    assert.equal((new tfchain.Currency(0)).str(), '0')
+    assert.equal((new tfchain.Currency(0.0)).str(), '0')
+    assert.equal((new tfchain.Currency(12.34)).str(), '12.34') // not recommended due to floating point accuracy problems
+    assert.equal((new tfchain.Currency('0')).str(), '0')
+    assert.equal((new tfchain.Currency('0.0')).str(), '0')
+    assert.equal((new tfchain.Currency(new tfchain.Currency('0.0'))).str(), '0')
+
+    // a currency has a decent format by default
+    assert.equal((new tfchain.Currency('2356.543')).str(), '2,356.543')
+    assert.equal((new tfchain.Currency('12356.543')).str(), '12,356.543')
+    assert.equal((new tfchain.Currency('012356.543')).str(), '12,356.543')
+    assert.equal((new tfchain.Currency('112356.543563')).str(), '112,356.543563')
+
+    // use different separators
+    assert.equal((new tfchain.Currency('112356.543563')).str({
+      decimal: ',',
+      group: '.'
+    }), '112.356,543563')
+    assert.equal((new tfchain.Currency('112356.543563')).str({
+      decimal: ',',
+      group: ' '
+    }), '112 356,543563')
+
+    // add a unit to the mix
+    assert.equal((new tfchain.Currency('3949403.123456789')).str({
+      decimal: ',',
+      group: '.',
+      unit: true
+    }), '3.949.403,123456789 TFT')
+    assert.equal((new tfchain.Currency(100)).str({
+      unit: 'BFR'
+    }), '100 BFR')
+    // or explictly use no unit
+    assert.equal((new tfchain.Currency(123)).str({
+      unit: false
+    }), '123')
+    assert.equal((new tfchain.Currency(456)).str({
+      unit: ''
+    }), '456')
+
+    // arithmitic is supported as well
+    assert.equal((new tfchain.Currency('13456.3456')).plus('1212.2121').str(), '14,668.5577')
+    assert.equal((new tfchain.Currency('13456.3456')).minus('30.1001').str(), '13,426.2455')
+    assert.equal((new tfchain.Currency('21')).times('2.02').str(), '42.42')
+    assert.equal((new tfchain.Currency('2')).times(3).str(), '6')
+    assert.equal((new tfchain.Currency('82')).divided_by(2).str(), '41')
+    assert.equal((new tfchain.Currency('2')).negate().str(), '-2')
+    assert.equal((new tfchain.Currency('-3')).negate().str(), '3')
+    assert.equal(tfchain.Currency.sum(35, '3.5', 1.5, null, new tfchain.Currency('2')).str({
+      unit: 'ANS'
+    }), '42 ANS')
   }
 }
 
