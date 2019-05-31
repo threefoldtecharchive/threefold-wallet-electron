@@ -37,6 +37,7 @@ const _all = {
     assert.true(newAccount.default_explorer_addresses_used)
     assert.equal(newAccount.explorer.explorer_addresses, _defs.network.standard.addresses)
     assert.equal(newAccount.wallets.length, 0) // wallets are not created by default
+    assert.equal(newAccount.next_available_wallet_start_index(), 0)
 
     // ...but it can also be recovered
     const exampleMnemonic = 'embark fatal whale file wait future bracket anger label long screen opinion giggle genius blur author warrior prevent cereal scale outdoor enhance diesel raccoon'
@@ -52,6 +53,7 @@ const _all = {
     assert.true(newAccount.default_explorer_addresses_used)
     assert.equal(newAccount.explorer.explorer_addresses, _defs.network.standard.addresses)
     assert.equal(newAccount.wallets.length, 0) // wallets are not created by default
+    assert.equal(newAccount.next_available_wallet_start_index(), 0)
     // create a default wallet...
     const recoveredDefaultWallet = recoveredAccount.wallet_new('ballet', 0, 1)
     assert.equal(recoveredDefaultWallet.address, '01956471980a60ec51a2d54e4b91f4b39ba26eca677ebb3f31929086f7431b17b7f8fe84985d59')
@@ -61,6 +63,7 @@ const _all = {
     assert.equal(recoveredAccount.addresses[0], recoveredDefaultWallet.address)
     assert.equal(recoveredAccount.address, recoveredDefaultWallet.address)
     assert.equal(recoveredAccount.wallets[0].address, recoveredDefaultWallet.address)
+    assert.equal(recoveredAccount.next_available_wallet_start_index(), 1)
     // you can only update a wallet at a valid index
     assert.throws(() => recoveredAccount.wallet_update(-1, 'default', 1, 3))
     assert.throws(() => recoveredAccount.wallet_update(1, 'default', 1, 3))
@@ -70,6 +73,7 @@ const _all = {
     assert.equal(updatedDefaultWallet.addresses, ['010e0adfb04322e91dfee62ce402e17600862c82c82682e6a7b925b572689e531a24cd002c59f2', '0168341e75d73597807321629d3895eec00aafabba9fc9ef68a6c4279ecfca9708f4dbd5a969f7', '011a3ae574a1081eca8cc5e7c6eae6ed1657a82b4f741413951d8a2313ee8a60eb1f35a6028ede'])
     assert.equal(recoveredAccount.address, updatedDefaultWallet.address)
     assert.equal(recoveredAccount.wallets.length, 1)
+    assert.equal(recoveredAccount.next_available_wallet_start_index(), 4)
   },
 
   walletAddressValidation: (assert) => {
