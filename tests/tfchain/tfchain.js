@@ -72,6 +72,36 @@ const _all = {
     assert.equal(recoveredAccount.wallets.length, 1)
   },
 
+  walletAddressValidation: (assert) => {
+    // garbage data
+    assert.false(tfchain.wallet_address_is_valid())
+    assert.false(tfchain.wallet_address_is_valid(false))
+    assert.false(tfchain.wallet_address_is_valid(1))
+    assert.false(tfchain.wallet_address_is_valid(null))
+    assert.false(tfchain.wallet_address_is_valid('0000'))
+    // invalid addresses (checksum)
+    assert.false(tfchain.wallet_address_is_valid('0195de96da59de0bd59c416e96d17df1a5bcc80acb6b02a1db0cde0bcdffca55a4f7f369e955ef'))
+    assert.false(tfchain.wallet_address_is_valid('0195de96da59de0bd59c416e96d17df1a5bbc80acb6b02a1db0cde0bcdffca55a4f7f369e955ff'))
+    assert.false(tfchain.wallet_address_is_valid('0295de96da59de0bd59c416e96d17df1a5bbc80acb6b02a1db0cde0bcdffca55a4f7f369e955ef'))
+    // invalid addresses (type)
+    assert.false(tfchain.wallet_address_is_valid('195de96da59de0bd59c416e96d17df1a5bbc80acb6b02a1db0cde0bcdffca55a4f7f369e955ef'))
+    assert.false(tfchain.wallet_address_is_valid('1195de96da59de0bd59c416e96d17df1a5bbc80acb6b02a1db0cde0bcdffca55a4f7f369e955ef'))
+    // valid addresses
+    assert.true(tfchain.wallet_address_is_valid('000000000000000000000000000000000000000000000000000000000000000000000000000000'))
+    assert.true(tfchain.wallet_address_is_valid('0195de96da59de0bd59c416e96d17df1a5bbc80acb6b02a1db0cde0bcdffca55a4f7f369e955ef'))
+    assert.true(tfchain.wallet_address_is_valid('0313a5abd192d1bacdd1eb518fc86987d3c3d1cfe3c5bed68ec4a86b93b2f05a89f67b89b07d71'))
+    // multisig can be valid if multisig is not allowed (by default it is allowed)
+    assert.false(tfchain.wallet_address_is_valid(
+      '0313a5abd192d1bacdd1eb518fc86987d3c3d1cfe3c5bed68ec4a86b93b2f05a89f67b89b07d71', {
+        multisig: false
+      }))
+    // you can therefore also explicitly defined it is allowed
+    assert.true(tfchain.wallet_address_is_valid(
+      '0313a5abd192d1bacdd1eb518fc86987d3c3d1cfe3c5bed68ec4a86b93b2f05a89f67b89b07d71', {
+        multisig: true
+      }))
+  },
+
   accountSerializeDeserialize: (assert) => {
     let account = new tfchain.Account('ufoo', 'pfoo')
     assert.equal(account.account_name, 'ufoo')
