@@ -61,8 +61,8 @@ class Account extends Component {
     this.setState({ accountBalanceLoader: true })
     this.props.account.balance.then(info => {
       const totalCoins = info.coins_total.str()
-      const totalCoinLocked = info.coins_unlocked.str()
-      const totalCoinUnlocked = info.coins_locked.str()
+      const totalCoinLocked = info.coins_locked.str()
+      const totalCoinUnlocked = info.coins_unlocked.str()
       const unconfirmedTotalCoins = info.unconfirmed_coins_total.str()
       const unconfirmedLockedCoins = info.unconfirmed_coins_locked.str()
       const unconfirmedUnlockedCoins = info.unconfirmed_coins_unlocked.str()
