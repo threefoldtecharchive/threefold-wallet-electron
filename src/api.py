@@ -11,6 +11,7 @@ import tfchain.polyfill.encoding.json as jsjson
 import tfchain.polyfill.encoding.hex as jshex
 import tfchain.polyfill.encoding.str as jsstr
 import tfchain.polyfill.encoding.object as jsobj
+import tfchain.polyfill.array as jsarr
 
 import tfchain.crypto.mnemonic as bip39
 import tfchain.encoding.siabin as tfsiabin
@@ -342,14 +343,11 @@ class Account:
         wallets = self.wallets
         if len(wallets) == 0:
             def no_balance_cb():
-                return Balance(self._network_type)
+                return AccountBalance(self._network_type, self.account_name)
             return jsasync.as_promise(no_balance_cb)
         # create aggregaton cb
         def aggregate(balances):
-            balance = balances[0]
-            for other in balances[1:]:
-                balance = balance.merge(other)
-            return balance
+            return AccountBalance(self._network_type, self.account_name, balances)
         # define generator
         def generator():
             for wallet in wallets:
@@ -458,7 +456,7 @@ class Wallet:
         """
         wallet = self.clone()
         def create_api_balance_obj(balance):
-            return Balance(wallet._tfwallet.network_type, balance)
+            return Balance(wallet._tfwallet.network_type, wallet.wallet_name, balance, wallet.addresses)
         return jsasync.chain(wallet._tfwallet.balance, create_api_balance_obj)
 
     def transaction_new(self):
@@ -512,24 +510,137 @@ class CoinTransactionBuilder:
         return self._builder.send(source=source, refund=refund, data=data)
 
 
-class Balance:
-    def __init__(self, network_type, tfbalance=None):
+class AccountBalance:
+    def __init__(self, network_type, account_name, balances=None):
         if not isinstance(network_type, tfnetwork.Type):
             raise TypeError("network_type has to be of type tfchain.network.Type, not be of type {}".format(type(network_type)))
         self._network_type = network_type
+        if not isinstance(account_name, str):
+            raise TypeError("account_name has to be of type str, not be of type {}".format(type(account_name)))
+        self._account_name = account_name
+        self._balances = {} if balances == None else dict([(b.wallet_name, b) for b in balances])
+
+    @property
+    def balances(self):
+        return jsobj.dict_values(self._balances)
+
+    def balance_for(self, wallet_name):
+        if wallet_name not in self._balances:
+            raise KeyError("wallet {} has no balance for account of {}".format(wallet_name, self._account_name))
+        return self._balances[wallet_name]
+
+    @property
+    def account_name(self):
+        return self._account_name
+
+    @property
+    def wallet_names(self):
+        return [balance.wallet_name for balance in self.balances]
+
+    @property
+    def addresses_all(self):
+        addresses = set()
+        for balance in self.balances:
+            for address in balance.addresses_all:
+                addresses.add(address)
+        return list(addresses)
+
+    @property
+    def addresses_used(self):
+        addresses = set()
+        for balance in self.balances:
+            for address in balance.addresses_used:
+                addresses.add(address)
+        return list(addresses)
+
+    @property
+    def coins_unlocked(self):
+        return Currency.sum(*[balance.coins_unlocked for balance in self.balances])
+
+    @property
+    def coins_locked(self):
+        return Currency.sum(*[balance.coins_locked for balance in self.balances])
+
+    @property
+    def coins_total(self):
+        return self.coins_unlocked.plus(self.coins_locked)
+
+    @property
+    def unconfirmed_coins_unlocked(self):
+        return Currency.sum(*[balance.unconfirmed_coins_unlocked for balance in self.balances])
+
+    @property
+    def unconfirmed_coins_locked(self):
+        return Currency.sum(*[balance.unconfirmed_coins_locked for balance in self.balances])
+
+    @property
+    def unconfirmed_coins_total(self):
+        return self.unconfirmed_coins_unlocked.plus(self.unconfirmed_coins_locked)
+
+    @property
+    def transactions(self):
+        # collect a mapping where each txn is only counted once,
+        # relevant for all wallets part of this account
+        tranmap = {}
+        for balance in self.balances:
+            transactions = balance.transactions
+            for txn in transactions:
+                if txn.identifier not in tranmap:
+                    tranmap[txn.identifier] = txn
+                else:
+                    extxn = tranmap[txn.identifier]
+                    for ci in txn.inputs:
+                        extxn.inputs.append(ci)
+                    for co in txn.outputs:
+                        extxn.outputs.append(co)
+        # make it a height-sorted map once again
+        transactions = jsobj.dict_values(tranmap)
+        transactions = jsarr.sort(transactions, TransactionView.sort_by_height, reverse=True)
+        # return the aggregated transactions
+        return transactions
+
+
+class Balance:
+    def __init__(self, network_type, wallet_name, tfbalance=None, addresses_all=None):
+        if not isinstance(network_type, tfnetwork.Type):
+            raise TypeError("network_type has to be of type tfchain.network.Type, not be of type {}".format(type(network_type)))
+        self._network_type = network_type
+        if not isinstance(wallet_name, str):
+            raise TypeError("wallet_name has to be of type str, not be of type {}".format(type(wallet_name)))
+        self._wallet_name = wallet_name
         if tfbalance == None:
             self._tfbalance = wbalance.WalletBalance()
         else:
             if not isinstance(tfbalance, wbalance.WalletBalance):
                 raise TypeError("tfbalance has to be of type tfchain.balance.WalletBalance, not be of type {}".format(type(tfbalance)))
             self._tfbalance = tfbalance
+        self._addresses_all = [] if addresses_all == None else [address for address in addresses_all]
+
+    @property
+    def wallet_name(self):
+        return self._wallet_name
+
+    @property
+    def addresses_all(self):
+        return self._addresses_all
+
+    @property
+    def addresses_used(self):
+        return self._tfbalance.addresses
 
     def merge(self, other):
         if self._network_type.__ne__(other._network_type):
-            raise ValueError("miner fees of to-be-merged balance objects have to be equal")
+            raise ValueError("network type of to-be-merged balance objects has to be equal")
+        if self._wallet_name.__ne__(other._wallet_name):
+            raise ValueError("wallet name of to-be-merged balance objects has to be equal")
+        addresses_all = set()
+        addresses_all = addresses_all.union(set(self.addresses_all))
+        addresses_all = addresses_all.union(set(other.addresses_all))
         return Balance(
             network_type=self._network_type,
+            wallet_name=self._wallet_name,
             tfbalance=wbalance.WalletBalance().balance_add(self._tfbalance).balance_add(other._tfbalance),
+            addresses_all=list(addresses_all),
         )
 
     def spend_amount_is_valid(self, amount):
@@ -648,6 +759,16 @@ class TransactionView:
     """
     A human readable view of a transaction as filtered for a specific wallet in mind.
     """
+
+    @staticmethod
+    def sort_by_height(a, b):
+        height_a = a.height if a.confirmed else pow(2, 64)
+        height_b = b.height if b.confirmed else pow(2, 64)
+        if height_a < height_b:
+            return -1
+        if height_a > height_b:
+            return 1
+        return 0
 
     @classmethod
     def from_transaction(cls, transaction, addresses=None):
