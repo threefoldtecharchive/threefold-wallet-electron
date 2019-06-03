@@ -66,7 +66,7 @@ class Footer extends Component {
       })
         .catch(err => {
           if (this.mounted) {
-            this.setState({ error: err.str() })
+            this.setState({ error: err.__str__() })
           }
         })
     }
@@ -90,7 +90,7 @@ class Footer extends Component {
       })
         .catch(err => {
           if (this.mounted) {
-            this.setState({ error: err.str() })
+            this.setState({ error: err.__str__() })
           }
         })
     }

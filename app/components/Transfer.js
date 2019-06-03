@@ -129,7 +129,7 @@ class Transfer extends Component {
         return this.props.history.push('/wallet')
       }).catch(err => {
         toast('transaction failed')
-        this.setState({ loader: false, errorMessage: err.str() })
+        this.setState({ loader: false, errorMessage: err.__str__() })
       })
     } else {
       toast.error('All fields are required !')
