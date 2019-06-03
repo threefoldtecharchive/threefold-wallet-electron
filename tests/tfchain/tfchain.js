@@ -269,7 +269,7 @@ const _all = {
     assert.equal(account.wallet.address_count, 1)
   },
 
-  jscurrency: (assert) => {
+  jscurrencyStr: (assert) => {
     // a currency can created from many different types
     assert.equal((new tfchain.Currency()).str(), '0')
     assert.equal((new tfchain.Currency(0)).str(), '0')
@@ -311,7 +311,9 @@ const _all = {
     assert.equal((new tfchain.Currency(456)).str({
       unit: ''
     }), '456')
+  },
 
+  jscurrencyArithmitic: (assert) => {
     // arithmitic is supported as well
     assert.equal((new tfchain.Currency('13456.3456')).plus('1212.2121').str(), '14,668.5577')
     assert.equal((new tfchain.Currency('13456.3456')).minus('30.1001').str(), '13,426.2455')
@@ -323,6 +325,19 @@ const _all = {
     assert.equal(tfchain.Currency.sum(35, '3.5', 1.5, null, new tfchain.Currency('2')).str({
       unit: 'ANS'
     }), '42 ANS')
+  },
+
+  jscurrencyEquality: (assert) => {
+    assert.true((new tfchain.Currency('-1.0').less_than(0)))
+    assert.true((new tfchain.Currency('1').greater_than(0)))
+    assert.true((new tfchain.Currency('3').greater_than_or_equal_to(3)))
+    assert.true((new tfchain.Currency('5').less_than_or_equal_to('5.0')))
+    assert.true((new tfchain.Currency('42.35').equal_to('42.35')))
+    assert.true((new tfchain.Currency('12.34').not_equal_to('12.341')))
+    assert.false((new tfchain.Currency(0).less_than('-1.0')))
+    assert.false((new tfchain.Currency(0).greater_than('1')))
+    assert.false((new tfchain.Currency('42.351').equal_to('42.35')))
+    assert.false((new tfchain.Currency('12.34').not_equal_to('12.34')))
   }
 }
 
@@ -398,11 +413,16 @@ export const tests = () => {
   const testCount = Object.keys(_all).length
   let testNumber = 1
   let testsPassed = 0
+  let tt = 0
   for (let fn in _all) {
     if (_all.hasOwnProperty(fn)) {
       console.log('[' + testNumber + '/' + testCount + '] running ' + fn + '...')
+      const t0 = performance.now()
       if (asserter.runSuite(_all[fn])) {
-        console.log('[' + testNumber + '/' + testCount + '] ' + fn + ' passed :)')
+        const t1 = performance.now()
+        const td = t1-t0
+        tt += td
+        console.log('[' + testNumber + '/' + testCount + '] ' + fn + ' ran ' + td.toFixed(3) + 'ms and passed :)')
         testsPassed++
       } else {
         console.log('[' + testNumber + '/' + testCount + '] ' + fn + ' failed :(')
@@ -411,4 +431,5 @@ export const tests = () => {
     }
   }
   console.log(testsPassed + ' of ' + testCount + ' ES6 TFChain api.py unit test(s) have passed :)')
+  console.log('The ES6 TFChain api.py unit test(s) ran in ' + tt.toFixed(3) + 'ms')
 }
