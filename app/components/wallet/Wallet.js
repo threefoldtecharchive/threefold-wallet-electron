@@ -13,53 +13,17 @@ import TransactionsList from './TransactionList'
 const mapStateToProps = state => ({
   wallet: state.wallet,
   routerLocations: state.routerLocations,
-  chainInfo: state.chainConstants
+  chainInfo: state.chainConstants,
+  balance: state.balance
 })
 
 class Wallet extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      coinsLocked: 0,
-      coinsUnlocked: 0,
-      coinsTotal: 0,
-      unconfirmedTotalCoins: 0,
-      unconfirmedLockedCoins: 0,
-      unconfirmedUnlockedCoins: 0,
       transactions: [],
       intervalId: undefined,
       loader: false
-    }
-  }
-
-  componentDidMount () {
-    const intervalId = setInterval(this.getBalance(), 60000)
-    this.mounted = true
-    this.setState({ intervalId })
-  }
-
-  componentWillUnmount () {
-    clearInterval(this.state.intervalId)
-    this.mounted = false
-  }
-
-  getBalance = () => {
-    if (!(this.props.wallet instanceof Array)) {
-      this.setState({ loader: true })
-      this.props.wallet.balance.then(info => {
-        if (this.mounted) {
-          this.setState({
-            coinsLocked: info.coins_locked.str(),
-            coinsUnlocked: info.coins_unlocked.str(),
-            coinsTotal: info.coins_total.str(),
-            transactions: info.transactions,
-            unconfirmedTotalCoins: info.unconfirmed_coins_total.str(),
-            unconfirmedLockedCoins: info.unconfirmed_coins_locked.str(),
-            unconfirmedUnlockedCoins: info.unconfirmed_coins_unlocked.str(),
-            loader: false
-          })
-        }
-      })
     }
   }
 
@@ -79,11 +43,13 @@ class Wallet extends Component {
   renderWalletBalanceGrid = () => {
     const routeToReceive = () => this.props.history.push(routes.WALLET_RECEIVE)
     const routeToTransfer = () => this.props.history.push(routes.TRANSFER)
+    const walletBalance = this.props.balance.info.balances.filter(w => w.wallet_name === this.props.wallet.wallet_name)[0]
 
-    if (this.state.unconfirmedTotalCoins > 0) {
+    if (walletBalance.unconfirmed_coins_total.greater_than(0)) {
       return (
         <BalanceUnconfirmedGrid
-          props={this.state}
+          loader={this.state.loader}
+          walletBalance={walletBalance}
           routeToReceive={routeToReceive}
           routeToTransfer={routeToTransfer}
         />
@@ -91,7 +57,8 @@ class Wallet extends Component {
     }
     return (
       <BalanceGrid
-        props={this.state}
+        loader={this.state.loader}
+        walletBalance={walletBalance}
         routeToReceive={routeToReceive}
         routeToTransfer={routeToTransfer}
       />
@@ -99,7 +66,7 @@ class Wallet extends Component {
   }
 
   render () {
-    const { wallet } = this.props
+    const wallet = this.props.balance.info.balances.filter(w => w.wallet_name === this.props.wallet.wallet_name)[0]
 
     return (
       <div>
@@ -120,7 +87,7 @@ class Wallet extends Component {
           <span onClick={() => this.goBack()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
           {this.renderWalletBalanceGrid()}
           <Segment style={{ width: '90%', height: '37vh', overflow: 'auto', overflowY: 'scroll', margin: 'auto', background: '#29272E', marginTop: 150 }}>
-            <TransactionsList loader={this.state.loader} transactions={this.state.transactions} chainInfo={this.props.chainInfo} />
+            <TransactionsList loader={this.state.loader} transactions={wallet.transactions} chainInfo={this.props.chainInfo} />
           </Segment>
         </div>
         <Footer />

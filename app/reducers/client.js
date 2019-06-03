@@ -4,6 +4,8 @@ export const client = (state = [], action) => {
       return Object.assign({}, state, {
         client: action.client
       })
+    case 'RESET_APP':
+      return []
     default:
       return state
   }

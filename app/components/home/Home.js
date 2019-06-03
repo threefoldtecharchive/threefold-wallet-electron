@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom'
 import { Button, Divider } from 'semantic-ui-react'
 import routes from '../../constants/routes'
 import styles from './Home.css'
-import { selectAccount } from '../../actions'
+import { selectAccount, resetApp } from '../../actions'
 const storage = require('electron-json-storage')
 
 const mapStateToProps = state => ({
@@ -14,8 +14,11 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = (dispatch) => ({
-  SelectAccount: (account) => {
+  selectAccount: (account) => {
     dispatch(selectAccount(account))
+  },
+  resetApp: () => {
+    dispatch(resetApp())
   }
 })
 
@@ -29,6 +32,9 @@ class Home extends Component {
   }
 
   componentWillMount () {
+    // Reset redux store
+    this.props.resetApp()
+
     const _this = this
     storage.getAll(function (err, data) {
       if (err) throw err
@@ -39,7 +45,7 @@ class Home extends Component {
   selectAccount = (account) => {
     const selectedAccount = Object.assign(this.state.accounts[account], { account_name: account })
 
-    this.props.SelectAccount(selectedAccount)
+    this.props.selectAccount(selectedAccount)
     return this.props.history.push('/login')
   }
 

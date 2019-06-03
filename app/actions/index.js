@@ -67,3 +67,27 @@ export const setChainConstants = function (chainInfo) {
     chainInfo
   }
 }
+
+export const resetApp = function () {
+  return {
+    type: 'RESET_APP'
+  }
+}
+
+export const setBalance = function (account) {
+  if (account) {
+    return dispatch => {
+      account.balance.then(info => {
+        dispatch({
+          type: 'SET_BALANCE',
+          info
+        })
+      })
+    }
+  } else {
+    return {
+      type: 'SET_BALANCE',
+      info: null
+    }
+  }
+}

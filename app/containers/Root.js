@@ -4,7 +4,7 @@ import React, { Component } from 'react'
 import { ConnectedRouter } from 'connected-react-router'
 import Routes from '../Routes'
 import { Tfchainclient } from '../client/tfchainclient'
-import { setClient, loadAccounts } from '../actions'
+import { setClient, loadAccounts, setBalance } from '../actions'
 
 const os = require('os')
 const storage = require('electron-json-storage')
@@ -12,12 +12,19 @@ const path = require('path')
 
 storage.setDataPath(os.tmpdir())
 
+const mapStateToProps = state => ({
+  account: state.account
+})
+
 const mapDispatchToProps = (dispatch) => ({
   setClient: (client) => {
     dispatch(setClient(client))
   },
   loadAccounts: (accounts) => {
     dispatch(loadAccounts(accounts))
+  },
+  setBalance: (account) => {
+    dispatch(setBalance(account))
   }
 })
 
@@ -27,7 +34,6 @@ class Root extends Component {
     const dataPath = storage.getDefaultDataPath()
     const newPath = path.join(dataPath, '/tfchain/accounts')
     storage.setDataPath(newPath)
-    console.log(newPath)
 
     // Load in accounts and put them in store
     const loadAccountsFromStorage = this.props.loadAccounts
@@ -39,6 +45,15 @@ class Root extends Component {
     // Create tfchainclient and put in store for later usage
     const tfchainClient = new Tfchainclient()
     this.props.setClient(tfchainClient)
+
+    // Refresh account balance every 1 minutes
+    this.intervalID = setInterval(() => {
+      this.props.setBalance(this.props.account)
+    }, 60000)
+  }
+
+  componentWillUnmount () {
+    clearInterval(this.intervalID)
   }
 
   render () {
@@ -54,6 +69,6 @@ class Root extends Component {
 }
 
 export default connect(
-  null,
+  mapStateToProps,
   mapDispatchToProps
 )(Root)

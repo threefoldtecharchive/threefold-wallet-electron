@@ -32,6 +32,8 @@ export const account = (state = [], action) => {
       const filteredWallets = state.wallets.filter(w => w._wallet_name !== action.wallet._wallet_name)
       state._wallets = filteredWallets
       return state
+    case 'RESET_APP':
+      return []
     default:
       return state
   }

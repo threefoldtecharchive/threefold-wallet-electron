@@ -2,8 +2,16 @@ import React from 'react'
 import { Button, Grid, Dimmer, Loader, Segment, GridColumn, Icon } from 'semantic-ui-react'
 import styles from '../home/Home.css'
 
-const WalletBalanceGrid = ({ props, routeToReceive, routeToTransfer }) => {
-  const { coinsTotal, coinsLocked, coinsUnlocked, unconfirmedLockedCoins, unconfirmedTotalCoins, unconfirmedUnlockedCoins, loader } = props
+const WalletBalanceGrid = ({ loader, routeToReceive, routeToTransfer, walletBalance }) => {
+  const {
+    coins_total: coinsTotal,
+    coins_locked: coinsLocked,
+    coins_unlocked: coinsUnlocked,
+    unconfirmed_coins_locked: unconfirmedLockedCoins,
+    unconfirmed_coins_total: unconfirmedTotalCoins,
+    unconfirmed_coins_unlocked: unconfirmedUnlockedCoins
+  } = walletBalance
+
   return (
     <Grid centered columns={3} style={{ marginBottom: 10, marginTop: -20 }}>
       <GridColumn style={{ height: 150, marginTop: 0, width: '40%', marginLeft: 30 }}>
@@ -12,11 +20,11 @@ const WalletBalanceGrid = ({ props, routeToReceive, routeToTransfer }) => {
             <Loader />
           </Dimmer>
           <h3 style={{ color: 'white', marginTop: 0 }}>Total Balance:</h3>
-          <h4 style={{ color: 'white', marginTop: 0 }}>{coinsTotal} TFT</h4>
+          <h4 style={{ color: 'white', marginTop: 0 }}>{coinsTotal.str()} TFT</h4>
           <h4 style={{ color: 'white' }}><Icon name='lock' />Locked Balance:</h4>
-          <h4 style={{ color: 'white', marginTop: 0 }}>{coinsLocked} TFT</h4>
+          <h4 style={{ color: 'white', marginTop: 0 }}>{coinsLocked.str()} TFT</h4>
           <h4 style={{ color: 'white' }}><Icon name='unlock' />Unlocked Balance: </h4>
-          <h4 style={{ color: 'white', marginTop: 0 }}>{coinsUnlocked} TFT</h4>
+          <h4 style={{ color: 'white', marginTop: 0 }}>{coinsUnlocked.str()} TFT</h4>
         </Segment>
       </GridColumn>
       <GridColumn style={{ width: '20%', height: 150 }}>
@@ -25,11 +33,11 @@ const WalletBalanceGrid = ({ props, routeToReceive, routeToTransfer }) => {
             <Loader />
           </Dimmer>
           <h4 style={{ color: 'white', marginTop: 0 }}>Total unconfirmed: </h4>
-          <h5 style={{ color: 'white', marginTop: 0 }}>{unconfirmedTotalCoins} TFT</h5>
+          <h5 style={{ color: 'white', marginTop: 0 }}>{unconfirmedTotalCoins.str()} TFT</h5>
           <h5 style={{ color: 'white' }}><Icon name='lock' />Locked unconfirmed:</h5>
-          <h5 style={{ color: 'white', marginTop: 0 }}>{unconfirmedLockedCoins} TFT</h5>
+          <h5 style={{ color: 'white', marginTop: 0 }}>{unconfirmedLockedCoins.str()} TFT</h5>
           <h5 style={{ color: 'white' }}><Icon name='unlock' />Unlocked unconfirmed: </h5>
-          <h5 style={{ color: 'white', marginTop: 0 }}>{unconfirmedUnlockedCoins} TFT</h5>
+          <h5 style={{ color: 'white', marginTop: 0 }}>{unconfirmedUnlockedCoins.str()} TFT</h5>
         </Segment>
       </GridColumn>
       <GridColumn style={{ width: '33%' }}>

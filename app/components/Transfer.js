@@ -5,7 +5,7 @@ import { Form, Button, Input, Icon, Dropdown, Divider, Loader, Dimmer, Message }
 import styles from './home/Home.css'
 import Footer from './footer'
 import { toast } from 'react-toastify'
-import { selectWallet } from '../actions'
+import { selectWallet, setBalance } from '../actions'
 import * as tfchain from '../tfchain/api'
 import moment from 'moment'
 
@@ -17,6 +17,9 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = (dispatch) => ({
   selectWallet: (wallet) => {
     dispatch(selectWallet(wallet))
+  },
+  setBalance: (account) => {
+    dispatch(setBalance(account))
   }
 })
 
@@ -122,6 +125,7 @@ class Transfer extends Component {
         this.setState({ destinationError, amountError, loader: false })
         // TODO: handle result.submitted === false, as that can happen as well
         toast('Transaction ' + result.transaction.id + ' submitted')
+        this.props.setBalance(this.props.account)
         return this.props.history.push('/wallet')
       }).catch(err => {
         toast('transaction failed')
