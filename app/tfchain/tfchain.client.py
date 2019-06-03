@@ -293,8 +293,8 @@ class TFChainClient:
                 # collect all multisig addresses
                 multisig_addresses = [UnlockHash.from_json(obj=uh) for uh in resp.get_or('multisigaddresses', None) or []]
                 for addr in multisig_addresses:
-                    if addr.type.__ne__(UnlockHashType.MULTI_SIG):
-                        raise tferrors.ExplorerInvalidResponse("invalid unlock hash type {} for MultiSignature Address (expected: 3)".format(addr.type.value), endpoint, resp)
+                    if addr.uhtype.__ne__(UnlockHashType.MULTI_SIG):
+                        raise tferrors.ExplorerInvalidResponse("invalid unlock hash type {} for MultiSignature Address (expected: 3)".format(addr.uhtype.value), endpoint, resp)
                 erc20_info = None
                 if 'erc20info' in resp:
                     info = resp['erc20info']

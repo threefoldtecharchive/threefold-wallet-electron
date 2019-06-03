@@ -888,6 +888,26 @@ export var Wallet =  __class__ ('Wallet', [object], {
 		else {
 		}
 		return CoinTransactionBuilder (self);
+	});},
+	get transaction_sign () {return __get__ (this, function (self, transaction) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'transaction': var transaction = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (isinstance (transaction, str)) {
+			var transaction = jsjson.json_loads (transaction);
+		}
+		return self._tfwallet.transaction_sign (__kwargtrans__ ({txn: transaction, submit: true}));
 	});}
 });
 Object.defineProperty (Wallet, 'balance', property.call (Wallet, Wallet._get_balance));

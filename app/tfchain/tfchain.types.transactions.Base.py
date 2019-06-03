@@ -438,7 +438,7 @@ class InputSignatureHashFactory:
 
 class OpaqueTransaction(TransactionBaseClass):
     def __init__(self):
-        self._version = -1
+        self._version = TransactionVersion(-1)
         self._raw_json_data = {}
         super().__init__()
 
@@ -453,7 +453,7 @@ class OpaqueTransaction(TransactionBaseClass):
     def version_set(self, version):
         if not isinstance(version, int):
             raise TypeError("version is of wrong type: invalid: {} ({})".format(version, type(version)))
-        self._version = version
+        self._version = TransactionVersion(version)
 
     def _custom_version_getter(self):
         return self._version

@@ -10,7 +10,9 @@ from tfchain.network import Type as NetworkType
 from tfchain.balance import WalletsBalance
 from tfchain.encoding.siabin import SiaBinaryEncoder
 
-from tfchain.types import ConditionTypes, transactions
+from tfchain.types import ConditionTypes, transactions, FulfillmentTypes
+from tfchain.types.transactions.Base import TransactionBaseClass
+from tfchain.types.transactions.Minting import TransactionV128, TransactionV129
 from tfchain.types.IO import CoinInput
 from tfchain.types.CryptoTypes import PublicKey, PublicKeySpecifier
 from tfchain.types.PrimitiveTypes import Hash, Currency
@@ -330,90 +332,99 @@ class TFChainWallet:
         """
         return CoinTransactionBuilder(self)
 
-    # def transaction_sign(self, txn, submit=True):
-    #     """
-    #     Sign in all places of the transaction where it is still possible,
-    #     and on which the wallet has authority to do so.
+    def transaction_sign(self, txn, submit=None):
+        """
+        Sign in all places of the transaction where it is still possible,
+        and on which the wallet has authority to do so.
 
-    #     Returns a TransactionSignResult.
+        Returns a TransactionSignResult.
 
-    #     @param txn: transaction to sign, a JSON-encoded txn or already loaded in-memory as a valid Transaction type
-    #     """
-    #     # validate and/or normalize txn parameter
-    #     if isinstance(txn, (str, dict)):
-    #         txn = tftransactions.from_json(txn)
-    #     elif not isinstance(txn, TransactionBaseClass):
-    #         raise TypeError("txn value has invalid type {} and cannot be signed".format(type(txn)))
+        @param txn: transaction to sign, a JSON-encoded txn or already loaded in-memory as a valid Transaction type
+        """
+        # validate and/or normalize txn parameter
+        if isinstance(txn, (str, dict)):
+            txn = transactions.from_json(txn)
+        elif not isinstance(txn, TransactionBaseClass):
+            raise TypeError("txn value has invalid type {} and cannot be signed".format(type(txn)))
 
-    #     balance = self.balance
+        wallet = self.clone()
 
-    #     # check all parentids from the specified coin inputs,
-    #     # and set the coin outputs for the ones this wallet knows about
-    #     # and that are still unspent
-    #     if len(txn.coin_inputs) > 0:
-    #         # collect all known outputs
-    #         known_outputs = {}
-    #         for co in balance.outputs_available:
-    #             known_outputs[co.id] = co
-    #         for co in balance.outputs_unconfirmed_available:
-    #             known_outputs[co.id] = co
-    #         for wallet in balance.wallets.values():
-    #             for co in wallet.outputs_available:
-    #                 known_outputs[co.id] = co
-    #             for co in wallet.outputs_unconfirmed_available:
-    #                 known_outputs[co.id] = co
-    #         # mark the coin inputs that are known as available outputs by this wallet
-    #         for ci in txn.coin_inputs:
-    #             if ci.parentid in known_outputs:
-    #                 ci.parent_output = known_outputs[ci.parentid]
+        to_submit = submit
+        def cb(balance):
+            # check all parentids from the specified coin inputs,
+            # and set the coin outputs for the ones this wallet knows about
+            # and that are still unspent
+            if len(txn.coin_inputs) > 0:
+                # collect all known outputs
+                known_outputs = {}
+                for co in balance.outputs_available:
+                    known_outputs[co.id.__str__()] = co
+                for co in balance.outputs_unconfirmed_available:
+                    known_outputs[co.id.__str__()] = co
+                for mswallet in balance.wallets.values():
+                    for co in mswallet.outputs_available:
+                        known_outputs[co.id.__str__()] = co
+                    for co in mswallet.outputs_unconfirmed_available:
+                        known_outputs[co.id.__str__()] = co
+                # mark the coin inputs that are known as available outputs by this wallet
+                for ci in txn.coin_inputs:
+                    parentid = ci.parentid.__str__()
+                    if parentid in known_outputs:
+                        ci.parent_output = known_outputs[parentid]
 
-    #     # check for specific transaction types, as to
-    #     # be able to add whatever content we know we can add
-    #     if isinstance(txn, (TransactionV128, TransactionV129)):
-    #         # set the parent mint condition
-    #         txn.parent_mint_condition = self.client.minter.condition_get()
-    #         # define the current fulfillment if it is not defined
-    #         if not txn.mint_fulfillment_defined():
-    #             txn.mint_fulfillment = FulfillmentTypes.from_condition(txn.parent_mint_condition)
+            # check for specific transaction types, as to
+            # be able to add whatever content we know we can add
+            if isinstance(txn, (TransactionV128, TransactionV129)):
+                # set the parent mint condition
+                txn.parent_mint_condition = wallet.client.minter.condition_get()
+                # define the current fulfillment if it is not defined
+                if not txn.mint_fulfillment_defined():
+                    txn.mint_fulfillment = FulfillmentTypes.from_condition(txn.parent_mint_condition)
 
-    #     # generate the signature requests
-    #     sig_requests = txn.signature_requests_new()
-    #     if len(sig_requests) == 0:
-    #         # possible if the wallet does not own any of the still required signatures,
-    #         # or for example because the wallet does not know about the parent outputs of
-    #         # the inputs still to be signed
-    #         return TransactionSignResult(txn, False, False)
+            # generate the signature requests
+            sig_requests = txn.signature_requests_new()
+            if len(sig_requests) == 0:
+                # possible if the wallet does not own any of the still required signatures,
+                # or for example because the wallet does not know about the parent outputs of
+                # the inputs still to be signed
+                return TransactionSignResult(txn, False, False)
 
-    #     # fulfill the signature requests that we can fulfill
-    #     signature_count = 0
-    #     for request in sig_requests:
-    #         try:
-    #             key_pair = self.key_pair_get(request.wallet_address)
-    #             input_hash = request.input_hash_new(public_key=key_pair.public_key)
-    #             signature = key_pair.sign(input_hash)
-    #             request.signature_fulfill(public_key=key_pair.public_key, signature=signature)
-    #             signature_count += 1
-    #         except KeyError:
-    #             pass # this is acceptable due to how we directly try the key_pair_get method
+            # fulfill the signature requests that we can fulfill
+            signature_count = 0
+            for request in sig_requests:
+                try:
+                    key_pair = wallet.key_pair_get(request.wallet_address)
+                    pk = public_key_from_assymetric_key_pair(key_pair)
+                    input_hash = request.input_hash_new(public_key=pk)
+                    signature = key_pair.sign(input_hash.value)
+                    request.signature_fulfill(public_key=pk, signature=signature)
+                    signature_count += 1
+                except KeyError:
+                    pass # this is acceptable due to how we directly try the key_pair_get method
 
-    #     # check if fulfilled, and if so, we'll submit unless the callee does not want that
-    #     is_fulfilled = txn.is_fulfilled()
-    #     submit = (submit and is_fulfilled)
-    #     if submit:
-    #         txn.id = self._transaction_put(transaction=txn)
-    #         addresses = self.addresses + balance.addresses_multisig
-    #         # update balance
-    #         for ci in txn.coin_inputs:
-    #             if str(ci.parent_output.condition.unlockhash) in addresses:
-    #                 balance.output_add(ci.parent_output, confirmed=False, spent=True)
-    #         for idx, co in enumerate(txn.coin_outputs):
-    #             if str(co.condition.unlockhash) in addresses:
-    #                 # add the id to the coin_output, so we can track it has been spent
-    #                 co.id = txn.coin_outputid_new(idx)
-    #                 balance.output_add(co, confirmed=False, spent=False)
+            # check if fulfilled, and if so, we'll submit unless the callee does not want that
+            is_fulfilled = txn.is_fulfilled()
+            submit = (to_submit and is_fulfilled)
+            if not submit: # return as-is
+                def stub_cb(resolve, reject):
+                    resolve(TransactionSignResult(
+                        transaction=txn,
+                        signed=(signature_count>0),
+                        submitted=submit,
+                    ))
+                return jsasync.promise_new(stub_cb)
+            
+            # submit, and only then return
+            def id_cb(id):
+                txn.id = id
+                return TransactionSignResult(
+                    transaction=txn,
+                    signed=(signature_count>0),
+                    submitted=submit,
+                )
+            return jsasync.chain(wallet._transaction_put(transaction=txn), id_cb)
 
-    #     # return up-to-date Txn, as well as if we signed and submitted
-    #     return TransactionSignResult(txn, (signature_count>0), submit)
+        return jsasync.chain(wallet.balance, cb)
 
     def key_pair_get(self, unlockhash):
         """
@@ -1547,25 +1558,25 @@ class TransactionSendResult():
     def submitted(self):
         return self._submitted
 
-# class TransactionSignResult():
-#     """
-#     TransactionSignResult is a named tuple,
-#     used as the result for a transaction sign call.
-#     """
-#     def __init__(self, transaction, signed, submitted):
-#         self._transaction = transaction
-#         self._signed = signed
-#         self._submitted = submitted
+class TransactionSignResult:
+    """
+    TransactionSignResult is a named tuple,
+    used as the result for a transaction sign call.
+    """
+    def __init__(self, transaction, signed, submitted):
+        self._transaction = transaction
+        self._signed = signed
+        self._submitted = submitted
 
-#     @property
-#     def transaction(self):
-#         return self._transaction
-#     @property
-#     def signed(self):
-#         return self._signed
-#     @property
-#     def submitted(self):
-#         return self._submitted
+    @property
+    def transaction(self):
+        return self._transaction
+    @property
+    def signed(self):
+        return self._signed
+    @property
+    def submitted(self):
+        return self._submitted
 
 # class AtomicSwapInitiationResult():
 #     """

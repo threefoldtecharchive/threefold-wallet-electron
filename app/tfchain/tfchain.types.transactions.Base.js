@@ -1400,7 +1400,7 @@ export var OpaqueTransaction =  __class__ ('OpaqueTransaction', [TransactionBase
 		}
 		else {
 		}
-		self._version = -(1);
+		self._version = TransactionVersion (-(1));
 		self._raw_json_data = dict ({});
 		__super__ (OpaqueTransaction, '__init__') (self);
 	});},
@@ -1462,7 +1462,7 @@ export var OpaqueTransaction =  __class__ ('OpaqueTransaction', [TransactionBase
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		self._version = version;
+		self._version = TransactionVersion (version);
 	});},
 	get _custom_version_getter () {return __get__ (this, function (self) {
 		if (arguments.length) {

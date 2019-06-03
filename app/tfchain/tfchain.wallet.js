@@ -4,8 +4,11 @@ import {ConditionMultiSignature, UnlockHash, UnlockHashType} from './tfchain.typ
 import {Currency, Hash} from './tfchain.types.PrimitiveTypes.js';
 import {PublicKey, PublicKeySpecifier} from './tfchain.types.CryptoTypes.js';
 import {CoinInput} from './tfchain.types.IO.js';
+import {TransactionV128, TransactionV129} from './tfchain.types.transactions.Minting.js';
+import {TransactionBaseClass} from './tfchain.types.transactions.Base.js';
 import * as ConditionTypes from './tfchain.types.ConditionTypes.js';
 import * as transactions from './tfchain.types.transactions.js';
+import * as FulfillmentTypes from './tfchain.types.FulfillmentTypes.js';
 import {SiaBinaryEncoder} from './tfchain.encoding.siabin.js';
 import {WalletsBalance} from './tfchain.balance.js';
 import {Type as NetworkType} from './tfchain.network.js';
@@ -391,6 +394,144 @@ export var TFChainWallet =  __class__ ('TFChainWallet', [object], {
 		}
 		return CoinTransactionBuilder (self);
 	});},
+	get transaction_sign () {return __get__ (this, function (self, txn, submit) {
+		if (typeof submit == 'undefined' || (submit != null && submit.hasOwnProperty ("__kwargtrans__"))) {;
+			var submit = null;
+		};
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'txn': var txn = __allkwargs0__ [__attrib0__]; break;
+						case 'submit': var submit = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (isinstance (txn, tuple ([str, dict]))) {
+			var txn = transactions.from_json (txn);
+		}
+		else if (!(isinstance (txn, TransactionBaseClass))) {
+			var __except0__ = py_TypeError ('txn value has invalid type {} and cannot be signed'.format (py_typeof (txn)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		var wallet = self.clone ();
+		var to_submit = submit;
+		var cb = function (balance) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'balance': var balance = __allkwargs0__ [__attrib0__]; break;
+						}
+					}
+				}
+			}
+			else {
+			}
+			if (len (txn.coin_inputs) > 0) {
+				var known_outputs = dict ({});
+				for (var co of balance.outputs_available) {
+					known_outputs [co.id.__str__ ()] = co;
+				}
+				for (var co of balance.outputs_unconfirmed_available) {
+					known_outputs [co.id.__str__ ()] = co;
+				}
+				for (var mswallet of balance.wallets.py_values ()) {
+					for (var co of mswallet.outputs_available) {
+						known_outputs [co.id.__str__ ()] = co;
+					}
+					for (var co of mswallet.outputs_unconfirmed_available) {
+						known_outputs [co.id.__str__ ()] = co;
+					}
+				}
+				for (var ci of txn.coin_inputs) {
+					var parentid = ci.parentid.__str__ ();
+					if (__in__ (parentid, known_outputs)) {
+						ci.parent_output = known_outputs [parentid];
+					}
+				}
+			}
+			if (isinstance (txn, tuple ([TransactionV128, TransactionV129]))) {
+				txn.parent_mint_condition = wallet.client.minter.condition_get ();
+				if (!(txn.mint_fulfillment_defined ())) {
+					txn.mint_fulfillment = FulfillmentTypes.from_condition (txn.parent_mint_condition);
+				}
+			}
+			var sig_requests = txn.signature_requests_new ();
+			if (len (sig_requests) == 0) {
+				return TransactionSignResult (txn, false, false);
+			}
+			var signature_count = 0;
+			for (var request of sig_requests) {
+				try {
+					var key_pair = wallet.key_pair_get (request.wallet_address);
+					var pk = public_key_from_assymetric_key_pair (key_pair);
+					var input_hash = request.input_hash_new (__kwargtrans__ ({public_key: pk}));
+					var signature = key_pair.sign (input_hash.value);
+					request.signature_fulfill (__kwargtrans__ ({public_key: pk, signature: signature}));
+					signature_count++;
+				}
+				catch (__except0__) {
+					if (isinstance (__except0__, KeyError)) {
+						// pass;
+					}
+					else {
+						throw __except0__;
+					}
+				}
+			}
+			var is_fulfilled = txn.is_fulfilled ();
+			var submit = to_submit && is_fulfilled;
+			if (!(submit)) {
+				var stub_cb = function (resolve, reject) {
+					if (arguments.length) {
+						var __ilastarg0__ = arguments.length - 1;
+						if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+							var __allkwargs0__ = arguments [__ilastarg0__--];
+							for (var __attrib0__ in __allkwargs0__) {
+								switch (__attrib0__) {
+									case 'resolve': var resolve = __allkwargs0__ [__attrib0__]; break;
+									case 'reject': var reject = __allkwargs0__ [__attrib0__]; break;
+								}
+							}
+						}
+					}
+					else {
+					}
+					resolve (TransactionSignResult (__kwargtrans__ ({transaction: txn, signed: signature_count > 0, submitted: submit})));
+				};
+				return jsasync.promise_new (stub_cb);
+			}
+			var id_cb = function (id) {
+				if (arguments.length) {
+					var __ilastarg0__ = arguments.length - 1;
+					if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+						var __allkwargs0__ = arguments [__ilastarg0__--];
+						for (var __attrib0__ in __allkwargs0__) {
+							switch (__attrib0__) {
+								case 'id': var id = __allkwargs0__ [__attrib0__]; break;
+							}
+						}
+					}
+				}
+				else {
+				}
+				txn.id = id;
+				return TransactionSignResult (__kwargtrans__ ({transaction: txn, signed: signature_count > 0, submitted: submit}));
+			};
+			return jsasync.chain (wallet._transaction_put (__kwargtrans__ ({transaction: txn})), id_cb);
+		};
+		return jsasync.chain (wallet.balance, cb);
+	});},
 	get key_pair_get () {return __get__ (this, function (self, unlockhash) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -526,6 +667,81 @@ export var TransactionSendResult =  __class__ ('TransactionSendResult', [object]
 });
 Object.defineProperty (TransactionSendResult, 'submitted', property.call (TransactionSendResult, TransactionSendResult._get_submitted));
 Object.defineProperty (TransactionSendResult, 'transaction', property.call (TransactionSendResult, TransactionSendResult._get_transaction));;
+export var TransactionSignResult =  __class__ ('TransactionSignResult', [object], {
+	__module__: __name__,
+	get __init__ () {return __get__ (this, function (self, transaction, signed, submitted) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'transaction': var transaction = __allkwargs0__ [__attrib0__]; break;
+						case 'signed': var signed = __allkwargs0__ [__attrib0__]; break;
+						case 'submitted': var submitted = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		self._transaction = transaction;
+		self._signed = signed;
+		self._submitted = submitted;
+	});},
+	get _get_transaction () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._transaction;
+	});},
+	get _get_signed () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._signed;
+	});},
+	get _get_submitted () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._submitted;
+	});}
+});
+Object.defineProperty (TransactionSignResult, 'submitted', property.call (TransactionSignResult, TransactionSignResult._get_submitted));
+Object.defineProperty (TransactionSignResult, 'signed', property.call (TransactionSignResult, TransactionSignResult._get_signed));
+Object.defineProperty (TransactionSignResult, 'transaction', property.call (TransactionSignResult, TransactionSignResult._get_transaction));;
 export var WalletBalanceAggregator =  __class__ ('WalletBalanceAggregator', [object], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, wallet) {

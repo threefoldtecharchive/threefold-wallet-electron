@@ -633,8 +633,8 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 					return __accu0__;
 				}) ();
 				for (var addr of multisig_addresses) {
-					if (addr.py_metatype.__ne__ (UnlockHashType.MULTI_SIG)) {
-						var __except0__ = tferrors.ExplorerInvalidResponse ('invalid unlock hash type {} for MultiSignature Address (expected: 3)'.format (addr.py_metatype.value), endpoint, resp);
+					if (addr.uhtype.__ne__ (UnlockHashType.MULTI_SIG)) {
+						var __except0__ = tferrors.ExplorerInvalidResponse ('invalid unlock hash type {} for MultiSignature Address (expected: 3)'.format (addr.uhtype.value), endpoint, resp);
 						__except0__.__cause__ = null;
 						throw __except0__;
 					}

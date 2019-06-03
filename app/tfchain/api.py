@@ -510,6 +510,14 @@ class Wallet:
         """
         return CoinTransactionBuilder(self)
 
+    def transaction_sign(self, transaction):
+        """
+        :returns: signs an existing transaction
+        """
+        if isinstance(transaction, str):
+           transaction = jsjson.json_loads(transaction) 
+        return self._tfwallet.transaction_sign(txn=transaction, submit=True)
+
 
 class CoinTransactionBuilder:
     """
