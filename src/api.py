@@ -828,54 +828,25 @@ class TransactionView:
             timestamp = transaction.timestamp
             blockid = transaction.blockid.__str__()
 
-        # collect inputs/outputs
-        inputs = []
-        outputs = []
-
         if addresses == None:
             # return early
-            return cls(identifier, height, timestamp, blockid, inputs, outputs)
+            return cls(identifier, height, timestamp, blockid, [], [])
 
         # go through all outputs and inputs and keep track of the addresses, locks and amounts
-        intermediate_outputs = {}
-        def intermediate_output_get(address):
-            if address not in intermediate_outputs:
-                intermediate_outputs[address] = OutputAggregator(address)
-            return intermediate_outputs[address]
-        senders = set()
-        recipient_mapping = {}
-        def recipient_add(address, lock):
-            if address not in recipient_mapping:
-                recipient_mapping[address] = set([lock])
-            else:
-                recipient_mapping[address].add(lock)
-        def recipient_lock_pairs_get():
-            pairs = []
-            for address, locks in jsobj.get_items(recipient_mapping):
-                for lock in locks:
-                    pairs.append((address, lock))
-            return pairs
+        aggregator = WalletOutputAggregator(addresses)
         for co in transaction.coin_outputs:
-            address = co.condition.unlockhash.__str__()
-            if address not in addresses:
-                recipient_add(address, co.condition.lock.value)
-                continue
-            output = intermediate_output_get(address)
-            output.receive(amount=co.value, lock=co.condition.lock.value)
+            aggregator.add_coin_output(
+                address=co.condition.unlockhash.__str__(),
+                lock=co.condition.lock.value,
+                amount=co.value)
         for ci in transaction.coin_inputs:
             co = ci.parent_output
-            address = co.condition.unlockhash.__str__()
-            if address not in addresses:
-                senders.add(address)
-                continue
-            output = intermediate_output_get(address)
-            output.send(amount=co.value)
+            aggregator.add_coin_input(
+                address=co.condition.unlockhash.__str__(),
+                amount=co.value)
 
-        # gather all inputs and outputs
-        senders = list(senders)
-        recipient_lock_pairs = recipient_lock_pairs_get()
-        for intermediate_output in jsobj.dict_values(intermediate_outputs):
-            intermediate_output.inputs_outputs_collect(senders, recipient_lock_pairs, inputs, outputs)
+        # get all inputs and outputs
+        inputs, outputs = aggregator.inputs_outputs_collect()
 
         # return it all as a single view
         return cls(identifier, height, timestamp, blockid, inputs, outputs)
@@ -946,55 +917,93 @@ class TransactionView:
         return self._outputs
 
 
-class OutputAggregator:
-    def __init__(self, address):
-        self._address = address
-        self._locked_outputs = {}
-        self._amount = Currency()
+class WalletOutputAggregator:
+    def __init__(self, addresses):
+        self._our_addresses = addresses
+        self._our_input = Currency()
+        self._our_send_addresses = set()
+        self._other_input = Currency()
+        self._other_send_addresses = set()
+        self._all_balances = {}
 
-    def receive(self, amount, lock):
-        if lock > 0:
-            slock = jsstr.from_int(lock)
-            if lock not in self._locked_outputs:
-                self._locked_outputs[slock] = amount
-            else:
-                self._locked_outputs[slock] = self._locked_outputs[slock].plus(amount)
+    def _modify_balance(self, address, lock, amount, negate=False):
+        slock = jsstr.from_int(lock)
+        if address not in self._all_balances:
+            # store as new address/lock combo, with first of the address' set
+            self._all_balances[address] = {
+                slock: Currency(amount.negate() if negate else amount),
+            }
+            return
+        balances = self._all_balances[address]
+        if slock not in balances:
+            # store as new address/lock combo
+            balances[slock] = Currency(amount.negate() if negate else amount)
+            return
+        # modify existing address/lock combo
+        if negate:
+            balances[slock] = balances[slock].minus(amount)
         else:
-            self._amount = self._amount.plus(amount)
+            balances[slock] = balances[slock].plus(amount)
 
-    def send(self, amount):
-        self._amount = self._amount.minus(amount)
+    def add_coin_input(self, address, amount):
+        if address in self._our_addresses:
+            self._our_input = self._our_input.plus(amount)
+            self._our_send_addresses.add(address)
+        else:
+            self._other_input = self._other_input.plus(amount)
+            self._other_send_addresses.add(address)
+        self._modify_balance(address, 0, amount, negate=True)
 
-    def inputs_outputs_collect(self, senders, recipient_lock_pairs, inputs, outputs):
-        # add unlocked amount (if it exists)
-        if self._amount.less_than(0):
-            amount = self._amount.negate().divided_by(len(recipient_lock_pairs))
-            for (recipient, lock) in recipient_lock_pairs:
-                outputs.append(CoinOutputView(
-                    senders=[self._address],
-                    recipient=recipient,
-                    amount=self._amount.negate(),
-                    lock=lock,
-                    lock_is_timestamp=False if lock == 0 else OutputLock(lock).is_timestamp,
-                ))
-        elif self._amount.greater_than(0):
-            inputs.append(CoinOutputView(
-                senders=senders,
-                recipient=self._address,
-                amount=self._amount,
-                lock=0,
-                lock_is_timestamp=False,
-            ))
-        # add all locked outputs
-        for (lock_value, amount) in jsobj.get_items(self._locked_outputs):
-            lock = jsstr.to_int(lock_value)
-            inputs.append(CoinOutputView(
-                senders=senders,
-                recipient=self._address,
-                amount=amount,
-                lock=lock,
-                lock_is_timestamp=OutputLock(lock).is_timestamp,
-            ))
+    def add_coin_output(self, address, lock, amount):
+        self._modify_balance(address, lock, amount, negate=False)
+
+    def inputs_outputs_collect(self):
+        # our final I/O lists
+        inputs = [] # money we receive
+        outputs = [] # money we send
+
+        # define ratio
+        ratio = Currency(1)
+        if self._our_input.greater_than(0) and self._other_input.greater_than(0):
+            ratio = self._our_input.divided_by(self._other_input.plus(self._our_input))
+
+        our_send_addresses = list(self._our_send_addresses)
+        other_send_addresses = list(self._other_send_addresses)
+
+        # add all inputs/outputs
+        for address, balances in jsobj.get_items(self._all_balances):
+            for slock, amount in jsobj.get_items(balances):
+                lock = jsstr.to_int(slock)
+                if amount.less_than_or_equal_to(0):
+                    # we can ignore it,
+                    # - if it is 0, it's a nil-op
+                    # - if it is negative and an address of ours than it's something we spend,
+                    #   which is already reflected as an output towards anothera ddress
+                    # - if it is negative and from someone else, it's a spenditure of someone else
+                    #   and thus not relevant to us
+                    continue
+                if address in self._our_addresses:
+                    # incoming money
+                    inputs.append(CoinOutputView(
+                        senders=other_send_addresses,
+                        recipient=address,
+                        amount=amount,
+                        lock=lock,
+                        lock_is_timestamp=False if lock == 0 else OutputLock(lock).is_timestamp,
+                    ))
+                else:
+                    # outgoing money
+                    outputs.append(CoinOutputView(
+                        senders=our_send_addresses,
+                        recipient=address,
+                        amount=amount.times(ratio),
+                        lock=lock,
+                        lock_is_timestamp=False if lock == 0 else OutputLock(lock).is_timestamp,
+                    ))
+
+        # returm the (filtered and) aggregated I/O
+        return inputs, outputs
+
 
 class CoinOutputView:
     """

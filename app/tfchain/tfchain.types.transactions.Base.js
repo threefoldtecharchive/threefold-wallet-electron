@@ -3,7 +3,9 @@ import {blake2b} from './tfchain.polyfill.crypto.js';
 import * as jsarr from './tfchain.polyfill.array.js';
 import * as jsobj from './tfchain.polyfill.encoding.object.js';
 import * as jsjson from './tfchain.polyfill.encoding.json.js';
-import {Hash} from './tfchain.types.PrimitiveTypes.js';
+import * as ConditionTypes from './tfchain.types.ConditionTypes.js';
+import {CoinOutput} from './tfchain.types.IO.js';
+import {Currency, Hash} from './tfchain.types.PrimitiveTypes.js';
 import {SiaBinaryEncoder} from './tfchain.encoding.siabin.js';
 import {RivineBinaryEncoder} from './tfchain.encoding.rivbin.js';
 var __name__ = 'tfchain.types.transactions.Base';
@@ -130,6 +132,8 @@ export var TransactionBaseClass =  __class__ ('TransactionBaseClass', [object], 
 		self._height = -(1);
 		self._block_timestamp = -(1);
 		self._blockid = null;
+		self._fee_payout_address = null;
+		self._fee_payout_id = null;
 		self._unconfirmed = false;
 	});},
 	get from_json () {return __getcm__ (this, function (cls, obj) {
@@ -269,6 +273,85 @@ export var TransactionBaseClass =  __class__ ('TransactionBaseClass', [object], 
 			self._id = Hash (__kwargtrans__ ({value: id.value}));
 		}
 		self._id = Hash (__kwargtrans__ ({value: id}));
+	});},
+	get _get_fee_payout_address () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._fee_payout_address;
+	});},
+	get _set_fee_payout_address () {return __get__ (this, function (self, value) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (isinstance (value, str)) {
+			self._fee_payout_address = ConditionTypes.UnlockHash.from_json (value);
+		}
+		else if (isinstance (value, ConditionTypes.UnlockHash)) {
+			self._fee_payout_address = ConditionTypes.UnlockHash (__kwargtrans__ ({uhtype: value.uhtype, uhhash: value.hash}));
+		}
+		else {
+			var __except0__ = py_TypeError ('invalid type of fee_payout_address value: {} ({})'.format (value, py_typeof (value)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+	});},
+	get _get_fee_payout_id () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (self._fee_payout_id == null) {
+			return null;
+		}
+		return self._fee_payout_id.__str__ ();
+	});},
+	get _set_fee_payout_id () {return __get__ (this, function (self, value) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		self._fee_payout_id = Hash (__kwargtrans__ ({value: value}));
 	});},
 	get __hash__ () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -512,7 +595,13 @@ export var TransactionBaseClass =  __class__ ('TransactionBaseClass', [object], 
 		}
 		else {
 		}
-		return self._custom_coin_outputs_getter ();
+		var outputs = [];
+		if (self.fee_payout_address != null && len (self.miner_fees) > 0) {
+			var amount = Currency.sum (...self.miner_fees);
+			var condition = ConditionTypes.from_recipient (self.fee_payout_address);
+			outputs.append (CoinOutput (__kwargtrans__ ({value: amount, condition: condition, id: self.blockid})));
+		}
+		return jsarr.concat (outputs, self._custom_coin_outputs_getter ());
 	});},
 	get _custom_coin_outputs_getter () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -1242,6 +1331,8 @@ Object.defineProperty (TransactionBaseClass, 'coin_inputs', property.call (Trans
 Object.defineProperty (TransactionBaseClass, 'blockid', property.call (TransactionBaseClass, TransactionBaseClass._get_blockid, TransactionBaseClass._set_blockid));
 Object.defineProperty (TransactionBaseClass, 'timestamp', property.call (TransactionBaseClass, TransactionBaseClass._get_timestamp, TransactionBaseClass._set_timestamp));
 Object.defineProperty (TransactionBaseClass, 'height', property.call (TransactionBaseClass, TransactionBaseClass._get_height, TransactionBaseClass._set_height));
+Object.defineProperty (TransactionBaseClass, 'fee_payout_id', property.call (TransactionBaseClass, TransactionBaseClass._get_fee_payout_id, TransactionBaseClass._set_fee_payout_id));
+Object.defineProperty (TransactionBaseClass, 'fee_payout_address', property.call (TransactionBaseClass, TransactionBaseClass._get_fee_payout_address, TransactionBaseClass._set_fee_payout_address));
 Object.defineProperty (TransactionBaseClass, 'id', property.call (TransactionBaseClass, TransactionBaseClass._get_id, TransactionBaseClass._set_id));
 Object.defineProperty (TransactionBaseClass, 'unconfirmed', property.call (TransactionBaseClass, TransactionBaseClass._get_unconfirmed, TransactionBaseClass._set_unconfirmed));
 Object.defineProperty (TransactionBaseClass, 'version', property.call (TransactionBaseClass, TransactionBaseClass._get_version));;

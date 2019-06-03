@@ -10,6 +10,7 @@ import * as ConditionTypes from './tfchain.types.ConditionTypes.js';
 import {MultiSigWalletBalance, WalletBalance} from './tfchain.balance.js';
 import * as tfexplorer from './tfchain.explorer.js';
 import * as tferrors from './tfchain.errors.js';
+import * as jslog from './tfchain.polyfill.log.js';
 import * as jsarr from './tfchain.polyfill.array.js';
 import * as jsdate from './tfchain.polyfill.date.js';
 import * as jsasync from './tfchain.polyfill.asynchronous.js';
@@ -273,7 +274,7 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 			var timestamp = int (rawblock ['timestamp']);
 			var blockid = Hash.from_json (block ['blockid']);
 			for (var transaction of transactions) {
-				transaction.timestamp = timestamp;
+				_assign_block_properties_to_transacton (transaction, block);
 				transaction.height = height;
 				transaction.blockid = blockid;
 			}
@@ -492,7 +493,7 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 				var __left0__ = result;
 				var _ = __left0__ [0];
 				var block = __left0__ [1];
-				transaction.timestamp = block.get_or ('rawblock', jsobj.new_dict ()).get_or ('timestamp', 0);
+				_assign_block_properties_to_transacton (transaction, block);
 				return transaction;
 			};
 			return jsasync.chain (p, aggregate);
@@ -683,7 +684,7 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 				}
 			}
 		};
-		var fetch_transacton_timestamps = function (result) {
+		var fetch_transacton_block = function (result) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
 				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -743,7 +744,7 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 				var _ = __left0__ [0];
 				var block = __left0__ [1];
 				for (var transaction of transactions [block.get_or ('blockid', '')]) {
-					transaction.timestamp = block.get_or ('rawblock', jsobj.new_dict ()).get_or ('timestamp', 0);
+					_assign_block_properties_to_transacton (transaction, block);
 				}
 			};
 			var aggregate = function () {
@@ -761,7 +762,7 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 			};
 			return jsasync.chain (jsasync.promise_pool_new (generator, __kwargtrans__ ({cb: result_cb})), aggregate);
 		};
-		return jsasync.catch_promise (jsasync.chain (ec.explorer_get (__kwargtrans__ ({endpoint: endpoint})), cb, fetch_transacton_timestamps), catch_no_content);
+		return jsasync.catch_promise (jsasync.chain (ec.explorer_get (__kwargtrans__ ({endpoint: endpoint})), cb, fetch_transacton_block), catch_no_content);
 	});},
 	get coin_output_get () {return __get__ (this, function (self, id) {
 		if (arguments.length) {
@@ -934,7 +935,7 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 					var __left0__ = results [0];
 					var _ = __left0__ [0];
 					var block = __left0__ [1];
-					result.creation_transaction.timestamp = block.get_or ('rawblock', jsobj.new_dict ()).get_or ('timestamp', 0);
+					_assign_block_properties_to_transacton (result.creation_transaction, block);
 					return result;
 				}
 				var __left0__ = results [0];
@@ -943,14 +944,13 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 				var __left0__ = results [1];
 				var _ = __left0__ [0];
 				var block_b = __left0__ [1];
-				if (block_a.id.__eq__ (result.creation_transaction.blockid)) {
-					result.creation_transaction.timestamp = block_a.get_or ('rawblock', jsobj.new_dict ()).get_or ('timestamp', 0);
-					result.spend_transaction.timestamp = block_b.get_or ('rawblock', jsobj.new_dict ()).get_or ('timestamp', 0);
+				if (block_a.id.__ne__ (result.creation_transaction.blockid)) {
+					var block_c = block_a;
+					var block_a = block_b;
+					var block_b = block_c;
 				}
-				else {
-					result.creation_transaction.timestamp = block_b.get_or ('rawblock', jsobj.new_dict ()).get_or ('timestamp', 0);
-					result.spend_transaction.timestamp = block_a.get_or ('rawblock', jsobj.new_dict ()).get_or ('timestamp', 0);
-				}
+				_assign_block_properties_to_transacton (result.creation_transaction, block_a);
+				_assign_block_properties_to_transacton (result.spend_transaction, block_b);
 				return result;
 			};
 			return jsasync.chain (p, aggregate);
@@ -1086,6 +1086,29 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 });
 Object.defineProperty (TFChainClient, 'explorer_addresses', property.call (TFChainClient, TFChainClient._get_explorer_addresses));
 Object.defineProperty (TFChainClient, 'minter', property.call (TFChainClient, TFChainClient._get_minter));;
+export var _assign_block_properties_to_transacton = function (txn, block) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'txn': var txn = __allkwargs0__ [__attrib0__]; break;
+					case 'block': var block = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	var raw_block = block.get_or ('rawblock', jsobj.new_dict ());
+	txn.timestamp = raw_block.get_or ('timestamp', 0);
+	var miner_payout_ids = block.get_or ('minerpayoutids', []);
+	if (len (miner_payout_ids) >= 2) {
+		txn.fee_payout_id = miner_payout_ids [1];
+		txn.fee_payout_address = raw_block ['minerpayouts'] [1] ['unlockhash'];
+	}
+};
 export var ExplorerOutputResult =  __class__ ('ExplorerOutputResult', [object], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, output, creation_tx, spend_tx) {

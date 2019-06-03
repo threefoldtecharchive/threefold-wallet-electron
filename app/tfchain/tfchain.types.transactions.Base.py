@@ -1,7 +1,9 @@
 from tfchain.encoding.rivbin import RivineBinaryEncoder
 from tfchain.encoding.siabin import SiaBinaryEncoder
 
-from tfchain.types.PrimitiveTypes import Hash
+from tfchain.types.PrimitiveTypes import Hash, Currency
+from tfchain.types.IO import CoinOutput
+from tfchain.types import ConditionTypes
 
 import tfchain.polyfill.encoding.json as jsjson
 import tfchain.polyfill.encoding.object as jsobj
@@ -53,6 +55,8 @@ class TransactionBaseClass():
         self._height = -1
         self._block_timestamp = -1
         self._blockid = None
+        self._fee_payout_address = None
+        self._fee_payout_id = None
         self._unconfirmed = False
 
     @classmethod
@@ -100,6 +104,27 @@ class TransactionBaseClass():
         if isinstance(id, Hash):
             self._id = Hash(value=id.value)
         self._id = Hash(value=id)
+
+    @property
+    def fee_payout_address(self):
+        return self._fee_payout_address
+    @fee_payout_address.setter
+    def fee_payout_address(self, value):
+        if isinstance(value, str):
+            self._fee_payout_address = ConditionTypes.UnlockHash.from_json(value)
+        elif isinstance(value, ConditionTypes.UnlockHash):
+            self._fee_payout_address = ConditionTypes.UnlockHash(uhtype=value.uhtype, uhhash=value.hash)
+        else:
+            raise TypeError("invalid type of fee_payout_address value: {} ({})".format(value, type(value)))
+
+    @property
+    def fee_payout_id(self):
+        if self._fee_payout_id == None:
+            return None
+        return self._fee_payout_id.__str__()
+    @fee_payout_id.setter
+    def fee_payout_id(self, value):
+        self._fee_payout_id = Hash(value=value)
 
     def __hash__(self):
         if self._id == None:
@@ -176,7 +201,12 @@ class TransactionBaseClass():
         Coin outputs of this Transaction,
         funded by the Transaction's coin inputs.
         """
-        return self._custom_coin_outputs_getter()
+        outputs = []
+        if self.fee_payout_address != None and len(self.miner_fees) > 0:
+            amount = Currency.sum(*self.miner_fees)
+            condition = ConditionTypes.from_recipient(self.fee_payout_address)
+            outputs.append(CoinOutput(value=amount, condition=condition, id=self.blockid)) # TODO: support ID
+        return jsarr.concat(outputs, self._custom_coin_outputs_getter())
     def _custom_coin_outputs_getter(self):
         return []
     @coin_outputs.setter
