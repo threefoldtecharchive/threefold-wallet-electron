@@ -298,7 +298,7 @@ Object.defineProperty (CoinInput, 'fulfillment', property.call (CoinInput, CoinI
 Object.defineProperty (CoinInput, 'parentid', property.call (CoinInput, CoinInput._get_parentid, CoinInput._set_parentid));;
 export var CoinOutput =  __class__ ('CoinOutput', [BaseDataTypeClass], {
 	__module__: __name__,
-	get __init__ () {return __get__ (this, function (self, value, condition, id) {
+	get __init__ () {return __get__ (this, function (self, value, condition, id, is_fee) {
 		if (typeof value == 'undefined' || (value != null && value.hasOwnProperty ("__kwargtrans__"))) {;
 			var value = null;
 		};
@@ -307,6 +307,9 @@ export var CoinOutput =  __class__ ('CoinOutput', [BaseDataTypeClass], {
 		};
 		if (typeof id == 'undefined' || (id != null && id.hasOwnProperty ("__kwargtrans__"))) {;
 			var id = null;
+		};
+		if (typeof is_fee == 'undefined' || (is_fee != null && is_fee.hasOwnProperty ("__kwargtrans__"))) {;
+			var is_fee = false;
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -318,6 +321,7 @@ export var CoinOutput =  __class__ ('CoinOutput', [BaseDataTypeClass], {
 						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
 						case 'condition': var condition = __allkwargs0__ [__attrib0__]; break;
 						case 'id': var id = __allkwargs0__ [__attrib0__]; break;
+						case 'is_fee': var is_fee = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
@@ -330,6 +334,8 @@ export var CoinOutput =  __class__ ('CoinOutput', [BaseDataTypeClass], {
 		self.condition = condition;
 		self._id = null;
 		self.id = id;
+		self._is_fee = false;
+		self.is_fee = is_fee;
 	});},
 	get from_json () {return __getcm__ (this, function (cls, obj) {
 		if (arguments.length) {
@@ -464,6 +470,44 @@ export var CoinOutput =  __class__ ('CoinOutput', [BaseDataTypeClass], {
 		}
 		self._id = Hash (__kwargtrans__ ({value: value}));
 	});},
+	get _get_is_fee () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._is_fee;
+	});},
+	get _set_is_fee () {return __get__ (this, function (self, value) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (!(isinstance (value, bool))) {
+			var __except0__ = py_TypeError ('is fee is supposed to be a bool, cannot be {} ({})'.format (value, py_typeof (value)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		self._is_fee = value;
+	});},
 	get json () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -515,6 +559,7 @@ export var CoinOutput =  __class__ ('CoinOutput', [BaseDataTypeClass], {
 		encoder.add_all (self._value, self._condition);
 	});}
 });
+Object.defineProperty (CoinOutput, 'is_fee', property.call (CoinOutput, CoinOutput._get_is_fee, CoinOutput._set_is_fee));
 Object.defineProperty (CoinOutput, 'id', property.call (CoinOutput, CoinOutput._get_id, CoinOutput._set_id));
 Object.defineProperty (CoinOutput, 'condition', property.call (CoinOutput, CoinOutput._get_condition, CoinOutput._set_condition));
 Object.defineProperty (CoinOutput, 'value', property.call (CoinOutput, CoinOutput._get_value, CoinOutput._set_value));;

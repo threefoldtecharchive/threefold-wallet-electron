@@ -116,6 +116,7 @@ function renderTransactionBody (tx, explorerAddress) {
             Amount: <span style={{ color: '#ff6961' }}>- {out.amount.str({
               unit: true
             })}</span>
+            {out.is_fee ? (<span style={{ marginLeft: 3 }}>(fee)</span>) : null}
             {renderLockedValue(out.lock, out.lock_is_timestamp)}
           </List.Description>
           <List.Description style={listDescriptionStyle} as='a'>

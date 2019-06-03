@@ -121,7 +121,7 @@ class CoinOutput(BaseDataTypeClass):
     CoinOutput class
     """
 
-    def __init__(self, value=None, condition=None, id=None):
+    def __init__(self, value=None, condition=None, id=None, is_fee=False):
         self._value = None
         self.value = value
         self._condition = None
@@ -129,6 +129,8 @@ class CoinOutput(BaseDataTypeClass):
         # property that can be set if known, but which is not part of the actual CoinOutput
         self._id = None
         self.id = id
+        self._is_fee = False
+        self.is_fee = is_fee
 
     @classmethod
     def from_json(cls, obj):
@@ -171,6 +173,16 @@ class CoinOutput(BaseDataTypeClass):
             self._id = Hash(value=value.value)
             return
         self._id = Hash(value=value)
+
+    @property
+    def is_fee(self):
+        return self._is_fee
+
+    @is_fee.setter
+    def is_fee(self, value):
+        if not isinstance(value, bool):
+            raise TypeError("is fee is supposed to be a bool, cannot be {} ({})".format(value, type(value)))
+        self._is_fee = value
 
     def json(self):
         return {

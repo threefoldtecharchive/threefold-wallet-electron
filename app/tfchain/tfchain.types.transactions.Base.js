@@ -599,7 +599,7 @@ export var TransactionBaseClass =  __class__ ('TransactionBaseClass', [object], 
 		if (self.fee_payout_address != null && len (self.miner_fees) > 0) {
 			var amount = Currency.sum (...self.miner_fees);
 			var condition = ConditionTypes.from_recipient (self.fee_payout_address);
-			outputs.append (CoinOutput (__kwargtrans__ ({value: amount, condition: condition, id: self.blockid})));
+			outputs.append (CoinOutput (__kwargtrans__ ({value: amount, condition: condition, id: self._fee_payout_id, is_fee: true})));
 		}
 		return jsarr.concat (outputs, self._custom_coin_outputs_getter ());
 	});},

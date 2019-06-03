@@ -205,7 +205,7 @@ class TransactionBaseClass():
         if self.fee_payout_address != None and len(self.miner_fees) > 0:
             amount = Currency.sum(*self.miner_fees)
             condition = ConditionTypes.from_recipient(self.fee_payout_address)
-            outputs.append(CoinOutput(value=amount, condition=condition, id=self.blockid)) # TODO: support ID
+            outputs.append(CoinOutput(value=amount, condition=condition, id=self._fee_payout_id, is_fee=True))
         return jsarr.concat(outputs, self._custom_coin_outputs_getter())
     def _custom_coin_outputs_getter(self):
         return []

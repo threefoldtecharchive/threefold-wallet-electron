@@ -835,10 +835,15 @@ class TransactionView:
         # go through all outputs and inputs and keep track of the addresses, locks and amounts
         aggregator = WalletOutputAggregator(addresses)
         for co in transaction.coin_outputs:
-            aggregator.add_coin_output(
-                address=co.condition.unlockhash.__str__(),
-                lock=co.condition.lock.value,
-                amount=co.value)
+            if not co.is_fee:
+                aggregator.add_coin_output(
+                    address=co.condition.unlockhash.__str__(),
+                    lock=co.condition.lock.value,
+                    amount=co.value)
+            else:
+                aggregator.add_fee(
+                    address=co.condition.unlockhash.__str__(),
+                    amount=co.value)
         for ci in transaction.coin_inputs:
             co = ci.parent_output
             aggregator.add_coin_input(
@@ -925,6 +930,7 @@ class WalletOutputAggregator:
         self._other_input = Currency()
         self._other_send_addresses = set()
         self._all_balances = {}
+        self._fee_balances = {}
 
     def _modify_balance(self, address, lock, amount, negate=False):
         slock = jsstr.from_int(lock)
@@ -945,6 +951,12 @@ class WalletOutputAggregator:
         else:
             balances[slock] = balances[slock].plus(amount)
 
+    def _modify_fee_balance(self, address, amount):
+        if address not in self._fee_balances:
+            self._fee_balances[address] = Currency(amount)
+        else:
+            self._fee_balances[address] = self._fee_balances[address].plus(amount)
+
     def add_coin_input(self, address, amount):
         if address in self._our_addresses:
             self._our_input = self._our_input.plus(amount)
@@ -956,6 +968,9 @@ class WalletOutputAggregator:
 
     def add_coin_output(self, address, lock, amount):
         self._modify_balance(address, lock, amount, negate=False)
+
+    def add_fee(self, address, amount):
+        self._modify_fee_balance(address, amount)
 
     def inputs_outputs_collect(self):
         # our final I/O lists
@@ -990,6 +1005,7 @@ class WalletOutputAggregator:
                         amount=amount,
                         lock=lock,
                         lock_is_timestamp=False if lock == 0 else OutputLock(lock).is_timestamp,
+                        fee=False,
                     ))
                 else:
                     # outgoing money
@@ -999,7 +1015,19 @@ class WalletOutputAggregator:
                         amount=amount.times(ratio),
                         lock=lock,
                         lock_is_timestamp=False if lock == 0 else OutputLock(lock).is_timestamp,
+                        fee=False,
                     ))
+        # add all fees if required
+        if len(our_send_addresses) > 0:
+            for address, amount in jsobj.get_items(self._fee_balances):
+                outputs.append(CoinOutputView(
+                    senders=our_send_addresses,
+                    recipient=address,
+                    amount=amount.times(ratio),
+                    lock=0,
+                    lock_is_timestamp=False,
+                    fee=True,
+                ))
 
         # returm the (filtered and) aggregated I/O
         return inputs, outputs
@@ -1012,12 +1040,13 @@ class CoinOutputView:
     NOTE: AtomicSwapConditioned outputs are not supported.
     """
 
-    def __init__(self, senders, recipient, amount, lock, lock_is_timestamp):
+    def __init__(self, senders, recipient, amount, lock, lock_is_timestamp, fee):
         self._senders = senders
         self._recipient = recipient
         self._amount = amount
         self._lock = lock
         self._lock_is_timestamp = lock_is_timestamp
+        self._fee = fee
 
     @property
     def senders(self):
@@ -1054,6 +1083,13 @@ class CoinOutputView:
         :rtype: bool
         """
         return self._lock_is_timestamp
+    @property
+    def is_fee(self):
+        """
+        :returns: true if this coin output is a fee, false otherwise
+        :rtype: bool
+        """
+        return self._fee
 
 
 class ChainInfo:
