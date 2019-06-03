@@ -647,20 +647,47 @@ export var Account =  __class__ ('Account', [object], {
 			};
 			return jsasync.as_promise (no_balance_cb);
 		}
-		var aggregate = function (balances) {
+		var aggregate = function (balance_pairs) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
 				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
-							case 'balances': var balances = __allkwargs0__ [__attrib0__]; break;
+							case 'balance_pairs': var balance_pairs = __allkwargs0__ [__attrib0__]; break;
 						}
 					}
 				}
 			}
 			else {
 			}
+			var sort_pairs = function (pair_a, pair_b) {
+				if (arguments.length) {
+					var __ilastarg0__ = arguments.length - 1;
+					if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+						var __allkwargs0__ = arguments [__ilastarg0__--];
+						for (var __attrib0__ in __allkwargs0__) {
+							switch (__attrib0__) {
+								case 'pair_a': var pair_a = __allkwargs0__ [__attrib0__]; break;
+								case 'pair_b': var pair_b = __allkwargs0__ [__attrib0__]; break;
+							}
+						}
+					}
+				}
+				else {
+				}
+				var index_a = pair_a [0];
+				var index_b = pair_b [0];
+				return index_a - index_b;
+			};
+			var balance_pairs = jsarr.py_sort (balance_pairs, sort_pairs);
+			var balances = (function () {
+				var __accu0__ = [];
+				for (var pair of balance_pairs) {
+					__accu0__.append (pair [1]);
+				}
+				return __accu0__;
+			}) ();
 			return AccountBalance (self._network_type, self.account_name, balances);
 		};
 		var generator = function* () {
@@ -674,8 +701,10 @@ export var Account =  __class__ ('Account', [object], {
 			}
 			else {
 			}
+			var index = 0;
 			for (var wallet of wallets) {
-				yield wallet.balance;
+				yield jsasync.chain (wallet.balance, _create_account_wallet_balance_result_cb (index));
+				index++;
 			}
 			};
 		return jsasync.chain (jsasync.promise_pool_new (generator), aggregate);
@@ -695,6 +724,38 @@ Object.defineProperty (Account, 'mnemonic', property.call (Account, Account._get
 Object.defineProperty (Account, 'default_explorer_addresses_used', property.call (Account, Account._get_default_explorer_addresses_used));
 Object.defineProperty (Account, 'account_name', property.call (Account, Account._get_account_name, Account._set_account_name));
 Object.defineProperty (Account, 'previous_account_name', property.call (Account, Account._get_previous_account_name));;
+export var _create_account_wallet_balance_result_cb = function (index) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'index': var index = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	var cb = function (balance) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'balance': var balance = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return tuple ([index, balance]);
+	};
+	return cb;
+};
 export var Wallet =  __class__ ('Wallet', [object], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, network_type, explorer_client, wallet_index, wallet_name, start_index, pairs) {
@@ -1019,13 +1080,7 @@ export var AccountBalance =  __class__ ('AccountBalance', [object], {
 			throw __except0__;
 		}
 		self._account_name = account_name;
-		self._balances = (balances == null ? dict ({}) : dict ((function () {
-			var __accu0__ = [];
-			for (var b of balances) {
-				__accu0__.append (tuple ([b.wallet_name, b]));
-			}
-			return __accu0__;
-		}) ()));
+		self._balances = (balances == null ? [] : balances);
 	});},
 	get _get_balances () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -1041,7 +1096,13 @@ export var AccountBalance =  __class__ ('AccountBalance', [object], {
 		}
 		else {
 		}
-		return jsobj.dict_values (self._balances);
+		return (function () {
+			var __accu0__ = [];
+			for (var balance of self._balances) {
+				__accu0__.append (balance);
+			}
+			return __accu0__;
+		}) ();
 	});},
 	get balance_for () {return __get__ (this, function (self, wallet_name) {
 		if (arguments.length) {
@@ -1058,12 +1119,14 @@ export var AccountBalance =  __class__ ('AccountBalance', [object], {
 		}
 		else {
 		}
-		if (!__in__ (wallet_name, self._balances)) {
-			var __except0__ = KeyError ('wallet {} has no balance for account of {}'.format (wallet_name, self._account_name));
-			__except0__.__cause__ = null;
-			throw __except0__;
+		for (var balance of self._balances) {
+			if (balance.wallet_name == wallet_name) {
+				return balance;
+			}
 		}
-		return self._balances [wallet_name];
+		var __except0__ = KeyError ('wallet {} has no balance for account of {}'.format (wallet_name, self._account_name));
+		__except0__.__cause__ = null;
+		throw __except0__;
 	});},
 	get _get_account_name () {return __get__ (this, function (self) {
 		if (arguments.length) {

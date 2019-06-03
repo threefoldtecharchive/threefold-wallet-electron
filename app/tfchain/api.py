@@ -391,14 +391,27 @@ class Account:
                 return AccountBalance(self._network_type, self.account_name)
             return jsasync.as_promise(no_balance_cb)
         # create aggregaton cb
-        def aggregate(balances):
+        def aggregate(balance_pairs):
+            def sort_pairs(pair_a, pair_b):
+                index_a = pair_a[0]
+                index_b = pair_b[0]
+                return index_a - index_b
+            balance_pairs = jsarr.sort(balance_pairs, sort_pairs)
+            balances = [pair[1] for pair in balance_pairs]
             return AccountBalance(self._network_type, self.account_name, balances)
         # define generator
         def generator():
+            index = 0
             for wallet in wallets:
-                yield wallet.balance
+                yield jsasync.chain(wallet.balance, _create_account_wallet_balance_result_cb(index))
+                index += 1
         # return pooled promise
         return jsasync.chain(jsasync.promise_pool_new(generator), aggregate)
+
+def _create_account_wallet_balance_result_cb(index):
+    def cb(balance):
+        return (index, balance)
+    return cb
 
 class Wallet:
     """
@@ -571,16 +584,17 @@ class AccountBalance:
         if not isinstance(account_name, str):
             raise TypeError("account_name has to be of type str, not be of type {}".format(type(account_name)))
         self._account_name = account_name
-        self._balances = {} if balances == None else dict([(b.wallet_name, b) for b in balances])
+        self._balances = [] if balances == None else balances
 
     @property
     def balances(self):
-        return jsobj.dict_values(self._balances)
+        return [balance for balance in self._balances]
 
     def balance_for(self, wallet_name):
-        if wallet_name not in self._balances:
-            raise KeyError("wallet {} has no balance for account of {}".format(wallet_name, self._account_name))
-        return self._balances[wallet_name]
+        for balance in self._balances:
+            if balance.wallet_name == wallet_name:
+                return balance
+        raise KeyError("wallet {} has no balance for account of {}".format(wallet_name, self._account_name))
 
     @property
     def account_name(self):
