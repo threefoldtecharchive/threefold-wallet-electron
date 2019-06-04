@@ -12,6 +12,8 @@ import WalletReceive from './components/wallet/WallerReceive'
 import NewWallet from './components/wallet/NewWallet'
 import Transfer from './components/Transfer'
 import Login from './components/home/Login'
+import Sign from './components/transactions/Sign'
+import SignTransaction from './components/transactions/SignTransaction'
 
 export default () => (
   <App>
@@ -23,6 +25,8 @@ export default () => (
       <Route path={routes.WALLET_SETTINGS} component={WalletSettings} />
       <Route path={routes.WALLET_RECEIVE} component={WalletReceive} />
       <Route path={routes.TRANSFER} component={Transfer} />
+      <Route path={routes.SIGN} component={Sign} />
+      <Route path={routes.SIGN_TRANSACTIONS} component={SignTransaction} />
       <Route path={routes.LOGIN} component={Login} />
       <Route path={routes.WALLET_NEW} component={NewWallet} />
       <Route path={routes.HOME} component={HomePage} />

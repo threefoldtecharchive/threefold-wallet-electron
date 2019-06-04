@@ -5,9 +5,10 @@ import { Form, Button, Input, Icon, Dropdown, Divider, Loader, Dimmer, Message }
 import styles from './home/Home.css'
 import Footer from './footer'
 import { toast } from 'react-toastify'
-import { selectWallet, setBalance } from '../actions'
+import { selectWallet, setBalance, setTransactionJson } from '../actions'
 import * as tfchain from '../tfchain/api'
 import moment from 'moment'
+import routes from '../constants/routes'
 
 const mapStateToProps = state => ({
   account: state.account,
@@ -20,6 +21,9 @@ const mapDispatchToProps = (dispatch) => ({
   },
   setBalance: (account) => {
     dispatch(setBalance(account))
+  },
+  setTransactionJson: (json) => {
+    dispatch(setTransactionJson(json))
   }
 })
 
@@ -114,20 +118,34 @@ class Transfer extends Component {
 
     if (!destinationError && !amountError && selectedWallet != null) {
       this.renderLoader(true)
-
       const builder = selectedWallet.transaction_new()
       if (timestamp) {
-        builder.output_add(destination, amount.toString(), { lock: timestamp })
+        try {
+          builder.output_add(destination, amount.toString(), { lock: timestamp })
+        } catch (error) {
+          toast('transaction failed')
+          return this.setState({ loader: false, errorMessage: error.__str__() })
+        }
       } else {
-        builder.output_add(destination, amount.toString())
+        try {
+          builder.output_add(destination, amount.toString())
+        } catch (error) {
+          toast('transaction failed')
+          return this.setState({ loader: false, errorMessage: error.__str__() })
+        }
       }
       builder.send({ data: description }).then(result => {
         this.setState({ destinationError, amountError, loader: false })
-        // TODO: handle result.submitted === false, as that can happen as well
-        toast('Transaction ' + result.transaction.id + ' submitted')
         this.props.setBalance(this.props.account)
-        return this.props.history.push('/wallet')
+        if (result.submitted) {
+          toast('Transaction ' + result.transaction.id + ' submitted')
+          return this.props.history.push(routes.WALLET)
+        } else {
+          this.props.setTransactionJson(JSON.stringify(result.transaction.json()))
+          return this.props.history.push(routes.SIGN)
+        }
       }).catch(err => {
+        console.log('error?')
         toast('transaction failed')
         this.setState({ loader: false, errorMessage: err.__str__() })
       })
@@ -225,8 +243,8 @@ class Transfer extends Component {
               value={walletsOptions[0].value}
             />
           </Form.Field>
+          {this.renderErrorMessage()}
         </Form>
-        {this.renderErrorMessage()}
         <div style={{ position: 'absolute', bottom: 150, right: 80 }}>
           <Button className={styles.cancelButton} onClick={() => this.props.history.goBack()} style={{ marginTop: 20, float: 'left', background: '#2B3C72', color: 'white', marginRight: 15 }} size='big'>Cancel</Button>
           <Button className={styles.acceptButton} onClick={() => this.submitTransaction()} style={{ marginTop: 20, marginRight: 10, float: 'left', background: '#015DE1', color: 'white' }} size='big'>Send</Button>

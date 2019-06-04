@@ -157,3 +157,17 @@ export const setBalance = function (account) {
     }
   }
 }
+
+export const setTransactionJson = function (json) {
+  return {
+    type: 'SET_TRANSACTION_JSON',
+    json
+  }
+}
+
+export const clearTransactionJson = function (json) {
+  return {
+    type: 'CLEAR_TRANSACTION_JSON',
+    json
+  }
+}

@@ -9,5 +9,7 @@
   "WALLET_RECEIVE": "/walletreceive",
   "WALLET_SETTINGS": "/walletsettings",
   "TRANSFER": "/transfer",
-  "LOGIN": "/login"
+  "LOGIN": "/login",
+  "SIGN": "/sign",
+  "SIGN_TRANSACTIONS": "/signtx"
 }
