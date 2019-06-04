@@ -12,7 +12,8 @@ import routes from '../constants/routes'
 
 const mapStateToProps = state => ({
   account: state.account,
-  wallet: state.wallet
+  wallet: state.wallet,
+  routerLocations: state.routerLocations
 })
 
 const mapDispatchToProps = (dispatch) => ({
@@ -39,7 +40,7 @@ class Transfer extends Component {
       descriptionError: false,
       amountError: false,
       wallets: [],
-      selectedWallet: this.props.account.wallets[0],
+      selectedWallet: this.props.account.wallets[0].wallet_name,
       loader: false,
       datelock: '',
       timelock: ''
@@ -68,8 +69,10 @@ class Transfer extends Component {
   }
 
   handleAmountChange = ({ target }) => {
-    if (this.state.selectedWallet && target.value !== 0) {
-      this.state.selectedWallet.balance.then(b => {
+    const { selectedWallet } = this.state
+    if (selectedWallet && target.value !== 0) {
+      const selectedWalletFromProps = this.props.account.wallets.filter(w => w.wallet_name === selectedWallet)[0]
+      selectedWalletFromProps.balance.then(b => {
         if (!b.spend_amount_is_valid(target.value)) {
           this.setState({ amountError: true })
         } else {
@@ -84,16 +87,36 @@ class Transfer extends Component {
     const { wallets } = this.props.account
     return wallets.map(w => {
       return {
-        key: w._wallet_name,
-        text: w._wallet_name,
-        value: w
+        key: w.wallet_name,
+        text: w.wallet_name,
+        value: w.wallet_name
       }
     })
   }
 
   selectWallet = (event, data) => {
+    const selectedWallet = this.props.account.wallets.filter(w => w.wallet_name === data.value)
     this.setState({ selectedWallet: data.value })
-    this.props.selectWallet(data.value)
+    this.props.selectWallet(selectedWallet)
+  }
+
+  // implement goBack ourselfs, if a user has made a transaction and he presses go back then he should route to account
+  // instead of going back to transfer (default behaviour of react router 'goBack' function)
+  goBack = () => {
+    const { routerLocations } = this.props
+    const previousLocation = routerLocations[routerLocations.length - 2]
+    const { location } = previousLocation
+    const { pathname } = location
+    switch (pathname) {
+      case '/account':
+        return this.props.history.push(routes.ACCOUNT)
+      case '/transfer':
+        return this.props.history.push(routes.ACCOUNT)
+      case '/wallet':
+        return this.props.history.push(routes.WALLET)
+      default:
+        return this.props.history.push(routes.WALLET)
+    }
   }
 
   submitTransaction = () => {
@@ -118,7 +141,8 @@ class Transfer extends Component {
 
     if (!destinationError && !amountError && selectedWallet != null) {
       this.renderLoader(true)
-      const builder = selectedWallet.transaction_new()
+      const selectedWalletFromProps = this.props.account.wallets.filter(w => w.wallet_name === selectedWallet)[0]
+      const builder = selectedWalletFromProps.transaction_new()
       if (timestamp) {
         try {
           builder.output_add(destination, amount.toString(), { lock: timestamp })
@@ -139,13 +163,12 @@ class Transfer extends Component {
         this.props.setBalance(this.props.account)
         if (result.submitted) {
           toast('Transaction ' + result.transaction.id + ' submitted')
-          return this.props.history.push(routes.WALLET)
+          return this.goBack()
         } else {
           this.props.setTransactionJson(JSON.stringify(result.transaction.json()))
           return this.props.history.push(routes.SIGN)
         }
       }).catch(err => {
-        console.log('error?')
         toast('transaction failed')
         this.setState({ loader: false, errorMessage: err.__str__() })
       })
@@ -195,7 +218,7 @@ class Transfer extends Component {
   }
 
   render () {
-    const { destination, destinationError, amountError, amount, timelock, datelock } = this.state
+    const { destination, destinationError, amountError, amount, timelock, datelock, selectedWallet } = this.state
     const walletsOptions = this.mapWalletsToDropdownOption()
 
     if (this.state.loader) {
@@ -220,9 +243,6 @@ class Transfer extends Component {
             <Input error={destinationError} style={{ background: '#0c111d !important', color: '#7784a9' }} icon={<Icon name='send' style={{ color: '#0e72f5' }} />} iconPosition='left' placeholder='destination address' value={destination} onChange={this.handleDestinationChange} />
             {this.renderDestinationError()}
           </Form.Field>
-          {/* <Form.Field style={{ marginTop: 30 }}>
-            <Input error={descriptionError} style={{ background: '#0c111d !important', color: '#7784a9' }} icon={<Icon name='align left' style={{ color: 'green' }} />} iconPosition='left' placeholder='message' value={description} onChange={this.handleDescriptionChange} />
-          </Form.Field> */}
           <Form.Field style={{ marginTop: 30 }}>
             <Input type='number' error={amountError} label='Amount TFT' style={{ background: '#0c111d !important', color: '#7784a9', width: 150 }} placeholder='amount' value={amount} onChange={this.handleAmountChange} />
             {this.renderAmountError()}
@@ -240,7 +260,7 @@ class Transfer extends Component {
               selection
               options={walletsOptions}
               onChange={this.selectWallet}
-              value={walletsOptions[0].value}
+              value={selectedWallet}
             />
           </Form.Field>
           {this.renderErrorMessage()}

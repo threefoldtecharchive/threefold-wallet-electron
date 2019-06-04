@@ -101,7 +101,7 @@ class WalletSettings extends Component {
     const { amount, selectedAddress, selectedWallet } = this.state
 
     return (
-      <div>
+      <div style={{ height: '100vh', overflowY: 'scroll' }}>
         <div className={styles.container} >
           <h2>Receive</h2>
         </div>
