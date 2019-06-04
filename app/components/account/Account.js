@@ -45,22 +45,22 @@ class Account extends Component {
   renderWallets = () => {
     let wallets = this.props.account.wallets
     if (!(this.props.balance instanceof Array)) {
-      wallets = this.props.balance.info.balances
+      wallets = this.props.balance.wallets
     }
     return (
       <Card.Group style={{ marginTop: 20, marginLeft: 20 }}>
         {wallets.map(w => {
           let content = null
-          if (this.props.balance.info) {
+          if (this.props.balance.wallets) {
             content = (
               <Card.Content>
                 <div>
                   <Icon name='chevron right' style={{ position: 'absolute', right: 20, top: 130, fontSize: 25, opacity: '0.3', color: 'white' }} />
                   <Card.Description style={{ color: 'white', marginTop: 10, marginBottom: 10, fontFamily: 'SF UI Text Light', display: 'flex' }}>
-                    <Icon name='unlock' style={{ fontSize: 16, marginLeft: 20 }} /> <p style={{ marginLeft: 30, marginTop: -8 }}>{w.coins_unlocked ? w.coins_unlocked.str() : 0} TFT</p>
+                    <Icon name='unlock' style={{ fontSize: 16, marginLeft: 20 }} /> <p style={{ marginLeft: 30, marginTop: -8 }}>{w.balance.coins_unlocked.str()} TFT</p>
                   </Card.Description>
                   <Card.Description style={{ textAlign: 'left', color: 'white', marginTop: 20, marginBottom: 10, fontFamily: 'SF UI Text Light', display: 'flex' }}>
-                    <Icon name='lock' style={{ fontSize: 16, marginLeft: 20 }} /> <p style={{ marginLeft: 33, marginTop: -3, fontFamily: 'SF UI Text Light', fontSize: 18 }}>{w.coins_locked ? w.coins_locked.str() : 0} TFT</p>
+                    <Icon name='lock' style={{ fontSize: 16, marginLeft: 20 }} /> <p style={{ marginLeft: 33, marginTop: -3, fontFamily: 'SF UI Text Light', fontSize: 18 }}>{w.balance.coins_locked.str()} TFT</p>
                   </Card.Description>
                   <Divider />
                   <Card.Header style={{ textAlign: 'center', color: 'white', fontSize: 18, textTransform: 'uppercase', marginTop: 20, fontFamily: 'SF UI Text Light' }}>

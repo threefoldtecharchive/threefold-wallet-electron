@@ -71,7 +71,7 @@ app.on('ready', async () => {
     show: false,
     width: 1250,
     height: 800,
-    titleBarStyle: 'hiddenInset',
+    titleBarStyle: 'hidden',
     resizable: false
   })
 

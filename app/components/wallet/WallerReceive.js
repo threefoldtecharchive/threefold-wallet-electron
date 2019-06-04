@@ -29,17 +29,17 @@ class WalletSettings extends Component {
     if (this.props.wallet instanceof Array) {
       // If wallet in properties is array (means no global state for wallet is set, meaning coming from account page most likely)
       // select the first wallet / address from the account props
-      selectedWallet = this.props.account.wallets[0]
+      selectedWallet = this.props.account.wallets[0].wallet_name
       selectedAddress = this.props.account.wallets[0].address
     } else {
       // If wallet in properties is selected (meaning coming from a wallet page)
       // select this wallet as default value in dropdown
-      selectedWallet = this.props.wallet
+      selectedWallet = this.props.wallet.wallet_name
       selectedAddress = this.props.wallet.address
     }
 
     this.state = {
-      name: this.props.wallet._wallet_name,
+      name: this.props.wallet.wallet_name,
       selectedWallet,
       selectedAddress,
       amount: 0,
@@ -51,9 +51,9 @@ class WalletSettings extends Component {
     const { wallets } = this.props.account
     return flatten(wallets.map(w => {
       return {
-        key: w._wallet_name,
-        text: w._wallet_name,
-        value: w
+        key: w.wallet_name,
+        text: w.wallet_name,
+        value: w.wallet_name
       }
     }))
   }
@@ -61,7 +61,7 @@ class WalletSettings extends Component {
   mapAddressesToDropdownOption = () => {
     const { selectedWallet } = this.state
     if (selectedWallet) {
-      const wallet = find(this.props.account.wallets, w => w.wallet_name === selectedWallet.wallet_name)
+      const wallet = find(this.props.account.wallets, w => w.wallet_name === selectedWallet)
       return flatten(wallet.addresses.map(w => {
         return {
           key: w,
@@ -73,8 +73,8 @@ class WalletSettings extends Component {
   }
 
   selectWallet = (event, data) => {
-    this.setState({ selectedWallet: data.value, selectedAddress: data.value.addresses[0] })
-    this.props.selectWallet(data.value)
+    const wallet = find(this.props.account.wallets, w => w.wallet_name === data.value)
+    this.setState({ selectedWallet: data.value, selectedAddress: wallet.addresses[0] })
   }
 
   selectAddress = (event, data) => {
