@@ -528,7 +528,7 @@ export var Account =  __class__ ('Account', [object], {
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		var old_name = self._wallets [wallet_index];
+		var old_name = self._wallets [wallet_index].wallet_name;
 		if (old_name != wallet_name) {
 			self._update_cache_wallet (old_name, wallet_name);
 		}

@@ -328,7 +328,7 @@ class Account:
             raise TypeError("wallet name has to be an non empty str, invalid: {} ({})".format(wallet_name, type(wallet_name)))
         if wallet_index < 0 or wallet_index >= self.wallet_count:
             raise ValueError("wallet index {} is out of range".format(wallet_index))
-        old_name = self._wallets[wallet_index]
+        old_name = self._wallets[wallet_index].wallet_name
         if old_name != wallet_name:
             # update cache in case of a wallet rename
             self._update_cache_wallet(old_name, wallet_name)
