@@ -64,6 +64,9 @@ export var Account =  __class__ ('Account', [object], {
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
+		if (isinstance (data, str)) {
+			var data = jsjson.json_loads (data);
+		}
 		if (data.version != 1) {
 			jslog.warning ('data object with invalid version:', data);
 			var __except0__ = ValueError ('account data of version {} is not supported'.format (data.version));
@@ -79,8 +82,17 @@ export var Account =  __class__ ('Account', [object], {
 			throw __except0__;
 		}
 		var account = cls (account_name, password, __kwargtrans__ ({opts: dict ({'seed': jshex.bytes_from_hex (payload ['seed']), 'network': payload ['network_type'], 'addresses': payload.get_or ('explorer_addresses', null)})}));
-		for (var data of payload ['wallets']) {
-			account.wallet_new (data.wallet_name, data.start_index, data.address_count);
+		if (__in__ ('wallets', payload)) {
+			var wallet_data_objs = payload ['wallets'] || [];
+			for (var data of wallet_data_objs) {
+				account.wallet_new (data.wallet_name, data.start_index, data.address_count);
+			}
+		}
+		if (__in__ ('multisig_wallets', payload)) {
+			var ms_wallet_data_objs = payload ['multisig_wallets'] || [];
+			for (var data of ms_wallet_data_objs) {
+				account.multisig_wallet_name_update (__kwargtrans__ ({address: data.wallet_address, py_name: data.wallet_name}));
+			}
 		}
 		return account;
 	});},
@@ -137,6 +149,7 @@ export var Account =  __class__ ('Account', [object], {
 		self._mnemonic = mnemonic;
 		self._seed = seed;
 		self._wallets = [];
+		self._multisig_wallet_names = dict ({});
 		self._cached_wallet_balances = dict ({});
 	});},
 	get _update_cache_wallet () {return __get__ (this, function (self, old_name, new_name) {
@@ -597,6 +610,102 @@ export var Account =  __class__ ('Account', [object], {
 			}
 		}
 	});},
+	get _get_named_multisig_wallets () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return (function () {
+			var __accu0__ = [];
+			for (var [address, py_name] of jsobj.get_items (self._multisig_wallet_names)) {
+				__accu0__.append (MultiSignatureWalletAddressNamePair (address, py_name));
+			}
+			return __accu0__;
+		}) ();
+	});},
+	get multisig_wallet_name_get () {return __get__ (this, function (self, address) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'address': var address = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (!(isinstance (address, str))) {
+			var __except0__ = py_TypeError ('address has an invalid type: {} ({})'.format (address, py_typeof (address)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		var uh = UnlockHash.from_json (address);
+		if (uh.uhtype.__ne__ (UnlockHashType.MULTI_SIG)) {
+			var __except0__ = ValueError ('address is not a multisig address: {}'.format (address));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		var address = uh.__str__ ();
+		if (!__in__ (address, self._multisig_wallet_names)) {
+			var __except0__ = KeyError ('address {} does not have a multisig wallet name'.format (address));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		return self._multisig_wallet_names [address];
+	});},
+	get multisig_wallet_name_update () {return __get__ (this, function (self, address, py_name) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'address': var address = __allkwargs0__ [__attrib0__]; break;
+						case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (!(isinstance (address, str))) {
+			var __except0__ = py_TypeError ('address has an invalid type: {} ({})'.format (address, py_typeof (address)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		var uh = UnlockHash.from_json (address);
+		if (uh.uhtype.__ne__ (UnlockHashType.MULTI_SIG)) {
+			var __except0__ = ValueError ('address is not a multisig address: {}'.format (address));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		var address = uh.__str__ ();
+		if (py_name == null || py_name == '') {
+			delete self._multisig_wallet_names [address];
+		}
+		else {
+			if (!(isinstance (py_name, str))) {
+				var __except0__ = py_TypeError ('name has an invalid type: {} ({})'.format (py_name, py_typeof (py_name)));
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
+			self._multisig_wallet_names [address] = py_name;
+		}
+	});},
 	get next_available_wallet_start_index () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -635,7 +744,11 @@ export var Account =  __class__ ('Account', [object], {
 		for (var wallet of self.wallets) {
 			wallets.append (dict ({'wallet_name': wallet.wallet_name, 'start_index': wallet.start_index, 'address_count': wallet.address_count}));
 		}
-		var payload = dict ({'account_name': self.account_name, 'network_type': self.network_type, 'explorer_addresses': (self.default_explorer_addresses_used ? null : self.explorer.explorer_addresses), 'seed': jshex.bytes_to_hex (self.seed), 'wallets': wallets});
+		var multisig_wallets = [];
+		for (var [address, py_name] of jsobj.get_items (self._multisig_wallet_names)) {
+			multisig_wallets.append (dict ({'wallet_address': address, 'wallet_name': py_name}));
+		}
+		var payload = dict ({'account_name': self.account_name, 'network_type': self.network_type, 'explorer_addresses': (self.default_explorer_addresses_used ? null : self.explorer.explorer_addresses), 'seed': jshex.bytes_to_hex (self.seed), 'wallets': (len (wallets) == 0 ? null : wallets), 'multisig_wallets': (len (multisig_wallets) == 0 ? null : multisig_wallets)});
 		var __left0__ = self._symmetric_key.encrypt (payload);
 		var ct = __left0__ [0];
 		var rsei = __left0__ [1];
@@ -787,6 +900,7 @@ export var Account =  __class__ ('Account', [object], {
 	});}
 });
 Object.defineProperty (Account, 'balance', property.call (Account, Account._get_balance));
+Object.defineProperty (Account, 'named_multisig_wallets', property.call (Account, Account._get_named_multisig_wallets));
 Object.defineProperty (Account, 'addresses', property.call (Account, Account._get_addresses));
 Object.defineProperty (Account, 'address', property.call (Account, Account._get_address));
 Object.defineProperty (Account, 'wallet_count', property.call (Account, Account._get_wallet_count));
@@ -800,6 +914,72 @@ Object.defineProperty (Account, 'mnemonic', property.call (Account, Account._get
 Object.defineProperty (Account, 'default_explorer_addresses_used', property.call (Account, Account._get_default_explorer_addresses_used));
 Object.defineProperty (Account, 'account_name', property.call (Account, Account._get_account_name, Account._set_account_name));
 Object.defineProperty (Account, 'previous_account_name', property.call (Account, Account._get_previous_account_name));;
+export var MultiSignatureWalletAddressNamePair =  __class__ ('MultiSignatureWalletAddressNamePair', [object], {
+	__module__: __name__,
+	get __init__ () {return __get__ (this, function (self, address, py_name) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'address': var address = __allkwargs0__ [__attrib0__]; break;
+						case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (!(isinstance (address, str)) || address == '') {
+			var __except0__ = py_TypeError ('address has to be a non-empty str, invalid {} ({})'.format (address, py_typeof (address)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		self._address = address;
+		if (!(isinstance (py_name, str)) || py_name == '') {
+			var __except0__ = py_TypeError ('name has to be a non-empty str, invalid {} ({})'.format (py_name, py_typeof (py_name)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		self._name = py_name;
+	});},
+	get _get_address () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._address;
+	});},
+	get _get_name () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._name;
+	});}
+});
+Object.defineProperty (MultiSignatureWalletAddressNamePair, 'name', property.call (MultiSignatureWalletAddressNamePair, MultiSignatureWalletAddressNamePair._get_name));
+Object.defineProperty (MultiSignatureWalletAddressNamePair, 'address', property.call (MultiSignatureWalletAddressNamePair, MultiSignatureWalletAddressNamePair._get_address));;
 export var _create_account_wallet_balance_result_cb = function (index) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;

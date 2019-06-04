@@ -62,6 +62,10 @@ class Account:
         if not data:
             raise ValueError("no data is given, while it is required")
 
+        if isinstance(data, str):
+            # parse the data if not JSON-decoded yet
+            data = jsjson.json_loads(data)
+
         # ensure the data version is correct, we currently only supported one version (1)
         if data.version != 1:
             jslog.warning("data object with invalid version:", data)
@@ -83,8 +87,17 @@ class Account:
             'addresses': payload.get_or('explorer_addresses', None),
         })
         # restore all wallets for the account
-        for data in payload['wallets']:
-            account.wallet_new(data.wallet_name, data.start_index, data.address_count)
+        if 'wallets' in payload:
+            wallet_data_objs = payload['wallets'] or []
+            for data in wallet_data_objs:
+                account.wallet_new(data.wallet_name, data.start_index, data.address_count)
+        # restore all multisig_wallets (at least the fact they are named) for the account
+        if 'multisig_wallets' in payload:
+            ms_wallet_data_objs = payload['multisig_wallets'] or []
+            for data in ms_wallet_data_objs:
+                account.multisig_wallet_name_update(
+                    address=data.wallet_address,
+                    name=data.wallet_name)
 
         # return the fully restored account
         return account
@@ -134,6 +147,9 @@ class Account:
         self._mnemonic = mnemonic
         self._seed = seed
         self._wallets = [] # start with no wallets, can be created using the `wallet_new` instance method
+
+        # for multisig wallets we only store names for multisig wallets
+        self._multisig_wallet_names = {}
 
         # cache properties
         self._cached_wallet_balances = {}
@@ -358,6 +374,45 @@ class Account:
             if len(addresses_set.intersection(set(wallet.addresses))) != 0:
                 raise ValueError("cannot use addresses for wallet {} as it overlaps with the addresses of wallet {}".format(candidate.wallet_name, wallet.wallet_name))
 
+    @property
+    def named_multisig_wallets(self):
+        """
+        :returns: all named multisig wallets linked to this wallet
+        """
+        return [MultiSignatureWalletAddressNamePair(address, name) for
+            (address, name) in jsobj.get_items(self._multisig_wallet_names)]
+
+    def multisig_wallet_name_get(self, address):
+        """
+        :returns: None if no label is attached to address or a name if it is
+        """
+        if not isinstance(address, str):
+            raise TypeError("address has an invalid type: {} ({})".format(address, type(address)))
+        uh = UnlockHash.from_json(address)
+        if uh.uhtype.__ne__(UnlockHashType.MULTI_SIG):
+            raise ValueError("address is not a multisig address: {}".format(address))
+        address = uh.__str__()
+        if address not in self._multisig_wallet_names:
+            raise KeyError("address {} does not have a multisig wallet name".format(address))
+        return self._multisig_wallet_names[address]
+
+    def multisig_wallet_name_update(self, address, name):
+        """
+        Delete (name=None||"") or update the name for an address.
+        """
+        if not isinstance(address, str):
+            raise TypeError("address has an invalid type: {} ({})".format(address, type(address)))
+        uh = UnlockHash.from_json(address)
+        if uh.uhtype.__ne__(UnlockHashType.MULTI_SIG):
+            raise ValueError("address is not a multisig address: {}".format(address))
+        address = uh.__str__()
+        if name == None or name == '':
+            del self._multisig_wallet_names[address]
+        else:
+            if not isinstance(name, str):
+                raise TypeError("name has an invalid type: {} ({})".format(name, type(name)))
+            self._multisig_wallet_names[address] = name
+
     def next_available_wallet_start_index(self):
         """
         Returns the next available wallet start index,
@@ -386,12 +441,19 @@ class Account:
                 'start_index': wallet.start_index,
                 'address_count': wallet.address_count,
             })
+        multisig_wallets = []
+        for address, name in jsobj.get_items(self._multisig_wallet_names):
+            multisig_wallets.append({
+                'wallet_address': address,
+                'wallet_name': name,
+            })
         payload = {
             'account_name': self.account_name,
             'network_type': self.network_type,
             'explorer_addresses': None if self.default_explorer_addresses_used else self.explorer.explorer_addresses,
             'seed': jshex.bytes_to_hex(self.seed),
-            'wallets': wallets,
+            'wallets': None if len(wallets) == 0 else wallets,
+            'multisig_wallets': None if len(multisig_wallets) == 0 else multisig_wallets,
         }
         # encrypt it using the internal symmetric key
         ct, rsei = self._symmetric_key.encrypt(payload)
@@ -442,6 +504,23 @@ class Account:
             # return pooled promise
             return jsasync.chain(jsasync.promise_pool_new(generator), aggregate)
         return jsasync.chain(self.chain_info_get(), aggregate_cb)
+
+class MultiSignatureWalletAddressNamePair:
+    def __init__(self, address, name):
+        if not isinstance(address, str) or address == "":
+            raise TypeError("address has to be a non-empty str, invalid {} ({})".format(address, type(address)))
+        self._address = address
+        if not isinstance(name, str) or name == "":
+            raise TypeError("name has to be a non-empty str, invalid {} ({})".format(name, type(name)))
+        self._name = name
+
+    @property
+    def address(self):
+        return self._address
+
+    @property
+    def name(self):
+        return self._name
 
 def _create_account_wallet_balance_result_cb(index):
     def cb(balance):
