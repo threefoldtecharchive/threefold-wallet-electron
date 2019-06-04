@@ -490,6 +490,17 @@ class Wallet:
         )
 
     @property
+    def is_cached(self):
+        """
+        :returns: True if this wallet is cached, False otherwise
+        :rtype: bool
+        """
+        return self._is_cached_getter()
+
+    def _is_cached_getter(self):
+        return False
+
+    @property
     def wallet_index(self):
         """
         :returns: the index of the wallet
@@ -590,6 +601,9 @@ class CachedWallet(Wallet):
         if not isinstance(balance, Balance):
             raise TypeError("balance has an unexpected type: {} ({})".format(balance, type(balance)))
         self._balance = balance
+
+    def _is_cached_getter(self):
+        return True
 
     def _balance_getter(self):
         """

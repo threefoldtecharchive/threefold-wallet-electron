@@ -862,6 +862,38 @@ export var Wallet =  __class__ ('Wallet', [object], {
 			return __accu0__;
 		}) ());
 	});},
+	get _get_is_cached () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._is_cached_getter ();
+	});},
+	get _is_cached_getter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return false;
+	});},
 	get _get_wallet_index () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -1050,7 +1082,8 @@ Object.defineProperty (Wallet, 'addresses', property.call (Wallet, Wallet._get_a
 Object.defineProperty (Wallet, 'address', property.call (Wallet, Wallet._get_address));
 Object.defineProperty (Wallet, 'start_index', property.call (Wallet, Wallet._get_start_index));
 Object.defineProperty (Wallet, 'wallet_name', property.call (Wallet, Wallet._get_wallet_name));
-Object.defineProperty (Wallet, 'wallet_index', property.call (Wallet, Wallet._get_wallet_index));;
+Object.defineProperty (Wallet, 'wallet_index', property.call (Wallet, Wallet._get_wallet_index));
+Object.defineProperty (Wallet, 'is_cached', property.call (Wallet, Wallet._get_is_cached));;
 export var CachedWallet =  __class__ ('CachedWallet', [Wallet], {
 	__module__: __name__,
 	get from_wallet () {return __getcm__ (this, function (cls, wallet, balance) {
@@ -1105,6 +1138,22 @@ export var CachedWallet =  __class__ ('CachedWallet', [Wallet], {
 			throw __except0__;
 		}
 		self._balance = balance;
+	});},
+	get _is_cached_getter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return true;
 	});},
 	get _balance_getter () {return __get__ (this, function (self) {
 		if (arguments.length) {
