@@ -284,8 +284,28 @@ export var TFChainWallet =  __class__ ('TFChainWallet', [object], {
 		}
 		else {
 		}
+		return self.balance_get ();
+	});},
+	get balance_get () {return __get__ (this, function (self, chain_info) {
+		if (typeof chain_info == 'undefined' || (chain_info != null && chain_info.hasOwnProperty ("__kwargtrans__"))) {;
+			var chain_info = null;
+		};
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'chain_info': var chain_info = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
 		var w = self.clone ();
-		var aggregator = WalletBalanceAggregator (w);
+		var aggregator = WalletBalanceAggregator (w, __kwargtrans__ ({chain_info: chain_info}));
 		return aggregator.fetch_and_aggregate ();
 	});},
 	get _get_transactions () {return __get__ (this, function (self) {
@@ -771,7 +791,10 @@ Object.defineProperty (TransactionSignResult, 'signed', property.call (Transacti
 Object.defineProperty (TransactionSignResult, 'transaction', property.call (TransactionSignResult, TransactionSignResult._get_transaction));;
 export var WalletBalanceAggregator =  __class__ ('WalletBalanceAggregator', [object], {
 	__module__: __name__,
-	get __init__ () {return __get__ (this, function (self, wallet) {
+	get __init__ () {return __get__ (this, function (self, wallet, chain_info) {
+		if (typeof chain_info == 'undefined' || (chain_info != null && chain_info.hasOwnProperty ("__kwargtrans__"))) {;
+			var chain_info = null;
+		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -780,6 +803,7 @@ export var WalletBalanceAggregator =  __class__ ('WalletBalanceAggregator', [obj
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
 						case 'wallet': var wallet = __allkwargs0__ [__attrib0__]; break;
+						case 'chain_info': var chain_info = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
@@ -789,7 +813,12 @@ export var WalletBalanceAggregator =  __class__ ('WalletBalanceAggregator', [obj
 		self._wallet = wallet;
 		self._balance = WalletsBalance ();
 		self._multisig_addresses = [];
-		self._info = null;
+		self._info = chain_info;
+		if (self._info != null && !(isinstance (self._info, tfclient.ExplorerBlockchainInfo))) {
+			var __except0__ = py_TypeError ('info has to be an ExplorerBlockchainInfo object, invalid: {} ({})'.format (self._info, py_typeof (self._info)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
 	});},
 	get fetch_and_aggregate () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -804,6 +833,9 @@ export var WalletBalanceAggregator =  __class__ ('WalletBalanceAggregator', [obj
 			}
 		}
 		else {
+		}
+		if (self._info != null) {
+			return jsasync.chain (self._personal_pool_chain_get (), self._multisig_pool_chain_get, self._balance_get);
 		}
 		return jsasync.chain (self._wallet._client.blockchain_info_get (), self._collect_chain_info, self._personal_pool_chain_get, self._multisig_pool_chain_get, self._balance_get);
 	});},

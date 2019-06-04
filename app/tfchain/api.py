@@ -418,26 +418,30 @@ class Account:
     def balance(self):
         wallets = self.wallets
         if len(wallets) == 0:
-            def no_balance_cb():
-                return AccountBalance(self._network_type, self.account_name)
-            return jsasync.as_promise(no_balance_cb)
-        # create aggregaton cb
-        def aggregate(balance_pairs):
-            def sort_pairs(pair_a, pair_b):
-                index_a = pair_a[0]
-                index_b = pair_b[0]
-                return index_a - index_b
-            balance_pairs = jsarr.sort(balance_pairs, sort_pairs)
-            balances = [pair[1] for pair in balance_pairs]
-            return AccountBalance(self._network_type, self.account_name, balances)
-        # define generator
-        def generator():
-            index = 0
-            for wallet in wallets:
-                yield jsasync.chain(wallet.balance, _create_account_wallet_balance_result_cb(index))
-                index += 1
-        # return pooled promise
-        return jsasync.chain(jsasync.promise_pool_new(generator), aggregate)
+            def no_balance_cb(chain_info):
+                return AccountBalance(self._network_type, self.account_name, chain_info)
+            return jsasync.chain(self.chain_info_get(), no_balance_cb)
+        def aggregate_cb(chain_info):
+            # create aggregaton cb
+            def aggregate(balance_pairs):
+                def sort_pairs(pair_a, pair_b):
+                    index_a = pair_a[0]
+                    index_b = pair_b[0]
+                    return index_a - index_b
+                balance_pairs = jsarr.sort(balance_pairs, sort_pairs)
+                balances = [pair[1] for pair in balance_pairs]
+                return AccountBalance(self._network_type, self.account_name, chain_info, balances)
+            # define generator
+            def generator():
+                index = 0
+                for wallet in wallets:
+                    yield jsasync.chain(
+                        wallet.balance_get(chain_info=chain_info),
+                        _create_account_wallet_balance_result_cb(index))
+                    index += 1
+            # return pooled promise
+            return jsasync.chain(jsasync.promise_pool_new(generator), aggregate)
+        return jsasync.chain(self.chain_info_get(), aggregate_cb)
 
 def _create_account_wallet_balance_result_cb(index):
     def cb(balance):
@@ -554,13 +558,18 @@ class Wallet:
         :returns: the current balance of this wallet (async)
         :rtype: Balance
         """
-        return self._balance_getter()
+        return self.balance_get()
 
-    def _balance_getter(self):
+    def balance_get(self, chain_info=None):
         wallet = self.clone()
         def create_api_balance_obj(balance):
             return Balance(wallet._tfwallet.network_type, wallet.wallet_name, balance, wallet.addresses)
-        return jsasync.chain(wallet._tfwallet.balance, create_api_balance_obj)
+        bcinfo = None
+        if chain_info != None:
+            if not isinstance(chain_info, ChainInfo):
+                raise TypeError("chain_info has to be a ChainInfo object, invalid: {} ({})".format(chain_info, type(chain_info)))
+            bcinfo = chain_info._tf_chain_info
+        return jsasync.chain(wallet._tfwallet.balance_get(bcinfo), create_api_balance_obj)
 
     def transaction_new(self):
         """
@@ -674,14 +683,21 @@ class CoinTransactionBuilder:
 
 
 class AccountBalance:
-    def __init__(self, network_type, account_name, balances=None):
+    def __init__(self, network_type, account_name, chain_info, balances=None):
         if not isinstance(network_type, tfnetwork.Type):
             raise TypeError("network_type has to be of type tfchain.network.Type, not be of type {}".format(type(network_type)))
         self._network_type = network_type
         if not isinstance(account_name, str):
             raise TypeError("account_name has to be of type str, not be of type {}".format(type(account_name)))
         self._account_name = account_name
+        if not isinstance(chain_info, ChainInfo):
+            raise TypeError("chain_info is supposed to be of type ChainInfo, invalid: {} ({})".format(chain_info, type(chain_info)))
+        self._chain_info = chain_info
         self._balances = [] if balances == None else balances
+
+    @property
+    def chain_info(self):
+        return self._chain_info
 
     @property
     def balances(self):

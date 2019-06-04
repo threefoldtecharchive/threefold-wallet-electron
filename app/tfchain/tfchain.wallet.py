@@ -169,8 +169,14 @@ class TFChainWallet:
         """
         The balance "sheet" of the wallet.
         """
+        return self.balance_get()
+
+    def balance_get(self, chain_info=None):
+        """
+        The balance "sheet" of the wallet.
+        """
         w = self.clone()
-        aggregator = WalletBalanceAggregator(w)
+        aggregator = WalletBalanceAggregator(w, chain_info=chain_info)
         return aggregator.fetch_and_aggregate()
 
     @property
@@ -1650,13 +1656,21 @@ class WalletBalanceAggregator:
     single- and/or multisignature.
     """
 
-    def __init__(self, wallet):
+    def __init__(self, wallet, chain_info=None):
         self._wallet = wallet
         self._balance = WalletsBalance()
         self._multisig_addresses = []
-        self._info = None
+        self._info = chain_info
+        if self._info != None and not isinstance(self._info, tfclient.ExplorerBlockchainInfo):
+            raise TypeError("info has to be an ExplorerBlockchainInfo object, invalid: {} ({})".format(self._info, type(self._info)))
 
     def fetch_and_aggregate(self):
+        if self._info != None:
+            return jsasync.chain(
+                self._personal_pool_chain_get(),
+                self._multisig_pool_chain_get,
+                self._balance_get,
+            )
         return jsasync.chain(
             self._wallet._client.blockchain_info_get(),
             self._collect_chain_info,
