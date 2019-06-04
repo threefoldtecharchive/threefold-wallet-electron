@@ -64,7 +64,7 @@ export const setClient = function (client) {
 }
 
 export const setChainConstants = function (account) {
-  if (account) {
+  if (account && !(account instanceof Array)) {
     return dispatch => {
       account.chain_info_get().then(info => {
         const chainInfo = {
@@ -95,7 +95,7 @@ export const setChainConstants = function (account) {
 }
 
 export const getTransactionsNotifications = function (account) {
-  if (account) {
+  if (account && !(account instanceof Array)) {
     return dispatch => {
       account.chain_info_get().then(info => {
         account.wallets.map(w => {
@@ -139,7 +139,7 @@ export const resetApp = function () {
 }
 
 export const setBalance = function (account) {
-  if (account) {
+  if (account && !(account instanceof Array)) {
     return dispatch => {
       account.balance.then(info => {
         const wallets = info.balances.map(b => account.cached_wallet_for(b))

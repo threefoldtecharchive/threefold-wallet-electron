@@ -4,7 +4,10 @@ export const chainConstants = (state = [], action) => {
       if (action.err) {
         return action.err
       }
-      return action.chainInfo
+      if (action.chainInfo) {
+        return action.chainInfo
+      }
+      return []
     case 'RESET_APP':
       return []
     default:

@@ -4,7 +4,7 @@ import React, { Component } from 'react'
 import { Form, Checkbox, Button, Message, Icon, TextArea, Radio, Divider, Popup, Input } from 'semantic-ui-react'
 import routes from '../../constants/routes'
 import styles from '../home/Home.css'
-import { addAccount } from '../../actions'
+import { addAccount, setBalance, setChainConstants, getTransactionsNotifications } from '../../actions'
 import SeedConfirmationModal from './SeedConfirmationModal'
 import { difference } from 'lodash'
 import * as tfchain from '../../tfchain/api'
@@ -17,6 +17,15 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = (dispatch) => ({
   AddAccount: (account) => {
     dispatch(addAccount(account))
+  },
+  SetBalance: (account) => {
+    dispatch(setBalance(account))
+  },
+  SetChainConstants: (account) => {
+    dispatch(setChainConstants(account))
+  },
+  GetTransactionsNotifications: (account) => {
+    dispatch(getTransactionsNotifications(account))
   }
 })
 
@@ -94,6 +103,7 @@ class NewAccount extends Component {
     if (generateSeed) {
       seed = tfchain.mnemonic_new()
     }
+    console.log(generateSeed)
     this.setState({ seed, generateSeed, seedError: false })
   }
 
@@ -157,25 +167,27 @@ class NewAccount extends Component {
   }
 
   createAccount = () => {
-    const { seed, name, seedConfirmation, password, network } = this.state
+    const { seed, name, seedConfirmation, password, network, generateSeed } = this.state
 
-    if (seedConfirmation === '') {
-      return this.setState({ seedConfirmationError: true })
+    if (generateSeed) {
+      if (seedConfirmation === '') {
+        return this.setState({ seedConfirmationError: true })
+      }
+
+      const confirmationWords = seedConfirmation.split(' ')
+      // must contain 3 words
+      if (confirmationWords.length !== 3) {
+        return this.setState({ seedConfirmationError: true })
+      }
+
+      let seedWords = seed.split(' ')
+      const diff = difference(seedWords, confirmationWords)
+      if (diff.length !== 21) {
+        return this.setState({ seedConfirmationError: true })
+      }
+
+      this.setState({ seedConfirmationError: false })
     }
-
-    const confirmationWords = seedConfirmation.split(' ')
-    // must contain 3 words
-    if (confirmationWords.length !== 3) {
-      return this.setState({ seedConfirmationError: true })
-    }
-
-    let seedWords = seed.split(' ')
-    const diff = difference(seedWords, confirmationWords)
-    if (diff.length !== 21) {
-      return this.setState({ seedConfirmationError: true })
-    }
-
-    this.setState({ seedConfirmationError: false })
     try {
       // create account
       const account = new tfchain.Account(name, password, {
@@ -186,6 +198,10 @@ class NewAccount extends Component {
       account.wallet_new('default', 0, 1)
 
       this.props.AddAccount(account)
+
+      this.props.SetBalance(account)
+      this.props.SetChainConstants(account)
+      this.props.GetTransactionsNotifications(account)
       // account creation succeeded so remove error if there was one
       this.setState({ accountCreationError: false })
 
@@ -199,10 +215,13 @@ class NewAccount extends Component {
 
   openConfirmationModal = () => {
     const { nameError, passwordError, passwordConfirmationError, seedError } = this.checkFormValues()
-
-    if (!nameError && !passwordError && !passwordConfirmationError && !seedError) {
+    const { generateSeed } = this.state
+    if (!nameError && !passwordError && !passwordConfirmationError && !seedError && generateSeed) {
       const open = !this.state.openConfirmationModal
       return this.setState({ openConfirmationModal: open })
+    }
+    if (!nameError && !passwordError && !passwordConfirmationError && !seedError && !generateSeed) {
+      this.createAccount()
     }
     this.setState({ nameError, passwordError, passwordConfirmationError, seedError })
   }
