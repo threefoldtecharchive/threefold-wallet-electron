@@ -1187,7 +1187,10 @@ export var CachedWallet =  __class__ ('CachedWallet', [Wallet], {
 		}
 		return true;
 	});},
-	get _balance_getter () {return __get__ (this, function (self) {
+	get balance_get () {return __get__ (this, function (self, chain_info) {
+		if (typeof chain_info == 'undefined' || (chain_info != null && chain_info.hasOwnProperty ("__kwargtrans__"))) {;
+			var chain_info = null;
+		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -1195,6 +1198,7 @@ export var CachedWallet =  __class__ ('CachedWallet', [Wallet], {
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'chain_info': var chain_info = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}

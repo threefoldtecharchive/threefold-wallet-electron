@@ -614,10 +614,12 @@ class CachedWallet(Wallet):
     def _is_cached_getter(self):
         return True
 
-    def _balance_getter(self):
+    def balance_get(self, chain_info=None):
         """
         :returns: a cached version of the balance
         """
+        # TODO: check if we need to use chain_info somehow,
+        #       for now it is ignored
         return self._balance
 
     def transaction_new(self):
