@@ -3,7 +3,6 @@ import { Icon } from 'semantic-ui-react'
 import { connect } from 'react-redux'
 import { setChainConstants } from '../actions'
 import moment from 'moment'
-import { toast } from 'react-toastify'
 import momentTz from 'moment-timezone'
 
 const mapStateToProps = state => ({
@@ -18,87 +17,12 @@ const mapDispatchToProps = (dispatch) => ({
 })
 
 class Footer extends Component {
-  constructor (props) {
-    super(props)
-    this.state = {
-      error: false,
-      intervalId: undefined
-    }
-  }
-
-  componentDidMount () {
-    this.mounted = true
-    this.getChainInfo()
-    this.getTransactionsForWallet()
-    const intervalId = setInterval(() => {
-      this.getChainInfo()
-      this.getTransactionsForWallet()
-    }, 60000)
-    this.setState({ intervalId })
-  }
-
-  componentWillUnmount () {
-    clearInterval(this.state.intervalId)
-    this.mounted = false
-  }
-
-  getTransactionsForWallet = () => {
-    if (this.props.account.chain_info_get) {
-      this.props.account.chain_info_get().then(info => {
-        this.props.account.wallets.map(w => {
-          const block = info.last_block_get({
-            addresses: w.addresses
-          })
-          if (block.transactions.length > 0) {
-            block.transactions.forEach(tx => {
-              if (tx.inputs.length > 0) {
-                toast('Incomming transaction received')
-              }
-              if (tx.outputs.length > 0) {
-                toast('Outgoing transaction received')
-              }
-            })
-          }
-        })
-        if (this.mounted) {
-          this.setState({ error: false })
-        }
-      })
-        .catch(err => {
-          if (this.mounted) {
-            this.setState({ error: err.__str__() })
-          }
-        })
-    }
-  }
-
-  getChainInfo = () => {
-    if (this.props.account.chain_info_get) {
-      this.props.account.chain_info_get().then(info => {
-        const chainInfo = {
-          chainHeight: info.chain_height,
-          chainName: info.chain_name,
-          chainNetwork: info.chain_network,
-          chainTimestamp: info.chain_timestamp,
-          chainVersion: info.chain_version,
-          explorerAddress: info.explorer_address
-        }
-        if (this.mounted) {
-          this.props.setChainConstants(chainInfo)
-          this.setState({ error: false })
-        }
-      })
-        .catch(err => {
-          if (this.mounted) {
-            this.setState({ error: err.__str__() })
-          }
-        })
-    }
-  }
-
   render () {
     const { chainConstants } = this.props
-    const { error } = this.state
+    let error = false
+    if (chainConstants.err) {
+      error = true
+    }
     const date = moment(chainConstants.chain_timestamp).format('MMMM Do , HH:mm')
     const tz = momentTz.tz.guess()
 

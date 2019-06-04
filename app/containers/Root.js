@@ -4,7 +4,7 @@ import React, { Component } from 'react'
 import { ConnectedRouter } from 'connected-react-router'
 import Routes from '../Routes'
 import { Tfchainclient } from '../client/tfchainclient'
-import { setClient, loadAccounts, setBalance } from '../actions'
+import { setClient, loadAccounts, setBalance, setChainConstants, getTransactionsNotifications } from '../actions'
 
 const os = require('os')
 const storage = require('electron-json-storage')
@@ -25,6 +25,12 @@ const mapDispatchToProps = (dispatch) => ({
   },
   setBalance: (account) => {
     dispatch(setBalance(account))
+  },
+  setChainConstants: (account) => {
+    dispatch(setChainConstants(account))
+  },
+  getTransactionsNotifications: (account) => {
+    dispatch(getTransactionsNotifications(account))
   }
 })
 
@@ -48,7 +54,10 @@ class Root extends Component {
 
     // Refresh account balance every 1 minutes
     this.intervalID = setInterval(() => {
-      this.props.setBalance(this.props.account)
+      const { account } = this.props
+      this.props.setBalance(account)
+      this.props.setChainConstants(account)
+      this.props.getTransactionsNotifications(account)
     }, 60000)
   }
 

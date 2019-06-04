@@ -1,3 +1,5 @@
+import { toast } from 'react-toastify'
+
 export const addAccount = function (account) {
   return {
     type: 'ADD_ACCOUNT',
@@ -61,10 +63,72 @@ export const setClient = function (client) {
   }
 }
 
-export const setChainConstants = function (chainInfo) {
-  return {
-    type: 'SET_CHAIN_CONSTANTS',
-    chainInfo
+export const setChainConstants = function (account) {
+  if (account) {
+    return dispatch => {
+      account.chain_info_get().then(info => {
+        const chainInfo = {
+          chainHeight: info.chain_height,
+          chainName: info.chain_name,
+          chainNetwork: info.chain_network,
+          chainTimestamp: info.chain_timestamp,
+          chainVersion: info.chain_version,
+          explorerAddress: info.explorer_address
+        }
+        dispatch({
+          type: 'SET_CHAIN_CONSTANTS',
+          chainInfo
+        })
+      }).catch(err => {
+        dispatch({
+          type: 'SET_CHAIN_CONSTANTS',
+          err
+        })
+      })
+    }
+  } else {
+    return {
+      type: 'SET_CHAIN_CONSTANTS',
+      info: null
+    }
+  }
+}
+
+export const getTransactionsNotifications = function (account) {
+  if (account) {
+    return dispatch => {
+      account.chain_info_get().then(info => {
+        account.wallets.map(w => {
+          const block = info.last_block_get({
+            addresses: w.addresses
+          })
+          if (block.transactions.length > 0) {
+            block.transactions.forEach(tx => {
+              if (tx.inputs.length > 0) {
+                toast('Incomming transaction received')
+              }
+              if (tx.outputs.length > 0) {
+                toast('Outgoing transaction received')
+              }
+            })
+          }
+        })
+        dispatch({
+          type: 'GET_TX_FOR_WALLET',
+          tx: null
+        })
+      }).catch(err => {
+        dispatch({
+          type: 'GET_TX_FOR_WALLET',
+          tx: err
+        })
+      })
+    }
+  } else {
+    return {
+      type: 'GET_TX_FOR_WALLET',
+      tx: null
+    }
   }
 }
 
