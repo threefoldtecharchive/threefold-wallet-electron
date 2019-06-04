@@ -311,6 +311,31 @@ const _all = {
     assert.equal((new tfchain.Currency(456)).str({
       unit: ''
     }), '456')
+
+    // change the precision
+    assert.equal((new tfchain.Currency('1.123456789')).str({
+      precision: 9
+    }), '1.123456789')
+    assert.equal((new tfchain.Currency('1.123456789')).str({
+      precision: 7
+    }), '1.1234568')
+    assert.equal((new tfchain.Currency('1.123456789')).str({
+      precision: 3
+    }), '1.123')
+    assert.equal((new tfchain.Currency('1.123456789')).str({
+      precision: 0
+    }), '1')
+  },
+
+  jscurrencyFromStr: (assert) => {
+    assert.equal(tfchain.Currency.from_str('1.415639203').str(), '1.415639203')
+    assert.equal(tfchain.Currency.from_str('1.415639203', {
+      precision: 9
+    }).str(), '1.415639203')
+    // parsing precision can be modified
+    assert.equal(tfchain.Currency.from_str('1.415', {
+      precision: 2
+    }).str(), '1.42')
   },
 
   jscurrencyArithmitic: (assert) => {

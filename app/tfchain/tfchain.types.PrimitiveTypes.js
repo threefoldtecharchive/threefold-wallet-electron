@@ -1278,12 +1278,15 @@ export var Currency =  __class__ ('Currency', [BaseDataTypeClass], {
 		}
 		return self.str ();
 	});},
-	get str () {return __get__ (this, function (self, with_unit, lowest_unit) {
+	get str () {return __get__ (this, function (self, with_unit, lowest_unit, precision) {
 		if (typeof with_unit == 'undefined' || (with_unit != null && with_unit.hasOwnProperty ("__kwargtrans__"))) {;
 			var with_unit = false;
 		};
 		if (typeof lowest_unit == 'undefined' || (lowest_unit != null && lowest_unit.hasOwnProperty ("__kwargtrans__"))) {;
 			var lowest_unit = false;
+		};
+		if (typeof precision == 'undefined' || (precision != null && precision.hasOwnProperty ("__kwargtrans__"))) {;
+			var precision = 9;
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -1294,13 +1297,14 @@ export var Currency =  __class__ ('Currency', [BaseDataTypeClass], {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
 						case 'with_unit': var with_unit = __allkwargs0__ [__attrib0__]; break;
 						case 'lowest_unit': var lowest_unit = __allkwargs0__ [__attrib0__]; break;
+						case 'precision': var precision = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
 		}
 		else {
 		}
-		var s = self.value.str (9);
+		var s = self.value.str (precision);
 		if (lowest_unit) {
 			var s = jsstr.lstrip (jsstr.py_replace (s, '.', ''), '0');
 		}

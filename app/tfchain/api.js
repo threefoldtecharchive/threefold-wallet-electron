@@ -2788,10 +2788,11 @@ export var Currency =  __class__ ('Currency', [object], {
 		}
 		else {
 		}
-		var __left0__ = jsfunc.opts_get_with_defaults (opts, dict ({'unit': null, 'group': ',', 'decimal': '.'}));
+		var __left0__ = jsfunc.opts_get_with_defaults (opts, dict ({'unit': null, 'group': ',', 'decimal': '.', 'precision': 9}));
 		var unit = __left0__ [0];
 		var group = __left0__ [1];
 		var decimal = __left0__ [2];
+		var precision = __left0__ [3];
 		if (unit != null && !(isinstance (unit, tuple ([bool, str])))) {
 			var __except0__ = py_TypeError ('unit has to be None, a bool or a non-empty str, invalid type: {}'.format (py_typeof (unit)));
 			__except0__.__cause__ = null;
@@ -2824,7 +2825,22 @@ export var Currency =  __class__ ('Currency', [object], {
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		return tuple ([unit, group, decimal]);
+		if (precision == null) {
+			var precision = 0;
+		}
+		else {
+			if (!(isinstance (precision, int))) {
+				var __except0__ = py_TypeError ('precision has to be None or an int within the inclusive [0,9] range, invalid: {} ({})'.format (precision, py_typeof (precision)));
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
+			if (precision < 0 || precision > 9) {
+				var __except0__ = ValueError ('precision has to be within the inclusive range [0,9], invalid: {}'.format (precision));
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
+		}
+		return tuple ([unit, group, decimal, precision]);
 	};},
 	get sum () {return __getcm__ (this, function (cls) {
 		if (arguments.length) {
@@ -2879,6 +2895,7 @@ export var Currency =  __class__ ('Currency', [object], {
 		var unit = __left0__ [0];
 		var group = __left0__ [1];
 		var decimal = __left0__ [2];
+		var precision = __left0__ [3];
 		var s = jsstr.strip (s);
 		if (unit != null) {
 			var s = jsstr.rstrip (jsstr.rstrip (s, unit));
@@ -2893,6 +2910,16 @@ export var Currency =  __class__ ('Currency', [object], {
 			var __left0__ = parts;
 			var integer = __left0__ [0];
 			var fraction = __left0__ [1];
+			if (precision == 0) {
+				var fraction = '0';
+			}
+			else if (len (fraction) > precision) {
+				var ld = fraction [precision];
+				var fraction = fraction.__getslice__ (0, precision, 1);
+				if (jsstr.to_int (ld) >= 5) {
+					var fraction = jsstr.from_int (jsstr.to_int (fraction) + 1);
+				}
+			}
 		}
 		else {
 			var integer = s;
@@ -2956,7 +2983,8 @@ export var Currency =  __class__ ('Currency', [object], {
 		var unit = __left0__ [0];
 		var group = __left0__ [1];
 		var decimal = __left0__ [2];
-		var s = self._value.str ();
+		var precision = __left0__ [3];
+		var s = self._value.str (__kwargtrans__ ({precision: precision}));
 		if (__in__ ('.', s)) {
 			var parts = jsstr.py_split (s, __kwargtrans__ ({c: '.'}));
 			if (len (parts) != 2) {

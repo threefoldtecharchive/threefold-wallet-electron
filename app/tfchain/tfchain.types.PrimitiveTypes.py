@@ -367,14 +367,14 @@ class Currency(BaseDataTypeClass):
     def __str__(self):
         return self.str()
 
-    def str(self, with_unit=False, lowest_unit=False):
+    def str(self, with_unit=False, lowest_unit=False, precision=9):
         """
         Turn this Currency value into a str TFT unit-based value,
         optionally with the currency notation.
 
         @param with_unit: include the TFT currency suffix unit with the str
         """
-        s = self.value.str(9)
+        s = self.value.str(precision)
         if lowest_unit:
             s = jsstr.lstrip(jsstr.replace(s, ".", ""), "0")
         elif jsstr.contains(s, "."):

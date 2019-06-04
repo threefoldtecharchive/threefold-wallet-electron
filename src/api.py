@@ -1289,10 +1289,11 @@ class Currency:
     @staticmethod
     def _parse_opts(opts):
         # get options
-        unit, group, decimal = jsfunc.opts_get_with_defaults(opts, {
+        unit, group, decimal, precision = jsfunc.opts_get_with_defaults(opts, {
             'unit': None,
             'group': ',',
             'decimal': '.',
+            'precision': 9,
         })
         # validate unit option
         if unit != None and not isinstance(unit, (bool, str)):
@@ -1313,8 +1314,16 @@ class Currency:
             decimal = '.'
         if group == decimal:
             raise ValueError("group- and decimal separator cannot be the same character")
+        # validate the precision units
+        if precision == None:
+            precision = 0
+        else:
+            if not isinstance(precision, int):
+                raise TypeError("precision has to be None or an int within the inclusive [0,9] range, invalid: {} ({})".format(precision, type(precision)))
+            if precision < 0 or precision > 9:
+                raise ValueError("precision has to be within the inclusive range [0,9], invalid: {}".format(precision))
         # return the options
-        return (unit, group, decimal)
+        return (unit, group, decimal, precision)
 
     @classmethod
     def sum(cls, *values):
@@ -1330,7 +1339,7 @@ class Currency:
         if not isinstance(s, str):
             raise TypeError("s has to be a str, not be of type {}".format(type(str)))
         # parse options
-        unit, group, decimal = Currency._parse_opts(opts)
+        unit, group, decimal, precision = Currency._parse_opts(opts)
         # remove spaces
         s = jsstr.strip(s)
         # remove unit if exists
@@ -1342,6 +1351,13 @@ class Currency:
             if len(parts) != 2:
                 raise ValueError("invalid str {}".format(s))
             integer, fraction = parts
+            if precision == 0:
+                fraction = '0'
+            elif len(fraction) > precision:
+                ld = fraction[precision]
+                fraction = fraction[:precision]
+                if jsstr.to_int(ld) >= 5:
+                    fraction = jsstr.from_int(jsstr.to_int(fraction)+1)
         else:
             integer = s
             fraction = '0'
@@ -1363,9 +1379,9 @@ class Currency:
 
     def str(self, opts=None):
         # parse options
-        unit, group, decimal = Currency._parse_opts(opts)
+        unit, group, decimal, precision = Currency._parse_opts(opts)
         # get integer and whole part
-        s = self._value.str()
+        s = self._value.str(precision=precision)
         if '.' in s:
             parts = jsstr.split(s, c='.')
             if len(parts) != 2:
