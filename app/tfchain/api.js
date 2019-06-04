@@ -2469,6 +2469,7 @@ export var WalletOutputAggregator =  __class__ ('WalletOutputAggregator', [objec
 		}
 		var our_send_addresses = list (self._our_send_addresses);
 		var other_send_addresses = list (self._other_send_addresses);
+		var we_sent_coin_outputs = len (our_send_addresses) > 0;
 		for (var [address, balances] of jsobj.get_items (self._all_balances)) {
 			for (var [slock, amount] of jsobj.get_items (balances)) {
 				var lock = jsstr.to_int (slock);
@@ -2478,12 +2479,12 @@ export var WalletOutputAggregator =  __class__ ('WalletOutputAggregator', [objec
 				if (__in__ (address, self._our_addresses)) {
 					inputs.append (CoinOutputView (__kwargtrans__ ({senders: other_send_addresses, recipient: address, amount: amount, lock: lock, lock_is_timestamp: (lock == 0 ? false : OutputLock (lock).is_timestamp), fee: false})));
 				}
-				else {
+				else if (we_sent_coin_outputs) {
 					outputs.append (CoinOutputView (__kwargtrans__ ({senders: our_send_addresses, recipient: address, amount: amount.times (ratio), lock: lock, lock_is_timestamp: (lock == 0 ? false : OutputLock (lock).is_timestamp), fee: false})));
 				}
 			}
 		}
-		if (len (our_send_addresses) > 0) {
+		if (we_sent_coin_outputs) {
 			for (var [address, amount] of jsobj.get_items (self._fee_balances)) {
 				outputs.append (CoinOutputView (__kwargtrans__ ({senders: our_send_addresses, recipient: address, amount: amount.times (ratio), lock: 0, lock_is_timestamp: false, fee: true})));
 			}

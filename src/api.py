@@ -1104,6 +1104,9 @@ class WalletOutputAggregator:
         our_send_addresses = list(self._our_send_addresses)
         other_send_addresses = list(self._other_send_addresses)
 
+        # define if we actually sent something
+        we_sent_coin_outputs = len(our_send_addresses) > 0
+
         # add all inputs/outputs
         for address, balances in jsobj.get_items(self._all_balances):
             for slock, amount in jsobj.get_items(balances):
@@ -1126,7 +1129,7 @@ class WalletOutputAggregator:
                         lock_is_timestamp=False if lock == 0 else OutputLock(lock).is_timestamp,
                         fee=False,
                     ))
-                else:
+                elif we_sent_coin_outputs: # only if we actually send coins, shall we track
                     # outgoing money
                     outputs.append(CoinOutputView(
                         senders=our_send_addresses,
@@ -1137,7 +1140,7 @@ class WalletOutputAggregator:
                         fee=False,
                     ))
         # add all fees if required
-        if len(our_send_addresses) > 0:
+        if we_sent_coin_outputs:
             for address, amount in jsobj.get_items(self._fee_balances):
                 outputs.append(CoinOutputView(
                     senders=our_send_addresses,
