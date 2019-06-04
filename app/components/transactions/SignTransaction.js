@@ -33,7 +33,7 @@ class SignTransaction extends Component {
     this.state = {
       jsonError: false,
       json: '',
-      selectedWallet: this.props.account.wallets[0],
+      selectedWallet: this.props.account.wallets[0].wallet_name,
       loader: false
     }
   }
@@ -43,17 +43,18 @@ class SignTransaction extends Component {
       const { wallets } = this.props.account
       return wallets.map(w => {
         return {
-          key: w._wallet_name,
-          text: w._wallet_name,
-          value: w
+          key: w.wallet_name,
+          text: w.wallet_name,
+          value: w.wallet_name
         }
       })
     }
   }
 
   selectWallet = (event, data) => {
+    const selectedWallet = this.props.account.wallets.filter(w => w.wallet.name === data.value)[0]
     this.setState({ selectedWallet: data.value })
-    this.props.selectWallet(data.value)
+    this.props.selectWallet(selectedWallet)
   }
 
   goBackToWallet = () => {
@@ -82,9 +83,11 @@ class SignTransaction extends Component {
   }
 
   signAndSend = () => {
-    const { jsonError, json, selectedWallet } = this.state
+    const { jsonError, json, selectedWallet: wallet } = this.state
     if (!jsonError && json !== '') {
       this.setState({ loader: true })
+      const selectedWallet = this.props.account.wallets.filter(w => w.wallet_name === wallet)[0]
+      console.log(selectedWallet)
       selectedWallet.transaction_sign(json).then(res => {
         this.setState({ loader: false })
         this.props.history.push(routes.ACCOUNT)
@@ -137,7 +140,6 @@ class SignTransaction extends Component {
               placeholder='raw json'
               value={json}
               onChange={this.handleJsonChange}
-              error={this.state.jsonError}
             />
           </Form.Field>
           {this.renderErrorMessage()}

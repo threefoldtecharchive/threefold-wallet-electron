@@ -55,7 +55,6 @@ class Sign extends Component {
               placeholder='raw json'
               value={json}
               onChange={this.handleDestinationChange}
-              disabledjson_loads
             />
           </Form.Field>
           <CopyToClipboard text={json} onCopy={() => console.log('copied')}>
