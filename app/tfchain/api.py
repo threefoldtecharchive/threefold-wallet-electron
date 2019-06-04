@@ -135,6 +135,14 @@ class Account:
         self._seed = seed
         self._wallets = [] # start with no wallets, can be created using the `wallet_new` instance method
 
+        # cache properties
+        self._cached_wallet_balances = {}
+
+    def _update_cache_wallet(self, old_name, new_name):
+        if old_name in self._cached_wallet_balances:
+            self._cached_wallet_balances[new_name] = self._cached_wallet_balances[old_name]
+            del self._cached_wallet_balances[old_name]
+
     @property
     def previous_account_name(self):
         """
@@ -279,6 +287,25 @@ class Account:
             addresses = jsarr.concat(addresses, wallet.addresses)
         return addresses
 
+    def cached_wallet_for(self, balance):
+        """
+        :returns: a cached version of the wallet for the given balance
+        :rtype: CachedWallet
+        """
+        if not isinstance(balance, Balance):
+            raise TypeError("balance is of an unexpected type: {} ({})".format(balance, type(balance)))
+        # find the wallet for the given name, cache and return
+        # throw an exception in case the wallet could not be found
+        name = balance.wallet_name
+        for wallet in self.wallets:
+            if wallet.wallet_name == name:
+                # cache wallet
+                self._cached_wallet_balances[name] = balance
+                # return cached wallet
+                return CachedWallet.from_wallet(wallet, balance)
+        # raise KeyError, as wallet could not be found
+        raise KeyError("wallet with name {} is not owned by account {}".format(name, self.account_name))
+
     def wallet_new(self, wallet_name, start_index, address_count):
         """
         Create a new wallet with a unique name, and a unique set of addresses.
@@ -301,6 +328,10 @@ class Account:
             raise TypeError("wallet name has to be an non empty str, invalid: {} ({})".format(wallet_name, type(wallet_name)))
         if wallet_index < 0 or wallet_index >= self.wallet_count:
             raise ValueError("wallet index {} is out of range".format(wallet_index))
+        old_name = self._wallets[wallet_index]
+        if old_name != wallet_name:
+            # update cache in case of a wallet rename
+            self._update_cache_wallet(old_name, wallet_name)
         wallet = self._wallet_new(wallet_index, wallet_name, start_index, address_count)
         self._wallets[wallet_index] = wallet
         return wallet
@@ -440,7 +471,7 @@ class Wallet:
         self._start_index = start_index
         self._wallet_index = wallet_index
         self._wallet_name = wallet_name
-        self._tfwallet = tfwallet.TFChainWallet(network_type, pairs, explorer_client)
+        self._tfwallet = tfwallet.TFChainWallet(network_type, pairs, client=explorer_client)
 
     def clone(self):
         """
@@ -512,6 +543,9 @@ class Wallet:
         :returns: the current balance of this wallet (async)
         :rtype: Balance
         """
+        return self._balance_getter()
+
+    def _balance_getter(self):
         wallet = self.clone()
         def create_api_balance_obj(balance):
             return Balance(wallet._tfwallet.network_type, wallet.wallet_name, balance, wallet.addresses)
@@ -532,12 +566,61 @@ class Wallet:
         return self._tfwallet.transaction_sign(txn=transaction, submit=True)
 
 
+class CachedWallet(Wallet):
+    """
+    Similar to the regular Wallet, but with the Balance cached.
+    """
+
+    @classmethod
+    def from_wallet(cls, wallet, balance):
+        return cls(
+            tfnetwork.Type(wallet._tfwallet.network_type),
+            wallet._tfwallet.client.clone(),
+            wallet.wallet_index,
+            wallet.wallet_name,
+            wallet.start_index,
+            [pair for pair in wallet._tfwallet.pairs],
+            balance)
+
+    def __init__(self, network_type, client, wallet_index, wallet_name, start_index, pairs, balance):
+        """
+        Create a new cached wallet.
+        """
+        super().__init__(network_type, client, wallet_index, wallet_name, start_index, pairs)
+        if not isinstance(balance, Balance):
+            raise TypeError("balance has an unexpected type: {} ({})".format(balance, type(balance)))
+        self._balance = balance
+
+    def _balance_getter(self):
+        """
+        :returns: a cached version of the balance
+        """
+        return self._balance
+
+    def transaction_new(self):
+        """
+        :returns: a transaction builder that allows for the building of transactions
+        """
+        return CoinTransactionBuilder(self)
+
+    def transaction_sign(self, transaction):
+        """
+        :returns: signs an existing transaction
+        """
+        if isinstance(transaction, str):
+           transaction = jsjson.json_loads(transaction) 
+        return self._tfwallet.transaction_sign(txn=transaction, submit=True, balance=self._balance._tfbalance)
+
+
 class CoinTransactionBuilder:
     """
     A builder of transactions, owned by a non-cloned wallet.
     Cloning only happens when doing the actual sending.
     """
     def __init__(self, wallet):
+        self._balance = None
+        if isinstance(wallet, CachedWallet):
+            self._balance = wallet.balance
         self._builder = wallet._tfwallet.coin_transaction_builder_new()
 
     def output_add(self, recipient, amount, opts=None):
@@ -573,7 +656,7 @@ class CoinTransactionBuilder:
         :returns: a promise that resolves with a transaction ID or rejects with an Exception
         """
         source, refund, data = jsfunc.opts_get(opts, 'source', 'refund', 'data')
-        return self._builder.send(source=source, refund=refund, data=data)
+        return self._builder.send(source=source, refund=refund, data=data, balance=self._balance) # optionally uses cached wallet
 
 
 class AccountBalance:

@@ -332,7 +332,7 @@ class TFChainWallet:
         """
         return CoinTransactionBuilder(self)
 
-    def transaction_sign(self, txn, submit=None):
+    def transaction_sign(self, txn, submit=None, balance=None):
         """
         Sign in all places of the transaction where it is still possible,
         and on which the wallet has authority to do so.
@@ -350,6 +350,7 @@ class TFChainWallet:
         wallet = self.clone()
 
         to_submit = submit
+        balance_is_cached = (balance != None)
         def cb(balance):
             # check all parentids from the specified coin inputs,
             # and set the coin outputs for the ones this wallet knows about
@@ -417,6 +418,19 @@ class TFChainWallet:
             # submit, and only then return
             def id_cb(id):
                 txn.id = id
+                if balance_is_cached:
+                    # if the balance is cached, also update...
+                    addresses = wallet.addresses + balance.addresses_multisig
+                    # ... the balance
+                    for idx, ci in enumerate(txn.coin_inputs):
+                        if ci.parent_output.condition.unlockhash.__str__() in addresses:
+                            balance.output_add(txn, idx, confirmed=False, spent=True)
+                    for idx, co in enumerate(txn.coin_outputs):
+                        if co.condition.unlockhash.__str__() in addresses:
+                            # add the id to the coin_output, so we can track it has been spent
+                            co.id = txn.coin_outputid_new(idx)
+                            balance.output_add(txn, idx, confirmed=False, spent=False)
+                # return the signed result
                 return TransactionSignResult(
                     transaction=txn,
                     signed=(signature_count>0),
@@ -424,6 +438,12 @@ class TFChainWallet:
                 )
             return jsasync.chain(wallet._transaction_put(transaction=txn), id_cb)
 
+        if balance_is_cached:
+            if not isinstance(balance, WalletsBalance):
+                raise TypeError("balance is of unexpected type: {} ({})".format(balance, type(balance)))
+            # execute the balance cb directly if a cached balance is given
+            return cb(balance)
+        # chain the balance object first
         return jsasync.chain(wallet.balance, cb)
 
     def key_pair_get(self, unlockhash):
@@ -1721,12 +1741,13 @@ class CoinTransactionBuilder():
         self._txn.coin_output_add(value=amount, condition=recipient)
         return self
 
-    def send(self, source=None, refund=None, data=None):
+    def send(self, source=None, refund=None, data=None, balance=None):
         txn = self._txn
         self._txn = None
 
         wallet = self._wallet.clone()
 
+        balance_is_cached = (balance != None)
         def balance_cb(balance):
             # fund amount
             amount = Currency.sum(*[co.value for co in txn.coin_outputs])
@@ -1782,7 +1803,26 @@ class CoinTransactionBuilder():
             # submit, and only then return
             def id_cb(id):
                 txn.id = id
+                if balance_is_cached:
+                    # if the balance is cached, also update...
+                    addresses = wallet.addresses + balance.addresses_multisig
+                    # ... the balance
+                    for idx, ci in enumerate(txn.coin_inputs):
+                        if ci.parent_output.condition.unlockhash.__str__() in addresses:
+                            balance.output_add(txn, idx, confirmed=False, spent=True)
+                    for idx, co in enumerate(txn.coin_outputs):
+                        if co.condition.unlockhash.__str__() in addresses:
+                            # add the id to the coin_output, so we can track it has been spent
+                            co.id = txn.coin_outputid_new(idx)
+                            balance.output_add(txn, idx, confirmed=False, spent=False)
+                # return the semd result
                 return TransactionSendResult(txn, submit)
             return jsasync.chain(wallet._transaction_put(transaction=txn), id_cb)
 
+        if balance != None:
+            if not isinstance(balance, WalletsBalance):
+                raise TypeError("balance is of unexpected type: {} ({})".format(balance, type(balance)))
+            # if balance is given, execute the balance cb directly
+            return balance_cb(balance)
+        # else fetch the balance first and get it than
         return jsasync.chain(wallet.balance, balance_cb)

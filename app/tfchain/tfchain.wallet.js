@@ -394,9 +394,12 @@ export var TFChainWallet =  __class__ ('TFChainWallet', [object], {
 		}
 		return CoinTransactionBuilder (self);
 	});},
-	get transaction_sign () {return __get__ (this, function (self, txn, submit) {
+	get transaction_sign () {return __get__ (this, function (self, txn, submit, balance) {
 		if (typeof submit == 'undefined' || (submit != null && submit.hasOwnProperty ("__kwargtrans__"))) {;
 			var submit = null;
+		};
+		if (typeof balance == 'undefined' || (balance != null && balance.hasOwnProperty ("__kwargtrans__"))) {;
+			var balance = null;
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -407,6 +410,7 @@ export var TFChainWallet =  __class__ ('TFChainWallet', [object], {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
 						case 'txn': var txn = __allkwargs0__ [__attrib0__]; break;
 						case 'submit': var submit = __allkwargs0__ [__attrib0__]; break;
+						case 'balance': var balance = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
@@ -423,6 +427,7 @@ export var TFChainWallet =  __class__ ('TFChainWallet', [object], {
 		}
 		var wallet = self.clone ();
 		var to_submit = submit;
+		var balance_is_cached = balance != null;
 		var cb = function (balance) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
@@ -526,10 +531,32 @@ export var TFChainWallet =  __class__ ('TFChainWallet', [object], {
 				else {
 				}
 				txn.id = id;
+				if (balance_is_cached) {
+					var addresses = wallet.addresses + balance.addresses_multisig;
+					for (var [idx, ci] of enumerate (txn.coin_inputs)) {
+						if (__in__ (ci.parent_output.condition.unlockhash.__str__ (), addresses)) {
+							balance.output_add (txn, idx, __kwargtrans__ ({confirmed: false, spent: true}));
+						}
+					}
+					for (var [idx, co] of enumerate (txn.coin_outputs)) {
+						if (__in__ (co.condition.unlockhash.__str__ (), addresses)) {
+							co.id = txn.coin_outputid_new (idx);
+							balance.output_add (txn, idx, __kwargtrans__ ({confirmed: false, spent: false}));
+						}
+					}
+				}
 				return TransactionSignResult (__kwargtrans__ ({transaction: txn, signed: signature_count > 0, submitted: submit}));
 			};
 			return jsasync.chain (wallet._transaction_put (__kwargtrans__ ({transaction: txn})), id_cb);
 		};
+		if (balance_is_cached) {
+			if (!(isinstance (balance, WalletsBalance))) {
+				var __except0__ = py_TypeError ('balance is of unexpected type: {} ({})'.format (balance, py_typeof (balance)));
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
+			return cb (balance);
+		}
 		return jsasync.chain (wallet.balance, cb);
 	});},
 	get key_pair_get () {return __get__ (this, function (self, unlockhash) {
@@ -976,7 +1003,7 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 		self._txn.coin_output_add (__kwargtrans__ ({value: amount, condition: recipient}));
 		return self;
 	});},
-	get send () {return __get__ (this, function (self, source, refund, data) {
+	get send () {return __get__ (this, function (self, source, refund, data, balance) {
 		if (typeof source == 'undefined' || (source != null && source.hasOwnProperty ("__kwargtrans__"))) {;
 			var source = null;
 		};
@@ -985,6 +1012,9 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 		};
 		if (typeof data == 'undefined' || (data != null && data.hasOwnProperty ("__kwargtrans__"))) {;
 			var data = null;
+		};
+		if (typeof balance == 'undefined' || (balance != null && balance.hasOwnProperty ("__kwargtrans__"))) {;
+			var balance = null;
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -996,6 +1026,7 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 						case 'source': var source = __allkwargs0__ [__attrib0__]; break;
 						case 'refund': var refund = __allkwargs0__ [__attrib0__]; break;
 						case 'data': var data = __allkwargs0__ [__attrib0__]; break;
+						case 'balance': var balance = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
@@ -1005,6 +1036,7 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 		var txn = self._txn;
 		self._txn = null;
 		var wallet = self._wallet.clone ();
+		var balance_is_cached = balance != null;
 		var balance_cb = function (balance) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
@@ -1109,10 +1141,32 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 				else {
 				}
 				txn.id = id;
+				if (balance_is_cached) {
+					var addresses = wallet.addresses + balance.addresses_multisig;
+					for (var [idx, ci] of enumerate (txn.coin_inputs)) {
+						if (__in__ (ci.parent_output.condition.unlockhash.__str__ (), addresses)) {
+							balance.output_add (txn, idx, __kwargtrans__ ({confirmed: false, spent: true}));
+						}
+					}
+					for (var [idx, co] of enumerate (txn.coin_outputs)) {
+						if (__in__ (co.condition.unlockhash.__str__ (), addresses)) {
+							co.id = txn.coin_outputid_new (idx);
+							balance.output_add (txn, idx, __kwargtrans__ ({confirmed: false, spent: false}));
+						}
+					}
+				}
 				return TransactionSendResult (txn, submit);
 			};
 			return jsasync.chain (wallet._transaction_put (__kwargtrans__ ({transaction: txn})), id_cb);
 		};
+		if (balance != null) {
+			if (!(isinstance (balance, WalletsBalance))) {
+				var __except0__ = py_TypeError ('balance is of unexpected type: {} ({})'.format (balance, py_typeof (balance)));
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
+			return balance_cb (balance);
+		}
 		return jsasync.chain (wallet.balance, balance_cb);
 	});}
 });

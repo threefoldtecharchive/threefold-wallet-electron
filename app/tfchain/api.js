@@ -137,6 +137,28 @@ export var Account =  __class__ ('Account', [object], {
 		self._mnemonic = mnemonic;
 		self._seed = seed;
 		self._wallets = [];
+		self._cached_wallet_balances = dict ({});
+	});},
+	get _update_cache_wallet () {return __get__ (this, function (self, old_name, new_name) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'old_name': var old_name = __allkwargs0__ [__attrib0__]; break;
+						case 'new_name': var new_name = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (__in__ (old_name, self._cached_wallet_balances)) {
+			self._cached_wallet_balances [new_name] = self._cached_wallet_balances [old_name];
+			delete self._cached_wallet_balances [old_name];
+		}
 	});},
 	get _get_previous_account_name () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -421,6 +443,37 @@ export var Account =  __class__ ('Account', [object], {
 		}
 		return addresses;
 	});},
+	get cached_wallet_for () {return __get__ (this, function (self, balance) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'balance': var balance = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (!(isinstance (balance, Balance))) {
+			var __except0__ = py_TypeError ('balance is of an unexpected type: {} ({})'.format (balance, py_typeof (balance)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		var py_name = balance.wallet_name;
+		for (var wallet of self.wallets) {
+			if (wallet.wallet_name == py_name) {
+				self._cached_wallet_balances [py_name] = balance;
+				return CachedWallet.from_wallet (wallet, balance);
+			}
+		}
+		var __except0__ = KeyError ('wallet with name {} is not owned by account {}'.format (py_name, self.account_name));
+		__except0__.__cause__ = null;
+		throw __except0__;
+	});},
 	get wallet_new () {return __get__ (this, function (self, wallet_name, start_index, address_count) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -474,6 +527,10 @@ export var Account =  __class__ ('Account', [object], {
 			var __except0__ = ValueError ('wallet index {} is out of range'.format (wallet_index));
 			__except0__.__cause__ = null;
 			throw __except0__;
+		}
+		var old_name = self._wallets [wallet_index];
+		if (old_name != wallet_name) {
+			self._update_cache_wallet (old_name, wallet_name);
 		}
 		var wallet = self._wallet_new (wallet_index, wallet_name, start_index, address_count);
 		self._wallets [wallet_index] = wallet;
@@ -781,7 +838,7 @@ export var Wallet =  __class__ ('Wallet', [object], {
 		self._start_index = start_index;
 		self._wallet_index = wallet_index;
 		self._wallet_name = wallet_name;
-		self._tfwallet = tfwallet.TFChainWallet (network_type, pairs, explorer_client);
+		self._tfwallet = tfwallet.TFChainWallet (network_type, pairs, __kwargtrans__ ({client: explorer_client}));
 	});},
 	get clone () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -915,6 +972,22 @@ export var Wallet =  __class__ ('Wallet', [object], {
 		}
 		else {
 		}
+		return self._balance_getter ();
+	});},
+	get _balance_getter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
 		var wallet = self.clone ();
 		var create_api_balance_obj = function (balance) {
 			if (arguments.length) {
@@ -978,6 +1051,114 @@ Object.defineProperty (Wallet, 'address', property.call (Wallet, Wallet._get_add
 Object.defineProperty (Wallet, 'start_index', property.call (Wallet, Wallet._get_start_index));
 Object.defineProperty (Wallet, 'wallet_name', property.call (Wallet, Wallet._get_wallet_name));
 Object.defineProperty (Wallet, 'wallet_index', property.call (Wallet, Wallet._get_wallet_index));;
+export var CachedWallet =  __class__ ('CachedWallet', [Wallet], {
+	__module__: __name__,
+	get from_wallet () {return __getcm__ (this, function (cls, wallet, balance) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+						case 'wallet': var wallet = __allkwargs0__ [__attrib0__]; break;
+						case 'balance': var balance = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return cls (tfnetwork.Type (wallet._tfwallet.network_type), wallet._tfwallet.client.clone (), wallet.wallet_index, wallet.wallet_name, wallet.start_index, (function () {
+			var __accu0__ = [];
+			for (var pair of wallet._tfwallet.pairs) {
+				__accu0__.append (pair);
+			}
+			return __accu0__;
+		}) (), balance);
+	});},
+	get __init__ () {return __get__ (this, function (self, network_type, client, wallet_index, wallet_name, start_index, pairs, balance) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'network_type': var network_type = __allkwargs0__ [__attrib0__]; break;
+						case 'client': var client = __allkwargs0__ [__attrib0__]; break;
+						case 'wallet_index': var wallet_index = __allkwargs0__ [__attrib0__]; break;
+						case 'wallet_name': var wallet_name = __allkwargs0__ [__attrib0__]; break;
+						case 'start_index': var start_index = __allkwargs0__ [__attrib0__]; break;
+						case 'pairs': var pairs = __allkwargs0__ [__attrib0__]; break;
+						case 'balance': var balance = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		__super__ (CachedWallet, '__init__') (self, network_type, client, wallet_index, wallet_name, start_index, pairs);
+		if (!(isinstance (balance, Balance))) {
+			var __except0__ = py_TypeError ('balance has an unexpected type: {} ({})'.format (balance, py_typeof (balance)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		self._balance = balance;
+	});},
+	get _balance_getter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._balance;
+	});},
+	get transaction_new () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return CoinTransactionBuilder (self);
+	});},
+	get transaction_sign () {return __get__ (this, function (self, transaction) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'transaction': var transaction = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (isinstance (transaction, str)) {
+			var transaction = jsjson.json_loads (transaction);
+		}
+		return self._tfwallet.transaction_sign (__kwargtrans__ ({txn: transaction, submit: true, balance: self._balance._tfbalance}));
+	});}
+});
 export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [object], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, wallet) {
@@ -994,6 +1175,10 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 			}
 		}
 		else {
+		}
+		self._balance = null;
+		if (isinstance (wallet, CachedWallet)) {
+			self._balance = wallet.balance;
 		}
 		self._builder = wallet._tfwallet.coin_transaction_builder_new ();
 	});},
@@ -1043,7 +1228,7 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 		var source = __left0__ [0];
 		var refund = __left0__ [1];
 		var data = __left0__ [2];
-		return self._builder.send (__kwargtrans__ ({source: source, refund: refund, data: data}));
+		return self._builder.send (__kwargtrans__ ({source: source, refund: refund, data: data, balance: self._balance}));
 	});}
 });
 export var AccountBalance =  __class__ ('AccountBalance', [object], {
