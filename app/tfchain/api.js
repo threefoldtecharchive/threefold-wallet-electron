@@ -770,6 +770,11 @@ export var Account =  __class__ ('Account', [object], {
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
+		if (__in__ (info.address, self._multisig_wallet_info_map)) {
+			var __except0__ = ValueError ('multisig wallet {} already exists as {} and cannot be created again'.format (info.address, self._multisig_wallet_info_map [info.address].wallet_name));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
 		self._multisig_wallet_info_map [info.address] = info;
 		return info;
 	});},

@@ -436,6 +436,10 @@ class Account:
         # ensure at least one owner is part of our balances
         if len(set(owners).intersection(set(self.addresses))) == 0:
             raise ValueError("at least one owner of the multisig wallet has to be owned by this account")
+        # ensure the address doesn't exist yet
+        if info.address in self._multisig_wallet_info_map:
+            raise ValueError("multisig wallet {} already exists as {} and cannot be created again".format(
+                info.address, self._multisig_wallet_info_map[info.address].wallet_name))
         # store and return the wallet info
         self._multisig_wallet_info_map[info.address] = info
         return info
