@@ -48,46 +48,59 @@ class Account extends Component {
       wallets = this.props.balance.wallets
     }
     return (
-      <Card.Group style={{ marginTop: 20, marginLeft: 20 }}>
-        {wallets.map(w => {
-          let content = null
-          if (this.props.balance.wallets) {
-            content = (
-              <Card.Content>
-                <div>
-                  <Icon name='chevron right' style={{ position: 'absolute', right: 20, top: 130, fontSize: 25, opacity: '0.3', color: 'white' }} />
-                  <Card.Description style={{ color: 'white', marginTop: 10, marginBottom: 10, fontFamily: 'SF UI Text Light', display: 'flex' }}>
-                    <Icon name='unlock' style={{ fontSize: 16, marginLeft: 20 }} /> <p style={{ marginLeft: 30, marginTop: -8 }}>{w.balance.coins_unlocked.str()} TFT</p>
-                  </Card.Description>
-                  <Card.Description style={{ textAlign: 'left', color: 'white', marginTop: 20, marginBottom: 10, fontFamily: 'SF UI Text Light', display: 'flex' }}>
-                    <Icon name='lock' style={{ fontSize: 16, marginLeft: 20 }} /> <p style={{ marginLeft: 33, marginTop: -3, fontFamily: 'SF UI Text Light', fontSize: 18 }}>{w.balance.coins_locked.str()} TFT</p>
-                  </Card.Description>
-                  <Divider />
-                  <Card.Header style={{ textAlign: 'center', color: 'white', fontSize: 18, textTransform: 'uppercase', marginTop: 20, fontFamily: 'SF UI Text Light' }}>
-                    wallet {w.wallet_name}
-                  </Card.Header>
-                </div>
-              </Card.Content>
+      <div>
+        <Card.Group style={{ marginTop: 20, marginLeft: 20, marginBottom: -20 }}>
+          {wallets.map(w => {
+            let content = null
+            if (this.props.balance.wallets) {
+              content = (
+                <Card.Content>
+                  <div>
+                    <Icon name='chevron right' style={{ position: 'absolute', right: 20, top: 130, fontSize: 25, opacity: '0.3', color: 'white' }} />
+                    <Card.Description style={{ color: 'white', marginTop: 10, marginBottom: 10, fontFamily: 'SF UI Text Light', display: 'flex' }}>
+                      <Icon name='unlock' style={{ fontSize: 16, marginLeft: 20 }} /> <p style={{ marginLeft: 30, marginTop: -8 }}>{w.balance.coins_unlocked.str()} TFT</p>
+                    </Card.Description>
+                    <Card.Description style={{ textAlign: 'left', color: 'white', marginTop: 20, marginBottom: 10, fontFamily: 'SF UI Text Light', display: 'flex' }}>
+                      <Icon name='lock' style={{ fontSize: 16, marginLeft: 20 }} /> <p style={{ marginLeft: 33, marginTop: -3, fontFamily: 'SF UI Text Light', fontSize: 18 }}>{w.balance.coins_locked.str()} TFT</p>
+                    </Card.Description>
+                    <Divider />
+                    <Card.Header style={{ textAlign: 'center', color: 'white', fontSize: 18, textTransform: 'uppercase', marginTop: 20, fontFamily: 'SF UI Text Light' }}>
+                      wallet {w.wallet_name}
+                    </Card.Header>
+                  </div>
+                </Card.Content>
+              )
+            }
+            return (
+              <Card key={w._wallet_name} style={{ boxShadow: 'none', height: 180, width: 350, marginTop: 0, marginRight: 20, marginBottom: 30, background: 'linear-gradient(90deg, rgba(56,51,186,1) 0%, rgba(102,71,254,1) 100%)' }} onClick={() => this.handleWalletClick(w)}>
+                <Dimmer active={content == null}>
+                  <Loader />
+                </Dimmer>
+                {content}
+              </Card>
             )
-          }
-          return (
-            <Card key={w._wallet_name} style={{ boxShadow: 'none', height: 180, width: 350, marginTop: 0, marginRight: 20, marginBottom: 30, background: 'linear-gradient(90deg, rgba(56,51,186,1) 0%, rgba(102,71,254,1) 100%)' }} onClick={() => this.handleWalletClick(w)}>
-              <Dimmer active={content == null}>
-                <Loader />
-              </Dimmer>
-              {content}
-            </Card>
-          )
-        })}
-        <Card style={{ boxShadow: 'none', height: 180, width: 350, marginBottom: 60, marginTop: 0, background: '#29272E' }} onClick={() => this.props.history.push(routes.WALLET_NEW)}>
-          <Card.Content style={{ textAlign: 'center' }}>
-            <Card.Header style={{ color: 'white', fontSize: 20, textTransform: 'uppercase', position: 'absolute', top: 50, left: 90 }}>
-              Create wallet
-            </Card.Header>
-            <Icon name='plus circle' style={{ position: 'absolute', left: 145, top: 100, fontSize: 40, opacity: '0.3' }} />
-          </Card.Content>
-        </Card>
-      </Card.Group>
+          })}
+          <Card style={{ boxShadow: 'none', height: 180, width: 350, marginBottom: 60, marginTop: 0, background: '#29272E' }} onClick={() => this.props.history.push(routes.WALLET_NEW)}>
+            <Card.Content style={{ textAlign: 'center' }}>
+              <Card.Header style={{ color: 'white', fontSize: 20, textTransform: 'uppercase', position: 'absolute', top: 50, left: 90 }}>
+                Create wallet
+              </Card.Header>
+              <Icon name='plus circle' style={{ position: 'absolute', left: 145, top: 100, fontSize: 40, opacity: '0.3' }} />
+            </Card.Content>
+          </Card>
+        </Card.Group>
+        <Divider style={{ marginTop: -20 }} />
+        <Card.Group style={{ marginTop: 20, marginLeft: 20 }}>
+          <Card style={{ boxShadow: 'none', height: 180, width: 350, marginBottom: 60, marginTop: 0, background: '#29272E' }} onClick={() => this.props.history.push(routes.WALLET_MULTI_NEW)}>
+            <Card.Content style={{ textAlign: 'center' }}>
+              <Card.Header style={{ color: 'white', fontSize: 20, textTransform: 'uppercase', position: 'absolute', top: 50, left: 45, textAlign: 'center' }}>
+                Create multisig wallet
+              </Card.Header>
+              <Icon name='plus circle' style={{ position: 'absolute', left: 145, top: 100, fontSize: 40, opacity: '0.3' }} />
+            </Card.Content>
+          </Card>
+        </Card.Group >
+      </div>
     )
   }
 

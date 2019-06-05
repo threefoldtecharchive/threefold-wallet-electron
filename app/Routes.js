@@ -14,6 +14,7 @@ import Transfer from './components/Transfer'
 import Login from './components/home/Login'
 import Sign from './components/transactions/Sign'
 import SignTransaction from './components/transactions/SignTransaction'
+import WalletMultisigNew from './components/wallet/NewMultiSigWallet'
 
 export default () => (
   <App>
@@ -24,6 +25,7 @@ export default () => (
       <Route path={routes.WALLET} component={Wallet} />
       <Route path={routes.WALLET_SETTINGS} component={WalletSettings} />
       <Route path={routes.WALLET_RECEIVE} component={WalletReceive} />
+      <Route path={routes.WALLET_MULTI_NEW} component={WalletMultisigNew} />
       <Route path={routes.TRANSFER} component={Transfer} />
       <Route path={routes.SIGN} component={Sign} />
       <Route path={routes.SIGN_TRANSACTIONS} component={SignTransaction} />
