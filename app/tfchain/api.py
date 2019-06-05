@@ -96,9 +96,10 @@ class Account:
         if 'multisig_wallets' in payload:
             ms_wallet_data_objs = payload['multisig_wallets'] or []
             for data in ms_wallet_data_objs:
-                account.multisig_wallet_name_update(
-                    address=data.wallet_address,
-                    name=data.wallet_name)
+                account.multisig_wallet_new(
+                    name=data.wallet_name,
+                    owners=data.owners,
+                    signatures_required=data.signatures_required)
 
         # return the fully restored account
         return account
@@ -149,8 +150,8 @@ class Account:
         self._seed = seed
         self._wallets = [] # start with no wallets, can be created using the `wallet_new` instance method
 
-        # for multisig wallets we only store names for multisig wallets
-        self._multisig_wallet_names = {}
+        # for multisig wallets we only store some non-balance info for multisig wallets (the static info)
+        self._multisig_wallet_info_map = {}
 
         # cache properties
         self._cached_wallet_balances = {}
@@ -353,6 +354,29 @@ class Account:
         self._wallets[wallet_index] = wallet
         return wallet
 
+    def wallet_delete(self, wallet_index, wallet_name):
+        # validate params
+        if not isinstance(wallet_index, int):
+            raise TypeError("wallet index has to be an integer, not be of type {}".format(type(wallet_index)))
+        if not isinstance(wallet_name, str) or wallet_name == '':
+            raise TypeError("wallet name has to be an non empty str, invalid: {} ({})".format(wallet_name, type(wallet_name)))
+        if wallet_index < 0 or wallet_index >= self.wallet_count:
+            raise ValueError("wallet index {} is out of range".format(wallet_index))
+        if self._wallets[wallet_index].wallet_name != wallet_name:
+            raise ValueError("invalid wallet name {}, does not match the wallet at the given wallet index {}".format(wallet_name, wallet_index))
+        # ensure the wallet is not used by any multisig wallet
+        wallet_to_delete = self._wallets[wallet_index]
+        for mswallet in self.multisig_wallets:
+            if len(set(mswallet.owners).intersection(set(wallet_to_delete.addresses))) > 0:
+                raise ValueError("wallet {} cannot be deleted as it owns the existing and stored multisig wallet {}".format(wallet_name, mswallet.wallet_name))
+        # delete the wallet
+        jsarr.pop(self._wallets, wallet_index)
+        # update wallet indexes of other wallets if there are beyond this wallet
+        if wallet_index != self.wallet_count:
+            for wallet in self._wallets[wallet_index:]:
+                wallet._wallet_index -= 1
+        # return nothing
+
     def _wallet_new(self, wallet_index, wallet_name, start_index, address_count):
         start_index = max(start_index, 0)
         address_count = max(address_count, 1)
@@ -376,16 +400,22 @@ class Account:
                 raise ValueError("cannot use addresses for wallet {} as it overlaps with the addresses of wallet {}".format(candidate.wallet_name, wallet.wallet_name))
 
     @property
-    def named_multisig_wallets(self):
+    def multisig_wallets(self):
         """
-        :returns: all named multisig wallets linked to this wallet
+        :returns: all multisig wallets for which we have the static info stored sorted by name
         """
-        return [MultiSignatureWalletAddressNamePair(address, name) for
-            (address, name) in jsobj.get_items(self._multisig_wallet_names)]
+        wallets = [wallet for wallet in jsobj.dict_values(self._multisig_wallet_info_map)]
+        def sort_by_label(a, b):
+            if a.wallet_name < b.wallet_name:
+                return -1
+            if b.wallet_name < a.wallet_name:
+                return 1
+            return 0
+        return jsarr.sort(wallets, sort_by_label)
 
-    def multisig_wallet_name_get(self, address):
+    def multisig_wallet_get(self, address):
         """
-        :returns: None if no label is attached to address or a name if it is
+        :returns: None if no info is stored to the given address or info if it is
         """
         if not isinstance(address, str):
             raise TypeError("address has an invalid type: {} ({})".format(address, type(address)))
@@ -393,11 +423,24 @@ class Account:
         if uh.uhtype.__ne__(UnlockHashType.MULTI_SIG):
             raise ValueError("address is not a multisig address: {}".format(address))
         address = uh.__str__()
-        if address not in self._multisig_wallet_names:
-            raise KeyError("address {} does not have a multisig wallet name".format(address))
-        return self._multisig_wallet_names[address]
+        if address not in self._multisig_wallet_info_map:
+            raise KeyError("address {} does not have multisig wallet info stored".format(address))
+        return self._multisig_wallet_info_map[address]
 
-    def multisig_wallet_name_update(self, address, name):
+    def multisig_wallet_new(self, name, owners, signatures_required):
+        # create the wallet info (also validates the parameters)
+        info = MultiSignatureWalletInfo(name, owners, signatures_required)
+        # ensure the name is not yet used
+        if name in self._multisig_wallet_info_map:
+            raise ValueError("a multisig wallet with the name {} is already stored in this account".format(name))
+        # ensure at least one owner is part of our balances
+        if len(set(owners).intersection(set(self.addresses))) == 0:
+            raise ValueError("at least one owner of the multisig wallet has to be owned by this account")
+        # store and return the wallet info
+        self._multisig_wallet_info_map[info.address] = info
+        return info
+
+    def multisig_wallet_update(self, address, name):
         """
         Delete (name=None||"") or update the name for an address.
         """
@@ -407,12 +450,16 @@ class Account:
         if uh.uhtype.__ne__(UnlockHashType.MULTI_SIG):
             raise ValueError("address is not a multisig address: {}".format(address))
         address = uh.__str__()
+        if address not in self._multisig_wallet_info_map:
+            raise KeyError("no multisig wallet with address {} is stored in this account".format(address))
         if name == None or name == '':
-            del self._multisig_wallet_names[address]
-        else:
-            if not isinstance(name, str):
-                raise TypeError("name has an invalid type: {} ({})".format(name, type(name)))
-            self._multisig_wallet_names[address] = name
+            del self._multisig_wallet_info_map[address]
+            return None
+        self._multisig_wallet_info_map[address].wallet_name = name
+        return self._multisig_wallet_info_map[address]
+
+    def multisig_wallet_delete(self, address):
+        return self.multisig_wallet_update(address, None)
 
     def next_available_wallet_start_index(self):
         """
@@ -443,10 +490,11 @@ class Account:
                 'address_count': wallet.address_count,
             })
         multisig_wallets = []
-        for address, name in jsobj.get_items(self._multisig_wallet_names):
+        for info in jsobj.dict_values(self._multisig_wallet_info_map):
             multisig_wallets.append({
-                'wallet_address': address,
-                'wallet_name': name,
+                'wallet_name': info.wallet_name,
+                'owners': info.owners,
+                'signatures_required': info.signatures_required,
             })
         payload = {
             'account_name': self.account_name,
@@ -1139,6 +1187,44 @@ class TransactionView:
         return self._outputs
 
 
+class MultiSignatureWalletInfo:
+    def __init__(self, wallet_name, owners, signatures_required):
+        self._wallet_name = None
+        self.wallet_name = wallet_name
+        self._address = multisig_wallet_address_new(owners, signatures_required)
+        self._owners = [owner for owner in owners]
+        self._signatures_required = signatures_required
+
+    @property
+    def address(self):
+        return self._address
+
+    @property
+    def owners(self):
+        def sort_by_uh(a, b):
+            if a < b:
+                return -1
+            if b < a:
+                return 1
+            return 0
+        return jsarr.sort(self._owners, sort_by_uh)
+
+    @property
+    def signatures_required(self):
+        return self._signatures_required
+
+    @property
+    def wallet_name(self):
+        return self._wallet_name
+    @wallet_name.setter
+    def wallet_name(self, value):
+        if not isinstance(value, str):
+            raise TypeError("wallet_name has to be a non-empty str, not be {} ({})".format(value, type(value)))
+        if value == "":
+            raise ValueError("wallet_name cannot be an empty str")
+        self._wallet_name = value
+
+
 class WalletOutputAggregator:
     def __init__(self, addresses):
         self._our_addresses = addresses
@@ -1623,7 +1709,7 @@ def wallet_address_is_valid(address, opts=None):
 
 def multisig_wallet_address_new(owners, signatures_required):
     # validate parameters
-    if not jsobj.is_js_arr(owners):
+    if not isinstance(owners, list) and not jsobj.is_js_arr(owners):
         raise TypeError("owners is expected to be an array, not {} ({})".format(owners, type(owners)))
     if len(owners) <= 1:
         raise ValueError("expected at two owners, less is not allowed")

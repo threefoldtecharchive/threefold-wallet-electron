@@ -70,10 +70,106 @@ const _all = {
     // update the default wallet...
     const updatedDefaultWallet = recoveredAccount.wallet_update(0, 'default', 1, 3)
     assert.equal(updatedDefaultWallet.address, '010e0adfb04322e91dfee62ce402e17600862c82c82682e6a7b925b572689e531a24cd002c59f2')
+    assert.equal(updatedDefaultWallet.wallet_index, 0)
     assert.equal(updatedDefaultWallet.addresses, ['010e0adfb04322e91dfee62ce402e17600862c82c82682e6a7b925b572689e531a24cd002c59f2', '0168341e75d73597807321629d3895eec00aafabba9fc9ef68a6c4279ecfca9708f4dbd5a969f7', '011a3ae574a1081eca8cc5e7c6eae6ed1657a82b4f741413951d8a2313ee8a60eb1f35a6028ede'])
     assert.equal(recoveredAccount.address, updatedDefaultWallet.address)
     assert.equal(recoveredAccount.wallets.length, 1)
     assert.equal(recoveredAccount.next_available_wallet_start_index(), 4)
+
+    // delete an existing account
+    recoveredAccount.wallet_delete(0, 'default')
+    assert.equal(recoveredAccount.wallets.length, 0)
+    assert.equal(recoveredAccount.next_available_wallet_start_index(), 0)
+  },
+
+  walletDeleteOneInTheMiddle: (assert) => {
+    const account = new tfchain.Account('foo', 'bar')
+    assert.equal(account.account_name, 'foo')
+    assert.equal(account.password, 'bar')
+    assert.equal(account.wallets.length, 0) // wallets are not created by default
+    assert.equal(account.next_available_wallet_start_index(), 0)
+
+    // create a first wallet
+    const defaultWallet = account.wallet_new('a', 0, 1)
+    assert.equal(account.wallets.length, 1)
+    assert.equal(account.wallet.address, defaultWallet.address)
+    assert.equal(account.addresses.length, 1)
+    assert.equal(account.next_available_wallet_start_index(), 1)
+    assert.equal(defaultWallet.wallet_index, 0)
+
+    // create two more wallets wallet
+    const walletNames = ['b', 'c']
+    for (let i = 0; i < 2; i += 1) {
+      const wallet = account.wallet_new(walletNames[i], account.next_available_wallet_start_index(), 1)
+      assert.equal(account.wallets.length, i + 2)
+      assert.equal(account.addresses.length, i + 2)
+      assert.equal(account.addresses[i + 1], wallet.address)
+      assert.equal(wallet.wallet_index, i + 1)
+      assert.equal(account.next_available_wallet_start_index(), i + 2)
+    }
+
+    // when deleting you have to give the correct index/wallet_name combination
+    assert.throws(() => account.wallet_delete(1, 'a'))
+    assert.throws(() => account.wallet_delete(2, 'a'))
+    assert.throws(() => account.wallet_delete(0, 'b'))
+    assert.throws(() => account.wallet_delete(2, 'b'))
+    assert.throws(() => account.wallet_delete(0, 'c'))
+    assert.throws(() => account.wallet_delete(1, 'c'))
+
+    // delete the middle wallet
+    account.wallet_delete(1, 'b')
+
+    // wallet indices should be updates now
+    let i = 0
+    for (let wallet of account.wallets) {
+      assert.equal(wallet.wallet_index, i)
+      i += 1
+    }
+  },
+
+  walletMultiSignatureInfo: (assert) => {
+    const account = new tfchain.Account('foo', 'bar')
+    assert.equal(account.account_name, 'foo')
+    assert.equal(account.password, 'bar')
+    assert.equal(account.wallets.length, 0) // wallets are not created by default
+    assert.equal(account.next_available_wallet_start_index(), 0)
+
+    // getting a multisignature wallet won't be possible yet
+    assert.throws(() => account.multisig_wallet_get('0313a5abd192d1bacdd1eb518fc86987d3c3d1cfe3c5bed68ec4a86b93b2f05a89f67b89b07d71'))
+
+    // this will throws as we need to be co-owner of any created multisig wallet
+    assert.throws(() => account.multisig_wallet_new('our_wallet', ['01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0', '01370af706b547dd4e562a047e6265d7e7750771f9bff633b1a12dbd59b11712c6ef65edb1690d'], 1))
+
+    // create a wallet
+    const defaultWallet = account.wallet_new('default', 0, 1)
+
+    // create a multsignature wallet
+    const msWalletA = account.multisig_wallet_new('our_wallet', ['01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0', defaultWallet.address], 1)
+    assert.equal(msWalletA.wallet_name, 'our_wallet')
+    // owners is automatically sorted, as it is done when creating the MS address
+    assert.equal(msWalletA.owners, ['01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0', defaultWallet.address])
+    assert.equal(msWalletA.signatures_required, 1)
+
+    // update one can only if it exists
+    assert.throws(() => account.multisig_wallet_update('03a2fee279ebb7bceee06d9cb1777789c977d33805b028ca09b7d4a01d3695475132fe83a27cbf', 'foo'))
+
+    // update the multisig wallet
+    const msWalletACopy = account.multisig_wallet_update(msWalletA.address, 'foo')
+    assert.equal(msWalletACopy.wallet_name, 'foo')
+    assert.equal(msWalletA.wallet_name, 'foo')
+    assert.equal(msWalletA.address, msWalletACopy.address)
+
+    // deleting a wallet that is referenced by a ms wallet is not possible
+    assert.throws(() => account.wallet_delete(0, 'default'))
+
+    // deleting a multisig wallet is only possible if it exists
+    assert.throws(() => account.multisig_wallet_delete('03a2fee279ebb7bceee06d9cb1777789c977d33805b028ca09b7d4a01d3695475132fe83a27cbf'))
+
+    // delete the only ms wallet we have
+    account.multisig_wallet_delete(msWalletA.address)
+
+    // deleting the default wallet is now possible
+    account.wallet_delete(0, 'default')
   },
 
   walletAddressValidation: (assert) => {
@@ -267,6 +363,26 @@ const _all = {
     assert.equal(account.wallet.wallet_name, 'default')
     assert.equal(account.wallet.start_index, 0)
     assert.equal(account.wallet.address_count, 1)
+
+    // recover testnet account with multisignature wallets stored
+    account = tfchain.Account.deserialize('ufoo', 'pfoo', JSON.parse('{"version":1,"data":{"payload":"OHPWQ4uxtvzVJXHVyg/pbXCdkTbXV2KqZrSEOlEOQ32nCPEprjPAEyxV/fqSK26EfELiMoje1VtGUzDCQypcbG543ssyRrzYXM5YTgucSGHK9Pf+9UNy3xPMis7M1VANdBAWppNkrqJpaUPkGvOSUFzC1cjAJim3RvcfSWzSyjDuBRLAfIyryMxLl7dFX5TufJ0OtWXeCmwDCEmnL7hIhJL1S+fbwl7KiDpglfnn2O4Xqve7NJ24icwXEgVLLSXR5tL3A9UN1B6/lwgdzAatkx1GpDwhE+emONJHfLSjeN0ED5N8XXSlN1ZK5ZGdS+t/B3IwePnI0H95QWZbj1aYmGQP2ld8MPsRx+4hqVYX7efBETtNA2zrxhiaBwfE9dH4WkhTNSdxMqXf1hkRdFg7J+SfCyUgrmv8GGPjhIFbIAbH5sBQVr7rd3AxzmG4wikwS/H/dbOAs5bOPH9Q7vhyCTlNaezXk2kRVQrMXJszJ1HqR2GeJYEFwLljW0MGXzqqnrZ2HdMZDU6E61tUAjvy0lyUmLWCDXJPhdV1G/klHuAiB34V/f8/nGj4uDY2ZXHp2EtzBYPGCBOYpQW2tOFgexG0uGvIX6ehgtZF9u6AJqiM9gbw7NYAJaETfjE=","salt":"YHqLtq22yvY=","iv":"XbmUEnDY60LxN1b9aDg+0Q=="}}'))
+    assert.equal(account.account_name, 'ufoo')
+    assert.equal(account.password, 'pfoo')
+    assert.equal(account.network_type, 'standard')
+    assert.true(account.default_explorer_addresses_used)
+    assert.equal(account.explorer.explorer_addresses, _defs.network.standard.addresses)
+    assert.equal(account.mnemonic, exampleMnemonic)
+    assert.equal(account.wallets.length, 1)
+    assert.equal(account.wallet.wallet_name, 'default')
+    assert.equal(account.wallet.start_index, 1)
+    assert.equal(account.wallet.address_count, 3)
+    const mswallets = account.multisig_wallets
+    assert.equal(mswallets.length, 1)
+    const mswallet = mswallets[0]
+    assert.equal(mswallet.wallet_name, 'our_wallet')
+    assert.equal(mswallet.address, '038c830e947d48e7ccb4b6e5e718c564cb08459706bb505456fc166537edcd8da57cec5947ca1b')
+    assert.equal(mswallet.owners, [account.address, '01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0'])
+    assert.equal(mswallet.signatures_required, 1)
   },
 
   jscurrencyStr: (assert) => {
