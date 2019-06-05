@@ -128,7 +128,10 @@ const _all = {
   },
 
   walletMultiSignatureInfo: (assert) => {
-    const account = new tfchain.Account('foo', 'bar')
+    const exampleMnemonic = 'embark fatal whale file wait future bracket anger label long screen opinion giggle genius blur author warrior prevent cereal scale outdoor enhance diesel raccoon'
+    const account = new tfchain.Account('foo', 'bar', {
+      seed: exampleMnemonic
+    })
     assert.equal(account.account_name, 'foo')
     assert.equal(account.password, 'bar')
     assert.equal(account.wallets.length, 0) // wallets are not created by default
@@ -147,7 +150,7 @@ const _all = {
     const msWalletA = account.multisig_wallet_new('our_wallet', ['01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0', defaultWallet.address], 1)
     assert.equal(msWalletA.wallet_name, 'our_wallet')
     // owners is automatically sorted, as it is done when creating the MS address
-    assert.equal(msWalletA.owners, ['01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0', defaultWallet.address])
+    assert.equal(msWalletA.owners, [defaultWallet.address, '01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0'])
     assert.equal(msWalletA.signatures_required, 1)
 
     // update one can only if it exists
