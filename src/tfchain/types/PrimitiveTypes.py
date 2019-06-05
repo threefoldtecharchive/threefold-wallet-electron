@@ -285,7 +285,7 @@ class Currency(BaseDataTypeClass):
     def __mul__(self, other):
         if not isinstance(other, Currency):
             return self.__mul__(Currency(other))
-        return Currency(self.value.__mul__(other.value))
+        return Currency(self.value.__mul__(other.value).to_nearest(9))
     def __rmul__(self, other):
         return self.__mul__(other)
 

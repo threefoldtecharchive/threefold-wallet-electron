@@ -965,7 +965,7 @@ export var Currency =  __class__ ('Currency', [BaseDataTypeClass], {
 		if (!(isinstance (other, Currency))) {
 			return self.__mul__ (Currency (other));
 		}
-		return Currency (self.value.__mul__ (other.value));
+		return Currency (self.value.__mul__ (other.value).to_nearest (9));
 	});},
 	get __rmul__ () {return __get__ (this, function (self, other) {
 		if (arguments.length) {
