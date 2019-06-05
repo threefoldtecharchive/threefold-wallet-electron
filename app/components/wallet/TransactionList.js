@@ -2,6 +2,7 @@ import React from 'react'
 import { Dimmer, Loader, List } from 'semantic-ui-react'
 import uuid from 'uuid'
 import moment from 'moment'
+import { differenceWith, flatten, isEqual } from 'lodash'
 const { shell } = require('electron')
 
 const confirmedStyle = {
@@ -28,7 +29,7 @@ const hashFont = {
   left: 32
 }
 
-const TransactionList = ({ loader, transactions, chainInfo }) => {
+const TransactionList = ({ loader, transactions, chainInfo, account }) => {
   if (loader) {
     return (
       <Dimmer active={loader} >
@@ -38,7 +39,7 @@ const TransactionList = ({ loader, transactions, chainInfo }) => {
   }
 
   const explorerAddress = chainInfo.explorerAddress
-
+  const accountAddresses = account.addresses
   if (transactions.length > 0) {
     return (
       <div>
@@ -51,14 +52,7 @@ const TransactionList = ({ loader, transactions, chainInfo }) => {
             return (
               <List.Item key={uuid.v4()} style={{ borderBottom: '1px solid grey' }}>
                 <List.Content>
-                  <List.Header as='a' style={{ color: 'white' + '!important', display: 'flex' }} onClick={() => shell.openExternal(`${explorerAddress}/hash.html?hash=${tx.identifier}`)}>
-                    <span style={{ color: '#4B38BE' }}>TXID {tx.identifier}:</span>
-                    {tx.confirmed
-                      ? (<p style={confirmedStyle}>
-                        Confirmed at {moment.unix(tx.timestamp).format('MMMM Do YYYY, HH:mm')}
-                      </p>)
-                      : (<p style={confirmedStyle}>Unconfirmed</p>)}
-                  </List.Header>
+                  {renderTransactionHeader(tx, explorerAddress, accountAddresses)}
                   {renderTransactionBody(tx, explorerAddress)}
                 </List.Content>
               </List.Item>
@@ -141,6 +135,45 @@ function renderTransactionBody (tx, explorerAddress) {
       )
     })
   }
+}
+
+function renderTransactionHeader (tx, explorerAddress, accountAddresses) {
+  const inputSenders = flatten(tx.inputs.map(input => input.senders))
+  const inputReceivers = flatten(tx.inputs.map(input => input.recipient))
+  const outputSenders = flatten(tx.outputs.map(output => output.senders))
+  const outputReceivers = flatten(tx.outputs.map(output => output.recipient))
+
+  let listHeaderColor = { color: '#4B38BE' }
+  let listItemDesc = (<span>Internal transaction</span>)
+  if (inputSenders.length > 0) {
+    const receivedFromOwnWallet = differenceWith(accountAddresses, inputSenders, isEqual).length === accountAddresses.length
+    const receivedToOwnWallet = differenceWith(accountAddresses, inputReceivers, isEqual).length === accountAddresses.length
+    if (receivedToOwnWallet || receivedFromOwnWallet) {
+      listItemDesc = (null)
+    }
+  }
+
+  if (outputSenders.length > 0) {
+    const sentFromOwnWallet = differenceWith(accountAddresses, outputSenders, isEqual).length === accountAddresses.length
+    const sentToOwnWallet = differenceWith(accountAddresses, outputReceivers, isEqual).length === accountAddresses.length
+    if (sentToOwnWallet || sentFromOwnWallet) {
+      listItemDesc = (null)
+    }
+  }
+
+  return (
+    <div>
+      <List.Header as='a' style={{ color: 'white' + '!important', display: 'flex' }} onClick={() => shell.openExternal(`${explorerAddress}/hash.html?hash=${tx.identifier}`)}>
+        <span style={listHeaderColor}>TXID {tx.identifier}:</span>
+        {tx.confirmed
+          ? (<p style={confirmedStyle}>
+            Confirmed at {moment.unix(tx.timestamp).format('MMMM Do YYYY, HH:mm')}
+          </p>)
+          : (<p style={confirmedStyle}>Unconfirmed</p>)}
+      </List.Header>
+      {listItemDesc}
+    </div>
+  )
 }
 
 function renderLockedValue (lockValue, isTimestamp) {
