@@ -38,7 +38,7 @@ const TransactionList = ({ loader, transactions, chainInfo, account }) => {
     )
   }
 
-  const explorerAddress = chainInfo.explorerAddress
+  const { explorerAddress, chainTimestamp } = chainInfo
   const accountAddresses = account.addresses
   if (transactions.length > 0) {
     return (
@@ -53,7 +53,7 @@ const TransactionList = ({ loader, transactions, chainInfo, account }) => {
               <List.Item key={uuid.v4()} style={{ borderBottom: '1px solid grey' }}>
                 <List.Content>
                   {renderTransactionHeader(tx, explorerAddress, accountAddresses)}
-                  {renderTransactionBody(tx, explorerAddress)}
+                  {renderTransactionBody(tx, explorerAddress, chainTimestamp)}
                 </List.Content>
               </List.Item>
             )
@@ -70,7 +70,7 @@ const TransactionList = ({ loader, transactions, chainInfo, account }) => {
   }
 }
 
-function renderTransactionBody (tx, explorerAddress) {
+function renderTransactionBody (tx, explorerAddress, chainTimestamp) {
   if (tx.inputs.length > 0) {
     return tx.inputs.map(input => {
       return (
@@ -79,7 +79,7 @@ function renderTransactionBody (tx, explorerAddress) {
             Amount: <span style={{ color: '#77dd77' }}>+ {input.amount.str({
               unit: true
             })}</span>
-            {renderLockedValue(input.lock, input.lock_is_timestamp)}
+            {renderLockedValue(input.lock, input.lock_is_timestamp, chainTimestamp)}
           </List.Description>
           <List.Description style={listDescriptionStyle} as='a'>
             {input.senders.map(sender => {
@@ -111,7 +111,7 @@ function renderTransactionBody (tx, explorerAddress) {
               unit: true
             })}</span>
             {out.is_fee ? (<span style={{ marginLeft: 3 }}>(fee)</span>) : null}
-            {renderLockedValue(out.lock, out.lock_is_timestamp)}
+            {renderLockedValue(out.lock, out.lock_is_timestamp, chainTimestamp)}
           </List.Description>
           <List.Description style={listDescriptionStyle} as='a'>
             {out.senders.map(sender => {
@@ -176,14 +176,19 @@ function renderTransactionHeader (tx, explorerAddress, accountAddresses) {
   )
 }
 
-function renderLockedValue (lockValue, isTimestamp) {
+function renderLockedValue (lockValue, isTimestamp, chainTimestamp) {
   if (lockValue) {
     if (isTimestamp) {
       const lockDate = new Date(lockValue * 1000)
+      const momentLockDate = moment(lockValue)
+      const momentChainDate = moment(chainTimestamp)
       const formattedDate = moment(lockDate).format('MMMM Do YYYY, HH:mm z')
       return (
         <span style={{ marginLeft: 30 }}>
-          Locked until {formattedDate}
+          {momentLockDate > momentChainDate
+            ? (<span>Locked until {formattedDate}</span>)
+            : (<span>Unlocked since {formattedDate}</span>)
+          }
         </span>
       )
     } else {

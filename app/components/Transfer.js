@@ -95,7 +95,7 @@ class Transfer extends Component {
   }
 
   selectWallet = (event, data) => {
-    const selectedWallet = this.props.account.wallets.filter(w => w.wallet_name === data.value)
+    const selectedWallet = this.props.account.wallets.filter(w => w.wallet_name === data.value)[0]
     this.setState({ selectedWallet: data.value })
     this.props.selectWallet(selectedWallet)
   }
