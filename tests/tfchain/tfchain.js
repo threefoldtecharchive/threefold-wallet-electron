@@ -153,6 +153,13 @@ const _all = {
     assert.equal(msWalletA.owners, [defaultWallet.address, '01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0'])
     assert.equal(msWalletA.signatures_required, 1)
 
+    // creating the same multisig wallet will always fail
+
+    assert.throws(() => account.multisig_wallet_new('our_wallet', [defaultWallet.address, '01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0'], 1))
+    assert.throws(() => account.multisig_wallet_new('our_wallet', ['01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0', defaultWallet.address], 1))
+    assert.throws(() => account.multisig_wallet_new('foo wallet', [defaultWallet.address, '01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0'], 1))
+    assert.throws(() => account.multisig_wallet_new('foo wallet', ['01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0', defaultWallet.address], 1))
+
     // update one can only if it exists
     assert.throws(() => account.multisig_wallet_update('03a2fee279ebb7bceee06d9cb1777789c977d33805b028ca09b7d4a01d3695475132fe83a27cbf', 'foo'))
 
