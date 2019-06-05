@@ -1,6 +1,7 @@
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __proxy__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, abs, all, any, assert, bool, bytearray, bytes, callable, chr, copy, deepcopy, delattr, dict, dir, divmod, enumerate, filter, float, getattr, hasattr, input, int, isinstance, issubclass, len, list, map, max, min, object, ord, pow, print, property, py_TypeError, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
 import {Currency as TFCurrency} from './tfchain.types.PrimitiveTypes.js';
 import {OutputLock, UnlockHash, UnlockHashType} from './tfchain.types.ConditionTypes.js';
+import * as ConditionTypes from './tfchain.types.ConditionTypes.js';
 import * as tfwallet from './tfchain.wallet.js';
 import * as tfclient from './tfchain.client.js';
 import * as wbalance from './tfchain.balance.js';
@@ -3588,6 +3589,55 @@ export var wallet_address_is_valid = function (address, opts) {
 			throw __except0__;
 		}
 	}
+};
+export var multisig_wallet_address_new = function (owners, signatures_required) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'owners': var owners = __allkwargs0__ [__attrib0__]; break;
+					case 'signatures_required': var signatures_required = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (!(jsobj.is_js_arr (owners))) {
+		var __except0__ = py_TypeError ('owners is expected to be an array, not {} ({})'.format (owners, py_typeof (owners)));
+		__except0__.__cause__ = null;
+		throw __except0__;
+	}
+	if (len (owners) <= 1) {
+		var __except0__ = ValueError ('expected at two owners, less is not allowed');
+		__except0__.__cause__ = null;
+		throw __except0__;
+	}
+	if (signatures_required == null) {
+		var signatures_required = len (owners);
+	}
+	else {
+		if (!(isinstance (signatures_required, int))) {
+			var __except0__ = py_TypeError ('signatures_required is supposed to be an int, invalid {} ({})'.format (signatures_required, py_typeof (signatures_required)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		if (signatures_required < 1 || signatures_required > len (owners)) {
+			var __except0__ = ValueError ('sgnatures_required has to be within the range [1, len(owners)]');
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+	}
+	var condition = ConditionTypes.multi_signature_new (__kwargtrans__ ({min_nr_sig: signatures_required, unlockhashes: (function () {
+		var __accu0__ = [];
+		for (var owner of owners) {
+			__accu0__.append (owner);
+		}
+		return __accu0__;
+	}) ()}));
+	return condition.unlockhash.__str__ ();
 };
 
 //# sourceMappingURL=api.map

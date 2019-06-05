@@ -22,6 +22,7 @@ import tfchain.balance as wbalance
 import tfchain.client as tfclient
 import tfchain.wallet as tfwallet
 
+from tfchain.types import ConditionTypes
 from tfchain.types.ConditionTypes import UnlockHash, UnlockHashType, OutputLock
 from tfchain.types.PrimitiveTypes import Currency as TFCurrency
 
@@ -1607,7 +1608,7 @@ def wallet_address_is_valid(address, opts=None):
     :param multisig: True is multisig addresses are allowed as well
 
     :returns: True if the mnemonic is valid, False otherwise
-    :rtype: bool
+    :rtype: bool 
     """
     multisig = jsfunc.opts_get_with_defaults(opts, {
         'multisig': True,
@@ -1619,3 +1620,20 @@ def wallet_address_is_valid(address, opts=None):
         return multisig and uh.uhtype.value == UnlockHashType.MULTI_SIG.value
     except Exception:
         return False
+
+def multisig_wallet_address_new(owners, signatures_required):
+    # validate parameters
+    if not jsobj.is_js_arr(owners):
+        raise TypeError("owners is expected to be an array, not {} ({})".format(owners, type(owners)))
+    if len(owners) <= 1:
+        raise ValueError("expected at two owners, less is not allowed")
+    if signatures_required == None:
+        signatures_required = len(owners)
+    else:
+        if not isinstance(signatures_required, int):
+            raise TypeError("signatures_required is supposed to be an int, invalid {} ({})".format(signatures_required, type(signatures_required)))
+        if signatures_required < 1 or signatures_required > len(owners):
+            raise ValueError("sgnatures_required has to be within the range [1, len(owners)]")
+    # create address
+    condition = ConditionTypes.multi_signature_new(min_nr_sig=signatures_required, unlockhashes=[owner for owner in owners])
+    return condition.unlockhash.__str__()

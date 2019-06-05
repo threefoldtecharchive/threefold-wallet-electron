@@ -363,6 +363,52 @@ const _all = {
     assert.false((new tfchain.Currency(0).greater_than('1')))
     assert.false((new tfchain.Currency('42.351').equal_to('42.35')))
     assert.false((new tfchain.Currency('12.34').not_equal_to('12.34')))
+  },
+
+  multisigWalletAddressNew: (assert) => {
+    // all wrong
+    assert.throws(() => tfchain.multisig_wallet_address_new()) // nothing given
+    assert.throws(() => tfchain.multisig_wallet_address_new(1)) // invalid first type given, owners required
+    assert.throws(() => tfchain.multisig_wallet_address_new(1, ['a', 'b'])) // invalid order
+    assert.throws(() => tfchain.multisig_wallet_address_new(['a', 'b'], 1)) // invalid owners
+    assert.throws(() => tfchain.multisig_wallet_address_new(['a', 'b'])) // no signature count given IS OK, but invalid owners
+    assert.throws(() => tfchain.multisig_wallet_address_new(['a'])) // not enough owners
+    assert.throws(() => tfchain.multisig_wallet_address_new(['01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0'])) // not enough owners
+    // correct 2-of-2 wallet
+    assert.equal(
+      '0300c5c3a10fefa54150768d135421fca460152168cf1b6d9398ca979b08f5d10419a19060f092',
+      tfchain.multisig_wallet_address_new(['01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0', '01370af706b547dd4e562a047e6265d7e7750771f9bff633b1a12dbd59b11712c6ef65edb1690d'])
+    )
+    // same as explcitly defining 2 as signature count here
+    assert.equal(
+      tfchain.multisig_wallet_address_new(['01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0', '01370af706b547dd4e562a047e6265d7e7750771f9bff633b1a12dbd59b11712c6ef65edb1690d']),
+      tfchain.multisig_wallet_address_new(['01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0', '01370af706b547dd4e562a047e6265d7e7750771f9bff633b1a12dbd59b11712c6ef65edb1690d'], 2)
+    )
+    // order does not matter, as the owners get sorted
+    assert.equal(
+      tfchain.multisig_wallet_address_new(['01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0', '01370af706b547dd4e562a047e6265d7e7750771f9bff633b1a12dbd59b11712c6ef65edb1690d']),
+      tfchain.multisig_wallet_address_new(['01370af706b547dd4e562a047e6265d7e7750771f9bff633b1a12dbd59b11712c6ef65edb1690d', '01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0'])
+    )
+    // a correct 1-of-2 wallet
+    assert.equal(
+      '032e619b0dab8386bed3dbd6c4ae670ee7ef878f72602567dfc2621b5caa7e5178d43689aa7aa9',
+      tfchain.multisig_wallet_address_new(['01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0', '01370af706b547dd4e562a047e6265d7e7750771f9bff633b1a12dbd59b11712c6ef65edb1690d'], 1)
+    )
+    // 2-of-3 wallet
+    assert.equal(
+      '0340a9cabe56df382c41a74f9824d9951b60b05dd2281402f8c1d3fd52c5110348548bc3820984',
+      tfchain.multisig_wallet_address_new(['01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0', '01370af706b547dd4e562a047e6265d7e7750771f9bff633b1a12dbd59b11712c6ef65edb1690d', '01956471980a60ec51a2d54e4b91f4b39ba26eca677ebb3f31929086f7431b17b7f8fe84985d59'], 2)
+    )
+    // 1-of-3 wallet
+    assert.equal(
+      '03033eb72ebd94ca33544cadc1c6eb547a45bff7cc41e83d5168355eb5ec30f9d1db9311645c4a',
+      tfchain.multisig_wallet_address_new(['01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0', '01370af706b547dd4e562a047e6265d7e7750771f9bff633b1a12dbd59b11712c6ef65edb1690d', '01956471980a60ec51a2d54e4b91f4b39ba26eca677ebb3f31929086f7431b17b7f8fe84985d59'], 1)
+    )
+    // 3-of-3 wallet
+    assert.equal(
+      '03a2fee279ebb7bceee06d9cb1777789c977d33805b028ca09b7d4a01d3695475132fe83a27cbf',
+      tfchain.multisig_wallet_address_new(['01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0', '01370af706b547dd4e562a047e6265d7e7750771f9bff633b1a12dbd59b11712c6ef65edb1690d', '01956471980a60ec51a2d54e4b91f4b39ba26eca677ebb3f31929086f7431b17b7f8fe84985d59'], 3)
+    )
   }
 }
 
