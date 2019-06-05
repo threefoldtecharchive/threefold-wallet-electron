@@ -57,7 +57,7 @@ const WalletBalanceGrid = ({ loader, routeToReceive, routeToTransfer, walletBala
             Transfer
           </Button>
         </div>
-        <div style={{ position: 'absolute', top: 10, right: 60 }}>
+        <div style={{ position: 'absolute', top: 100, right: 60 }}>
           <Button className={styles.acceptButton} onClick={() => routeToSign()} style={{ marginTop: 20, marginRight: 10, float: 'left', background: 'none', color: 'white' }} size='big'>Sign Transaction</Button>
         </div>
       </GridColumn>
