@@ -2,7 +2,7 @@ import React from 'react'
 import { Button, Grid, Dimmer, Loader, Segment, GridColumn, Icon } from 'semantic-ui-react'
 import styles from '../home/Home.css'
 
-const WalletBalanceGrid = ({ loader, routeToReceive, routeToTransfer, walletBalance }) => {
+const WalletBalanceGrid = ({ loader, routeToReceive, routeToTransfer, walletBalance, routeToSign }) => {
   const {
     coins_total: coinsTotal,
     coins_locked: coinsLocked,
@@ -20,11 +20,11 @@ const WalletBalanceGrid = ({ loader, routeToReceive, routeToTransfer, walletBala
             <Loader />
           </Dimmer>
           <h3 style={{ color: 'white', marginTop: 0 }}>Total Balance:</h3>
-          <h4 style={{ color: 'white', marginTop: 0 }}>{coinsTotal.str()} TFT</h4>
+          <h4 style={{ color: 'white', marginTop: 0 }}>{coinsTotal.str({ precision: 3 })} TFT</h4>
           <h4 style={{ color: 'white' }}><Icon name='lock' />Locked Balance:</h4>
-          <h4 style={{ color: 'white', marginTop: 0 }}>{coinsLocked.str()} TFT</h4>
+          <h4 style={{ color: 'white', marginTop: 0 }}>{coinsLocked.str({ precision: 3 })} TFT</h4>
           <h4 style={{ color: 'white' }}><Icon name='unlock' />Unlocked Balance: </h4>
-          <h4 style={{ color: 'white', marginTop: 0 }}>{coinsUnlocked.str()} TFT</h4>
+          <h4 style={{ color: 'white', marginTop: 0 }}>{coinsUnlocked.str({ precision: 3 })} TFT</h4>
         </Segment>
       </GridColumn>
       <GridColumn style={{ width: '20%', height: 150 }}>
@@ -33,11 +33,11 @@ const WalletBalanceGrid = ({ loader, routeToReceive, routeToTransfer, walletBala
             <Loader />
           </Dimmer>
           <h4 style={{ color: 'white', marginTop: 0 }}>Total unconfirmed: </h4>
-          <h5 style={{ color: 'white', marginTop: 0 }}>{unconfirmedTotalCoins.str()} TFT</h5>
+          <h5 style={{ color: 'white', marginTop: 0 }}>{unconfirmedTotalCoins.str({ precision: 3 })} TFT</h5>
           <h5 style={{ color: 'white' }}><Icon name='lock' />Locked unconfirmed:</h5>
-          <h5 style={{ color: 'white', marginTop: 0 }}>{unconfirmedLockedCoins.str()} TFT</h5>
+          <h5 style={{ color: 'white', marginTop: 0 }}>{unconfirmedLockedCoins.str({ precision: 3 })} TFT</h5>
           <h5 style={{ color: 'white' }}><Icon name='unlock' />Unlocked unconfirmed: </h5>
-          <h5 style={{ color: 'white', marginTop: 0 }}>{unconfirmedUnlockedCoins.str()} TFT</h5>
+          <h5 style={{ color: 'white', marginTop: 0 }}>{unconfirmedUnlockedCoins.str({ precision: 3 })} TFT</h5>
         </Segment>
       </GridColumn>
       <GridColumn style={{ width: '33%' }}>
@@ -56,6 +56,9 @@ const WalletBalanceGrid = ({ loader, routeToReceive, routeToTransfer, walletBala
             size='big'>
             Transfer
           </Button>
+        </div>
+        <div style={{ position: 'absolute', top: 10, right: 60 }}>
+          <Button className={styles.acceptButton} onClick={() => routeToSign()} style={{ marginTop: 20, marginRight: 10, float: 'left', background: 'none', color: 'white' }} size='big'>Sign Transaction</Button>
         </div>
       </GridColumn>
     </Grid>

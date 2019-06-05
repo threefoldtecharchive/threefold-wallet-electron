@@ -2,7 +2,7 @@ import React from 'react'
 import { Button, Grid, Dimmer, Loader, Segment, GridColumn, Icon } from 'semantic-ui-react'
 import styles from '../home/Home.css'
 
-const WalletBalanceGrid = ({ loader, walletBalance, routeToReceive, routeToTransfer }) => {
+const WalletBalanceGrid = ({ loader, walletBalance, routeToReceive, routeToTransfer, routeToSign }) => {
   const {
     coins_total: coinsTotal,
     coins_locked: coinsLocked,
@@ -28,6 +28,9 @@ const WalletBalanceGrid = ({ loader, walletBalance, routeToReceive, routeToTrans
         <div style={{ marginTop: 20, position: 'absolute', right: 60 }}>
           <Button className={styles.acceptButton} onClick={() => routeToReceive()} style={{ float: 'left', color: 'white', marginRight: 15 }} size='big'>Receive</Button>
           <Button className={styles.cancelButton} onClick={() => routeToTransfer()} style={{ marginRight: 10, float: 'left', color: 'white', background: 'none' }} size='big'>Transfer</Button>
+        </div>
+        <div style={{ position: 'absolute', top: 100, right: 60 }}>
+          <Button className={styles.acceptButton} onClick={() => routeToSign()} style={{ marginTop: 20, marginRight: 10, float: 'left', background: 'none', color: 'white' }} size='big'>Sign Transaction</Button>
         </div>
       </GridColumn>
     </Grid>

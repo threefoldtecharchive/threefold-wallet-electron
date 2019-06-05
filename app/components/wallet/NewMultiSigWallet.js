@@ -9,6 +9,7 @@ import { saveAccount } from '../../actions'
 import Footer from '../footer'
 import { toast } from 'react-toastify'
 import * as tfchain from '../../tfchain/api'
+import { filter } from 'lodash'
 
 const mapStateToProps = state => ({
   wallet: state.wallet,
@@ -42,7 +43,7 @@ class NewMultiSigWallet extends Component {
 
   handleSignatureCountChange = ({ target }) => {
     const { ownerAddresses } = this.state
-    if (target.value < ownerAddresses.length) {
+    if (target.value > ownerAddresses.length) {
       this.setState({ signatureCountError: true })
     } else {
       this.setState({ signatureCountError: false })
@@ -55,7 +56,7 @@ class NewMultiSigWallet extends Component {
   }
 
   createWallet = () => {
-    const { name, ownerAddresses, signatureCount } = this.state
+    const { name, ownerAddresses, signatureCount, ownerAddressErrors } = this.state
 
     let nameError = false
     let signatureCountError = false
@@ -70,16 +71,19 @@ class NewMultiSigWallet extends Component {
       this.setState({ signatureCountError: true })
     }
 
-    const hasOwnerAddressErrors = ownerAddresses.filter(e => e === true).length > 0
-    if (!nameError && !signatureCountError && !hasOwnerAddressErrors) {
+    const hasOwnerAddressErrors = ownerAddressErrors.filter(e => e === true).length > 0
+    const areAllOwnersFilledIn = filter(ownerAddresses, o => o === '').length === 0
+    if (!nameError && !signatureCountError && !hasOwnerAddressErrors && areAllOwnersFilledIn) {
       try {
-        this.props.account.wallet_new(name, ownerAddresses, signatureCount)
+        this.props.account.multisig_wallet_new(name, ownerAddresses, signatureCount)
         this.props.saveAccount(this.props.account)
-        toast('Wallet created')
+        toast('Multisig Wallet created')
         return this.props.history.push('/account')
       } catch (error) {
         this.setState({ errorMessage: error.__args__[0], showError: true })
       }
+    } else {
+      this.setState({ showError: true, errorMessage: 'Form is not filled in correctly, try again with different values.' })
     }
   }
 
@@ -109,7 +113,7 @@ class NewMultiSigWallet extends Component {
     if (signatureCountError) {
       return (
         <Message negative>
-          <p style={{ fontSize: 12 }}>Signature count must be lesser than or equal to the number of owners.</p>
+          <p style={{ fontSize: 12 }}>Signature count must be less than or equal to the number of owners.</p>
         </Message>
       )
     }
@@ -136,12 +140,13 @@ class NewMultiSigWallet extends Component {
     return ownerAddresses.map((owner, index) => {
       return (
         <div>
-          <div style={{ display: 'flex', marginTop: 10 }}>
+          <div key={index} style={{ display: 'flex', marginTop: 10 }}>
             <Input
               error={ownerAddressErrors[index]}
               style={{ background: '#0c111d !important', color: '#7784a9' }}
               icon={<Icon name='user' style={{ color: '#0e72f5' }} />}
-              iconPosition='left' placeholder='owner address'
+              iconPosition='left'
+              placeholder='owner address'
               value={owner}
               onChange={(e) => this.handleAddressOwnerChange(e, index)}
             />
@@ -168,7 +173,7 @@ class NewMultiSigWallet extends Component {
     this.setState({ ownerAddresses, signatureCount: ownerAddresses.length })
   }
 
-  removeOwnerAddress = (owner, index) => {
+  removeOwnerAddress = (index) => {
     const { ownerAddresses } = this.state
     ownerAddresses.splice(index, 1)
     this.setState({ ownerAddresses, signatureCount: ownerAddresses.length })
@@ -206,7 +211,7 @@ class NewMultiSigWallet extends Component {
             <Form.Field>
               <label style={{ float: 'left', color: 'white' }}>Signature count</label>
               <Popup offset={-30} size='large' position='right center' content='Signature count is the count of signatures that this multisig wallet requires to send transactions.' trigger={<Icon style={{ fontSize: 12, float: 'left', marginLeft: 10 }} name='question circle' />} />
-              <input type='number' placeholder='1' value={signatureCount} onChange={this.handleSignatureCountChange} />
+              <input type='number' placeholder='1' min='0' value={signatureCount} onChange={this.handleSignatureCountChange} />
               {this.renderSignatureCountError()}
             </Form.Field>
             {this.renderError()}

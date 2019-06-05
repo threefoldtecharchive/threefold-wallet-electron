@@ -136,7 +136,7 @@ class SignTransaction extends Component {
             <TextArea
               style={{ background: '#0c111d !important', color: '#7784a9', height: 250 }}
               icon={<Icon name='send' style={{ color: '#0e72f5' }} />}
-              iconPosition='left'
+              iconposition='left'
               placeholder='raw json'
               value={json}
               onChange={this.handleJsonChange}

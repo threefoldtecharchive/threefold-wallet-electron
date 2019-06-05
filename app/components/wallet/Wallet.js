@@ -44,6 +44,7 @@ class Wallet extends Component {
   renderWalletBalanceGrid = () => {
     const routeToReceive = () => this.props.history.push(routes.WALLET_RECEIVE)
     const routeToTransfer = () => this.props.history.push(routes.TRANSFER)
+    const routeToSign = () => this.props.history.push(routes.SIGN_TRANSACTIONS)
     const walletBalance = this.props.balance.info.balances.filter(w => w.wallet_name === this.props.wallet.wallet_name)[0]
 
     if (walletBalance.unconfirmed_coins_total.greater_than(0)) {
@@ -53,6 +54,7 @@ class Wallet extends Component {
           walletBalance={walletBalance}
           routeToReceive={routeToReceive}
           routeToTransfer={routeToTransfer}
+          routeToSign={routeToSign}
         />
       )
     }
@@ -62,6 +64,7 @@ class Wallet extends Component {
         walletBalance={walletBalance}
         routeToReceive={routeToReceive}
         routeToTransfer={routeToTransfer}
+        routeToSign={routeToSign}
       />
     )
   }

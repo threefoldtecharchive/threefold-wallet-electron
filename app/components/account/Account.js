@@ -58,10 +58,10 @@ class Account extends Component {
                   <div>
                     <Icon name='chevron right' style={{ position: 'absolute', right: 20, top: 130, fontSize: 25, opacity: '0.3', color: 'white' }} />
                     <Card.Description style={{ color: 'white', marginTop: 10, marginBottom: 10, fontFamily: 'SF UI Text Light', display: 'flex' }}>
-                      <Icon name='unlock' style={{ fontSize: 16, marginLeft: 20 }} /> <p style={{ marginLeft: 30, marginTop: -8 }}>{w.balance.coins_unlocked.str()} TFT</p>
+                      <Icon name='unlock' style={{ fontSize: 16, marginLeft: 20 }} /> <p style={{ marginLeft: 30, marginTop: -8 }}>{w.balance.coins_unlocked.str({ precision: 3 })} TFT</p>
                     </Card.Description>
                     <Card.Description style={{ textAlign: 'left', color: 'white', marginTop: 20, marginBottom: 10, fontFamily: 'SF UI Text Light', display: 'flex' }}>
-                      <Icon name='lock' style={{ fontSize: 16, marginLeft: 20 }} /> <p style={{ marginLeft: 33, marginTop: -3, fontFamily: 'SF UI Text Light', fontSize: 18 }}>{w.balance.coins_locked.str()} TFT</p>
+                      <Icon name='lock' style={{ fontSize: 16, marginLeft: 20 }} /> <p style={{ marginLeft: 33, marginTop: -3, fontFamily: 'SF UI Text Light', fontSize: 18 }}>{w.balance.coins_locked.str({ precision: 3 })} TFT</p>
                     </Card.Description>
                     <Divider />
                     <Card.Header style={{ textAlign: 'center', color: 'white', fontSize: 18, textTransform: 'uppercase', marginTop: 20, fontFamily: 'SF UI Text Light' }}>
@@ -119,16 +119,16 @@ class Account extends Component {
       content = (
         <div>
           <h3 style={{ color: 'white', marginTop: 0 }}>Total Balance</h3>
-          <h4 style={{ color: 'white', marginTop: 0 }}>{coinsTotal.str()} TFT</h4>
-          {unconfirmedTotalCoins.greater_than(0) ? (<span style={{ color: 'white', marginTop: 0, fontSize: 12 }}>unconfirmed: {unconfirmedTotalCoins.str()} TFT</span>) : (<p />)}
+          <h4 style={{ color: 'white', marginTop: 0 }}>{coinsTotal.str({ precision: 3 })} TFT</h4>
+          {unconfirmedTotalCoins.greater_than(0) ? (<span style={{ color: 'white', marginTop: 0, fontSize: 12 }}>unconfirmed: {unconfirmedTotalCoins.str({ precision: 3 })} TFT</span>) : (<p />)}
 
           <h4 style={{ color: 'white' }}><Icon name='lock' />Locked Balance</h4>
-          <h4 style={{ color: 'white', marginTop: 0 }}>{coinsLocked.str()}  TFT</h4>
-          {unconfirmedLockedCoins.greater_than(0) ? (<span style={{ color: 'white', marginTop: 0, fontSize: 12 }}>unconfirmed: {unconfirmedLockedCoins.str()} TFT</span>) : (<p />)}
+          <h4 style={{ color: 'white', marginTop: 0 }}>{coinsLocked.str({ precision: 3 })}  TFT</h4>
+          {unconfirmedLockedCoins.greater_than(0) ? (<span style={{ color: 'white', marginTop: 0, fontSize: 12 }}>unconfirmed: {unconfirmedLockedCoins.str({ precision: 3 })} TFT</span>) : (<p />)}
 
           <h4 style={{ color: 'white' }}><Icon name='unlock' />Unlocked Balance</h4>
-          <h4 style={{ color: 'white', marginTop: 0, marginBottom: 0 }}>{coinsUnlocked.str()}  TFT</h4>
-          {unconfirmedUnlockedCoins.greater_than(0) ? (<span style={{ color: 'white', marginTop: 0, fontSize: 12 }}>unconfirmed: {unconfirmedUnlockedCoins.str()} TFT </span>) : (<p />)}
+          <h4 style={{ color: 'white', marginTop: 0, marginBottom: 0 }}>{coinsUnlocked.str({ precision: 3 })}  TFT</h4>
+          {unconfirmedUnlockedCoins.greater_than(0) ? (<span style={{ color: 'white', marginTop: 0, fontSize: 12 }}>unconfirmed: {unconfirmedUnlockedCoins.str({ precision: 3 })} TFT </span>) : (<p />)}
         </div>
       )
     }
