@@ -1267,7 +1267,7 @@ class Balance:
     def merge(self, other):
         if self._network_type.__ne__(other._network_type):
             raise ValueError("network type of to-be-merged balance objects has to be equal")
-        if self._wallet_name.__ne__(other._wallet_name):
+        if self._wallet_name != other._wallet_name:
             raise ValueError("wallet name of to-be-merged balance objects has to be equal")
         addresses_all = set()
         addresses_all = addresses_all.union(set(self.addresses_all))

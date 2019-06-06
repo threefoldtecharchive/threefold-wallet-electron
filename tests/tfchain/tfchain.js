@@ -64,6 +64,7 @@ const _all = {
     assert.equal(recoveredAccount.address, recoveredDefaultWallet.address)
     assert.equal(recoveredAccount.wallets[0].address, recoveredDefaultWallet.address)
     assert.equal(recoveredDefaultWallet.wallet_name, 'ballet')
+    assert.true(recoveredDefaultWallet.has_signing_power)
     assert.equal(recoveredAccount.wallet_name_for_address('01956471980a60ec51a2d54e4b91f4b39ba26eca677ebb3f31929086f7431b17b7f8fe84985d59'), 'ballet')
     assert.equal(recoveredAccount.next_available_wallet_start_index(), 1)
     // you can only update a wallet at a valid index
@@ -78,6 +79,7 @@ const _all = {
     assert.equal(recoveredAccount.wallets.length, 1)
     assert.equal(recoveredAccount.next_available_wallet_start_index(), 4)
     assert.equal(updatedDefaultWallet.wallet_name, 'default')
+    assert.true(updatedDefaultWallet.has_signing_power)
     assert.equal(recoveredAccount.wallet_name_for_address('010e0adfb04322e91dfee62ce402e17600862c82c82682e6a7b925b572689e531a24cd002c59f2'), 'default')
     assert.equal(recoveredAccount.wallet_name_for_address('0168341e75d73597807321629d3895eec00aafabba9fc9ef68a6c4279ecfca9708f4dbd5a969f7'), 'default')
     assert.equal(recoveredAccount.wallet_name_for_address('011a3ae574a1081eca8cc5e7c6eae6ed1657a82b4f741413951d8a2313ee8a60eb1f35a6028ede'), 'default')

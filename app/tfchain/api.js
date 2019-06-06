@@ -3293,7 +3293,7 @@ export var Balance =  __class__ ('Balance', [object], {
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		if (self._wallet_name.__ne__ (other._wallet_name)) {
+		if (self._wallet_name != other._wallet_name) {
 			var __except0__ = ValueError ('wallet name of to-be-merged balance objects has to be equal');
 			__except0__.__cause__ = null;
 			throw __except0__;
