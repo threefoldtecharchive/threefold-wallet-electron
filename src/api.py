@@ -338,6 +338,12 @@ class Account:
         return None
 
     def wallet_name_for_address(self, address):
+        wallet = self._wallet_for_address(address)
+        if wallet == None:
+            return None
+        return wallet.wallet_name
+
+    def _wallet_for_address(self, address):
         # validate address
         if not isinstance(address, str):
             raise TypeError("address has an invalid type: {} ({})".format(address, type(address)))
@@ -348,7 +354,7 @@ class Account:
         # get address
         for wallet in self._wallets:
             if address in wallet.addresses:
-                return wallet.wallet_name
+                return wallet
         return None
 
     def cached_multisig_wallet_for(self, balance):
@@ -361,11 +367,13 @@ class Account:
             name = self.multisig_wallet_name_for_multisig_address(balance.address)
         wallets = []
         for owner in balance.owners:
-            owner_wallet_name = self.wallet_name_for_address(owner)
-            if owner_wallet_name == None:
+            owner_wallet = self._wallet_for_address(owner)
+            if owner_wallet == None:
                 continue
-            if owner_wallet_name in self._cached_wallet_balances:
-                wallets.append(self.cached_wallet_for(self._cached_wallet_balances[owner_wallet_name]))
+            if owner_wallet.wallet_name in self._cached_wallet_balances:
+                wallets.append(self.cached_wallet_for(self._cached_wallet_balances[owner_wallet.wallet_name]))
+            else:
+                wallets.append(owner_wallet)
         return CachedMultiSignatureWallet(self.network_type, name, balance, wallets)
 
     def wallet_new(self, wallet_name, start_index, address_count):
@@ -803,13 +811,13 @@ class Wallet(BaseWallet):
         """
         return CoinTransactionBuilder(self)
 
-    def transaction_sign(self, transaction):
+    def transaction_sign(self, transaction, balance=None):
         """
         :returns: signs an existing transaction
         """
         if isinstance(transaction, str):
            transaction = jsjson.json_loads(transaction) 
-        return self._tfwallet.transaction_sign(txn=transaction, submit=True)
+        return self._tfwallet.transaction_sign(txn=transaction, submit=True, balance=balance)
 
 
 class CachedWallet(Wallet):
@@ -854,13 +862,13 @@ class CachedWallet(Wallet):
         """
         return CoinTransactionBuilder(self)
 
-    def transaction_sign(self, transaction):
+    def transaction_sign(self, transaction, balance=None):
         """
         :returns: signs an existing transaction
         """
         if isinstance(transaction, str):
            transaction = jsjson.json_loads(transaction) 
-        return self._tfwallet.transaction_sign(txn=transaction, submit=True, balance=self._balance._tfbalance)
+        return self._tfwallet.transaction_sign(txn=transaction, submit=True, balance=(balance or self._balance._tfbalance))
 
 
 class MultiSignatureWalletStub(BaseWallet):
@@ -933,11 +941,10 @@ class CachedMultiSignatureWallet(BaseWallet):
         if not isinstance(wallets, list):
             raise TypeError("wallets is of wrong type {} ({})".format(wallets, type(wallets)))
         if len(wallets) == 0:
-            jslog.warning("creating a cached multisig wallet {} ({}) without any cached owner wallets, balance:".format(wallet_name, balance.address), balance)
-        else:
-            for wallet in wallets:
-                if not isinstance(wallet, CachedWallet):
-                    raise TypeError("wallets is of wrong type {} ({})".format(wallet, type(wallet)))
+            raise ValueError("at least one owner wallet is required")
+        for wallet in wallets:
+            if not isinstance(wallet, Wallet):
+                raise TypeError("wallets is of wrong type {} ({})".format(wallet, type(wallet)))
         self._wallets = wallets
 
     def _address_getter(self):
@@ -979,10 +986,15 @@ class CachedMultiSignatureWallet(BaseWallet):
         return self._balance
 
     def transaction_new(self):
-        raise RuntimeError("TODO")
+        return CachedMultiSignatureCoinTransactionBuilder(self._balance, self._wallets)
 
     def transaction_sign(self, transaction):
-        raise RuntimeError("TODO")
+        first_signer = self._wallets[0]
+        other_signers = self._wallets[1:]
+        p = first_signer.transaction_sign(transaction, balance=self._balance)
+        for signer in other_signers:
+            p = jsasync.chain(p, _create_signer_cb_for_wallet(signer, balance=self._balance._tfbalance))
+        return p
 
 
 class CoinTransactionBuilder:
@@ -1031,6 +1043,50 @@ class CoinTransactionBuilder:
         source, refund, data = jsfunc.opts_get(opts, 'source', 'refund', 'data')
         return self._builder.send(source=source, refund=refund, data=data, balance=self._balance) # optionally uses cached wallet
 
+class CachedMultiSignatureCoinTransactionBuilder:
+    """
+    A builder of transactions, owned by a non-cloned wallet.
+    Cloning only happens when doing the actual sending.
+    """
+    def __init__(self, balance, wallets):
+        if not isinstance(balance, MultiSignatureBalance):
+            raise TypeError("expected a MultiSignatureBalance object, not: {} ({})".format(balance, type(balance)))
+        self._balance = balance
+        self._builder = wallets[0]._tfwallet.coin_transaction_builder_new()
+        self._co_signers = wallets[1:]
+
+    def output_add(self, recipient, amount, opts=None):
+        lock = jsfunc.opts_get(opts, 'lock')
+        self._builder.output_add(recipient, amount, lock=lock)
+        return self
+
+    def send(self, opts=None):
+        source, refund, data = jsfunc.opts_get(opts, 'source', 'refund', 'data')
+        p = self._builder.send(source=source, refund=refund, data=data, balance=self._balance._tfbalance)
+        if len(self._co_signers) == 0:
+            return p
+
+        signers = self._co_signers
+        def result_cb(result):
+            if result.submitted:
+                return result
+
+            first_signer = signers[0]
+            signers = signers[1:]
+
+            cp = first_signer.transaction_sign(result.transaction, balance=self._balance)
+            for signer in signers:
+                cp = jsasync.chain(cp, _create_signer_cb_for_wallet(signer, balance=self._balance._tfbalance))
+            return cp
+
+        return jsasync.chain(p, result_cb)
+
+def _create_signer_cb_for_wallet(wallet, balance=None):
+    def cb(result):
+        if result.submitted:
+            return result
+        return wallet.transaction_sign(wallet, balance=balance)
+    return cb
 
 class AccountBalance:
     def __init__(self, network_type, account_name, chain_info, balances=None, msbalances=None):
