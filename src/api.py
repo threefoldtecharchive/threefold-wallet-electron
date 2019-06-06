@@ -1065,8 +1065,8 @@ class CoinTransactionBuilder:
 
         :returns: a promise that resolves with a transaction ID or rejects with an Exception
         """
-        source, refund, data = jsfunc.opts_get(opts, 'source', 'refund', 'data')
-        return self._builder.send(source=source, refund=refund, data=data, balance=self._balance) # optionally uses cached wallet
+        data = jsfunc.opts_get(opts, 'data')
+        return self._builder.send(data=data, balance=self._balance) # optionally uses cached wallet
 
 class CachedMultiSignatureCoinTransactionBuilder:
     """
@@ -1086,8 +1086,12 @@ class CachedMultiSignatureCoinTransactionBuilder:
         return self
 
     def send(self, opts=None):
-        source, refund, data = jsfunc.opts_get(opts, 'source', 'refund', 'data')
-        p = self._builder.send(source=source, refund=refund, data=data, balance=self._balance._tfbalance)
+        data = jsfunc.opts_get(opts, 'data')
+        p = self._builder.send(
+            source=self._balance.address,
+            refund=self._balance.address,
+            data=data,
+            balance=self._balance._tfbalance)
         if len(self._co_signers) == 0:
             return p
 
@@ -1275,7 +1279,7 @@ class Balance:
         return Balance(
             network_type=self._network_type,
             wallet_name=self._wallet_name,
-            tfbalance=wbalance.WalletBalance().balance_add(self._tfbalance).balance_add(other._tfbalance),
+            tfbalance=self._tfbalance.balance_add(other._tfbalance),
             addresses_all=list(addresses_all),
         )
 
@@ -1359,6 +1363,11 @@ class MultiSignatureBalance(Balance):
     def __init__(self, owners, signatures_required, *args, **kwargs):
         # init the balance object
         super().__init__(*args, **kwargs)
+
+        # ensure balance is MultSignature
+        if not isinstance(self._tfbalance, wbalance.MultiSigWalletBalance):
+            jslog.error("wrong internal tf balance of MultiSignatureBalance")
+            raise TypeError("internal tf balance is of a wrong type: {} ({})".format(self._tfbalance, type(self._tfbalance)))
 
         # add custom properties
         self._owners = owners

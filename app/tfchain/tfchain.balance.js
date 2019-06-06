@@ -550,9 +550,6 @@ export var WalletBalance =  __class__ ('WalletBalance', [object], {
 		if (other == null) {
 			return self;
 		}
-		if (isinstance (other, tuple ([WalletsBalance, MultiSigWalletBalance]))) {
-			return WalletsBalance ().balance_add (self).balance_add (other);
-		}
 		if (!(isinstance (other, WalletBalance))) {
 			var __except0__ = py_TypeError ('other balance has to be of type wallet balance');
 			__except0__.__cause__ = null;
@@ -662,6 +659,191 @@ export var WalletBalance =  __class__ ('WalletBalance', [object], {
 			txns.append (txn);
 		}
 		return txns;
+	});},
+	get fund () {return __get__ (this, function (self, amount, source) {
+		if (typeof source == 'undefined' || (source != null && source.hasOwnProperty ("__kwargtrans__"))) {;
+			var source = null;
+		};
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'amount': var amount = __allkwargs0__ [__attrib0__]; break;
+						case 'source': var source = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var addresses = set ();
+		var refund = null;
+		if (source == null) {
+			for (var co of self.outputs_available) {
+				addresses.add (co.condition.unlockhash.__str__ ());
+			}
+			for (var co of self.outputs_unconfirmed_available) {
+				addresses.add (co.condition.unlockhash.__str__ ());
+			}
+		}
+		else {
+			if (!(isinstance (source, list)) && !(jsobj.is_js_arr (source))) {
+				if (isinstance (source, str)) {
+					var source = UnlockHash.from_json (source);
+				}
+				else if (!(isinstance (source, UnlockHash))) {
+					var __except0__ = py_TypeError ('cannot add source address from type {}'.format (py_typeof (source)));
+					__except0__.__cause__ = null;
+					throw __except0__;
+				}
+				var source = [source];
+			}
+			for (var value of source) {
+				if (isinstance (value, str)) {
+					var value = UnlockHash.from_json (value);
+				}
+				else if (!(isinstance (value, UnlockHash))) {
+					var __except0__ = py_TypeError ('cannot add source address from type {}'.format (py_typeof (value)));
+					__except0__.__cause__ = null;
+					throw __except0__;
+				}
+				else if (value.uhtype.__eq__ (UnlockHashType.PUBLIC_KEY)) {
+					addresses.add (value);
+				}
+				else {
+					var __except0__ = py_TypeError ('cannot add source address with unsupported UnlockHashType {}'.format (value.uhtype));
+					__except0__.__cause__ = null;
+					throw __except0__;
+				}
+			}
+			if (len (source) == 1) {
+				if (source [0].uhtype.__eq__ (UnlockHashType.PUBLIC_KEY)) {
+					var refund = ConditionTypes.unlockhash_new (__kwargtrans__ ({unlockhash: source [0]}));
+				}
+			}
+		}
+		if (len (addresses) == 0) {
+			var __except0__ = tferrors.InsufficientFunds ('insufficient funds in this wallet');
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		if (len (addresses) == 0) {
+			var __left0__ = tuple ([[], Currency ()]);
+			var outputs = __left0__ [0];
+			var collected = __left0__ [1];
+		}
+		else {
+			var __left0__ = self._fund_individual (amount, addresses);
+			var outputs = __left0__ [0];
+			var collected = __left0__ [1];
+		}
+		if (collected.greater_than_or_equal_to (amount)) {
+			return tuple ([(function () {
+				var __accu0__ = [];
+				for (var co of outputs) {
+					__accu0__.append (CoinInput.from_coin_output (co));
+				}
+				return __accu0__;
+			}) (), collected.minus (amount), refund]);
+		}
+		var __except0__ = tferrors.InsufficientFunds ('not enough funds available in the wallet to fund the requested amount');
+		__except0__.__cause__ = null;
+		throw __except0__;
+	});},
+	get _fund_individual () {return __get__ (this, function (self, amount, addresses) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'amount': var amount = __allkwargs0__ [__attrib0__]; break;
+						case 'addresses': var addresses = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var outputs_available = (function () {
+			var __accu0__ = [];
+			for (var co of self.outputs_available) {
+				if (__in__ (co.condition.unlockhash.__str__ (), addresses)) {
+					__accu0__.append (co);
+				}
+			}
+			return __accu0__;
+		}) ();
+		var sort_output_by_value = function (a, b) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'a': var a = __allkwargs0__ [__attrib0__]; break;
+							case 'b': var b = __allkwargs0__ [__attrib0__]; break;
+						}
+					}
+				}
+			}
+			else {
+			}
+			if (a.value.less_than (b.value)) {
+				return -(1);
+			}
+			if (a.value.greater_than (b.value)) {
+				return 1;
+			}
+			return 0;
+		};
+		var outputs_available = jsarr.py_sort (outputs_available, sort_output_by_value);
+		var collected = Currency ();
+		var outputs = [];
+		for (var co of outputs_available) {
+			if (co.value.greater_than_or_equal_to (amount)) {
+				return tuple ([[co], co.value]);
+			}
+			var collected = collected.plus (co.value);
+			outputs.append (co);
+			if (len (outputs) > _MAX_RIVINE_TRANSACTION_INPUTS) {
+				var collected = collected.minus (jsarr.py_pop (outputs, 0).value);
+			}
+			if (collected.greater_than_or_equal_to (amount)) {
+				return tuple ([outputs, collected]);
+			}
+		}
+		if (collected.greater_than_or_equal_to (amount)) {
+			return tuple ([outputs, collected]);
+		}
+		var outputs_available = (function () {
+			var __accu0__ = [];
+			for (var co of self.outputs_unconfirmed_available) {
+				if (__in__ (co.condition.unlockhash.__str__ (), addresses)) {
+					__accu0__.append (co);
+				}
+			}
+			return __accu0__;
+		}) ();
+		var outputs_available = jsarr.py_sort (outputs_available, sort_output_by_value, __kwargtrans__ ({reverse: true}));
+		for (var co of outputs_available) {
+			if (co.value.greater_than_or_equal_to (amount)) {
+				return tuple ([[co], co.value]);
+			}
+			var collected = collected.plus (co.value);
+			outputs.append (co);
+			if (len (outputs) > _MAX_RIVINE_TRANSACTION_INPUTS) {
+				var collected = collected.minus (outputs.py_pop (0).value);
+			}
+			if (collected.greater_than_or_equal_to (amount)) {
+				return tuple ([outputs, collected]);
+			}
+		}
+		return tuple ([outputs, collected]);
 	});}
 });
 Object.defineProperty (WalletBalance, '_base', property.call (WalletBalance, WalletBalance._get__base));
@@ -731,7 +913,23 @@ export var MultiSigWalletBalance =  __class__ ('MultiSigWalletBalance', [WalletB
 		}
 		else {
 		}
-		return ConditionMultiSignature (__kwargtrans__ ({unlockhashes: self._owners, min_nr_sig: self._signature_count})).unlockhash.__str__ ();
+		return self.condition.unlockhash.__str__ ();
+	});},
+	get _get_condition () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return ConditionMultiSignature (__kwargtrans__ ({unlockhashes: self._owners, min_nr_sig: self._signature_count}));
 	});},
 	get _get_owners () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -803,10 +1001,63 @@ export var MultiSigWalletBalance =  __class__ ('MultiSigWalletBalance', [WalletB
 			throw __except0__;
 		}
 		return __super__ (MultiSigWalletBalance, 'balance_add') (self, other._base);
+	});},
+	get fund () {return __get__ (this, function (self, amount, source) {
+		if (typeof source == 'undefined' || (source != null && source.hasOwnProperty ("__kwargtrans__"))) {;
+			var source = null;
+		};
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'amount': var amount = __allkwargs0__ [__attrib0__]; break;
+						case 'source': var source = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var refund = self.condition;
+		var address = refund.unlockhash.__str__ ();
+		if (source == null) {
+			var source = address;
+		}
+		else {
+			if (!(isinstance (source, str))) {
+				var __except0__ = py_TypeError ('invalid source: {} ({})'.format (source, py_typeof (source)));
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
+			if (source != address) {
+				var __except0__ = ValueError ("source is of an address different than this multisig' balance' address: {} != {}".format (source, address));
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
+		}
+		var __left0__ = self._fund_individual (amount, [source]);
+		var outputs = __left0__ [0];
+		var collected = __left0__ [1];
+		if (collected.greater_than_or_equal_to (amount)) {
+			return tuple ([(function () {
+				var __accu0__ = [];
+				for (var co of outputs) {
+					__accu0__.append (CoinInput.from_coin_output (co));
+				}
+				return __accu0__;
+			}) (), collected.minus (amount), refund]);
+		}
+		var __except0__ = tferrors.InsufficientFunds ('not enough funds available in the wallet to fund the requested amount');
+		__except0__.__cause__ = null;
+		throw __except0__;
 	});}
 });
 Object.defineProperty (MultiSigWalletBalance, 'signature_count', property.call (MultiSigWalletBalance, MultiSigWalletBalance._get_signature_count));
 Object.defineProperty (MultiSigWalletBalance, 'owners', property.call (MultiSigWalletBalance, MultiSigWalletBalance._get_owners));
+Object.defineProperty (MultiSigWalletBalance, 'condition', property.call (MultiSigWalletBalance, MultiSigWalletBalance._get_condition));
 Object.defineProperty (MultiSigWalletBalance, 'address', property.call (MultiSigWalletBalance, MultiSigWalletBalance._get_address));;
 export var WalletsBalance =  __class__ ('WalletsBalance', [WalletBalance], {
 	__module__: __name__,
@@ -1047,20 +1298,20 @@ export var WalletsBalance =  __class__ ('WalletsBalance', [WalletBalance], {
 					__except0__.__cause__ = null;
 					throw __except0__;
 				}
-				if (value.py_metatype.__eq__ (UnlockHashType.MULTI_SIG)) {
+				if (value.uhtype.__eq__ (UnlockHashType.MULTI_SIG)) {
 					ms_addresses.add (value);
 				}
-				else if (value.py_metatype.__eq__ (UnlockHashType.PUBLIC_KEY)) {
+				else if (value.uhtype.__eq__ (UnlockHashType.PUBLIC_KEY)) {
 					addresses.add (value);
 				}
 				else {
-					var __except0__ = py_TypeError ('cannot add source address with unsupported UnlockHashType {}'.format (value.py_metatype));
+					var __except0__ = py_TypeError ('cannot add source address with unsupported UnlockHashType {}'.format (value.uhtype));
 					__except0__.__cause__ = null;
 					throw __except0__;
 				}
 			}
 			if (len (source) == 1) {
-				if (source [0].py_metatype.__eq__ (UnlockHashType.PUBLIC_KEY)) {
+				if (source [0].uhtype.__eq__ (UnlockHashType.PUBLIC_KEY)) {
 					var refund = ConditionTypes.unlockhash_new (__kwargtrans__ ({unlockhash: source [0]}));
 				}
 				else {
@@ -1116,98 +1367,6 @@ export var WalletsBalance =  __class__ ('WalletsBalance', [WalletBalance], {
 			}
 			return __accu0__;
 		}) (), collected.minus (amount), refund]);
-	});},
-	get _fund_individual () {return __get__ (this, function (self, amount, addresses) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'amount': var amount = __allkwargs0__ [__attrib0__]; break;
-						case 'addresses': var addresses = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		var outputs_available = (function () {
-			var __accu0__ = [];
-			for (var co of self.outputs_available) {
-				if (__in__ (co.condition.unlockhash.__str__ (), addresses)) {
-					__accu0__.append (co);
-				}
-			}
-			return __accu0__;
-		}) ();
-		var sort_output_by_value = function (a, b) {
-			if (arguments.length) {
-				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-					var __allkwargs0__ = arguments [__ilastarg0__--];
-					for (var __attrib0__ in __allkwargs0__) {
-						switch (__attrib0__) {
-							case 'a': var a = __allkwargs0__ [__attrib0__]; break;
-							case 'b': var b = __allkwargs0__ [__attrib0__]; break;
-						}
-					}
-				}
-			}
-			else {
-			}
-			if (a.value.less_than (b.value)) {
-				return -(1);
-			}
-			if (a.value.greater_than (b.value)) {
-				return 1;
-			}
-			return 0;
-		};
-		var outputs_available = jsarr.py_sort (outputs_available, sort_output_by_value);
-		var collected = Currency ();
-		var outputs = [];
-		for (var co of outputs_available) {
-			if (co.value.greater_than_or_equal_to (amount)) {
-				return tuple ([[co], co.value]);
-			}
-			var collected = collected.plus (co.value);
-			outputs.append (co);
-			if (len (outputs) > _MAX_RIVINE_TRANSACTION_INPUTS) {
-				var collected = collected.minus (jsarr.py_pop (outputs, 0).value);
-			}
-			if (collected.greater_than_or_equal_to (amount)) {
-				return tuple ([outputs, collected]);
-			}
-		}
-		if (collected.greater_than_or_equal_to (amount)) {
-			return tuple ([outputs, collected]);
-		}
-		var outputs_available = (function () {
-			var __accu0__ = [];
-			for (var co of self.outputs_unconfirmed_available) {
-				if (__in__ (co.condition.unlockhash.__str__ (), addresses)) {
-					__accu0__.append (co);
-				}
-			}
-			return __accu0__;
-		}) ();
-		var outputs_available = jsarr.py_sort (outputs_available, sort_output_by_value, __kwargtrans__ ({reverse: true}));
-		for (var co of outputs_available) {
-			if (co.value.greater_than_or_equal_to (amount)) {
-				return tuple ([[co], co.value]);
-			}
-			var collected = collected.plus (co.value);
-			outputs.append (co);
-			if (len (outputs) > _MAX_RIVINE_TRANSACTION_INPUTS) {
-				var collected = collected.minus (outputs.py_pop (0).value);
-			}
-			if (collected.greater_than_or_equal_to (amount)) {
-				return tuple ([outputs, collected]);
-			}
-		}
-		return tuple ([outputs, collected]);
 	});},
 	get _fund_multisig () {return __get__ (this, function (self, amount, addresses, outputs, collected) {
 		if (typeof outputs == 'undefined' || (outputs != null && outputs.hasOwnProperty ("__kwargtrans__"))) {;

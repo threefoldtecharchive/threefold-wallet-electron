@@ -10,7 +10,7 @@ import * as ConditionTypes from './tfchain.types.ConditionTypes.js';
 import * as transactions from './tfchain.types.transactions.js';
 import * as FulfillmentTypes from './tfchain.types.FulfillmentTypes.js';
 import {SiaBinaryEncoder} from './tfchain.encoding.siabin.js';
-import {WalletsBalance} from './tfchain.balance.js';
+import {MultiSigWalletBalance, WalletBalance, WalletsBalance} from './tfchain.balance.js';
 import {Type as NetworkType} from './tfchain.network.js';
 import * as tferrors from './tfchain.errors.js';
 import * as tfclient from './tfchain.client.js';
@@ -1174,7 +1174,10 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 				}
 				txn.id = id;
 				if (balance_is_cached) {
-					var addresses = wallet.addresses + balance.addresses_multisig;
+					var addresses = wallet.addresses;
+					if (isinstance (balance, WalletsBalance)) {
+						var addresses = jsarr.concat (addresses, balance.addresses_multisig);
+					}
 					for (var [idx, ci] of enumerate (txn.coin_inputs)) {
 						if (__in__ (ci.parent_output.condition.unlockhash.__str__ (), addresses)) {
 							balance.output_add (txn, idx, __kwargtrans__ ({confirmed: false, spent: true}));
@@ -1192,7 +1195,7 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 			return jsasync.chain (wallet._transaction_put (__kwargtrans__ ({transaction: txn})), id_cb);
 		};
 		if (balance != null) {
-			if (!(isinstance (balance, WalletsBalance))) {
+			if (!(isinstance (balance, WalletBalance))) {
 				var __except0__ = py_TypeError ('balance is of unexpected type: {} ({})'.format (balance, py_typeof (balance)));
 				__except0__.__cause__ = null;
 				throw __except0__;

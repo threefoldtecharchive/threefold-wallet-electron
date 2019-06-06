@@ -256,8 +256,8 @@ class WalletBalance(object):
         """
         if other == None:
             return self
-        if isinstance(other, (WalletsBalance, MultiSigWalletBalance)):
-            return WalletsBalance().balance_add(self).balance_add(other)
+        # if isinstance(other, WalletsBalance) and not isinstance(self, WalletsBalance):
+        #     return WalletsBalance().balance_add(self).balance_add(other)
         if not isinstance(other, WalletBalance):
             raise TypeError("other balance has to be of type wallet balance")
         # another balance is defined, create a new balance that will contain our merge
@@ -339,6 +339,101 @@ class WalletBalance(object):
         # return all created transactions, if any
         return txns
 
+    def fund(self, amount, source=None):
+        """
+        Fund the specified amount with the available outputs of this wallet's balance.
+        """
+        # collect addresses and multisig addresses
+        addresses = set()
+        refund = None
+        if source == None:
+            for co in self.outputs_available:
+                addresses.add(co.condition.unlockhash.__str__())
+            for co in self.outputs_unconfirmed_available:
+                addresses.add(co.condition.unlockhash.__str__())
+        else:
+            # if only one address is given, transform it into an acceptable list
+            if not isinstance(source, list) and not jsobj.is_js_arr(source):
+                if isinstance(source, str):
+                    source = UnlockHash.from_json(source)
+                elif not isinstance(source, UnlockHash):
+                    raise TypeError("cannot add source address from type {}".format(type(source)))
+                source = [source]
+            # add one or multiple personal/multisig addresses
+            for value in source:
+                if isinstance(value, str):
+                    value = UnlockHash.from_json(value)
+                elif not isinstance(value, UnlockHash):
+                    raise TypeError("cannot add source address from type {}".format(type(value)))
+                elif value.uhtype.__eq__(UnlockHashType.PUBLIC_KEY):
+                    addresses.add(value)
+                else:
+                    raise TypeError("cannot add source address with unsupported UnlockHashType {}".format(value.uhtype))
+            if len(source) == 1:
+                if source[0].uhtype.__eq__(UnlockHashType.PUBLIC_KEY):
+                    refund = ConditionTypes.unlockhash_new(unlockhash=source[0])
+
+        # ensure at least one address is defined
+        if len(addresses) == 0:
+            raise tferrors.InsufficientFunds("insufficient funds in this wallet")
+
+        # if personal addresses are given, try to use these first
+        # as these are the easiest kind to deal with
+        if len(addresses) == 0:
+            outputs, collected = ([], Currency()) # start with nothing
+        else:
+            outputs, collected = self._fund_individual(amount, addresses)
+
+        if collected.greater_than_or_equal_to(amount):
+            # if we already have sufficient, we stop now
+            return ([CoinInput.from_coin_output(co) for co in outputs], collected.minus(amount), refund)
+        raise tferrors.InsufficientFunds("not enough funds available in the wallet to fund the requested amount")
+
+    def _fund_individual(self, amount, addresses):
+        outputs_available = [co for co in self.outputs_available if co.condition.unlockhash.__str__() in addresses]
+        def sort_output_by_value(a, b):
+            if a.value.less_than(b.value):
+                return -1
+            if a.value.greater_than(b.value):
+                return 1
+            return 0
+        outputs_available = jsarr.sort(outputs_available, sort_output_by_value)
+
+        collected = Currency()
+        outputs = []
+        # try to fund only with confirmed outputs, if possible
+        for co in outputs_available:
+            if co.value.greater_than_or_equal_to(amount):
+                return [co], co.value
+            collected = collected.plus(co.value)
+            outputs.append(co)
+            if len(outputs) > _MAX_RIVINE_TRANSACTION_INPUTS:
+                # to not reach the input limit
+                collected = collected.minus(jsarr.pop(outputs, 0).value)
+            if collected.greater_than_or_equal_to(amount):
+                return outputs, collected
+
+        if collected.greater_than_or_equal_to(amount):
+            # if we already have sufficient, we stop now
+            return outputs, collected
+
+        # use unconfirmed balance, not ideal, but acceptable
+        outputs_available = [co for co in self.outputs_unconfirmed_available if co.condition.unlockhash.__str__() in addresses]
+        outputs_available = jsarr.sort(outputs_available, sort_output_by_value, reverse=True)
+        for co in outputs_available:
+            if co.value.greater_than_or_equal_to(amount):
+                return [co], co.value
+            collected = collected.plus(co.value)
+            outputs.append(co)
+            if len(outputs) > _MAX_RIVINE_TRANSACTION_INPUTS:
+                # to not reach the input limit
+                collected = collected.minus(outputs.pop(0).value)
+            if collected.greater_than_or_equal_to(amount):
+                return outputs, collected
+
+        # we return whatever we have collected, no matter if it is sufficient
+        return outputs, collected
+
 class MultiSigWalletBalance(WalletBalance):
     def __init__(self, owners, signature_count):
         """
@@ -359,7 +454,11 @@ class MultiSigWalletBalance(WalletBalance):
         """
         The address of this MultiSig Wallet
         """
-        return ConditionMultiSignature(unlockhashes=self._owners, min_nr_sig=self._signature_count).unlockhash.__str__()
+        return self.condition.unlockhash.__str__()
+
+    @property
+    def condition(self):
+        return ConditionMultiSignature(unlockhashes=self._owners, min_nr_sig=self._signature_count)
 
     @property
     def owners(self):
@@ -394,6 +493,27 @@ class MultiSigWalletBalance(WalletBalance):
             raise ValueError("other balance is for a different MultiSignature Wallet, cannot be merged")
         # piggy-back on the super class for the actual merge logic
         return super().balance_add(other._base)
+
+    def fund(self, amount, source=None):
+        """
+        Fund the specified amount with the available outputs of this wallet's balance.
+        """
+        refund = self.condition
+        address = refund.unlockhash.__str__()
+        if source == None:
+            source = address
+        else:
+            if not isinstance(source, str):
+                raise TypeError("invalid source: {} ({})".format(source, type(source)))
+            if source != address:
+                raise ValueError("source is of an address different than this multisig' balance' address: {} != {}".format(source, address))
+
+        outputs, collected = self._fund_individual(amount, [source])
+        if collected.greater_than_or_equal_to(amount):
+            # if we already have sufficient, we stop now
+            return ([CoinInput.from_coin_output(co) for co in outputs], collected.minus(amount), refund)
+        raise tferrors.InsufficientFunds("not enough funds available in the wallet to fund the requested amount")
+
 
 class WalletsBalance(WalletBalance):
     def __init__(self):
@@ -509,21 +629,20 @@ class WalletsBalance(WalletBalance):
                     value = UnlockHash.from_json(value)
                 elif not isinstance(value, UnlockHash):
                     raise TypeError("cannot add source address from type {}".format(type(value)))
-                if value.type.__eq__(UnlockHashType.MULTI_SIG):
+                if value.uhtype.__eq__(UnlockHashType.MULTI_SIG):
                     ms_addresses.add(value)
-                elif value.type.__eq__(UnlockHashType.PUBLIC_KEY):
+                elif value.uhtype.__eq__(UnlockHashType.PUBLIC_KEY):
                     addresses.add(value)
                 else:
-                    raise TypeError("cannot add source address with unsupported UnlockHashType {}".format(value.type))
+                    raise TypeError("cannot add source address with unsupported UnlockHashType {}".format(value.uhtype))
             if len(source) == 1:
-                if source[0].type.__eq__(UnlockHashType.PUBLIC_KEY):
+                if source[0].uhtype.__eq__(UnlockHashType.PUBLIC_KEY):
                     refund = ConditionTypes.unlockhash_new(unlockhash=source[0])
                 else:
                     addr = source[0].__str__()
                     if addr in self.wallets:
                         wallet = self.wallets[addr]
                         refund = ConditionTypes.multi_signature_new(min_nr_sig=wallet.signature_count, unlockhashes=wallet.owners)
-
 
         # ensure at least one address is defined
         if len(addresses) == 0 and len(ms_addresses) == 0:
@@ -550,51 +669,6 @@ class WalletsBalance(WalletBalance):
         if collected.less_than(amount):
             raise tferrors.InsufficientFunds("not enough funds available in the wallets to fund the requested amount")
         return ([CoinInput.from_coin_output(co) for co in outputs], collected.minus(amount), refund)
-
-    def _fund_individual(self, amount, addresses):
-        outputs_available = [co for co in self.outputs_available if co.condition.unlockhash.__str__() in addresses]
-        def sort_output_by_value(a, b):
-            if a.value.less_than(b.value):
-                return -1
-            if a.value.greater_than(b.value):
-                return 1
-            return 0
-        outputs_available = jsarr.sort(outputs_available, sort_output_by_value)
-
-        collected = Currency()
-        outputs = []
-        # try to fund only with confirmed outputs, if possible
-        for co in outputs_available:
-            if co.value.greater_than_or_equal_to(amount):
-                return [co], co.value
-            collected = collected.plus(co.value)
-            outputs.append(co)
-            if len(outputs) > _MAX_RIVINE_TRANSACTION_INPUTS:
-                # to not reach the input limit
-                collected = collected.minus(jsarr.pop(outputs, 0).value)
-            if collected.greater_than_or_equal_to(amount):
-                return outputs, collected
-
-        if collected.greater_than_or_equal_to(amount):
-            # if we already have sufficient, we stop now
-            return outputs, collected
-
-        # use unconfirmed balance, not ideal, but acceptable
-        outputs_available = [co for co in self.outputs_unconfirmed_available if co.condition.unlockhash.__str__() in addresses]
-        outputs_available = jsarr.sort(outputs_available, sort_output_by_value, reverse=True)
-        for co in outputs_available:
-            if co.value.greater_than_or_equal_to(amount):
-                return [co], co.value
-            collected = collected.plus(co.value)
-            outputs.append(co)
-            if len(outputs) > _MAX_RIVINE_TRANSACTION_INPUTS:
-                # to not reach the input limit
-                collected = collected.minus(outputs.pop(0).value)
-            if collected.greater_than_or_equal_to(amount):
-                return outputs, collected
-
-        # we return whatever we have collected, no matter if it is sufficient
-        return outputs, collected
 
     def _fund_multisig(self, amount, addresses, outputs=None, collected=None):
         if outputs == None:

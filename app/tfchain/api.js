@@ -2534,11 +2534,8 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 		}
 		else {
 		}
-		var __left0__ = jsfunc.opts_get (opts, 'source', 'refund', 'data');
-		var source = __left0__ [0];
-		var refund = __left0__ [1];
-		var data = __left0__ [2];
-		return self._builder.send (__kwargtrans__ ({source: source, refund: refund, data: data, balance: self._balance}));
+		var data = jsfunc.opts_get (opts, 'data');
+		return self._builder.send (__kwargtrans__ ({data: data, balance: self._balance}));
 	});}
 });
 export var CachedMultiSignatureCoinTransactionBuilder =  __class__ ('CachedMultiSignatureCoinTransactionBuilder', [object], {
@@ -2610,11 +2607,8 @@ export var CachedMultiSignatureCoinTransactionBuilder =  __class__ ('CachedMulti
 		}
 		else {
 		}
-		var __left0__ = jsfunc.opts_get (opts, 'source', 'refund', 'data');
-		var source = __left0__ [0];
-		var refund = __left0__ [1];
-		var data = __left0__ [2];
-		var p = self._builder.send (__kwargtrans__ ({source: source, refund: refund, data: data, balance: self._balance._tfbalance}));
+		var data = jsfunc.opts_get (opts, 'data');
+		var p = self._builder.send (__kwargtrans__ ({source: self._balance.address, refund: self._balance.address, data: data, balance: self._balance._tfbalance}));
 		if (len (self._co_signers) == 0) {
 			return p;
 		}
@@ -3301,7 +3295,7 @@ export var Balance =  __class__ ('Balance', [object], {
 		var addresses_all = set ();
 		var addresses_all = addresses_all.union (set (self.addresses_all));
 		var addresses_all = addresses_all.union (set (other.addresses_all));
-		return Balance (__kwargtrans__ ({network_type: self._network_type, wallet_name: self._wallet_name, tfbalance: wbalance.WalletBalance ().balance_add (self._tfbalance).balance_add (other._tfbalance), addresses_all: list (addresses_all)}));
+		return Balance (__kwargtrans__ ({network_type: self._network_type, wallet_name: self._wallet_name, tfbalance: self._tfbalance.balance_add (other._tfbalance), addresses_all: list (addresses_all)}));
 	});},
 	get spend_amount_is_valid () {return __get__ (this, function (self, amount) {
 		if (arguments.length) {
@@ -3533,6 +3527,12 @@ export var MultiSignatureBalance =  __class__ ('MultiSignatureBalance', [Balance
 			var args = tuple ();
 		}
 		__super__ (MultiSignatureBalance, '__init__') (self, ...args, __kwargtrans__ (kwargs));
+		if (!(isinstance (self._tfbalance, wbalance.MultiSigWalletBalance))) {
+			jslog.error ('wrong internal tf balance of MultiSignatureBalance');
+			var __except0__ = py_TypeError ('internal tf balance is of a wrong type: {} ({})'.format (self._tfbalance, py_typeof (self._tfbalance)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
 		self._owners = owners;
 		self._signatures_required = signatures_required;
 		var address = multisig_wallet_address_new (self.owners, self.signatures_required);

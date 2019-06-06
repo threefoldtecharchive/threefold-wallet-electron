@@ -7,7 +7,7 @@ import tfchain.client as tfclient
 import tfchain.errors as tferrors
 
 from tfchain.network import Type as NetworkType
-from tfchain.balance import WalletsBalance
+from tfchain.balance import WalletBalance, WalletsBalance, MultiSigWalletBalance
 from tfchain.encoding.siabin import SiaBinaryEncoder
 
 from tfchain.types import ConditionTypes, transactions, FulfillmentTypes
@@ -1819,7 +1819,9 @@ class CoinTransactionBuilder():
                 txn.id = id
                 if balance_is_cached:
                     # if the balance is cached, also update...
-                    addresses = wallet.addresses + balance.addresses_multisig
+                    addresses = wallet.addresses
+                    if isinstance(balance, WalletsBalance):
+                        addresses = jsarr.concat(addresses, balance.addresses_multisig)
                     # ... the balance
                     for idx, ci in enumerate(txn.coin_inputs):
                         if ci.parent_output.condition.unlockhash.__str__() in addresses:
@@ -1834,7 +1836,7 @@ class CoinTransactionBuilder():
             return jsasync.chain(wallet._transaction_put(transaction=txn), id_cb)
 
         if balance != None:
-            if not isinstance(balance, WalletsBalance):
+            if not isinstance(balance, WalletBalance):
                 raise TypeError("balance is of unexpected type: {} ({})".format(balance, type(balance)))
             # if balance is given, execute the balance cb directly
             return balance_cb(balance)
