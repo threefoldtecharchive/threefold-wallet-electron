@@ -12,7 +12,6 @@ const storage = require('electron-json-storage')
 const { shell } = require('electron')
 
 const mapStateToProps = state => ({
-  client: state.client.client,
   loadAccounts: state.loadAccounts,
   error: state.error
 })

@@ -3,7 +3,6 @@ import { connect, Provider } from 'react-redux'
 import React, { Component } from 'react'
 import { ConnectedRouter } from 'connected-react-router'
 import Routes from '../Routes'
-import { Tfchainclient } from '../client/tfchainclient'
 import { setClient, loadAccounts, setBalance, setChainConstants, getTransactionsNotifications, setError } from '../actions'
 
 const os = require('os')
@@ -64,10 +63,6 @@ class Root extends Component {
       if (err) throw err
       loadAccountsFromStorage(Object.values(data))
     })
-
-    // Create tfchainclient and put in store for later usage
-    const tfchainClient = new Tfchainclient()
-    this.props.setClient(tfchainClient)
 
     // Refresh account balance every 1 minutes
     this.intervalID = setInterval(() => {

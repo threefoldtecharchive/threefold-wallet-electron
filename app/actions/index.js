@@ -56,13 +56,6 @@ export const deleteWallet = function (wallet) {
   }
 }
 
-export const setClient = function (client) {
-  return {
-    type: 'SET_CLIENT',
-    client
-  }
-}
-
 export const setChainConstants = function (account) {
   if (account && !(account instanceof Array)) {
     return dispatch => {

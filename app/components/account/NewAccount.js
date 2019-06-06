@@ -10,10 +10,6 @@ import { difference } from 'lodash'
 import * as tfchain from '../../tfchain/api'
 import { toast } from 'react-toastify'
 
-const mapStateToProps = state => ({
-  client: state.client.client
-})
-
 const mapDispatchToProps = (dispatch) => ({
   AddAccount: (account) => {
     dispatch(addAccount(account))
@@ -320,6 +316,6 @@ class NewAccount extends Component {
   }
 }
 export default connect(
-  mapStateToProps,
+  null,
   mapDispatchToProps
 )(NewAccount)
