@@ -139,8 +139,8 @@ class NewMultiSigWallet extends Component {
     const { ownerAddresses, ownerAddressErrors } = this.state
     return ownerAddresses.map((owner, index) => {
       return (
-        <div>
-          <div key={index} style={{ display: 'flex', marginTop: 10 }}>
+        <div key={index} >
+          <div style={{ display: 'flex', marginTop: 10 }}>
             <Input
               error={ownerAddressErrors[index]}
               style={{ background: '#0c111d !important', color: '#7784a9' }}

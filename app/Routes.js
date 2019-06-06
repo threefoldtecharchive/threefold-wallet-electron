@@ -14,7 +14,7 @@ import Transfer from './components/Transfer'
 import Login from './components/home/Login'
 import Sign from './components/transactions/Sign'
 import SignTransaction from './components/transactions/SignTransaction'
-import WalletMultisigNew from './components/wallet/NewMultiSigWallet'
+import WalletMultisigNew from './components/multisigwallet/NewMultiSigWallet'
 
 export default () => (
   <App>

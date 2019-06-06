@@ -70,6 +70,12 @@ class Wallet extends Component {
   }
 
   render () {
+    // If refreshed in development and data in store is deleted, route to account.
+    if ((this.props.balance instanceof Array)) {
+      this.props.history.push(routes.ACCOUNT)
+      return null
+    }
+
     const wallet = this.props.balance.info.balances.filter(w => w.wallet_name === this.props.wallet.wallet_name)[0]
 
     return (

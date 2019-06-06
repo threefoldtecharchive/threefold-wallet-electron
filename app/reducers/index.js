@@ -8,6 +8,7 @@ import { chainConstants } from './chain'
 import { routerLocations } from './router'
 import { balance } from './balance'
 import { transactions } from './transactions'
+import { error } from './error'
 
 export default function createRootReducer (history) {
   return combineReducers({
@@ -19,6 +20,7 @@ export default function createRootReducer (history) {
     chainConstants,
     routerLocations,
     balance,
-    transactions
+    transactions,
+    error
   })
 }

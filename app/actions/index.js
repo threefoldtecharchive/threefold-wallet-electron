@@ -171,3 +171,16 @@ export const clearTransactionJson = function (json) {
     json
   }
 }
+
+export const setError = function (error) {
+  return {
+    type: 'SET_ERROR',
+    error
+  }
+}
+
+export const resetError = function () {
+  return {
+    type: 'RESET_ERROR'
+  }
+}

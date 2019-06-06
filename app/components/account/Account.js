@@ -106,6 +106,9 @@ class Account extends Component {
               content = (
                 <Card.Content>
                   <div>
+                    <Card.Description style={{ position: 'absolute', top: 10, right: 5, left: 310, color: 'white' }}>
+                      <p style={{ fontSize: 14 }}>{w.signatures_required}/{w.owners.length}</p>
+                    </Card.Description>
                     <Icon name='chevron right' style={{ position: 'absolute', right: 20, top: 130, fontSize: 25, opacity: '0.3', color: 'white' }} />
                     <Card.Description style={{ color: 'white', marginTop: 10, marginBottom: 10, fontFamily: 'SF UI Text Light', display: 'flex' }}>
                       <Icon name='unlock' style={{ fontSize: 16, marginLeft: 20 }} /> <p style={{ marginLeft: 30, marginTop: -8 }}>0 TFT</p>
@@ -122,7 +125,7 @@ class Account extends Component {
               )
             }
             return (
-              <Card key={w._wallet_name} style={{ boxShadow: 'none', height: 180, width: 350, marginTop: 0, marginRight: 20, marginBottom: 30, background: 'linear-gradient(90deg, rgba(56,51,186,1) 0%, rgba(102,71,254,1) 100%)' }} onClick={() => this.handleMultiSigWalletClick(w)}>
+              <Card key={w._wallet_name} style={{ boxShadow: 'none', height: 180, width: 350, marginTop: 0, marginRight: 20, marginBottom: 30, background: 'linear-gradient(90deg, rgba(56,51,186,1) 0%, rgba(102,71,254,1) 100%)' }} onClick={() => this.handleWalletClick(w)}>
                 <Dimmer active={content == null}>
                   <Loader />
                 </Dimmer>
@@ -182,6 +185,12 @@ class Account extends Component {
   }
 
   render () {
+    // If refreshed in development and data in store is deleted, route to home.
+    if ((this.props.account instanceof Array)) {
+      this.props.history.push(routes.HOME)
+      return null
+    }
+
     return (
       <div>
         <div data-tid='backButton'>

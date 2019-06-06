@@ -2,15 +2,19 @@
 import { connect } from 'react-redux'
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
-import { Button, Divider } from 'semantic-ui-react'
+import { Button, Divider, Message, Label, Icon } from 'semantic-ui-react'
 import routes from '../../constants/routes'
 import styles from './Home.css'
-import { selectAccount, resetApp } from '../../actions'
+import { selectAccount, resetApp, resetError } from '../../actions'
+import { CopyToClipboard } from 'react-copy-to-clipboard'
+import { toast } from 'react-toastify'
 const storage = require('electron-json-storage')
+const { shell } = require('electron')
 
 const mapStateToProps = state => ({
   client: state.client.client,
-  loadAccounts: state.loadAccounts
+  loadAccounts: state.loadAccounts,
+  error: state.error
 })
 
 const mapDispatchToProps = (dispatch) => ({
@@ -19,6 +23,9 @@ const mapDispatchToProps = (dispatch) => ({
   },
   resetApp: () => {
     dispatch(resetApp())
+  },
+  resetError: (error) => {
+    dispatch(resetError(error))
   }
 })
 
@@ -46,7 +53,38 @@ class Home extends Component {
     const selectedAccount = Object.assign(this.state.accounts[account], { account_name: account })
 
     this.props.selectAccount(selectedAccount)
+    this.props.resetError()
     return this.props.history.push('/login')
+  }
+
+  renderStackTrace = () => {
+    const errorOccured = !(this.props.error instanceof Array)
+    if (errorOccured) {
+      return (
+        <Message
+          error
+          style={{ width: '80%', margin: 'auto' }}
+          onDismiss={() => this.props.resetError()}
+        >
+          <Message.Header>An error occured</Message.Header>
+          <p style={{ fontSize: 12 }}>
+            please copy this error and report on the website below.
+          </p>
+          <CopyToClipboard text={this.props.error.error.stack} onCopy={() => console.log('copied')}>
+            <Label
+              onClick={() => toast('Error copied to clipboard')}
+              style={{ display: 'block', margin: 'auto', width: 200, cursor: 'pointer' }}>
+              <Icon name='clipboard' /> copy error to clipboard
+            </Label>
+          </CopyToClipboard>
+          <p
+            style={{ fontSize: 12, color: 'blue', textTransform: 'underline', cursor: 'pointer' }}
+            onClick={() => shell.openExternal(`https://github.com/threefoldfoundation/tfchain-wallet-electron/issues`)}>
+            https://github.com/threefoldfoundation/tfchain-wallet-electron/issues
+          </p>
+        </Message>
+      )
+    }
   }
 
   renderAccounts = () => {
@@ -82,8 +120,9 @@ class Home extends Component {
 
   render () {
     return (
-      <div className={styles.container} data-tid='container'>
+      <div className={styles.container} style={{ overflow: 'scroll', height: '100vh', padding: 40, marginBottom: 30 }} data-tid='container'>
         <h2 >TF Wallet</h2>
+        {this.renderStackTrace()}
         <div style={{ marginTop: 60 }}>
           {this.renderAccounts()}
         </div>

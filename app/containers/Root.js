@@ -4,7 +4,7 @@ import React, { Component } from 'react'
 import { ConnectedRouter } from 'connected-react-router'
 import Routes from '../Routes'
 import { Tfchainclient } from '../client/tfchainclient'
-import { setClient, loadAccounts, setBalance, setChainConstants, getTransactionsNotifications } from '../actions'
+import { setClient, loadAccounts, setBalance, setChainConstants, getTransactionsNotifications, setError } from '../actions'
 
 const os = require('os')
 const storage = require('electron-json-storage')
@@ -31,10 +31,27 @@ const mapDispatchToProps = (dispatch) => ({
   },
   getTransactionsNotifications: (account) => {
     dispatch(getTransactionsNotifications(account))
+  },
+  setError: (error) => {
+    dispatch(setError(error))
   }
 })
 
 class Root extends Component {
+  constructor (props) {
+    super(props)
+    this.state = { errorOccurred: false }
+  }
+
+  componentDidCatch = (error, info) => {
+    console.log(error)
+    if (error) {
+      this.props.setError(error)
+      this.props.history.push('/home')
+    }
+    this.setState({ errorOccurred: true })
+  }
+
   componentWillMount () {
     // Configure storage
     const dataPath = storage.getDefaultDataPath()
