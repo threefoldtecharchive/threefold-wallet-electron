@@ -324,6 +324,50 @@ class Account:
         # raise KeyError, as wallet could not be found
         raise KeyError("wallet with name {} is not owned by account {}".format(name, self.account_name))
 
+    def multisig_wallet_name_for_multisig_address(self, address):
+        # validate address
+        if not isinstance(address, str):
+            raise TypeError("address has an invalid type: {} ({})".format(address, type(address)))
+        uh = UnlockHash.from_json(address)
+        if uh.uhtype.__ne__(UnlockHashType.MULTI_SIG):
+            raise ValueError("address is not a multisig address: {}".format(address))
+        address = uh.__str__()
+        # get address
+        if address in self._multisig_wallet_info_map:
+            return self._multisig_wallet_info_map[address].wallet_name
+        return None
+
+    def wallet_name_for_address(self, address):
+        # validate address
+        if not isinstance(address, str):
+            raise TypeError("address has an invalid type: {} ({})".format(address, type(address)))
+        uh = UnlockHash.from_json(address)
+        if uh.uhtype.__ne__(UnlockHashType.PUBLIC_KEY):
+            raise ValueError("address is not a multisig address: {}".format(address))
+        address = uh.__str__()
+        # get address
+        for wallet in self._wallets:
+            if address in wallet.addresses:
+                return wallet.wallet_name
+        return None
+
+    def cached_multisig_wallet_for(self, balance):
+        if not isinstance(balance, MultiSignatureBalance):
+            raise TypeError("balance is of an unexpected type: {} ({})".format(balance, type(balance)))
+        # find the wallet for the given name, cache and return
+        # throw an exception in case the wallet could not be found
+        name = balance.wallet_name
+        if name == "" or name == None:
+            name = self.multisig_wallet_name_for_multisig_address(balance.address)
+        wallets = []
+        for owner in balance.owners:
+            owner_wallet_name = self.wallet_name_for_address(owner)
+            if owner_wallet_name == None:
+                continue
+            if owner_wallet_name in self._cached_wallet_balances:
+                wallets.append(self.cached_wallet_for(self._cached_wallet_balances[owner_wallet_name]))
+        return CachedMultiSignatureWallet(self.network_type, name, balance, wallets)
+
     def wallet_new(self, wallet_name, start_index, address_count):
         """
         Create a new wallet with a unique name, and a unique set of addresses.
@@ -561,11 +605,9 @@ class Account:
                                 raise RuntimeError("BUG: ms balance {} could not be merged".format(msbalance.address))
                         else:
                             msbalance_addresses.add(msbalance.address)
-                            try:
-                                winfo = self.multisig_wallet_get(msbalance.address)
-                                msbalance.wallet_name = winfo.wallet_name
-                            except Exception:
-                                pass
+                            wallet_name = self.multisig_wallet_name_for_multisig_address(msbalance.address)
+                            if wallet_name != None:
+                                msbalance.wallet_name = wallet_name
                             msbalances.append(msbalance)
                 # return account balance
                 return AccountBalance(self._network_type, self.account_name, chain_info, balances, msbalances)
@@ -878,30 +920,42 @@ class MultiSignatureWalletStub(BaseWallet):
 
 
 class CachedMultiSignatureWallet(BaseWallet):
-    def __init__(self, network_type, wallet_name, owners, signatures_required):
-        self._wallet_name = None
+    def __init__(self, network_type, wallet_name, balance, wallets):
+        if wallet_name == None:
+            wallet_name = ""
+        elif not isinstance(wallet_name, str):
+            raise TypeError("wallet_name should be of type str, invalid: {}".format(wallet_name))
+        self._wallet_name = wallet_name
         self._network_type = network_type
-        self.wallet_name = wallet_name
-        self._address = multisig_wallet_address_new(owners, signatures_required)
-        self._owners = [owner for owner in owners]
-        self._signatures_required = signatures_required
+        if not isinstance(balance, MultiSignatureBalance):
+            raise TypeError("balance is of wrong type {} ({})".format(balance, type(balance)))
+        self._balance = balance
+        if not isinstance(wallets, list):
+            raise TypeError("wallets is of wrong type {} ({})".format(wallets, type(wallets)))
+        if len(wallets) == 0:
+            jslog.warning("creating a cached multisig wallet {} ({}) without any cached owner wallets, balance:".format(wallet_name, balance.address), balance)
+        else:
+            for wallet in wallets:
+                if not isinstance(wallet, CachedWallet):
+                    raise TypeError("wallets is of wrong type {} ({})".format(wallet, type(wallet)))
+        self._wallets = wallets
 
     def _address_getter(self):
-        return self._address
+        return self._balance.address
+
+    def _addresses_getter(self):
+        return self._balance.addresses
+
+    def _address_count_getter(self):
+        return 1
 
     @property
     def owners(self):
-        def sort_by_uh(a, b):
-            if a < b:
-                return -1
-            if b < a:
-                return 1
-            return 0
-        return jsarr.sort(self._owners, sort_by_uh)
+        return self._balance.owners
 
     @property
     def signatures_required(self):
-        return self._signatures_required
+        return self._balance.signatures_required
 
     def _wallet_name_getter(self):
         return self._wallet_name
@@ -919,18 +973,16 @@ class CachedMultiSignatureWallet(BaseWallet):
         """
         return True
 
-    def _addresses_getter(self):
-        return [self.address]
-
-    def _address_count_getter(self):
-        return 1
-
     def balance_get(self, ChainInfo=None):
-        return MultiSignatureBalance(
-            self.owners,
-            self.signatures_required,
-            self._network_type,
-            self.wallet_name)
+        # TODO: check if we need to use chain_info somehow,
+        #       for now it is ignored
+        return self._balance
+
+    def transaction_new(self):
+        raise RuntimeError("TODO")
+
+    def transaction_sign(self, transaction):
+        raise RuntimeError("TODO")
 
 
 class CoinTransactionBuilder:
