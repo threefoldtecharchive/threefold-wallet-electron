@@ -759,7 +759,7 @@ export var Account =  __class__ ('Account', [object], {
 		}
 		else {
 		}
-		var info = MultiSignatureWalletInfo (py_name, owners, signatures_required);
+		var info = MultiSignatureWalletStub (self.network_type, py_name, owners, signatures_required);
 		if (__in__ (py_name, self._multisig_wallet_info_map)) {
 			var __except0__ = ValueError ('a multisig wallet with the name {} is already stored in this account'.format (py_name));
 			__except0__.__cause__ = null;
@@ -1080,72 +1080,6 @@ Object.defineProperty (Account, 'mnemonic', property.call (Account, Account._get
 Object.defineProperty (Account, 'default_explorer_addresses_used', property.call (Account, Account._get_default_explorer_addresses_used));
 Object.defineProperty (Account, 'account_name', property.call (Account, Account._get_account_name, Account._set_account_name));
 Object.defineProperty (Account, 'previous_account_name', property.call (Account, Account._get_previous_account_name));;
-export var MultiSignatureWalletAddressNamePair =  __class__ ('MultiSignatureWalletAddressNamePair', [object], {
-	__module__: __name__,
-	get __init__ () {return __get__ (this, function (self, address, py_name) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'address': var address = __allkwargs0__ [__attrib0__]; break;
-						case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (!(isinstance (address, str)) || address == '') {
-			var __except0__ = py_TypeError ('address has to be a non-empty str, invalid {} ({})'.format (address, py_typeof (address)));
-			__except0__.__cause__ = null;
-			throw __except0__;
-		}
-		self._address = address;
-		if (!(isinstance (py_name, str)) || py_name == '') {
-			var __except0__ = py_TypeError ('name has to be a non-empty str, invalid {} ({})'.format (py_name, py_typeof (py_name)));
-			__except0__.__cause__ = null;
-			throw __except0__;
-		}
-		self._name = py_name;
-	});},
-	get _get_address () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		return self._address;
-	});},
-	get _get_name () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		return self._name;
-	});}
-});
-Object.defineProperty (MultiSignatureWalletAddressNamePair, 'name', property.call (MultiSignatureWalletAddressNamePair, MultiSignatureWalletAddressNamePair._get_name));
-Object.defineProperty (MultiSignatureWalletAddressNamePair, 'address', property.call (MultiSignatureWalletAddressNamePair, MultiSignatureWalletAddressNamePair._get_address));;
 export var _create_account_wallet_balance_result_cb = function (index) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -1178,7 +1112,297 @@ export var _create_account_wallet_balance_result_cb = function (index) {
 	};
 	return cb;
 };
-export var Wallet =  __class__ ('Wallet', [object], {
+export var BaseWallet =  __class__ ('BaseWallet', [object], {
+	__module__: __name__,
+	get _get_is_cached () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._is_cached_getter ();
+	});},
+	get _is_cached_getter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var __except0__ = NotImplementedError ('_is_cached_getter is not implemented');
+		__except0__.__cause__ = null;
+		throw __except0__;
+	});},
+	get _get_wallet_name () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._wallet_name_getter ();
+	});},
+	get _wallet_name_getter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var __except0__ = NotImplementedError ('_wallet_name_getter is not implemented');
+		__except0__.__cause__ = null;
+		throw __except0__;
+	});},
+	get _set_wallet_name () {return __get__ (this, function (self, value) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		self._wallet_name_setter (value);
+	});},
+	get _wallet_name_setter () {return __get__ (this, function (self, value) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var __except0__ = NotImplementedError ('_wallet_name_setter is not implemented');
+		__except0__.__cause__ = null;
+		throw __except0__;
+	});},
+	get _get_address () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._address_getter ();
+	});},
+	get _address_getter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var __except0__ = NotImplementedError ('_address_getter is not implemented');
+		__except0__.__cause__ = null;
+		throw __except0__;
+	});},
+	get _get_addresses () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._addresses_getter ();
+	});},
+	get _addresses_getter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var __except0__ = NotImplementedError ('_addresses_getter is not implemented');
+		__except0__.__cause__ = null;
+		throw __except0__;
+	});},
+	get _get_address_count () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._address_count_getter ();
+	});},
+	get _address_count_getter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var __except0__ = NotImplementedError ('_address_count_getter is not implemented');
+		__except0__.__cause__ = null;
+		throw __except0__;
+	});},
+	get _get_balance () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self.balance_get ();
+	});},
+	get balance_get () {return __get__ (this, function (self, chain_info) {
+		if (typeof chain_info == 'undefined' || (chain_info != null && chain_info.hasOwnProperty ("__kwargtrans__"))) {;
+			var chain_info = null;
+		};
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'chain_info': var chain_info = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var __except0__ = NotImplementedError ('balance_get is not implemented');
+		__except0__.__cause__ = null;
+		throw __except0__;
+	});},
+	get transaction_new () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var __except0__ = NotImplementedError ('transaction_new is not implemented');
+		__except0__.__cause__ = null;
+		throw __except0__;
+	});},
+	get transaction_sign () {return __get__ (this, function (self, transaction) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'transaction': var transaction = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var __except0__ = NotImplementedError ('transaction_sign is not implemented');
+		__except0__.__cause__ = null;
+		throw __except0__;
+	});}
+});
+Object.defineProperty (BaseWallet, 'balance', property.call (BaseWallet, BaseWallet._get_balance));
+Object.defineProperty (BaseWallet, 'address_count', property.call (BaseWallet, BaseWallet._get_address_count));
+Object.defineProperty (BaseWallet, 'addresses', property.call (BaseWallet, BaseWallet._get_addresses));
+Object.defineProperty (BaseWallet, 'address', property.call (BaseWallet, BaseWallet._get_address));
+Object.defineProperty (BaseWallet, 'wallet_name', property.call (BaseWallet, BaseWallet._get_wallet_name, BaseWallet._set_wallet_name));
+Object.defineProperty (BaseWallet, 'is_cached', property.call (BaseWallet, BaseWallet._get_is_cached));;
+export var Wallet =  __class__ ('Wallet', [BaseWallet], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, network_type, explorer_client, wallet_index, wallet_name, start_index, pairs) {
 		if (arguments.length) {
@@ -1227,22 +1451,6 @@ export var Wallet =  __class__ ('Wallet', [object], {
 			return __accu0__;
 		}) ());
 	});},
-	get _get_is_cached () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		return self._is_cached_getter ();
-	});},
 	get _is_cached_getter () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -1275,7 +1483,7 @@ export var Wallet =  __class__ ('Wallet', [object], {
 		}
 		return self._wallet_index;
 	});},
-	get _get_wallet_name () {return __get__ (this, function (self) {
+	get _wallet_name_getter () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -1307,7 +1515,7 @@ export var Wallet =  __class__ ('Wallet', [object], {
 		}
 		return self._start_index;
 	});},
-	get _get_address () {return __get__ (this, function (self) {
+	get _address_getter () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -1323,7 +1531,7 @@ export var Wallet =  __class__ ('Wallet', [object], {
 		}
 		return self._tfwallet.address;
 	});},
-	get _get_addresses () {return __get__ (this, function (self) {
+	get _addresses_getter () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -1339,7 +1547,7 @@ export var Wallet =  __class__ ('Wallet', [object], {
 		}
 		return self._tfwallet.addresses;
 	});},
-	get _get_address_count () {return __get__ (this, function (self) {
+	get _address_count_getter () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -1354,22 +1562,6 @@ export var Wallet =  __class__ ('Wallet', [object], {
 		else {
 		}
 		return self._tfwallet.address_count;
-	});},
-	get _get_balance () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		return self.balance_get ();
 	});},
 	get balance_get () {return __get__ (this, function (self, chain_info) {
 		if (typeof chain_info == 'undefined' || (chain_info != null && chain_info.hasOwnProperty ("__kwargtrans__"))) {;
@@ -1454,14 +1646,8 @@ export var Wallet =  __class__ ('Wallet', [object], {
 		return self._tfwallet.transaction_sign (__kwargtrans__ ({txn: transaction, submit: true}));
 	});}
 });
-Object.defineProperty (Wallet, 'balance', property.call (Wallet, Wallet._get_balance));
-Object.defineProperty (Wallet, 'address_count', property.call (Wallet, Wallet._get_address_count));
-Object.defineProperty (Wallet, 'addresses', property.call (Wallet, Wallet._get_addresses));
-Object.defineProperty (Wallet, 'address', property.call (Wallet, Wallet._get_address));
 Object.defineProperty (Wallet, 'start_index', property.call (Wallet, Wallet._get_start_index));
-Object.defineProperty (Wallet, 'wallet_name', property.call (Wallet, Wallet._get_wallet_name));
-Object.defineProperty (Wallet, 'wallet_index', property.call (Wallet, Wallet._get_wallet_index));
-Object.defineProperty (Wallet, 'is_cached', property.call (Wallet, Wallet._get_is_cached));;
+Object.defineProperty (Wallet, 'wallet_index', property.call (Wallet, Wallet._get_wallet_index));;
 export var CachedWallet =  __class__ ('CachedWallet', [Wallet], {
 	__module__: __name__,
 	get from_wallet () {return __getcm__ (this, function (cls, wallet, balance) {
@@ -1590,6 +1776,442 @@ export var CachedWallet =  __class__ ('CachedWallet', [Wallet], {
 		return self._tfwallet.transaction_sign (__kwargtrans__ ({txn: transaction, submit: true, balance: self._balance._tfbalance}));
 	});}
 });
+export var MultiSignatureWalletStub =  __class__ ('MultiSignatureWalletStub', [BaseWallet], {
+	__module__: __name__,
+	get __init__ () {return __get__ (this, function (self, network_type, wallet_name, owners, signatures_required) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'network_type': var network_type = __allkwargs0__ [__attrib0__]; break;
+						case 'wallet_name': var wallet_name = __allkwargs0__ [__attrib0__]; break;
+						case 'owners': var owners = __allkwargs0__ [__attrib0__]; break;
+						case 'signatures_required': var signatures_required = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		self._wallet_name = null;
+		self._network_type = network_type;
+		self.wallet_name = wallet_name;
+		self._address = multisig_wallet_address_new (owners, signatures_required);
+		self._owners = (function () {
+			var __accu0__ = [];
+			for (var owner of owners) {
+				__accu0__.append (owner);
+			}
+			return __accu0__;
+		}) ();
+		self._signatures_required = signatures_required;
+	});},
+	get _address_getter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._address;
+	});},
+	get _get_owners () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var sort_by_uh = function (a, b) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'a': var a = __allkwargs0__ [__attrib0__]; break;
+							case 'b': var b = __allkwargs0__ [__attrib0__]; break;
+						}
+					}
+				}
+			}
+			else {
+			}
+			if (a < b) {
+				return -(1);
+			}
+			if (b < a) {
+				return 1;
+			}
+			return 0;
+		};
+		return jsarr.py_sort (self._owners, sort_by_uh);
+	});},
+	get _get_signatures_required () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._signatures_required;
+	});},
+	get _wallet_name_getter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._wallet_name;
+	});},
+	get _wallet_name_setter () {return __get__ (this, function (self, value) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (!(isinstance (value, str))) {
+			var __except0__ = py_TypeError ('wallet_name has to be a non-empty str, not be {} ({})'.format (value, py_typeof (value)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		if (value == '') {
+			var __except0__ = ValueError ('wallet_name cannot be an empty str');
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		self._wallet_name = value;
+	});},
+	get _is_cached_getter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return true;
+	});},
+	get _addresses_getter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return [self.address];
+	});},
+	get _address_count_getter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return 1;
+	});},
+	get balance_get () {return __get__ (this, function (self, ChainInfo) {
+		if (typeof ChainInfo == 'undefined' || (ChainInfo != null && ChainInfo.hasOwnProperty ("__kwargtrans__"))) {;
+			var ChainInfo = null;
+		};
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'ChainInfo': var ChainInfo = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return MultiSignatureBalance (self.owners, self.signatures_required, self._network_type, self.wallet_name);
+	});}
+});
+Object.defineProperty (MultiSignatureWalletStub, 'signatures_required', property.call (MultiSignatureWalletStub, MultiSignatureWalletStub._get_signatures_required));
+Object.defineProperty (MultiSignatureWalletStub, 'owners', property.call (MultiSignatureWalletStub, MultiSignatureWalletStub._get_owners));;
+export var CachedMultiSignatureWallet =  __class__ ('CachedMultiSignatureWallet', [BaseWallet], {
+	__module__: __name__,
+	get __init__ () {return __get__ (this, function (self, network_type, wallet_name, owners, signatures_required) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'network_type': var network_type = __allkwargs0__ [__attrib0__]; break;
+						case 'wallet_name': var wallet_name = __allkwargs0__ [__attrib0__]; break;
+						case 'owners': var owners = __allkwargs0__ [__attrib0__]; break;
+						case 'signatures_required': var signatures_required = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		self._wallet_name = null;
+		self._network_type = network_type;
+		self.wallet_name = wallet_name;
+		self._address = multisig_wallet_address_new (owners, signatures_required);
+		self._owners = (function () {
+			var __accu0__ = [];
+			for (var owner of owners) {
+				__accu0__.append (owner);
+			}
+			return __accu0__;
+		}) ();
+		self._signatures_required = signatures_required;
+	});},
+	get _address_getter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._address;
+	});},
+	get _get_owners () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var sort_by_uh = function (a, b) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'a': var a = __allkwargs0__ [__attrib0__]; break;
+							case 'b': var b = __allkwargs0__ [__attrib0__]; break;
+						}
+					}
+				}
+			}
+			else {
+			}
+			if (a < b) {
+				return -(1);
+			}
+			if (b < a) {
+				return 1;
+			}
+			return 0;
+		};
+		return jsarr.py_sort (self._owners, sort_by_uh);
+	});},
+	get _get_signatures_required () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._signatures_required;
+	});},
+	get _wallet_name_getter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._wallet_name;
+	});},
+	get _wallet_name_setter () {return __get__ (this, function (self, value) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (!(isinstance (value, str))) {
+			var __except0__ = py_TypeError ('wallet_name has to be a non-empty str, not be {} ({})'.format (value, py_typeof (value)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		if (value == '') {
+			var __except0__ = ValueError ('wallet_name cannot be an empty str');
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		self._wallet_name = value;
+	});},
+	get _is_cached_getter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return true;
+	});},
+	get _addresses_getter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return [self.address];
+	});},
+	get _address_count_getter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return 1;
+	});},
+	get balance_get () {return __get__ (this, function (self, ChainInfo) {
+		if (typeof ChainInfo == 'undefined' || (ChainInfo != null && ChainInfo.hasOwnProperty ("__kwargtrans__"))) {;
+			var ChainInfo = null;
+		};
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'ChainInfo': var ChainInfo = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return MultiSignatureBalance (self.owners, self.signatures_required, self._network_type, self.wallet_name);
+	});}
+});
+Object.defineProperty (CachedMultiSignatureWallet, 'signatures_required', property.call (CachedMultiSignatureWallet, CachedMultiSignatureWallet._get_signatures_required));
+Object.defineProperty (CachedMultiSignatureWallet, 'owners', property.call (CachedMultiSignatureWallet, CachedMultiSignatureWallet._get_owners));;
 export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [object], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, wallet) {
@@ -3014,156 +3636,6 @@ Object.defineProperty (TransactionView, 'timestamp', property.call (TransactionV
 Object.defineProperty (TransactionView, 'height', property.call (TransactionView, TransactionView._get_height));
 Object.defineProperty (TransactionView, 'confirmed', property.call (TransactionView, TransactionView._get_confirmed));
 Object.defineProperty (TransactionView, 'identifier', property.call (TransactionView, TransactionView._get_identifier));;
-export var MultiSignatureWalletInfo =  __class__ ('MultiSignatureWalletInfo', [object], {
-	__module__: __name__,
-	get __init__ () {return __get__ (this, function (self, wallet_name, owners, signatures_required) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'wallet_name': var wallet_name = __allkwargs0__ [__attrib0__]; break;
-						case 'owners': var owners = __allkwargs0__ [__attrib0__]; break;
-						case 'signatures_required': var signatures_required = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		self._wallet_name = null;
-		self.wallet_name = wallet_name;
-		self._address = multisig_wallet_address_new (owners, signatures_required);
-		self._owners = (function () {
-			var __accu0__ = [];
-			for (var owner of owners) {
-				__accu0__.append (owner);
-			}
-			return __accu0__;
-		}) ();
-		self._signatures_required = signatures_required;
-	});},
-	get _get_address () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		return self._address;
-	});},
-	get _get_owners () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		var sort_by_uh = function (a, b) {
-			if (arguments.length) {
-				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-					var __allkwargs0__ = arguments [__ilastarg0__--];
-					for (var __attrib0__ in __allkwargs0__) {
-						switch (__attrib0__) {
-							case 'a': var a = __allkwargs0__ [__attrib0__]; break;
-							case 'b': var b = __allkwargs0__ [__attrib0__]; break;
-						}
-					}
-				}
-			}
-			else {
-			}
-			if (a < b) {
-				return -(1);
-			}
-			if (b < a) {
-				return 1;
-			}
-			return 0;
-		};
-		return jsarr.py_sort (self._owners, sort_by_uh);
-	});},
-	get _get_signatures_required () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		return self._signatures_required;
-	});},
-	get _get_wallet_name () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		return self._wallet_name;
-	});},
-	get _set_wallet_name () {return __get__ (this, function (self, value) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (!(isinstance (value, str))) {
-			var __except0__ = py_TypeError ('wallet_name has to be a non-empty str, not be {} ({})'.format (value, py_typeof (value)));
-			__except0__.__cause__ = null;
-			throw __except0__;
-		}
-		if (value == '') {
-			var __except0__ = ValueError ('wallet_name cannot be an empty str');
-			__except0__.__cause__ = null;
-			throw __except0__;
-		}
-		self._wallet_name = value;
-	});}
-});
-Object.defineProperty (MultiSignatureWalletInfo, 'wallet_name', property.call (MultiSignatureWalletInfo, MultiSignatureWalletInfo._get_wallet_name, MultiSignatureWalletInfo._set_wallet_name));
-Object.defineProperty (MultiSignatureWalletInfo, 'signatures_required', property.call (MultiSignatureWalletInfo, MultiSignatureWalletInfo._get_signatures_required));
-Object.defineProperty (MultiSignatureWalletInfo, 'owners', property.call (MultiSignatureWalletInfo, MultiSignatureWalletInfo._get_owners));
-Object.defineProperty (MultiSignatureWalletInfo, 'address', property.call (MultiSignatureWalletInfo, MultiSignatureWalletInfo._get_address));;
 export var WalletOutputAggregator =  __class__ ('WalletOutputAggregator', [object], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, addresses) {

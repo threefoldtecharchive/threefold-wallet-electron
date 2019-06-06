@@ -429,7 +429,7 @@ class Account:
 
     def multisig_wallet_new(self, name, owners, signatures_required):
         # create the wallet info (also validates the parameters)
-        info = MultiSignatureWalletInfo(name, owners, signatures_required)
+        info = MultiSignatureWalletStub(self.network_type, name, owners, signatures_required)
         # ensure the name is not yet used
         if name in self._multisig_wallet_info_map:
             raise ValueError("a multisig wallet with the name {} is already stored in this account".format(name))
@@ -581,29 +581,94 @@ class Account:
             return jsasync.chain(jsasync.promise_pool_new(generator), aggregate)
         return jsasync.chain(self.chain_info_get(), aggregate_cb)
 
-class MultiSignatureWalletAddressNamePair:
-    def __init__(self, address, name):
-        if not isinstance(address, str) or address == "":
-            raise TypeError("address has to be a non-empty str, invalid {} ({})".format(address, type(address)))
-        self._address = address
-        if not isinstance(name, str) or name == "":
-            raise TypeError("name has to be a non-empty str, invalid {} ({})".format(name, type(name)))
-        self._name = name
-
-    @property
-    def address(self):
-        return self._address
-
-    @property
-    def name(self):
-        return self._name
 
 def _create_account_wallet_balance_result_cb(index):
     def cb(balance):
         return (index, balance)
     return cb
 
-class Wallet:
+
+class BaseWallet:
+    @property
+    def is_cached(self):
+        """
+        :returns: True if this wallet is cached, False otherwise
+        :rtype: bool
+        """
+        return self._is_cached_getter()
+    def _is_cached_getter(self):
+        raise NotImplementedError("_is_cached_getter is not implemented")
+
+    @property
+    def wallet_name(self):
+        """
+        :returns: the name of the wallet, a human-friendly lable
+        :rtype: str
+        """
+        return self._wallet_name_getter()
+    def _wallet_name_getter(self):
+        raise NotImplementedError("_wallet_name_getter is not implemented")
+    @wallet_name.setter
+    def wallet_name(self, value):
+        self._wallet_name_setter(value)
+    def _wallet_name_setter(self, value):
+        raise NotImplementedError("_wallet_name_setter is not implemented")
+
+    @property
+    def address(self):
+        """
+        :returns: the first (default) address of this wallet
+        :rtype: str
+        """
+        return self._address_getter()
+    def _address_getter(self):
+        raise NotImplementedError("_address_getter is not implemented")
+
+    @property
+    def addresses(self):
+        """
+        :returns: the addresses of this wallet
+        :rtype: list (of sts)
+        """
+        return self._addresses_getter()
+    def _addresses_getter(self):
+        raise NotImplementedError("_addresses_getter is not implemented")
+
+    @property
+    def address_count(self):
+        """
+        :returns: the address count of this wallet
+        :rtype: int
+        """
+        return self._address_count_getter()
+    def _address_count_getter(self):
+        raise NotImplementedError("_address_count_getter is not implemented")
+
+    @property
+    def balance(self):
+        """
+        :returns: the current balance of this wallet (async)
+        :rtype: Balance
+        """
+        return self.balance_get()
+
+    def balance_get(self, chain_info=None):
+        raise NotImplementedError("balance_get is not implemented")
+
+    def transaction_new(self):
+        """
+        :returns: a transaction builder that allows for the building of transactions
+        """
+        raise NotImplementedError("transaction_new is not implemented")
+
+    def transaction_sign(self, transaction):
+        """
+        :returns: signs an existing transaction
+        """
+        raise NotImplementedError("transaction_sign is not implemented")
+
+
+class Wallet(BaseWallet):
     """
     A wallet is identified by one or multiple addresses (derived from assymetric key pairs),
     and is recognised by humans using a human-friendly label.
@@ -648,14 +713,6 @@ class Wallet:
             [pair for pair in self._tfwallet.pairs],
         )
 
-    @property
-    def is_cached(self):
-        """
-        :returns: True if this wallet is cached, False otherwise
-        :rtype: bool
-        """
-        return self._is_cached_getter()
-
     def _is_cached_getter(self):
         return False
 
@@ -667,12 +724,7 @@ class Wallet:
         """
         return self._wallet_index
 
-    @property
-    def wallet_name(self):
-        """
-        :returns: the name of the wallet, a human-friendly lable
-        :rtype: str
-        """
+    def _wallet_name_getter(self):
         return self._wallet_name
 
     @property
@@ -683,37 +735,14 @@ class Wallet:
         """
         return self._start_index
 
-    @property
-    def address(self):
-        """
-        :returns: the first (default) address of this wallet
-        :rtype: str
-        """
+    def _address_getter(self):
         return self._tfwallet.address
 
-    @property
-    def addresses(self):
-        """
-        :returns: the addresses of this wallet
-        :rtype: list (of sts)
-        """
+    def _addresses_getter(self):
         return self._tfwallet.addresses
 
-    @property
-    def address_count(self):
-        """
-        :returns: the address count of this wallet
-        :rtype: int
-        """
+    def _address_count_getter(self):
         return self._tfwallet.address_count
-
-    @property
-    def balance(self):
-        """
-        :returns: the current balance of this wallet (async)
-        :rtype: Balance
-        """
-        return self.balance_get()
 
     def balance_get(self, chain_info=None):
         wallet = self.clone()
@@ -790,6 +819,118 @@ class CachedWallet(Wallet):
         if isinstance(transaction, str):
            transaction = jsjson.json_loads(transaction) 
         return self._tfwallet.transaction_sign(txn=transaction, submit=True, balance=self._balance._tfbalance)
+
+
+class MultiSignatureWalletStub(BaseWallet):
+    def __init__(self, network_type, wallet_name, owners, signatures_required):
+        self._wallet_name = None
+        self._network_type = network_type
+        self.wallet_name = wallet_name
+        self._address = multisig_wallet_address_new(owners, signatures_required)
+        self._owners = [owner for owner in owners]
+        self._signatures_required = signatures_required
+
+    def _address_getter(self):
+        return self._address
+
+    @property
+    def owners(self):
+        def sort_by_uh(a, b):
+            if a < b:
+                return -1
+            if b < a:
+                return 1
+            return 0
+        return jsarr.sort(self._owners, sort_by_uh)
+
+    @property
+    def signatures_required(self):
+        return self._signatures_required
+
+    def _wallet_name_getter(self):
+        return self._wallet_name
+    def _wallet_name_setter(self, value):
+        if not isinstance(value, str):
+            raise TypeError("wallet_name has to be a non-empty str, not be {} ({})".format(value, type(value)))
+        if value == "":
+            raise ValueError("wallet_name cannot be an empty str")
+        self._wallet_name = value
+
+    def _is_cached_getter(self):
+        """
+        :returns: True if this wallet is cached, False otherwise
+        :rtype: bool
+        """
+        return True
+
+    def _addresses_getter(self):
+        return [self.address]
+
+    def _address_count_getter(self):
+        return 1
+
+    def balance_get(self, ChainInfo=None):
+        return MultiSignatureBalance(
+            self.owners,
+            self.signatures_required,
+            self._network_type,
+            self.wallet_name)
+
+
+class CachedMultiSignatureWallet(BaseWallet):
+    def __init__(self, network_type, wallet_name, owners, signatures_required):
+        self._wallet_name = None
+        self._network_type = network_type
+        self.wallet_name = wallet_name
+        self._address = multisig_wallet_address_new(owners, signatures_required)
+        self._owners = [owner for owner in owners]
+        self._signatures_required = signatures_required
+
+    def _address_getter(self):
+        return self._address
+
+    @property
+    def owners(self):
+        def sort_by_uh(a, b):
+            if a < b:
+                return -1
+            if b < a:
+                return 1
+            return 0
+        return jsarr.sort(self._owners, sort_by_uh)
+
+    @property
+    def signatures_required(self):
+        return self._signatures_required
+
+    def _wallet_name_getter(self):
+        return self._wallet_name
+    def _wallet_name_setter(self, value):
+        if not isinstance(value, str):
+            raise TypeError("wallet_name has to be a non-empty str, not be {} ({})".format(value, type(value)))
+        if value == "":
+            raise ValueError("wallet_name cannot be an empty str")
+        self._wallet_name = value
+
+    def _is_cached_getter(self):
+        """
+        :returns: True if this wallet is cached, False otherwise
+        :rtype: bool
+        """
+        return True
+
+    def _addresses_getter(self):
+        return [self.address]
+
+    def _address_count_getter(self):
+        return 1
+
+    def balance_get(self, ChainInfo=None):
+        return MultiSignatureBalance(
+            self.owners,
+            self.signatures_required,
+            self._network_type,
+            self.wallet_name)
 
 
 class CoinTransactionBuilder:
@@ -1307,44 +1448,6 @@ class TransactionView:
         :rtype: list of CoinOutputViews
         """
         return self._outputs
-
-
-class MultiSignatureWalletInfo:
-    def __init__(self, wallet_name, owners, signatures_required):
-        self._wallet_name = None
-        self.wallet_name = wallet_name
-        self._address = multisig_wallet_address_new(owners, signatures_required)
-        self._owners = [owner for owner in owners]
-        self._signatures_required = signatures_required
-
-    @property
-    def address(self):
-        return self._address
-
-    @property
-    def owners(self):
-        def sort_by_uh(a, b):
-            if a < b:
-                return -1
-            if b < a:
-                return 1
-            return 0
-        return jsarr.sort(self._owners, sort_by_uh)
-
-    @property
-    def signatures_required(self):
-        return self._signatures_required
-
-    @property
-    def wallet_name(self):
-        return self._wallet_name
-    @wallet_name.setter
-    def wallet_name(self, value):
-        if not isinstance(value, str):
-            raise TypeError("wallet_name has to be a non-empty str, not be {} ({})".format(value, type(value)))
-        if value == "":
-            raise ValueError("wallet_name cannot be an empty str")
-        self._wallet_name = value
 
 
 class WalletOutputAggregator:
