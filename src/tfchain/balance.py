@@ -1,5 +1,6 @@
 import tfchain.polyfill.encoding.object as jsobj
 import tfchain.polyfill.array as jsarr
+import tfchain.polyfill.log as jslog
 
 import tfchain.errors as tferrors
 
@@ -386,10 +387,10 @@ class MultiSigWalletBalance(WalletBalance):
             return self
         if not isinstance(other, MultiSigWalletBalance):
             if isinstance(other, (WalletBalance, WalletsBalance)):
-                return WalletsBalance().balance_add(self).balance_add(self)
+                return WalletsBalance().balance_add(self).balance_add(other)
             # can only merge 2 multi-signature wallet balances
             raise TypeError("other balance has to be of type multi-signature wallet balance")
-        if self.address != other.addres:
+        if self.address != other.address:
             raise ValueError("other balance is for a different MultiSignature Wallet, cannot be merged")
         # piggy-back on the super class for the actual merge logic
         return super().balance_add(other._base)
@@ -479,8 +480,7 @@ class WalletsBalance(WalletBalance):
         if address not in self._wallets:
             self._wallets[address] = balance
             return
-        # TODO: FIX
-        # self._wallets[address] = self._wallets[address].merge(balance)
+        self._wallets[address] = self._wallets[address].balance_add(balance)
 
     def fund(self, amount, source=None):
         """
@@ -514,7 +514,7 @@ class WalletsBalance(WalletBalance):
                 elif value.type.__eq__(UnlockHashType.PUBLIC_KEY):
                     addresses.add(value)
                 else:
-                    raise TypeError("cannot add source addres with unsupported UnlockHashType {}".format(value.type))
+                    raise TypeError("cannot add source address with unsupported UnlockHashType {}".format(value.type))
             if len(source) == 1:
                 if source[0].type.__eq__(UnlockHashType.PUBLIC_KEY):
                     refund = ConditionTypes.unlockhash_new(unlockhash=source[0])

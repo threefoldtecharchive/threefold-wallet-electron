@@ -1522,7 +1522,7 @@ export var ExplorerUnlockhashResult =  __class__ ('ExplorerUnlockhashResult', [o
 		}
 		else {
 		}
-		if (self._unlockhash.py_metatype == UnlockHashType.MULTI_SIG) {
+		if (self._unlockhash.uhtype.__eq__ (UnlockHashType.MULTI_SIG)) {
 			var balance = self._multisig_balance (info);
 		}
 		else {
@@ -1603,7 +1603,7 @@ export var ExplorerUnlockhashResult =  __class__ ('ExplorerUnlockhashResult', [o
 					balance.output_add (txn, index, __kwargtrans__ ({confirmed: !(txn.unconfirmed), spent: false}));
 				}
 			}
-			if (isinstance (txn, TransactionV128)) {
+			if (isinstance (txn, TransactionV128) && balance == null) {
 				var oc = txn.mint_condition;
 				var balance = MultiSigWalletBalance (__kwargtrans__ ({owners: oc.unlockhashes, signature_count: oc.required_signatures}));
 			}

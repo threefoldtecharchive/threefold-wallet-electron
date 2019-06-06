@@ -689,7 +689,7 @@ class ExplorerUnlockhashResult():
         Compute a balance report for the defined unlockhash,
         based on the transactions of this report.
         """
-        if self._unlockhash.type == UnlockHashType.MULTI_SIG:
+        if self._unlockhash.uhtype.__eq__(UnlockHashType.MULTI_SIG):
             balance = self._multisig_balance(info)
         else:
             balance = WalletsBalance()
@@ -733,7 +733,7 @@ class ExplorerUnlockhashResult():
                     if balance == None:
                         balance = MultiSigWalletBalance(owners=oc.unlockhashes, signature_count=oc.required_signatures)
                     balance.output_add(txn, index, confirmed=(not txn.unconfirmed), spent=False)
-            if isinstance(txn, TransactionV128):
+            if isinstance(txn, TransactionV128) and balance == None:
                 oc = txn.mint_condition
                 balance = MultiSigWalletBalance(owners=oc.unlockhashes, signature_count=oc.required_signatures)
         if balance == None:
@@ -981,8 +981,8 @@ class TFChainMinterClient():
 #             unlockhash = UnlockHash.from_json(unlockhash)
 #         elif not isinstance(unlockhash, UnlockHash):
 #             raise TypeError("{} is not a valid type and cannot be used as unlock hash".format(type(unlockhash)))
-#         if unlockhash.type != UnlockHashType.PUBLIC_KEY:
-#             raise TypeError("only person wallet addresses cannot be registered as withdrawel addresses: {} is an invalid unlock hash type".format(unlockhash.type))
+#         if unlockhash.uhtype.__ne__(UnlockHashType.PUBLIC_KEY):
+#             raise TypeError("only person wallet addresses cannot be registered as withdrawel addresses: {} is an invalid unlock hash type".format(unlockhash.uhtype))
     
 #         endpoint = "/explorer/hashes/"+str(unlockhash)
 #         resp = self._client.explorer_get(endpoint=endpoint)

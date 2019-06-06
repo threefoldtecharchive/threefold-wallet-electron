@@ -5,6 +5,7 @@ import {Currency, Hash} from './tfchain.types.PrimitiveTypes.js';
 import * as ConditionTypes from './tfchain.types.ConditionTypes.js';
 import * as transactions from './tfchain.types.transactions.js';
 import * as tferrors from './tfchain.errors.js';
+import * as jslog from './tfchain.polyfill.log.js';
 import * as jsarr from './tfchain.polyfill.array.js';
 import * as jsobj from './tfchain.polyfill.encoding.object.js';
 var __name__ = 'tfchain.balance';
@@ -790,13 +791,13 @@ export var MultiSigWalletBalance =  __class__ ('MultiSigWalletBalance', [WalletB
 		}
 		if (!(isinstance (other, MultiSigWalletBalance))) {
 			if (isinstance (other, tuple ([WalletBalance, WalletsBalance]))) {
-				return WalletsBalance ().balance_add (self).balance_add (self);
+				return WalletsBalance ().balance_add (self).balance_add (other);
 			}
 			var __except0__ = py_TypeError ('other balance has to be of type multi-signature wallet balance');
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		if (self.address != other.addres) {
+		if (self.address != other.address) {
 			var __except0__ = ValueError ('other balance is for a different MultiSignature Wallet, cannot be merged');
 			__except0__.__cause__ = null;
 			throw __except0__;
@@ -993,6 +994,7 @@ export var WalletsBalance =  __class__ ('WalletsBalance', [WalletBalance], {
 			self._wallets [address] = balance;
 			return ;
 		}
+		self._wallets [address] = self._wallets [address].balance_add (balance);
 	});},
 	get fund () {return __get__ (this, function (self, amount, source) {
 		if (typeof source == 'undefined' || (source != null && source.hasOwnProperty ("__kwargtrans__"))) {;
@@ -1052,7 +1054,7 @@ export var WalletsBalance =  __class__ ('WalletsBalance', [WalletBalance], {
 					addresses.add (value);
 				}
 				else {
-					var __except0__ = py_TypeError ('cannot add source addres with unsupported UnlockHashType {}'.format (value.py_metatype));
+					var __except0__ = py_TypeError ('cannot add source address with unsupported UnlockHashType {}'.format (value.py_metatype));
 					__except0__.__cause__ = null;
 					throw __except0__;
 				}
