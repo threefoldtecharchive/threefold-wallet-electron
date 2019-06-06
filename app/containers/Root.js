@@ -3,7 +3,7 @@ import { connect, Provider } from 'react-redux'
 import React, { Component } from 'react'
 import { ConnectedRouter } from 'connected-react-router'
 import Routes from '../Routes'
-import { setClient, loadAccounts, setBalance, setChainConstants, getTransactionsNotifications, setError } from '../actions'
+import { loadAccounts, setBalance, setChainConstants, getTransactionsNotifications, setError } from '../actions'
 
 const os = require('os')
 const storage = require('electron-json-storage')
@@ -16,9 +16,6 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = (dispatch) => ({
-  setClient: (client) => {
-    dispatch(setClient(client))
-  },
   loadAccounts: (accounts) => {
     dispatch(loadAccounts(accounts))
   },

@@ -28,10 +28,6 @@ export const account = (state = [], action) => {
         if (err) console.log(err)
       })
       return action.account
-    case 'DELETE_WALLET':
-      const filteredWallets = state.wallets.filter(w => w._wallet_name !== action.wallet._wallet_name)
-      state._wallets = filteredWallets
-      return state
     case 'RESET_APP':
       return []
     default:

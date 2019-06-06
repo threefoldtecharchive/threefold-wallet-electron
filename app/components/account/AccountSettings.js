@@ -4,7 +4,7 @@ import React, { Component } from 'react'
 import { Form, Button, Icon, Header, List, Segment, Divider } from 'semantic-ui-react'
 import routes from '../../constants/routes'
 import styles from '../home/Home.css'
-import { saveAccount, deleteAccount, deleteWallet, selectWallet } from '../../actions'
+import { saveAccount, deleteAccount, setBalance, selectWallet } from '../../actions'
 import DeleteModal from './DeleteAccountModal'
 import DeleteWalletModal from '../wallet/DeleteWalletModal'
 import ShowSeedModal from './ShowSeedModal'
@@ -23,11 +23,11 @@ const mapDispatchToProps = (dispatch) => ({
   deleteAccount: (account) => {
     dispatch(deleteAccount(account))
   },
-  deleteWallet: (wallet) => {
-    dispatch(deleteWallet(wallet))
-  },
   selectWallet: (wallet) => {
     dispatch(selectWallet(wallet))
+  },
+  setBalance: (account) => {
+    dispatch(setBalance(account))
   }
 })
 
@@ -101,7 +101,7 @@ class AccountSettings extends Component {
                     <Icon name='settings'style={{ color: 'white', marginRight: 30, cursor: 'pointer' }} onClick={() => this.goToWalletSettings(w)} />
                     <Icon name='trash' style={{ color: 'white', marginRight: 30, cursor: 'pointer' }} onClick={() => this.openDeleteWalletModal(w)} />
                   </List.Content>
-                  <List.Content style={{ float: 'left' }}>{w._wallet_name}</List.Content>
+                  <List.Content style={{ float: 'left' }}>{w.wallet_name}</List.Content>
                 </List.Item>
               )
             })}
@@ -116,7 +116,7 @@ class AccountSettings extends Component {
     if (deleteWalletName !== walletName) {
       return this.setState({ deleteWalletNameError: true })
     }
-    this.props.deleteWallet(walletToDelete)
+    this.props.account.wallet_delete(walletToDelete.start_index, walletToDelete.wallet_name)
     this.props.saveAccount(this.props.account)
     this.setState({ deleteWalletNameError: false })
     toast('Wallet deleted')
@@ -125,7 +125,7 @@ class AccountSettings extends Component {
 
   openDeleteWalletModal = (w) => {
     const open = !this.state.openDeleteWalletModal
-    this.setState({ openDeleteWalletModal: open, walletName: w._wallet_name, walletToDelete: w })
+    this.setState({ openDeleteWalletModal: open, walletName: w.wallet_name, walletToDelete: w })
   }
 
   closeDeleteWalletModal = () => {

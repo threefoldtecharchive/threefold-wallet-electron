@@ -49,13 +49,6 @@ export const saveWallet = function (wallet) {
   }
 }
 
-export const deleteWallet = function (wallet) {
-  return {
-    type: 'DELETE_WALLET',
-    wallet
-  }
-}
-
 export const setChainConstants = function (account) {
   if (account && !(account instanceof Array)) {
     return dispatch => {

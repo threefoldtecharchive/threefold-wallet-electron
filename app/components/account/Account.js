@@ -53,7 +53,9 @@ class Account extends Component {
     let wallets = this.props.account.wallets
     let multiSigWallets = this.props.account.multisig_wallets
     if (!(this.props.balance instanceof Array)) {
-      wallets = this.props.balance.wallets
+      if (wallets.length === this.props.balance.wallets.length) {
+        wallets = this.props.balance.wallets
+      }
     }
     return (
       <div>
@@ -61,26 +63,28 @@ class Account extends Component {
           {wallets.map(w => {
             let content = null
             if (this.props.balance.wallets) {
-              content = (
-                <Card.Content>
-                  <div>
-                    <Icon name='chevron right' style={{ position: 'absolute', right: 20, top: 130, fontSize: 25, opacity: '0.3', color: 'white' }} />
-                    <Card.Description style={{ color: 'white', marginTop: 10, marginBottom: 10, fontFamily: 'SF UI Text Light', display: 'flex' }}>
-                      <Icon name='unlock' style={{ fontSize: 16, marginLeft: 20 }} /> <p style={{ marginLeft: 30, marginTop: -8 }}>{w.balance.coins_unlocked.str({ precision: 3 })} TFT</p>
-                    </Card.Description>
-                    <Card.Description style={{ textAlign: 'left', color: 'white', marginTop: 20, marginBottom: 10, fontFamily: 'SF UI Text Light', display: 'flex' }}>
-                      <Icon name='lock' style={{ fontSize: 16, marginLeft: 20 }} /> <p style={{ marginLeft: 33, marginTop: -3, fontFamily: 'SF UI Text Light', fontSize: 18 }}>{w.balance.coins_locked.str({ precision: 3 })} TFT</p>
-                    </Card.Description>
-                    <Divider />
-                    <Card.Header style={{ textAlign: 'center', color: 'white', fontSize: 18, textTransform: 'uppercase', marginTop: 20, fontFamily: 'SF UI Text Light' }}>
-                      wallet {w.wallet_name}
-                    </Card.Header>
-                  </div>
-                </Card.Content>
-              )
+              if (this.props.balance.wallets.length === wallets.length) {
+                content = (
+                  <Card.Content>
+                    <div>
+                      <Icon name='chevron right' style={{ position: 'absolute', right: 20, top: 130, fontSize: 25, opacity: '0.3', color: 'white' }} />
+                      <Card.Description style={{ color: 'white', marginTop: 10, marginBottom: 10, fontFamily: 'SF UI Text Light', display: 'flex' }}>
+                        <Icon name='unlock' style={{ fontSize: 16, marginLeft: 20 }} /> <p style={{ marginLeft: 30, marginTop: -8 }}>{w.balance.coins_unlocked.str({ precision: 3 })} TFT</p>
+                      </Card.Description>
+                      <Card.Description style={{ textAlign: 'left', color: 'white', marginTop: 20, marginBottom: 10, fontFamily: 'SF UI Text Light', display: 'flex' }}>
+                        <Icon name='lock' style={{ fontSize: 16, marginLeft: 20 }} /> <p style={{ marginLeft: 33, marginTop: -3, fontFamily: 'SF UI Text Light', fontSize: 18 }}>{w.balance.coins_locked.str({ precision: 3 })} TFT</p>
+                      </Card.Description>
+                      <Divider />
+                      <Card.Header style={{ textAlign: 'center', color: 'white', fontSize: 18, textTransform: 'uppercase', marginTop: 20, fontFamily: 'SF UI Text Light' }}>
+                        wallet {w.wallet_name}
+                      </Card.Header>
+                    </div>
+                  </Card.Content>
+                )
+              }
             }
             return (
-              <Card key={w._wallet_name} style={{ boxShadow: 'none', height: 180, width: 350, marginTop: 0, marginRight: 20, marginBottom: 30, background: 'linear-gradient(90deg, rgba(56,51,186,1) 0%, rgba(102,71,254,1) 100%)' }} onClick={() => this.handleWalletClick(w)}>
+              <Card key={w.wallet_name} style={{ boxShadow: 'none', height: 180, width: 350, marginTop: 0, marginRight: 20, marginBottom: 30, background: 'linear-gradient(90deg, rgba(56,51,186,1) 0%, rgba(102,71,254,1) 100%)' }} onClick={() => this.handleWalletClick(w)}>
                 <Dimmer active={content == null}>
                   <Loader />
                 </Dimmer>
@@ -100,7 +104,6 @@ class Account extends Component {
         <Divider style={{ marginTop: -20 }} />
         <Card.Group style={{ marginTop: 20, marginLeft: 20 }}>
           {multiSigWallets.map(w => {
-            console.log(w)
             let content = null
             if (multiSigWallets) {
               content = (
@@ -125,7 +128,7 @@ class Account extends Component {
               )
             }
             return (
-              <Card key={w._wallet_name} style={{ boxShadow: 'none', height: 180, width: 350, marginTop: 0, marginRight: 20, marginBottom: 30, background: 'linear-gradient(90deg, rgba(56,51,186,1) 0%, rgba(102,71,254,1) 100%)' }} onClick={() => this.handleWalletClick(w)}>
+              <Card key={w.wallet_name} style={{ boxShadow: 'none', height: 180, width: 350, marginTop: 0, marginRight: 20, marginBottom: 30, background: 'linear-gradient(90deg, rgba(56,51,186,1) 0%, rgba(102,71,254,1) 100%)' }} onClick={() => this.handleWalletClick(w)}>
                 <Dimmer active={content == null}>
                   <Loader />
                 </Dimmer>

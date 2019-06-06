@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 import React, { Component } from 'react'
 import { Form, Button, Icon, Header } from 'semantic-ui-react'
 import styles from '../home/Home.css'
-import { saveWallet, saveAccount, deleteWallet } from '../../actions'
+import { saveWallet, saveAccount, setBalance } from '../../actions'
 import DeleteModal from './DeleteWalletModal'
 import Footer from '../footer'
 import { toast } from 'react-toastify'
@@ -20,8 +20,8 @@ const mapDispatchToProps = (dispatch) => ({
   saveAccount: (account) => {
     dispatch(saveAccount(account))
   },
-  deleteWallet: (wallet) => {
-    dispatch(deleteWallet(wallet))
+  setBalance: (account) => {
+    dispatch(setBalance(account))
   }
 })
 
@@ -29,10 +29,10 @@ class WalletSettings extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      name: this.props.wallet._wallet_name,
+      name: this.props.wallet.wallet_name,
       openDeleteModal: false,
       deleteName: '',
-      startIndex: this.props.wallet._start_index,
+      startIndex: this.props.wallet.start_index,
       addressLength: this.props.wallet.addresses.length,
       deleteNameError: false
     }
@@ -45,7 +45,7 @@ class WalletSettings extends Component {
   saveWallet = () => {
     const { name, startIndex, addressLength } = this.state
 
-    const previousWalletName = this.props.wallet._wallet_name
+    const previousWalletName = this.props.wallet.wallet_name
 
     const walletIndex = this.props.wallet.wallet_index
     let newWallet = this.props.account.wallet_update(walletIndex, name, startIndex, addressLength)
@@ -84,8 +84,9 @@ class WalletSettings extends Component {
     if (deleteName !== name) {
       return this.setState({ deleteNameError: true })
     }
-    this.props.deleteWallet(this.props.wallet)
+    this.props.account.wallet_delete(this.props.wallet.start_index, deleteName)
     this.props.saveAccount(this.props.account)
+    this.props.setBalance(this.props.account)
     this.setState({ deleteNameError: false })
     toast('Wallet deleted')
     return this.props.history.push('/account')
