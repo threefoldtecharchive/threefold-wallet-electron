@@ -92,8 +92,33 @@ export var from_recipient = function (recipient, lock) {
 		else if (isinstance (recipient, tuple ([bytes, bytearray])) || jsarr.is_uint8_array (recipient)) {
 			var condition = unlockhash_new (__kwargtrans__ ({unlockhash: jshex.bytes_to_hex (recipient)}));
 		}
-		else if (isinstance (recipient, list)) {
-			var condition = multi_signature_new (__kwargtrans__ ({min_nr_sig: len (recipient), unlockhashes: recipient}));
+		else if (isinstance (recipient, list) || jsobj.is_js_arr (recipient)) {
+			if (len (recipient) == 2) {
+				var __left0__ = tuple ([null, null]);
+				var sig_count = __left0__ [0];
+				var owners = __left0__ [1];
+				if (isinstance (recipient [0], tuple ([int, float]))) {
+					var __left0__ = tuple ([int (recipient [0]), recipient [1]]);
+					var sig_count = __left0__ [0];
+					var owners = __left0__ [1];
+				}
+				if (isinstance (recipient [1], tuple ([int, float]))) {
+					if (sig_count != null) {
+						var __except0__ = py_TypeError ('invalid recipient {}'.format (recipient));
+						__except0__.__cause__ = null;
+						throw __except0__;
+					}
+					var __left0__ = tuple ([int (recipient [1]), recipient [0]]);
+					var sig_count = __left0__ [0];
+					var owners = __left0__ [1];
+				}
+				if (sig_count != null) {
+					var condition = multi_signature_new (__kwargtrans__ ({min_nr_sig: sig_count, unlockhashes: owners}));
+				}
+			}
+			if (condition == null) {
+				var condition = multi_signature_new (__kwargtrans__ ({min_nr_sig: len (recipient), unlockhashes: recipient}));
+			}
 		}
 		else if (isinstance (recipient, tuple)) {
 			if (len (recipient) != 2) {

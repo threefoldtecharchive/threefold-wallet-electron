@@ -7,7 +7,7 @@ import tfchain.polyfill.log as jslog
 
 import tfchain.errors as tferrors
 import tfchain.explorer as tfexplorer
-from tfchain.balance import WalletBalance, MultiSigWalletBalance
+from tfchain.balance import WalletBalance, WalletsBalance, MultiSigWalletBalance
 
 from tfchain.types import transactions, ConditionTypes
 from tfchain.types.transactions.Base import TransactionBaseClass
@@ -692,15 +692,18 @@ class ExplorerUnlockhashResult():
         if self._unlockhash.type == UnlockHashType.MULTI_SIG:
             balance = self._multisig_balance(info)
         else:
-            balance = WalletBalance()
+            balance = WalletsBalance()
             # collect the balance
             address = self.unlockhash.__str__()
+            msaddresses = [uh.__str__() for uh in self._multisig_addresses]
             for txn in self.transactions:
                 for index, ci in enumerate(txn.coin_inputs):
-                    if ci.parent_output.condition.unlockhash.__str__() == address:
+                    uhstr = ci.parent_output.condition.unlockhash.__str__()
+                    if uhstr == address or uhstr in msaddresses:
                         balance.output_add(txn, index, confirmed=(not txn.unconfirmed), spent=True)
                 for index, co in enumerate(txn.coin_outputs):
-                    if co.condition.unlockhash.__str__() == address:
+                    uhstr = co.condition.unlockhash.__str__()
+                    if uhstr == address or uhstr in msaddresses:
                         balance.output_add(txn, index, confirmed=(not txn.unconfirmed), spent=False)
         # if a client is set, attach the current chain info to it
         if info != None:

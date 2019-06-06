@@ -1004,7 +1004,44 @@ export var Account =  __class__ ('Account', [object], {
 					}
 					return __accu0__;
 				}) ();
-				return AccountBalance (self._network_type, self.account_name, chain_info, balances);
+				var msbalances = [];
+				var msbalance_addresses = set ();
+				for (var balance of balances) {
+					for (var msbalance of balance.multisig_balances) {
+						if (__in__ (msbalance.address, msbalance_addresses)) {
+							var merged = false;
+							for (var [index, existing_msbalance] of enumerate (msbalances)) {
+								if (existing_msbalance.address == msbalance.address) {
+									msbalances [index] = existing_msbalance.merge (msbalance);
+									var merged = true;
+									break;
+								}
+							}
+							if (!(merged)) {
+								var __except0__ = RuntimeError ('BUG: ms balance {} could not be merged'.format (msbalance.address));
+								__except0__.__cause__ = null;
+								throw __except0__;
+							}
+						}
+						else {
+							msbalance_addresses.add (msbalance.address);
+							try {
+								var winfo = self.multisig_wallet_get (msbalance.address);
+								msbalance.wallet_name = winfo.wallet_name;
+							}
+							catch (__except0__) {
+								if (isinstance (__except0__, Exception)) {
+									// pass;
+								}
+								else {
+									throw __except0__;
+								}
+							}
+							msbalances.append (msbalance);
+						}
+					}
+				}
+				return AccountBalance (self._network_type, self.account_name, chain_info, balances, msbalances);
 			};
 			var generator = function* () {
 				if (arguments.length) {
@@ -1367,7 +1404,7 @@ export var Wallet =  __class__ ('Wallet', [object], {
 			}
 			else {
 			}
-			return Balance (wallet._tfwallet.network_type, wallet.wallet_name, balance, wallet.addresses);
+			return SingleSignatureBalance (wallet._tfwallet.network_type, wallet.wallet_name, balance, wallet.addresses);
 		};
 		var bcinfo = null;
 		if (chain_info != null) {
@@ -1627,9 +1664,12 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 });
 export var AccountBalance =  __class__ ('AccountBalance', [object], {
 	__module__: __name__,
-	get __init__ () {return __get__ (this, function (self, network_type, account_name, chain_info, balances) {
+	get __init__ () {return __get__ (this, function (self, network_type, account_name, chain_info, balances, msbalances) {
 		if (typeof balances == 'undefined' || (balances != null && balances.hasOwnProperty ("__kwargtrans__"))) {;
 			var balances = null;
+		};
+		if (typeof msbalances == 'undefined' || (msbalances != null && msbalances.hasOwnProperty ("__kwargtrans__"))) {;
+			var msbalances = null;
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -1642,6 +1682,7 @@ export var AccountBalance =  __class__ ('AccountBalance', [object], {
 						case 'account_name': var account_name = __allkwargs0__ [__attrib0__]; break;
 						case 'chain_info': var chain_info = __allkwargs0__ [__attrib0__]; break;
 						case 'balances': var balances = __allkwargs0__ [__attrib0__]; break;
+						case 'msbalances': var msbalances = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
@@ -1667,6 +1708,7 @@ export var AccountBalance =  __class__ ('AccountBalance', [object], {
 		}
 		self._chain_info = chain_info;
 		self._balances = (balances == null ? [] : balances);
+		self._msbalances = (msbalances == null ? [] : msbalances);
 	});},
 	get _get_chain_info () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -1727,6 +1769,88 @@ export var AccountBalance =  __class__ ('AccountBalance', [object], {
 			}
 		}
 		var __except0__ = KeyError ('wallet {} has no balance for account of {}'.format (wallet_name, self._account_name));
+		__except0__.__cause__ = null;
+		throw __except0__;
+	});},
+	get _get_multisig_balances () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return (function () {
+			var __accu0__ = [];
+			for (var balance of self._msbalances) {
+				__accu0__.append (balance);
+			}
+			return __accu0__;
+		}) ();
+	});},
+	get multisig_balance_for () {return __get__ (this, function (self, identifier) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'identifier': var identifier = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (!(isinstance (identifier, str))) {
+			var __except0__ = py_TypeError ('identifier has to be a str, representing a multisig address or multisig wallet name');
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		var g = (multisig_wallet_address_is_valid (identifier) ? (function __lambda__ (b) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'b': var b = __allkwargs0__ [__attrib0__]; break;
+						}
+					}
+				}
+			}
+			else {
+			}
+			return b.address;
+		}) : (function __lambda__ (b) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'b': var b = __allkwargs0__ [__attrib0__]; break;
+						}
+					}
+				}
+			}
+			else {
+			}
+			return b.wallet_name;
+		}));
+		for (var balance of self._msbalances) {
+			if (g (balance) == identifier) {
+				return balance;
+			}
+		}
+		var __except0__ = KeyError ('multisig wallet {} has no balance for account of {}'.format (identifier, self._account_name));
 		__except0__.__cause__ = null;
 		throw __except0__;
 	});},
@@ -1980,6 +2104,7 @@ Object.defineProperty (AccountBalance, 'addresses_used', property.call (AccountB
 Object.defineProperty (AccountBalance, 'addresses_all', property.call (AccountBalance, AccountBalance._get_addresses_all));
 Object.defineProperty (AccountBalance, 'wallet_names', property.call (AccountBalance, AccountBalance._get_wallet_names));
 Object.defineProperty (AccountBalance, 'account_name', property.call (AccountBalance, AccountBalance._get_account_name));
+Object.defineProperty (AccountBalance, 'multisig_balances', property.call (AccountBalance, AccountBalance._get_multisig_balances));
 Object.defineProperty (AccountBalance, 'balances', property.call (AccountBalance, AccountBalance._get_balances));
 Object.defineProperty (AccountBalance, 'chain_info', property.call (AccountBalance, AccountBalance._get_chain_info));;
 export var Balance =  __class__ ('Balance', [object], {
@@ -2025,6 +2150,7 @@ export var Balance =  __class__ ('Balance', [object], {
 		}
 		else {
 			if (!(isinstance (tfbalance, wbalance.WalletBalance))) {
+				jslog.error ('invalid wallet balance object:', tfbalance);
 				var __except0__ = py_TypeError ('tfbalance has to be of type tfchain.balance.WalletBalance, not be of type {}'.format (py_typeof (tfbalance)));
 				__except0__.__cause__ = null;
 				throw __except0__;
@@ -2054,6 +2180,42 @@ export var Balance =  __class__ ('Balance', [object], {
 		else {
 		}
 		return self._wallet_name;
+	});},
+	get _set_wallet_name () {return __get__ (this, function (self, value) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		self._wallet_name_setter (value);
+	});},
+	get _wallet_name_setter () {return __get__ (this, function (self, value) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var __except0__ = NotImplementedError ('_wallet_name_setter is not implemented/supported');
+		__except0__.__cause__ = null;
+		throw __except0__;
 	});},
 	get _get_addresses_all () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -2277,7 +2439,192 @@ Object.defineProperty (Balance, 'coins_locked', property.call (Balance, Balance.
 Object.defineProperty (Balance, 'coins_unlocked', property.call (Balance, Balance._get_coins_unlocked));
 Object.defineProperty (Balance, 'addresses_used', property.call (Balance, Balance._get_addresses_used));
 Object.defineProperty (Balance, 'addresses_all', property.call (Balance, Balance._get_addresses_all));
-Object.defineProperty (Balance, 'wallet_name', property.call (Balance, Balance._get_wallet_name));;
+Object.defineProperty (Balance, 'wallet_name', property.call (Balance, Balance._get_wallet_name, Balance._set_wallet_name));;
+export var SingleSignatureBalance =  __class__ ('SingleSignatureBalance', [Balance], {
+	__module__: __name__,
+	get __init__ () {return __get__ (this, function (self) {
+		var kwargs = dict ();
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						default: kwargs [__attrib0__] = __allkwargs0__ [__attrib0__];
+					}
+				}
+				delete kwargs.__kwargtrans__;
+			}
+			var args = tuple ([].slice.apply (arguments).slice (1, __ilastarg0__ + 1));
+		}
+		else {
+			var args = tuple ();
+		}
+		__super__ (SingleSignatureBalance, '__init__') (self, ...args, __kwargtrans__ (kwargs));
+		self._msbalances = [];
+		for (var balance of jsobj.dict_values (self._tfbalance.wallets)) {
+			self._msbalances.append (MultiSignatureBalance (__kwargtrans__ ({owners: balance.owners, signatures_required: balance.signature_count, network_type: self._network_type, wallet_name: '', tfbalance: balance, addresses_all: [balance.address]})));
+		}
+	});},
+	get _get_multisig_balances () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._msbalances;
+	});}
+});
+Object.defineProperty (SingleSignatureBalance, 'multisig_balances', property.call (SingleSignatureBalance, SingleSignatureBalance._get_multisig_balances));;
+export var MultiSignatureBalance =  __class__ ('MultiSignatureBalance', [Balance], {
+	__module__: __name__,
+	get __init__ () {return __get__ (this, function (self, owners, signatures_required) {
+		var kwargs = dict ();
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'owners': var owners = __allkwargs0__ [__attrib0__]; break;
+						case 'signatures_required': var signatures_required = __allkwargs0__ [__attrib0__]; break;
+						default: kwargs [__attrib0__] = __allkwargs0__ [__attrib0__];
+					}
+				}
+				delete kwargs.__kwargtrans__;
+			}
+			var args = tuple ([].slice.apply (arguments).slice (3, __ilastarg0__ + 1));
+		}
+		else {
+			var args = tuple ();
+		}
+		__super__ (MultiSignatureBalance, '__init__') (self, ...args, __kwargtrans__ (kwargs));
+		self._owners = owners;
+		self._signatures_required = signatures_required;
+		var address = multisig_wallet_address_new (self.owners, self.signatures_required);
+		if (address != self.address) {
+			var __except0__ = RuntimeError ('BUG: (ms) address is {}, but expected it to be {}'.format (address, self.address));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+	});},
+	get merge () {return __get__ (this, function (self, other) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (!(isinstance (other, MultiSignatureBalance))) {
+			var __except0__ = py_TypeError ('can only merge multisig balance objects together, invalid {} ({})'.format (other, py_typeof (other)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		if (self.address != other.address) {
+			var __except0__ = ValueError ('can only merge multisig balance objects that represent the same wallet: {} != {}'.format (self.address, other.address));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		var b = __super__ (MultiSignatureBalance, 'merge') (self, other);
+		return MultiSignatureBalance (__kwargtrans__ ({owners: self.owners, signatures_required: self.signatures_required, network_type: b._network_type, wallet_name: b._wallet_name, tfbalance: b._tfbalance, addresses_all: b.addresses_all}));
+	});},
+	get _get_address () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._addresses_all [0];
+	});},
+	get _get_owners () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._owners;
+	});},
+	get _get_signatures_required () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._signatures_required;
+	});},
+	get _wallet_name_setter () {return __get__ (this, function (self, value) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (!(isinstance (value, str))) {
+			var __except0__ = py_TypeError ('wallet name has to be a str, invalid {} ({})'.format (value, py_typeof (value)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		if (value == '') {
+			var __except0__ = ValueError ('wallet name cannot be empty');
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		self._wallet_name = value;
+	});}
+});
+Object.defineProperty (MultiSignatureBalance, 'signatures_required', property.call (MultiSignatureBalance, MultiSignatureBalance._get_signatures_required));
+Object.defineProperty (MultiSignatureBalance, 'owners', property.call (MultiSignatureBalance, MultiSignatureBalance._get_owners));
+Object.defineProperty (MultiSignatureBalance, 'address', property.call (MultiSignatureBalance, MultiSignatureBalance._get_address));;
 export var BlockView =  __class__ ('BlockView', [object], {
 	__module__: __name__,
 	get from_block () {return __getcm__ (this, function (cls, block, addresses) {
@@ -3858,6 +4205,33 @@ export var wallet_address_is_valid = function (address, opts) {
 			return true;
 		}
 		return multisig && uh.uhtype.value == UnlockHashType.MULTI_SIG.value;
+	}
+	catch (__except0__) {
+		if (isinstance (__except0__, Exception)) {
+			return false;
+		}
+		else {
+			throw __except0__;
+		}
+	}
+};
+export var multisig_wallet_address_is_valid = function (address) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'address': var address = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	try {
+		var uh = UnlockHash.from_str (address);
+		return uh.uhtype.value == UnlockHashType.MULTI_SIG.value;
 	}
 	catch (__except0__) {
 		if (isinstance (__except0__, Exception)) {

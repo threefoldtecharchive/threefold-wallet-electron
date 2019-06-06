@@ -137,8 +137,10 @@ def is_undefined(obj):
     return result
 
 def is_js_arr(obj):
+    if is_undefined(obj):
+        return None
     result = None
     __pragma__("js", "{}", """
-    result = obj !== null && obj.constructor === Array;
+    result = obj.constructor === Array;
     """)
     return result

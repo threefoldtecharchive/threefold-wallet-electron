@@ -926,7 +926,7 @@ export var WalletsBalance =  __class__ ('WalletsBalance', [WalletBalance], {
 			var output = txn.coin_outputs [index];
 		}
 		var uh = output.condition.unlockhash;
-		if (uh.py_metatype.__eq__ (UnlockHashType.MULTI_SIG)) {
+		if (uh.uhtype.__eq__ (UnlockHashType.MULTI_SIG)) {
 			return self._multisig_output_add (__kwargtrans__ ({address: uh.__str__ (), output: output, txn: txn, index: index, confirmed: confirmed, spent: spent}));
 		}
 		self._addresses.add (uh.__str__ ());
@@ -993,7 +993,6 @@ export var WalletsBalance =  __class__ ('WalletsBalance', [WalletBalance], {
 			self._wallets [address] = balance;
 			return ;
 		}
-		self._wallets [address] = self._wallets [address].merge (balance);
 	});},
 	get fund () {return __get__ (this, function (self, amount, source) {
 		if (typeof source == 'undefined' || (source != null && source.hasOwnProperty ("__kwargtrans__"))) {;

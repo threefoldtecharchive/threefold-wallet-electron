@@ -61,9 +61,20 @@ def from_recipient(recipient, lock=None):
         elif isinstance(recipient, (bytes, bytearray)) or jsarr.is_uint8_array(recipient):
             # single sig wallet
             condition = unlockhash_new(unlockhash=jshex.bytes_to_hex(recipient))
-        elif isinstance(recipient, list):
-            # multisig to an all-for-all wallet
-            condition = multi_signature_new(min_nr_sig=len(recipient), unlockhashes=recipient)
+        elif isinstance(recipient, list) or jsobj.is_js_arr(recipient):
+            if len(recipient) == 2:
+                sig_count, owners = None, None
+                if isinstance(recipient[0], (int, float)):
+                    sig_count, owners = int(recipient[0]), recipient[1]
+                if isinstance(recipient[1], (int, float)):
+                    if sig_count != None:
+                        raise TypeError("invalid recipient {}".format(recipient))
+                    sig_count, owners = int(recipient[1]), recipient[0]
+                if sig_count != None:
+                    condition = multi_signature_new(min_nr_sig=sig_count, unlockhashes=owners)
+            if condition == None:
+                # multisig to an all-for-all wallet
+                condition = multi_signature_new(min_nr_sig=len(recipient), unlockhashes=recipient)
         elif isinstance(recipient, tuple):
             # multisig wallet with custom x-of-n definition
             if len(recipient) != 2:

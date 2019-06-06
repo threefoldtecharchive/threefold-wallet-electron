@@ -440,7 +440,7 @@ class WalletsBalance(WalletBalance):
         else:
             output = txn.coin_outputs[index]
         uh = output.condition.unlockhash
-        if uh.type.__eq__(UnlockHashType.MULTI_SIG):
+        if uh.uhtype.__eq__(UnlockHashType.MULTI_SIG):
             return self._multisig_output_add(address=uh.__str__(), output=output, txn=txn, index=index, confirmed=confirmed, spent=spent)
         self._addresses.add(uh.__str__())
         return super().output_add(txn=txn, index=index, confirmed=confirmed, spent=spent)
@@ -479,7 +479,8 @@ class WalletsBalance(WalletBalance):
         if address not in self._wallets:
             self._wallets[address] = balance
             return
-        self._wallets[address] = self._wallets[address].merge(balance)
+        # TODO: FIX
+        # self._wallets[address] = self._wallets[address].merge(balance)
 
     def fund(self, amount, source=None):
         """

@@ -545,7 +545,30 @@ class Account:
                     return index_a - index_b
                 balance_pairs = jsarr.sort(balance_pairs, sort_pairs)
                 balances = [pair[1] for pair in balance_pairs]
-                return AccountBalance(self._network_type, self.account_name, chain_info, balances)
+                # collect ms balances from the regular balances
+                msbalances = []
+                msbalance_addresses = set()
+                for balance in balances:
+                    for msbalance in balance.multisig_balances:
+                        if msbalance.address in msbalance_addresses:
+                            merged = False
+                            for index, existing_msbalance in enumerate(msbalances):
+                                if existing_msbalance.address == msbalance.address:
+                                    msbalances[index] = existing_msbalance.merge(msbalance)
+                                    merged = True
+                                    break
+                            if not merged:
+                                raise RuntimeError("BUG: ms balance {} could not be merged".format(msbalance.address))
+                        else:
+                            msbalance_addresses.add(msbalance.address)
+                            try:
+                                winfo = self.multisig_wallet_get(msbalance.address)
+                                msbalance.wallet_name = winfo.wallet_name
+                            except Exception:
+                                pass
+                            msbalances.append(msbalance)
+                # return account balance
+                return AccountBalance(self._network_type, self.account_name, chain_info, balances, msbalances)
             # define generator
             def generator():
                 index = 0
@@ -695,7 +718,7 @@ class Wallet:
     def balance_get(self, chain_info=None):
         wallet = self.clone()
         def create_api_balance_obj(balance):
-            return Balance(wallet._tfwallet.network_type, wallet.wallet_name, balance, wallet.addresses)
+            return SingleSignatureBalance(wallet._tfwallet.network_type, wallet.wallet_name, balance, wallet.addresses)
         bcinfo = None
         if chain_info != None:
             if not isinstance(chain_info, ChainInfo):
@@ -817,7 +840,7 @@ class CoinTransactionBuilder:
 
 
 class AccountBalance:
-    def __init__(self, network_type, account_name, chain_info, balances=None):
+    def __init__(self, network_type, account_name, chain_info, balances=None, msbalances=None):
         if not isinstance(network_type, tfnetwork.Type):
             raise TypeError("network_type has to be of type tfchain.network.Type, not be of type {}".format(type(network_type)))
         self._network_type = network_type
@@ -828,6 +851,7 @@ class AccountBalance:
             raise TypeError("chain_info is supposed to be of type ChainInfo, invalid: {} ({})".format(chain_info, type(chain_info)))
         self._chain_info = chain_info
         self._balances = [] if balances == None else balances
+        self._msbalances = [] if msbalances == None else msbalances
 
     @property
     def chain_info(self):
@@ -842,6 +866,22 @@ class AccountBalance:
             if balance.wallet_name == wallet_name:
                 return balance
         raise KeyError("wallet {} has no balance for account of {}".format(wallet_name, self._account_name))
+
+    @property
+    def multisig_balances(self):
+        return [balance for balance in self._msbalances]
+
+    def multisig_balance_for(self, identifier):
+        """
+        Find a multisig balance based on the address or name.
+        """
+        if not isinstance(identifier, str):
+            raise TypeError("identifier has to be a str, representing a multisig address or multisig wallet name")
+        g = (lambda b: b.address) if multisig_wallet_address_is_valid(identifier) else (lambda b: b.wallet_name)
+        for balance in self._msbalances:
+            if g(balance) == identifier:
+                return balance
+        raise KeyError("multisig wallet {} has no balance for account of {}".format(identifier, self._account_name))
 
     @property
     def account_name(self):
@@ -926,6 +966,7 @@ class Balance:
             self._tfbalance = wbalance.WalletBalance()
         else:
             if not isinstance(tfbalance, wbalance.WalletBalance):
+                jslog.error("invalid wallet balance object:", tfbalance)
                 raise TypeError("tfbalance has to be of type tfchain.balance.WalletBalance, not be of type {}".format(type(tfbalance)))
             self._tfbalance = tfbalance
         self._addresses_all = [] if addresses_all == None else [address for address in addresses_all]
@@ -933,6 +974,13 @@ class Balance:
     @property
     def wallet_name(self):
         return self._wallet_name
+
+    @wallet_name.setter
+    def wallet_name(self, value):
+        self._wallet_name_setter(value)
+
+    def _wallet_name_setter(self, value):
+        raise NotImplementedError("_wallet_name_setter is not implemented/supported")
 
     @property
     def addresses_all(self):
@@ -1009,6 +1057,76 @@ class Balance:
         for transaction in self._tfbalance.transactions:
             transactions.append(TransactionView.from_transaction(transaction, self._tfbalance.addresses))
         return transactions
+
+
+class SingleSignatureBalance(Balance):
+    def __init__(self, *args, **kwargs):
+        # init the balance object
+        super().__init__(*args, **kwargs)
+
+        # init the multisig child balance objects if these exist
+        self._msbalances = []
+        for balance in jsobj.dict_values(self._tfbalance.wallets):
+            self._msbalances.append(MultiSignatureBalance(
+                owners=balance.owners,
+                signatures_required=balance.signature_count,
+                network_type=self._network_type,
+                wallet_name="",
+                tfbalance=balance,
+                addresses_all=[balance.address],
+            ))
+
+    @property
+    def multisig_balances(self):
+        return self._msbalances
+
+
+class MultiSignatureBalance(Balance):
+    def __init__(self, owners, signatures_required, *args, **kwargs):
+        # init the balance object
+        super().__init__(*args, **kwargs)
+
+        # add custom properties
+        self._owners = owners
+        self._signatures_required = signatures_required
+        # validate address
+        address = multisig_wallet_address_new(self.owners, self.signatures_required)
+        if address != self.address:
+            raise RuntimeError("BUG: (ms) address is {}, but expected it to be {}".format(address, self.address))
+
+    def merge(self, other):
+        if not isinstance(other, MultiSignatureBalance):
+            raise TypeError("can only merge multisig balance objects together, invalid {} ({})".format(other, type(other)))
+        if self.address != other.address:
+            raise ValueError("can only merge multisig balance objects that represent the same wallet: {} != {}".format(self.address, other.address))
+        b = super().merge(other)
+        return MultiSignatureBalance(
+            owners=self.owners,
+            signatures_required=self.signatures_required,
+            network_type=b._network_type,
+            wallet_name=b._wallet_name,
+            tfbalance=b._tfbalance,
+            addresses_all=b.addresses_all,
+        )
+
+    @property
+    def address(self):
+        return self._addresses_all[0]
+
+    @property
+    def owners(self):
+        return self._owners
+
+    @property
+    def signatures_required(self):
+        return self._signatures_required
+
+    def _wallet_name_setter(self, value):
+        if not isinstance(value, str):
+            raise TypeError("wallet name has to be a str, invalid {} ({})".format(value, type(value)))
+        if value == "":
+            raise ValueError("wallet name cannot be empty")
+        self._wallet_name = value
 
 
 class BlockView:
@@ -1708,6 +1826,19 @@ def wallet_address_is_valid(address, opts=None):
         if uh.uhtype.value in (UnlockHashType.NIL.value, UnlockHashType.PUBLIC_KEY.value):
             return True
         return multisig and uh.uhtype.value == UnlockHashType.MULTI_SIG.value
+    except Exception:
+        return False
+
+def multisig_wallet_address_is_valid(address):
+    """
+    Validate a multsig wallet address.
+
+    :returns: True if the mnemonic is valid, False otherwise
+    :rtype: bool 
+    """
+    try:
+        uh = UnlockHash.from_str(address)
+        return uh.uhtype.value == UnlockHashType.MULTI_SIG.value
     except Exception:
         return False
 

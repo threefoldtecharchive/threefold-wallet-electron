@@ -355,9 +355,12 @@ export var is_js_arr = function (obj) {
 	}
 	else {
 	}
+	if (is_undefined (obj)) {
+		return null;
+	}
 	var result = null;
 	
-	    result = obj !== null && obj.constructor === Array;
+	    result = obj.constructor === Array;
 	    
 	return result;
 };

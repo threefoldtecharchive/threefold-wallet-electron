@@ -7,7 +7,7 @@ import {TransactionV128} from './tfchain.types.transactions.Minting.js';
 import {TransactionBaseClass} from './tfchain.types.transactions.Base.js';
 import * as transactions from './tfchain.types.transactions.js';
 import * as ConditionTypes from './tfchain.types.ConditionTypes.js';
-import {MultiSigWalletBalance, WalletBalance} from './tfchain.balance.js';
+import {MultiSigWalletBalance, WalletBalance, WalletsBalance} from './tfchain.balance.js';
 import * as tfexplorer from './tfchain.explorer.js';
 import * as tferrors from './tfchain.errors.js';
 import * as jslog from './tfchain.polyfill.log.js';
@@ -1526,16 +1526,25 @@ export var ExplorerUnlockhashResult =  __class__ ('ExplorerUnlockhashResult', [o
 			var balance = self._multisig_balance (info);
 		}
 		else {
-			var balance = WalletBalance ();
+			var balance = WalletsBalance ();
 			var address = self.unlockhash.__str__ ();
+			var msaddresses = (function () {
+				var __accu0__ = [];
+				for (var uh of self._multisig_addresses) {
+					__accu0__.append (uh.__str__ ());
+				}
+				return __accu0__;
+			}) ();
 			for (var txn of self.transactions) {
 				for (var [index, ci] of enumerate (txn.coin_inputs)) {
-					if (ci.parent_output.condition.unlockhash.__str__ () == address) {
+					var uhstr = ci.parent_output.condition.unlockhash.__str__ ();
+					if (uhstr == address || __in__ (uhstr, msaddresses)) {
 						balance.output_add (txn, index, __kwargtrans__ ({confirmed: !(txn.unconfirmed), spent: true}));
 					}
 				}
 				for (var [index, co] of enumerate (txn.coin_outputs)) {
-					if (co.condition.unlockhash.__str__ () == address) {
+					var uhstr = co.condition.unlockhash.__str__ ();
+					if (uhstr == address || __in__ (uhstr, msaddresses)) {
 						balance.output_add (txn, index, __kwargtrans__ ({confirmed: !(txn.unconfirmed), spent: false}));
 					}
 				}
