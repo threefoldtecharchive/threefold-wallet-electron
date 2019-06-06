@@ -650,6 +650,16 @@ class BaseWallet:
         raise NotImplementedError("_is_cached_getter is not implemented")
 
     @property
+    def has_signing_power(self):
+        """
+        :returns: True if this wallet can be used to sign, in other words: create transactions or sign them
+        :rtype: bool
+        """
+        return self._has_signing_power_getter()
+    def _has_signing_power_getter(self):
+        raise NotImplementedError("_has_signing_power is not implemented")
+
+    @property
     def wallet_name(self):
         """
         :returns: the name of the wallet, a human-friendly lable
@@ -765,6 +775,9 @@ class Wallet(BaseWallet):
 
     def _is_cached_getter(self):
         return False
+
+    def _has_signing_power_getter(self):
+        return True
 
     @property
     def wallet_index(self):
@@ -913,6 +926,9 @@ class MultiSignatureWalletStub(BaseWallet):
         """
         return True
 
+    def _has_signing_power_getter(self):
+        return False
+
     def _addresses_getter(self):
         return [self.address]
 
@@ -940,8 +956,10 @@ class CachedMultiSignatureWallet(BaseWallet):
         self._balance = balance
         if not isinstance(wallets, list):
             raise TypeError("wallets is of wrong type {} ({})".format(wallets, type(wallets)))
+        self._signing_power = True
         if len(wallets) == 0:
-            raise ValueError("at least one owner wallet is required")
+            jslog.warning("creating cached multisig wallet {} ({}) with no signing power, balance:".format(wallet_name, balance.address), balance)
+            self._signing_power = False
         for wallet in wallets:
             if not isinstance(wallet, Wallet):
                 raise TypeError("wallets is of wrong type {} ({})".format(wallet, type(wallet)))
@@ -980,15 +998,22 @@ class CachedMultiSignatureWallet(BaseWallet):
         """
         return True
 
+    def _has_signing_power_getter(self):
+        return self._signing_power
+
     def balance_get(self, ChainInfo=None):
         # TODO: check if we need to use chain_info somehow,
         #       for now it is ignored
         return self._balance
 
     def transaction_new(self):
+        if not self._signing_power:
+            raise RuntimeError("cannot create a transaction using a (multisig) wallet with no signing power")
         return CachedMultiSignatureCoinTransactionBuilder(self._balance, self._wallets)
 
     def transaction_sign(self, transaction):
+        if not self._signing_power:
+            raise RuntimeError("cannot sign a transaction using a (multisig) wallet with no signing power")
         first_signer = self._wallets[0]
         other_signers = self._wallets[1:]
         p = first_signer.transaction_sign(transaction, balance=self._balance)

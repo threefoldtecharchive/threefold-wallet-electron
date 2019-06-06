@@ -1266,6 +1266,40 @@ export var BaseWallet =  __class__ ('BaseWallet', [object], {
 		__except0__.__cause__ = null;
 		throw __except0__;
 	});},
+	get _get_has_signing_power () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._has_signing_power_getter ();
+	});},
+	get _has_signing_power_getter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var __except0__ = NotImplementedError ('_has_signing_power is not implemented');
+		__except0__.__cause__ = null;
+		throw __except0__;
+	});},
 	get _get_wallet_name () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -1519,6 +1553,7 @@ Object.defineProperty (BaseWallet, 'address_count', property.call (BaseWallet, B
 Object.defineProperty (BaseWallet, 'addresses', property.call (BaseWallet, BaseWallet._get_addresses));
 Object.defineProperty (BaseWallet, 'address', property.call (BaseWallet, BaseWallet._get_address));
 Object.defineProperty (BaseWallet, 'wallet_name', property.call (BaseWallet, BaseWallet._get_wallet_name, BaseWallet._set_wallet_name));
+Object.defineProperty (BaseWallet, 'has_signing_power', property.call (BaseWallet, BaseWallet._get_has_signing_power));
 Object.defineProperty (BaseWallet, 'is_cached', property.call (BaseWallet, BaseWallet._get_is_cached));;
 export var Wallet =  __class__ ('Wallet', [BaseWallet], {
 	__module__: __name__,
@@ -1584,6 +1619,22 @@ export var Wallet =  __class__ ('Wallet', [BaseWallet], {
 		else {
 		}
 		return false;
+	});},
+	get _has_signing_power_getter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return true;
 	});},
 	get _get_wallet_index () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -2065,6 +2116,22 @@ export var MultiSignatureWalletStub =  __class__ ('MultiSignatureWalletStub', [B
 		}
 		return true;
 	});},
+	get _has_signing_power_getter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return false;
+	});},
 	get _addresses_getter () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -2161,10 +2228,10 @@ export var CachedMultiSignatureWallet =  __class__ ('CachedMultiSignatureWallet'
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
+		self._signing_power = true;
 		if (len (wallets) == 0) {
-			var __except0__ = ValueError ('at least one owner wallet is required');
-			__except0__.__cause__ = null;
-			throw __except0__;
+			jslog.warning ('creating cached multisig wallet {} ({}) with no signing power, balance:'.format (wallet_name, balance.address), balance);
+			self._signing_power = false;
 		}
 		for (var wallet of wallets) {
 			if (!(isinstance (wallet, Wallet))) {
@@ -2314,6 +2381,22 @@ export var CachedMultiSignatureWallet =  __class__ ('CachedMultiSignatureWallet'
 		}
 		return true;
 	});},
+	get _has_signing_power_getter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._signing_power;
+	});},
 	get balance_get () {return __get__ (this, function (self, ChainInfo) {
 		if (typeof ChainInfo == 'undefined' || (ChainInfo != null && ChainInfo.hasOwnProperty ("__kwargtrans__"))) {;
 			var ChainInfo = null;
@@ -2348,6 +2431,11 @@ export var CachedMultiSignatureWallet =  __class__ ('CachedMultiSignatureWallet'
 		}
 		else {
 		}
+		if (!(self._signing_power)) {
+			var __except0__ = RuntimeError ('cannot create a transaction using a (multisig) wallet with no signing power');
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
 		return CachedMultiSignatureCoinTransactionBuilder (self._balance, self._wallets);
 	});},
 	get transaction_sign () {return __get__ (this, function (self, transaction) {
@@ -2364,6 +2452,11 @@ export var CachedMultiSignatureWallet =  __class__ ('CachedMultiSignatureWallet'
 			}
 		}
 		else {
+		}
+		if (!(self._signing_power)) {
+			var __except0__ = RuntimeError ('cannot sign a transaction using a (multisig) wallet with no signing power');
+			__except0__.__cause__ = null;
+			throw __except0__;
 		}
 		var first_signer = self._wallets [0];
 		var other_signers = self._wallets.__getslice__ (1, null, 1);
