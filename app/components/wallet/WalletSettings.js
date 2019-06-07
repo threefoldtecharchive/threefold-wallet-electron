@@ -48,7 +48,15 @@ class WalletSettings extends Component {
     const previousWalletName = this.props.wallet.wallet_name
 
     const walletIndex = this.props.wallet.wallet_index
-    let newWallet = this.props.account.wallet_update(walletIndex, name, startIndex, addressLength)
+
+    let newWallet
+    try {
+      newWallet = this.props.account.wallet_update(walletIndex, name, startIndex, addressLength)
+    } catch (err) {
+      if (err) {
+        toast.error('Deleting wallet failed')
+      }
+    }
 
     Object.assign(newWallet, { _previous_wallet_name: previousWalletName })
 
@@ -84,7 +92,14 @@ class WalletSettings extends Component {
     if (deleteName !== name) {
       return this.setState({ deleteNameError: true })
     }
-    this.props.account.wallet_delete(this.props.wallet.start_index, deleteName)
+
+    try {
+      this.props.account.wallet_delete(this.props.wallet.start_index, deleteName)
+    } catch (err) {
+      if (err) {
+        toast.error('Deleting wallet failed')
+      }
+    }
     this.props.saveAccount(this.props.account)
     this.props.setBalance(this.props.account)
     this.setState({ deleteNameError: false })
