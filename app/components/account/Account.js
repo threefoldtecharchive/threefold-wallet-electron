@@ -7,6 +7,7 @@ import routes from '../../constants/routes'
 import { selectWallet, setBalance } from '../../actions'
 import styles from '../home/Home.css'
 import Footer from '../footer'
+import { truncate } from 'lodash'
 
 const mapStateToProps = state => ({
   account: state.account,
@@ -53,10 +54,10 @@ class Account extends Component {
     let wallets = this.props.account.wallets
     let multiSigWallets = this.props.account.multisig_wallets
     if (!(this.props.balance instanceof Array)) {
-      if (wallets.length === this.props.balance.wallets.length) {
+      if (this.props.balance.wallets && this.props.balance.wallets.length > 0) {
         wallets = this.props.balance.wallets
       }
-      if (multiSigWallets.length === this.props.balance.multiSigWallet.length) {
+      if (this.props.balance.multiSigWallet && this.props.balance.multiSigWallet.length > 0) {
         multiSigWallets = this.props.balance.multiSigWallet
       }
     }
@@ -79,7 +80,7 @@ class Account extends Component {
                       </Card.Description>
                       <Divider />
                       <Card.Header style={{ textAlign: 'center', color: 'white', fontSize: 18, textTransform: 'uppercase', marginTop: 20, fontFamily: 'SF UI Text Light' }}>
-                        wallet {w.wallet_name}
+                        wallet {w.wallet_name || truncate(w.address, { length: 14 })}
                       </Card.Header>
                     </div>
                   </Card.Content>
@@ -87,7 +88,7 @@ class Account extends Component {
               }
             }
             return (
-              <Card key={w.wallet_name} style={{ boxShadow: 'none', height: 180, width: 350, marginTop: 0, marginRight: 20, marginBottom: 30, background: 'linear-gradient(90deg, rgba(56,51,186,1) 0%, rgba(102,71,254,1) 100%)' }} onClick={() => this.handleWalletClick(w)}>
+              <Card key={w.wallet_name || w.address} style={{ boxShadow: 'none', height: 180, width: 350, marginTop: 0, marginRight: 20, marginBottom: 30, background: 'linear-gradient(90deg, rgba(56,51,186,1) 0%, rgba(102,71,254,1) 100%)' }} onClick={() => this.handleWalletClick(w)}>
                 <Dimmer active={content == null}>
                   <Loader />
                 </Dimmer>
@@ -124,14 +125,14 @@ class Account extends Component {
                     </Card.Description>
                     <Divider />
                     <Card.Header style={{ textAlign: 'center', color: 'white', fontSize: 18, textTransform: 'uppercase', marginTop: 20, fontFamily: 'SF UI Text Light' }}>
-                      wallet {w.wallet_name}
+                      wallet {w.wallet_name || truncate(w.address, { length: 14 })}
                     </Card.Header>
                   </div>
                 </Card.Content>
               )
             }
             return (
-              <Card key={w.wallet_name} style={{ boxShadow: 'none', height: 180, width: 350, marginTop: 0, marginRight: 20, marginBottom: 30, background: 'linear-gradient(90deg, rgba(56,51,186,1) 0%, rgba(102,71,254,1) 100%)' }} onClick={() => this.handleMultiSigWalletClick(w)}>
+              <Card key={w.wallet_name || w.address} style={{ boxShadow: 'none', height: 180, width: 350, marginTop: 0, marginRight: 20, marginBottom: 30, background: 'linear-gradient(90deg, rgba(56,51,186,1) 0%, rgba(102,71,254,1) 100%)' }} onClick={() => this.handleMultiSigWalletClick(w)}>
                 <Dimmer active={content == null}>
                   <Loader />
                 </Dimmer>

@@ -9,6 +9,7 @@ import Footer from '../footer'
 import BalanceGrid from '../wallet/BalanceGrid'
 import BalanceUnconfirmedGrid from '../wallet/BalanceUnconfirmedGrid'
 import TransactionsList from '../wallet/TransactionList'
+import { truncate } from 'lodash'
 
 const mapStateToProps = state => ({
   wallet: state.wallet,
@@ -108,7 +109,7 @@ class Wallet extends Component {
           </Link>
         </div>
         <div className={styles.container} >
-          <h2>Wallet {wallet.wallet_name}</h2>
+          <h2>Wallet {wallet.wallet_name || truncate(wallet.address, { length: 14 })}</h2>
         </div>
         <Divider style={{ background: '#1A253F' }} />
         <div>
