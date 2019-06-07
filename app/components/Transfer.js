@@ -42,7 +42,7 @@ class Transfer extends Component {
       descriptionError: false,
       amountError: false,
       wallets: [],
-      selectedWallet: this.props.account.wallets[0].wallet_name,
+      selectedWallet: this.props.wallet.wallet_name,
       isMultiSigOutput: false,
       loader: false,
       datelock: '',
@@ -256,9 +256,8 @@ class Transfer extends Component {
   selectWallet = (event, data) => {
     let newSelectedWallet = this.props.account.wallets.filter(w => w.wallet_name === data.value)[0]
     if (!newSelectedWallet) {
-      newSelectedWallet = this.props.account.multisig_wallets.filter(w => w.wallet_name === data.value)[0]
+      newSelectedWallet = this.props.account.multisig_wallets.filter(w => w.wallet_name === data.value || w.address === data.value)[0]
     }
-
     this.setState({ selectedWallet: data.value })
     this.props.selectWallet(newSelectedWallet)
   }
@@ -275,8 +274,11 @@ class Transfer extends Component {
 
     let goToMultiSig = false
     let selectedWalletFromProps = wallets.filter(w => w.wallet_name === selectedWallet)[0]
+    console.log(selectedWalletFromProps)
     if (!selectedWalletFromProps) {
       selectedWalletFromProps = multiSigWallet.filter(w => w.wallet_name === selectedWallet)[0]
+      console.log(selectedWalletFromProps)
+
       goToMultiSig = true
     }
 

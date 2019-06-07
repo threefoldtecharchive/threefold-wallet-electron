@@ -42,19 +42,17 @@ class WalletSettings extends Component {
 
   saveWallet = () => {
     const { name } = this.state
-
-    const previousWalletName = this.props.wallet.wallet_name
+    const { wallet } = this.props
 
     let newWallet
     try {
-      newWallet = this.props.account.multisig_wallet_update(this.props.wallet.address, name)
+      newWallet = this.props.account.multisig_wallet_update(name, wallet.owners, wallet.signatures_required)
     } catch (err) {
       if (err) {
-        toast.error('Updating wallet failed')
+        console.log(err)
+        return toast.error('Updating wallet failed')
       }
     }
-
-    Object.assign(newWallet, { _previous_wallet_name: previousWalletName })
 
     this.props.saveWallet(newWallet)
     this.props.saveAccount(this.props.account)
