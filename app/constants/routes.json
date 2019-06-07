@@ -9,6 +9,7 @@
   "WALLET_MULTI_SIG": "/walletmultisig",
   "WALLET_MULTI_NEW": "/walletmultinew",
   "WALLET_MULTI_RECEIVE": "/walletmultireceive",
+  "WALLET_MULTI_SETTINGS": "/walletmultisettings",
   "WALLET_RECEIVE": "/walletreceive",
   "WALLET_SETTINGS": "/walletsettings",
   "TRANSFER": "/transfer",

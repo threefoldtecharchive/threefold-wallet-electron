@@ -2,7 +2,7 @@
 import { connect } from 'react-redux'
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
-import { Segment, Icon, Divider, List } from 'semantic-ui-react'
+import { Segment, Icon, Divider, List, Dimmer, Loader } from 'semantic-ui-react'
 import routes from '../../constants/routes'
 import styles from '../home/Home.css'
 import Footer from '../footer'
@@ -98,31 +98,41 @@ class Wallet extends Component {
 
     const wallet = this.props.balance.info.multisig_balances.filter(w => w.wallet_name === this.props.wallet.wallet_name)[0]
 
+    const active = true
     return (
       <div>
-        <div className={styles.backButton} data-tid='backButton'>
-          <Link to={routes.WALLET_SETTINGS}>
-            <Icon style={{ fontSize: 25, position: 'absolute', right: 20, cursor: 'pointer' }} name='setting' />
-          </Link>
-          <Link to={routes.HOME}>
-            <Icon style={{ fontSize: 25, position: 'absolute', right: 70, cursor: 'pointer' }} name='sign-out' />
-          </Link>
-        </div>
-        <div className={styles.container} >
-          <h2>Wallet {wallet.wallet_name || truncate(wallet.address, { length: 14 })}</h2>
-        </div>
-        <Divider style={{ background: '#1A253F' }} />
-        <div>
-          <Icon onClick={() => this.goBack()} style={{ fontSize: 25, marginLeft: 15, marginTop: 15, cursor: 'pointer', zIndex: 5 }} name='chevron circle left' />
-          <span onClick={() => this.goBack()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
-          {this.renderWalletBalanceGrid()}
-          <Segment style={{ width: '90%', height: 100, overflow: 'auto', overflowY: 'scroll', margin: 'auto', background: '#29272E', marginTop: 150 }}>
-            {this.renderOwnerList()}
-          </Segment>
-          <Segment style={{ width: '90%', height: '37vh', overflow: 'auto', overflowY: 'scroll', margin: 'auto', background: '#29272E', marginTop: 20 }}>
-            <TransactionsList account={this.props.account} loader={this.state.loader} transactions={wallet.transactions} chainInfo={this.props.chainInfo} />
-          </Segment>
-        </div>
+        {!wallet ? (
+          <Dimmer >
+            <Loader active={active} content='Loading wallet transaction' />
+          </Dimmer>
+        )
+          : (
+            <div>
+              <div className={styles.backButton} data-tid='backButton'>
+                <Link to={routes.WALLET_MULTI_SETTINGS}>
+                  <Icon style={{ fontSize: 25, position: 'absolute', right: 20, cursor: 'pointer' }} name='setting' />
+                </Link>
+                <Link to={routes.HOME}>
+                  <Icon style={{ fontSize: 25, position: 'absolute', right: 70, cursor: 'pointer' }} name='sign-out' />
+                </Link>
+              </div>
+              <div className={styles.container} >
+                <h2>Wallet {wallet.wallet_name || truncate(wallet.address, { length: 14 })}</h2>
+              </div>
+              <Divider style={{ background: '#1A253F' }} />
+              <div>
+                <Icon onClick={() => this.goBack()} style={{ fontSize: 25, marginLeft: 15, marginTop: 15, cursor: 'pointer', zIndex: 5 }} name='chevron circle left' />
+                <span onClick={() => this.goBack()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
+                {this.renderWalletBalanceGrid()}
+                <Segment style={{ width: '90%', height: 100, overflow: 'auto', overflowY: 'scroll', margin: 'auto', background: '#29272E', marginTop: 150 }}>
+                  {this.renderOwnerList()}
+                </Segment>
+                <Segment style={{ width: '90%', height: '37vh', overflow: 'auto', overflowY: 'scroll', margin: 'auto', background: '#29272E', marginTop: 20 }}>
+                  <TransactionsList account={this.props.account} loader={this.state.loader} transactions={wallet.transactions} chainInfo={this.props.chainInfo} />
+                </Segment>
+              </div>
+            </div>
+          )}
         <Footer />
       </div>
     )
