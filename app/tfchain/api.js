@@ -787,6 +787,11 @@ export var Account =  __class__ ('Account', [object], {
 				throw __except0__;
 			}
 		}
+		if (__in__ (candidate.wallet_name, self._multisig_wallet_info_map)) {
+			var __except0__ = ValueError ('a multisig wallet with the name {} is already stored in this account'.format (candidate.wallet_name));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
 	});},
 	get _get_multisig_wallets () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -886,11 +891,7 @@ export var Account =  __class__ ('Account', [object], {
 		else {
 		}
 		var info = MultiSignatureWalletStub (self._network_type, py_name, owners, signatures_required);
-		if (__in__ (py_name, self._multisig_wallet_info_map)) {
-			var __except0__ = ValueError ('a multisig wallet with the name {} is already stored in this account'.format (py_name));
-			__except0__.__cause__ = null;
-			throw __except0__;
-		}
+		self._validate_multisig_name (py_name);
 		if (len (set (owners).intersection (set (self.addresses))) == 0) {
 			var __except0__ = ValueError ('at least one owner of the multisig wallet has to be owned by this account');
 			__except0__.__cause__ = null;
@@ -941,6 +942,7 @@ export var Account =  __class__ ('Account', [object], {
 			delete self._multisig_wallet_info_map [address];
 			return null;
 		}
+		self._validate_multisig_name (py_name);
 		self._multisig_wallet_info_map [address].wallet_name = py_name;
 		return self._multisig_wallet_info_map [address];
 	});},
@@ -960,6 +962,34 @@ export var Account =  __class__ ('Account', [object], {
 		else {
 		}
 		return self.multisig_wallet_update (address, null);
+	});},
+	get _validate_multisig_name () {return __get__ (this, function (self, py_name) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		for (var wallet of self._wallets) {
+			if (wallet.wallet_name == py_name) {
+				var __except0__ = ValueError ('a wallet already exists with wallet_name {}'.format (py_name));
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
+		}
+		if (__in__ (py_name, self._multisig_wallet_info_map)) {
+			var __except0__ = ValueError ('a multisig wallet with the name {} is already stored in this account'.format (py_name));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
 	});},
 	get next_available_wallet_start_index () {return __get__ (this, function (self) {
 		if (arguments.length) {

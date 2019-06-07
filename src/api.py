@@ -450,6 +450,9 @@ class Account:
                 raise ValueError("a wallet already exists with wallet_name {}".format(candidate.wallet_name))
             if len(addresses_set.intersection(set(wallet.addresses))) != 0:
                 raise ValueError("cannot use addresses for wallet {} as it overlaps with the addresses of wallet {}".format(candidate.wallet_name, wallet.wallet_name))
+        # ensure also no name conflcits with multisig wallets
+        if candidate.wallet_name in self._multisig_wallet_info_map:
+            raise ValueError("a multisig wallet with the name {} is already stored in this account".format(candidate.wallet_name))
 
     @property
     def multisig_wallets(self):
@@ -483,8 +486,7 @@ class Account:
         # create the wallet info (also validates the parameters)
         info = MultiSignatureWalletStub(self._network_type, name, owners, signatures_required)
         # ensure the name is not yet used
-        if name in self._multisig_wallet_info_map:
-            raise ValueError("a multisig wallet with the name {} is already stored in this account".format(name))
+        self._validate_multisig_name(name)
         # ensure at least one owner is part of our balances
         if len(set(owners).intersection(set(self.addresses))) == 0:
             raise ValueError("at least one owner of the multisig wallet has to be owned by this account")
@@ -511,11 +513,19 @@ class Account:
         if name == None or name == '':
             del self._multisig_wallet_info_map[address]
             return None
+        self._validate_multisig_name(name)
         self._multisig_wallet_info_map[address].wallet_name = name
         return self._multisig_wallet_info_map[address]
 
     def multisig_wallet_delete(self, address):
         return self.multisig_wallet_update(address, None)
+
+    def _validate_multisig_name(self, name):
+        for wallet in self._wallets:
+            if wallet.wallet_name == name:
+                raise ValueError("a wallet already exists with wallet_name {}".format(name))
+        if name in self._multisig_wallet_info_map:
+            raise ValueError("a multisig wallet with the name {} is already stored in this account".format(name))
 
     def next_available_wallet_start_index(self):
         """
