@@ -484,6 +484,10 @@ class Account:
         return self._multisig_wallet_info_map[address]
 
     def multisig_wallet_new(self, name, owners, signatures_required):
+        if isinstance(signatures_required, str):
+            signatures_required = jsstr.to_int(signatures_required)
+        elif isinstance(signatures_required, float):
+            signatures_required = int(signatures_required)
         # create the wallet info (also validates the parameters)
         info = MultiSignatureWalletStub(self._network_type, name, owners, signatures_required)
         # ensure the name is not yet used

@@ -891,6 +891,12 @@ export var Account =  __class__ ('Account', [object], {
 		}
 		else {
 		}
+		if (isinstance (signatures_required, str)) {
+			var signatures_required = jsstr.to_int (signatures_required);
+		}
+		else if (isinstance (signatures_required, float)) {
+			var signatures_required = int (signatures_required);
+		}
 		var info = MultiSignatureWalletStub (self._network_type, py_name, owners, signatures_required);
 		self._validate_multisig_name (py_name);
 		if (len (set (owners).intersection (set (self.addresses))) == 0) {
