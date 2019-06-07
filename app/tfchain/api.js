@@ -912,7 +912,7 @@ export var Account =  __class__ ('Account', [object], {
 		self._multisig_wallet_info_map [info.address] = info;
 		return info;
 	});},
-	get multisig_wallet_update () {return __get__ (this, function (self, address, py_name) {
+	get multisig_wallet_update () {return __get__ (this, function (self, py_name, owners, signatures_required) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -920,8 +920,9 @@ export var Account =  __class__ ('Account', [object], {
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'address': var address = __allkwargs0__ [__attrib0__]; break;
 						case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+						case 'owners': var owners = __allkwargs0__ [__attrib0__]; break;
+						case 'signatures_required': var signatures_required = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
@@ -941,9 +942,7 @@ export var Account =  __class__ ('Account', [object], {
 		}
 		var address = uh.__str__ ();
 		if (!__in__ (address, self._multisig_wallet_info_map)) {
-			var __except0__ = KeyError ('no multisig wallet with address {} is stored in this account'.format (address));
-			__except0__.__cause__ = null;
-			throw __except0__;
+			return self.multisig_wallet_new (py_name, owners, signatures_required);
 		}
 		if (py_name == null || py_name == '') {
 			delete self._multisig_wallet_info_map [address];

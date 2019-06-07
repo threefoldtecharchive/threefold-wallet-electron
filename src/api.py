@@ -503,7 +503,7 @@ class Account:
         self._multisig_wallet_info_map[info.address] = info
         return info
 
-    def multisig_wallet_update(self, address, name):
+    def multisig_wallet_update(self, name, owners, signatures_required):
         """
         Delete (name=None||"") or update the name for an address.
         """
@@ -514,7 +514,7 @@ class Account:
             raise ValueError("address is not a multisig address: {}".format(address))
         address = uh.__str__()
         if address not in self._multisig_wallet_info_map:
-            raise KeyError("no multisig wallet with address {} is stored in this account".format(address))
+            return self.multisig_wallet_new(name, owners, signatures_required)
         if name == None or name == '':
             del self._multisig_wallet_info_map[address]
             return None
