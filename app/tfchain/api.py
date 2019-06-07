@@ -481,7 +481,7 @@ class Account:
 
     def multisig_wallet_new(self, name, owners, signatures_required):
         # create the wallet info (also validates the parameters)
-        info = MultiSignatureWalletStub(self.network_type, name, owners, signatures_required)
+        info = MultiSignatureWalletStub(self._network_type, name, owners, signatures_required)
         # ensure the name is not yet used
         if name in self._multisig_wallet_info_map:
             raise ValueError("a multisig wallet with the name {} is already stored in this account".format(name))
@@ -617,6 +617,20 @@ class Account:
                             if wallet_name != None:
                                 msbalance.wallet_name = wallet_name
                             msbalances.append(msbalance)
+                # add all missing ms balances
+                for wallet in jsobj.dict_values(self._multisig_wallet_info_map):
+                    if wallet.address not in msbalance_addresses:
+                        msbalances.append(wallet.balance)
+                # sort all msbalances
+                def sort_ms_balances_by_name_or_address(a, b):
+                    if a.wallet_name != "":
+                        if b.wallet_name != "":
+                            return jsstr.compare(a.wallet_name, b.wallet_name)
+                        return 1
+                    if b.wallet_name != "":
+                        return -1
+                    return jsstr.compare(a.address, b.address)
+                msbalances = jsarr.sort(msbalances, sort_ms_balances_by_name_or_address, reverse=True)
                 # return account balance
                 return AccountBalance(self._network_type, self.account_name, chain_info, balances, msbalances)
             # define generator
@@ -940,7 +954,10 @@ class MultiSignatureWalletStub(BaseWallet):
             self.owners,
             self.signatures_required,
             self._network_type,
-            self.wallet_name)
+            self.wallet_name,
+            wbalance.MultiSigWalletBalance(self.owners, self.signatures_required),
+            addresses_all=[self._address],
+        )
 
 
 class CachedMultiSignatureWallet(BaseWallet):

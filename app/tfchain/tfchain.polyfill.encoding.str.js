@@ -547,6 +547,29 @@ export var join = function (arr, sep) {
 	    
 	return s;
 };
+export var compare = function (a, b) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'a': var a = __allkwargs0__ [__attrib0__]; break;
+					case 'b': var b = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (a < b) {
+		return -(1);
+	}
+	if (b < a) {
+		return 1;
+	}
+	return 0;
+};
 export var String =  __class__ ('String', [object], {
 	__module__: __name__,
 	get from_utf8 () {return __getcm__ (this, function (cls, b) {

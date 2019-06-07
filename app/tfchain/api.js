@@ -885,7 +885,7 @@ export var Account =  __class__ ('Account', [object], {
 		}
 		else {
 		}
-		var info = MultiSignatureWalletStub (self.network_type, py_name, owners, signatures_required);
+		var info = MultiSignatureWalletStub (self._network_type, py_name, owners, signatures_required);
 		if (__in__ (py_name, self._multisig_wallet_info_map)) {
 			var __except0__ = ValueError ('a multisig wallet with the name {} is already stored in this account'.format (py_name));
 			__except0__.__cause__ = null;
@@ -1159,6 +1159,38 @@ export var Account =  __class__ ('Account', [object], {
 						}
 					}
 				}
+				for (var wallet of jsobj.dict_values (self._multisig_wallet_info_map)) {
+					if (!__in__ (wallet.address, msbalance_addresses)) {
+						msbalances.append (wallet.balance);
+					}
+				}
+				var sort_ms_balances_by_name_or_address = function (a, b) {
+					if (arguments.length) {
+						var __ilastarg0__ = arguments.length - 1;
+						if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+							var __allkwargs0__ = arguments [__ilastarg0__--];
+							for (var __attrib0__ in __allkwargs0__) {
+								switch (__attrib0__) {
+									case 'a': var a = __allkwargs0__ [__attrib0__]; break;
+									case 'b': var b = __allkwargs0__ [__attrib0__]; break;
+								}
+							}
+						}
+					}
+					else {
+					}
+					if (a.wallet_name != '') {
+						if (b.wallet_name != '') {
+							return jsstr.compare (a.wallet_name, b.wallet_name);
+						}
+						return 1;
+					}
+					if (b.wallet_name != '') {
+						return -(1);
+					}
+					return jsstr.compare (a.address, b.address);
+				};
+				var msbalances = jsarr.py_sort (msbalances, sort_ms_balances_by_name_or_address, __kwargtrans__ ({reverse: true}));
 				return AccountBalance (self._network_type, self.account_name, chain_info, balances, msbalances);
 			};
 			var generator = function* () {
@@ -2182,7 +2214,7 @@ export var MultiSignatureWalletStub =  __class__ ('MultiSignatureWalletStub', [B
 		}
 		else {
 		}
-		return MultiSignatureBalance (self.owners, self.signatures_required, self._network_type, self.wallet_name);
+		return MultiSignatureBalance (self.owners, self.signatures_required, self._network_type, self.wallet_name, wbalance.MultiSigWalletBalance (self.owners, self.signatures_required), __kwargtrans__ ({addresses_all: [self._address]}));
 	});}
 });
 Object.defineProperty (MultiSignatureWalletStub, 'signatures_required', property.call (MultiSignatureWalletStub, MultiSignatureWalletStub._get_signatures_required));

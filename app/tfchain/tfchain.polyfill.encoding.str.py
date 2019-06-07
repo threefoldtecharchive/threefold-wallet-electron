@@ -190,6 +190,13 @@ def join(arr, sep):
     """)
     return s
 
+def compare(a, b):
+    if a < b:
+        return -1
+    if b < a:
+        return 1
+    return 0
+
 
 class String:
     """
