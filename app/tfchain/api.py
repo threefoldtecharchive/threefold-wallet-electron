@@ -159,6 +159,7 @@ class Account:
     def _update_cache_wallet(self, old_name, new_name):
         if old_name in self._cached_wallet_balances:
             self._cached_wallet_balances[new_name] = self._cached_wallet_balances[old_name]
+            self._cached_wallet_balances[new_name].wallet_name = new_name
             del self._cached_wallet_balances[old_name]
 
     @property
@@ -791,9 +792,9 @@ class Wallet(BaseWallet):
         return Wallet(
             tfnetwork.Type(self._tfwallet.network_type),
             self._tfwallet.client.clone(),
-            self._wallet_index,
-            self._wallet_name,
-            self._start_index,
+            self.wallet_index,
+            self.wallet_name,
+            self.start_index,
             [pair for pair in self._tfwallet.pairs],
         )
 
@@ -813,6 +814,13 @@ class Wallet(BaseWallet):
 
     def _wallet_name_getter(self):
         return self._wallet_name
+
+    def _wallet_name_setter(self, value):
+        if not isinstance(value, str):
+            raise TypeError("wallet_name has to be a non-empty str, not be {} ({})".format(value, type(value)))
+        if value == "":
+            raise ValueError("wallet_name cannot be an empty str")
+        self._wallet_name = value
 
     @property
     def start_index(self):
@@ -890,6 +898,17 @@ class CachedWallet(Wallet):
         if total_funds.less_than_or_equal_to(0):
             return -1
         return 1
+
+    def _wallet_name_getter(self):
+        return self._balance.wallet_name
+
+    def _wallet_name_setter(self, value):
+        if not isinstance(value, str):
+            raise TypeError("wallet_name has to be a non-empty str, not be {} ({})".format(value, type(value)))
+        if value == "":
+            raise ValueError("wallet_name cannot be an empty str")
+        self._wallet_name = value
+        self._balance.wallet_name = value
 
     def balance_get(self, chain_info=None):
         """
@@ -1042,13 +1061,11 @@ class CachedMultiSignatureWallet(BaseWallet):
         return self._balance
 
     def transaction_new(self):
-        if not self._signing_power:
-            raise RuntimeError("cannot create a transaction using a (multisig) wallet with no signing power")
+        if self.fund_state < 0:
+            raise RuntimeError("cannot create a transaction using a (multisig) wallet with no funds")
         return CachedMultiSignatureCoinTransactionBuilder(self._balance, self._wallets)
 
     def transaction_sign(self, transaction):
-        if not self._signing_power:
-            raise RuntimeError("cannot sign a transaction using a (multisig) wallet with no signing power")
         first_signer = self._wallets[0]
         other_signers = self._wallets[1:]
         p = first_signer.transaction_sign(transaction, balance=self._balance)
@@ -1293,7 +1310,11 @@ class Balance:
         self._wallet_name_setter(value)
 
     def _wallet_name_setter(self, value):
-        raise NotImplementedError("_wallet_name_setter is not implemented/supported")
+        if not isinstance(value, str):
+            raise TypeError("wallet_name has to be a non-empty str, not be {} ({})".format(value, type(value)))
+        if value == "":
+            raise ValueError("wallet_name cannot be an empty str")
+        self._wallet_name = value
 
     @property
     def addresses_all(self):

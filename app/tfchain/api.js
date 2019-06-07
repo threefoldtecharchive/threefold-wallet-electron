@@ -171,6 +171,7 @@ export var Account =  __class__ ('Account', [object], {
 		}
 		if (__in__ (old_name, self._cached_wallet_balances)) {
 			self._cached_wallet_balances [new_name] = self._cached_wallet_balances [old_name];
+			self._cached_wallet_balances [new_name].wallet_name = new_name;
 			delete self._cached_wallet_balances [old_name];
 		}
 	});},
@@ -1658,7 +1659,7 @@ export var Wallet =  __class__ ('Wallet', [BaseWallet], {
 		}
 		else {
 		}
-		return Wallet (tfnetwork.Type (self._tfwallet.network_type), self._tfwallet.client.clone (), self._wallet_index, self._wallet_name, self._start_index, (function () {
+		return Wallet (tfnetwork.Type (self._tfwallet.network_type), self._tfwallet.client.clone (), self.wallet_index, self.wallet_name, self.start_index, (function () {
 			var __accu0__ = [];
 			for (var pair of self._tfwallet.pairs) {
 				__accu0__.append (pair);
@@ -1729,6 +1730,33 @@ export var Wallet =  __class__ ('Wallet', [BaseWallet], {
 		else {
 		}
 		return self._wallet_name;
+	});},
+	get _wallet_name_setter () {return __get__ (this, function (self, value) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (!(isinstance (value, str))) {
+			var __except0__ = py_TypeError ('wallet_name has to be a non-empty str, not be {} ({})'.format (value, py_typeof (value)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		if (value == '') {
+			var __except0__ = ValueError ('wallet_name cannot be an empty str');
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		self._wallet_name = value;
 	});},
 	get _get_start_index () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -1973,6 +2001,50 @@ export var CachedWallet =  __class__ ('CachedWallet', [Wallet], {
 			return -(1);
 		}
 		return 1;
+	});},
+	get _wallet_name_getter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._balance.wallet_name;
+	});},
+	get _wallet_name_setter () {return __get__ (this, function (self, value) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (!(isinstance (value, str))) {
+			var __except0__ = py_TypeError ('wallet_name has to be a non-empty str, not be {} ({})'.format (value, py_typeof (value)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		if (value == '') {
+			var __except0__ = ValueError ('wallet_name cannot be an empty str');
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		self._wallet_name = value;
+		self._balance.wallet_name = value;
 	});},
 	get balance_get () {return __get__ (this, function (self, chain_info) {
 		if (typeof chain_info == 'undefined' || (chain_info != null && chain_info.hasOwnProperty ("__kwargtrans__"))) {;
@@ -2518,8 +2590,8 @@ export var CachedMultiSignatureWallet =  __class__ ('CachedMultiSignatureWallet'
 		}
 		else {
 		}
-		if (!(self._signing_power)) {
-			var __except0__ = RuntimeError ('cannot create a transaction using a (multisig) wallet with no signing power');
+		if (self.fund_state < 0) {
+			var __except0__ = RuntimeError ('cannot create a transaction using a (multisig) wallet with no funds');
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
@@ -2539,11 +2611,6 @@ export var CachedMultiSignatureWallet =  __class__ ('CachedMultiSignatureWallet'
 			}
 		}
 		else {
-		}
-		if (!(self._signing_power)) {
-			var __except0__ = RuntimeError ('cannot sign a transaction using a (multisig) wallet with no signing power');
-			__except0__.__cause__ = null;
-			throw __except0__;
 		}
 		var first_signer = self._wallets [0];
 		var other_signers = self._wallets.__getslice__ (1, null, 1);
@@ -3318,9 +3385,17 @@ export var Balance =  __class__ ('Balance', [object], {
 		}
 		else {
 		}
-		var __except0__ = NotImplementedError ('_wallet_name_setter is not implemented/supported');
-		__except0__.__cause__ = null;
-		throw __except0__;
+		if (!(isinstance (value, str))) {
+			var __except0__ = py_TypeError ('wallet_name has to be a non-empty str, not be {} ({})'.format (value, py_typeof (value)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		if (value == '') {
+			var __except0__ = ValueError ('wallet_name cannot be an empty str');
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		self._wallet_name = value;
 	});},
 	get _get_addresses_all () {return __get__ (this, function (self) {
 		if (arguments.length) {
