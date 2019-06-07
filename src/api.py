@@ -507,12 +507,7 @@ class Account:
         """
         Delete (name=None||"") or update the name for an address.
         """
-        if not isinstance(address, str):
-            raise TypeError("address has an invalid type: {} ({})".format(address, type(address)))
-        uh = UnlockHash.from_json(address)
-        if uh.uhtype.__ne__(UnlockHashType.MULTI_SIG):
-            raise ValueError("address is not a multisig address: {}".format(address))
-        address = uh.__str__()
+        address = multisig_wallet_address_new(owners, signatures_required)
         if address not in self._multisig_wallet_info_map:
             return self.multisig_wallet_new(name, owners, signatures_required)
         if name == None or name == '':
@@ -2160,7 +2155,11 @@ def multisig_wallet_address_new(owners, signatures_required):
     if signatures_required == None:
         signatures_required = len(owners)
     else:
-        if not isinstance(signatures_required, int):
+        if isinstance(signatures_required, str):
+            signatures_required = jsstr.to_int(signatures_required)
+        elif isinstance(signatures_required, float):
+            signatures_required = int(signatures_required)
+        elif not isinstance(signatures_required, int):
             raise TypeError("signatures_required is supposed to be an int, invalid {} ({})".format(signatures_required, type(signatures_required)))
         if signatures_required < 1 or signatures_required > len(owners):
             raise ValueError("sgnatures_required has to be within the range [1, len(owners)]")

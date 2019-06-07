@@ -929,18 +929,7 @@ export var Account =  __class__ ('Account', [object], {
 		}
 		else {
 		}
-		if (!(isinstance (address, str))) {
-			var __except0__ = py_TypeError ('address has an invalid type: {} ({})'.format (address, py_typeof (address)));
-			__except0__.__cause__ = null;
-			throw __except0__;
-		}
-		var uh = UnlockHash.from_json (address);
-		if (uh.uhtype.__ne__ (UnlockHashType.MULTI_SIG)) {
-			var __except0__ = ValueError ('address is not a multisig address: {}'.format (address));
-			__except0__.__cause__ = null;
-			throw __except0__;
-		}
-		var address = uh.__str__ ();
+		var address = multisig_wallet_address_new (owners, signatures_required);
 		if (!__in__ (address, self._multisig_wallet_info_map)) {
 			return self.multisig_wallet_new (py_name, owners, signatures_required);
 		}
@@ -5329,7 +5318,13 @@ export var multisig_wallet_address_new = function (owners, signatures_required) 
 		var signatures_required = len (owners);
 	}
 	else {
-		if (!(isinstance (signatures_required, int))) {
+		if (isinstance (signatures_required, str)) {
+			var signatures_required = jsstr.to_int (signatures_required);
+		}
+		else if (isinstance (signatures_required, float)) {
+			var signatures_required = int (signatures_required);
+		}
+		else if (!(isinstance (signatures_required, int))) {
 			var __except0__ = py_TypeError ('signatures_required is supposed to be an int, invalid {} ({})'.format (signatures_required, py_typeof (signatures_required)));
 			__except0__.__cause__ = null;
 			throw __except0__;
