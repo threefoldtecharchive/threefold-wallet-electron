@@ -5,7 +5,7 @@ import { Icon, Input, Divider, Dropdown, Segment, Label } from 'semantic-ui-reac
 import styles from '../home/Home.css'
 import Footer from '../footer'
 import QRCode from 'qrcode.react'
-import { flatten, find, concat, truncate } from 'lodash'
+import { flatten, find } from 'lodash'
 import { CopyToClipboard } from 'react-copy-to-clipboard'
 import { toast } from 'react-toastify'
 import { selectWallet } from '../../actions'
@@ -49,36 +49,14 @@ class WalletSettings extends Component {
   }
 
   mapWalletsToDropdownOption = () => {
-    let { wallets } = this.props.account
-    let { multisig_wallets: multiSigWallets } = this.props.account
-    if (!(this.props.balance instanceof Array)) {
-      if (this.props.balance.wallets && this.props.balance.wallets.length > 0) {
-        wallets = this.props.balance.wallets
-      }
-      if (this.props.balance.multiSigWallet && this.props.balance.multiSigWallet.length > 0) {
-        multiSigWallets = this.props.balance.multiSigWallet
-      }
-    }
-
-    const nWallets = wallets.map(w => {
+    const { wallets } = this.props.account
+    return flatten(wallets.map(w => {
       return {
-        key: `NM: ${w.wallet_name}`,
+        key: w.wallet_name,
         text: w.wallet_name,
         value: w.wallet_name
       }
-    })
-
-    const mWallets = multiSigWallets.map(w => {
-      const id = w.wallet_name || w.address
-      return {
-        key: `MS: ${id}`,
-        text: `Multisig: ${truncate(id, { length: 24 })}`,
-        value: id
-      }
-    })
-
-    const newWallets = concat(nWallets, mWallets)
-    return newWallets
+    }))
   }
 
   mapAddressesToDropdownOption = () => {
