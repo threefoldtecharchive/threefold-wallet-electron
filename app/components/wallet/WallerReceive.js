@@ -12,7 +12,8 @@ import { selectWallet } from '../../actions'
 
 const mapStateToProps = state => ({
   wallet: state.wallet,
-  account: state.account
+  account: state.account,
+  balance: state.balance
 })
 
 const mapDispatchToProps = (dispatch) => ({
