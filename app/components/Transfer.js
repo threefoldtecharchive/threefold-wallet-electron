@@ -506,7 +506,7 @@ class Transfer extends Component {
           <Form.Field>
             <Radio
               label={<label style={{ color: 'white' }}>Multisignature Wallet</label>}
-              checked={radioChecked}
+              checked={!radioChecked}
               onChange={this.handleMultiSigTransactionCheck}
             />
           </Form.Field>
