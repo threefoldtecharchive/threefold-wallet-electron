@@ -9,7 +9,7 @@ import { selectWallet, setBalance, setTransactionJson } from '../actions'
 import * as tfchain from '../tfchain/api'
 import moment from 'moment'
 import routes from '../constants/routes'
-import { filter, concat } from 'lodash'
+import { filter, concat, truncate } from 'lodash'
 
 const mapStateToProps = state => ({
   account: state.account,
@@ -221,8 +221,16 @@ class Transfer extends Component {
   }
 
   mapWalletsToDropdownOption = () => {
-    const { wallets } = this.props.account
-    const { multisig_wallets: multiSigWallets } = this.props.account
+    let { wallets } = this.props.account
+    let { multisig_wallets: multiSigWallets } = this.props.account
+    if (!(this.props.balance instanceof Array)) {
+      if (this.props.balance.wallets && this.props.balance.wallets.length > 0) {
+        wallets = this.props.balance.wallets
+      }
+      if (this.props.balance.multiSigWallet && this.props.balance.multiSigWallet.length > 0) {
+        multiSigWallets = this.props.balance.multiSigWallet
+      }
+    }
 
     const nWallets = wallets.map(w => {
       return {
@@ -236,7 +244,7 @@ class Transfer extends Component {
       const id = w.wallet_name || w.address
       return {
         key: `MS: ${id}`,
-        text: `Multisig: ${id}`,
+        text: `Multisig: ${truncate(id, { length: 24 })}`,
         value: id
       }
     })

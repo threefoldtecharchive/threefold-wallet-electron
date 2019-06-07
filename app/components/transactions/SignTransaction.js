@@ -8,11 +8,13 @@ import routes from '../../constants/routes'
 import { selectWallet, setBalance, clearTransactionJson } from '../../actions'
 import { CopyToClipboard } from 'react-copy-to-clipboard'
 import { toast } from 'react-toastify'
+import { concat, truncate } from 'lodash'
 
 const mapStateToProps = state => ({
   account: state.account,
   wallet: state.wallet,
-  json: state.transactions.json
+  json: state.transactions.json,
+  balance: state.balance
 })
 
 const mapDispatchToProps = (dispatch) => ({
@@ -40,14 +42,36 @@ class SignTransaction extends Component {
 
   mapWalletsToDropdownOption = () => {
     if (this.props.account) {
-      const { wallets } = this.props.account
-      return wallets.map(w => {
+      let { wallets } = this.props.account
+      let { multisig_wallets: multiSigWallets } = this.props.account
+      if (!(this.props.balance instanceof Array)) {
+        if (this.props.balance.wallets && this.props.balance.wallets.length > 0) {
+          wallets = this.props.balance.wallets
+        }
+        if (this.props.balance.multiSigWallet && this.props.balance.multiSigWallet.length > 0) {
+          multiSigWallets = this.props.balance.multiSigWallet
+        }
+      }
+
+      const nWallets = wallets.map(w => {
         return {
-          key: w.wallet_name,
+          key: `NM: ${w.wallet_name}`,
           text: w.wallet_name,
           value: w.wallet_name
         }
       })
+
+      const mWallets = multiSigWallets.map(w => {
+        const id = w.wallet_name || w.address
+        return {
+          key: `MS: ${id}`,
+          text: `Multisig: ${truncate(id, { length: 24 })}`,
+          value: id
+        }
+      })
+
+      const newWallets = concat(nWallets, mWallets)
+      return newWallets
     }
   }
 
