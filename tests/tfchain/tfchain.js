@@ -168,11 +168,8 @@ const _all = {
     assert.throws(() => account.multisig_wallet_new('foo wallet', [defaultWallet.address, '01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0'], 1))
     assert.throws(() => account.multisig_wallet_new('foo wallet', ['01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0', defaultWallet.address], 1))
 
-    // update one can only if it exists
-    assert.throws(() => account.multisig_wallet_update('03a2fee279ebb7bceee06d9cb1777789c977d33805b028ca09b7d4a01d3695475132fe83a27cbf', 'foo'))
-
     // update the multisig wallet
-    const msWalletACopy = account.multisig_wallet_update(msWalletA.address, 'foo')
+    const msWalletACopy = account.multisig_wallet_update('foo', [defaultWallet.address, '01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0'], 1)
     assert.equal(msWalletACopy.wallet_name, 'foo')
     assert.equal(msWalletA.wallet_name, 'foo')
     assert.equal(msWalletA.address, msWalletACopy.address)
@@ -180,8 +177,8 @@ const _all = {
     // deleting a wallet that is referenced by a ms wallet is not possible
     assert.throws(() => account.wallet_delete(0, 'default'))
 
-    // deleting a multisig wallet is only possible if it exists
-    assert.throws(() => account.multisig_wallet_delete('03a2fee279ebb7bceee06d9cb1777789c977d33805b028ca09b7d4a01d3695475132fe83a27cbf'))
+    // deleting a multisig wallet is possible if it doesn't exist
+    account.multisig_wallet_delete('03a2fee279ebb7bceee06d9cb1777789c977d33805b028ca09b7d4a01d3695475132fe83a27cbf')
 
     // delete the only ms wallet we have
     account.multisig_wallet_delete(msWalletA.address)

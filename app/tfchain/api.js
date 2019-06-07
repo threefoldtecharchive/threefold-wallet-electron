@@ -934,8 +934,9 @@ export var Account =  __class__ ('Account', [object], {
 			return self.multisig_wallet_new (py_name, owners, signatures_required);
 		}
 		if (py_name == null || py_name == '') {
-			delete self._multisig_wallet_info_map [address];
-			return null;
+			var __except0__ = ValueError ('invalid name: {} ({})'.format (py_name, py_typeof (py_name)));
+			__except0__.__cause__ = null;
+			throw __except0__;
 		}
 		self._validate_multisig_name (py_name);
 		self._multisig_wallet_info_map [address].wallet_name = py_name;
@@ -956,7 +957,9 @@ export var Account =  __class__ ('Account', [object], {
 		}
 		else {
 		}
-		return self.multisig_wallet_update (address, null);
+		if (__in__ (address, self._multisig_wallet_info_map)) {
+			delete self._multisig_wallet_info_map [address];
+		}
 	});},
 	get _validate_multisig_name () {return __get__ (this, function (self, py_name) {
 		if (arguments.length) {

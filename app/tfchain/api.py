@@ -511,14 +511,14 @@ class Account:
         if address not in self._multisig_wallet_info_map:
             return self.multisig_wallet_new(name, owners, signatures_required)
         if name == None or name == '':
-            del self._multisig_wallet_info_map[address]
-            return None
+            raise ValueError("invalid name: {} ({})".format(name, type(name)))
         self._validate_multisig_name(name)
         self._multisig_wallet_info_map[address].wallet_name = name
         return self._multisig_wallet_info_map[address]
 
     def multisig_wallet_delete(self, address):
-        return self.multisig_wallet_update(address, None)
+        if address in self._multisig_wallet_info_map:
+            del self._multisig_wallet_info_map[address]
 
     def _validate_multisig_name(self, name):
         for wallet in self._wallets:
