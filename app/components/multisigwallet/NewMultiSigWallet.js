@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom'
 import { Form, Button, Icon, Divider, Message, Popup, Input } from 'semantic-ui-react'
 import routes from '../../constants/routes'
 import styles from '../home/Home.css'
-import { saveAccount } from '../../actions'
+import { saveAccount, setBalance } from '../../actions'
 import Footer from '../footer'
 import { toast } from 'react-toastify'
 import * as tfchain from '../../tfchain/api'
@@ -19,6 +19,9 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = (dispatch) => ({
   saveAccount: (account) => {
     dispatch(saveAccount(account))
+  },
+  setBalance: (account) => {
+    dispatch(setBalance(account))
   }
 })
 
@@ -77,6 +80,7 @@ class NewMultiSigWallet extends Component {
       try {
         this.props.account.multisig_wallet_new(name, ownerAddresses, signatureCount)
         this.props.saveAccount(this.props.account)
+        this.props.setBalance(this.props.account)
         toast('Multisig Wallet created')
         return this.props.history.push('/account')
       } catch (error) {
@@ -122,7 +126,7 @@ class NewMultiSigWallet extends Component {
   handleAddressOwnerChange = (e, index) => {
     const { ownerAddresses, ownerAddressErrors } = this.state
     const { target } = e
-    if (!tfchain.wallet_address_is_valid(target.value) && target.value !== '') {
+    if (!tfchain.wallet_address_is_valid(target.value, { multisig: false }) && target.value !== '') {
       ownerAddressErrors.splice(index, 1)
       ownerAddressErrors.insert(index, true)
       this.setState({ ownerAddressErrors })

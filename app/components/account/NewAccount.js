@@ -99,7 +99,6 @@ class NewAccount extends Component {
     if (generateSeed) {
       seed = tfchain.mnemonic_new()
     }
-    console.log(generateSeed)
     this.setState({ seed, generateSeed, seedError: false })
   }
 

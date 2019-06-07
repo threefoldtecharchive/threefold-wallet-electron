@@ -46,7 +46,7 @@ class Account extends Component {
 
   handleMultiSigWalletClick = (wallet) => {
     this.props.selectWallet(wallet)
-    this.props.history.push(routes.ACCOUNT)
+    this.props.history.push(routes.WALLET_MULTI_SIG)
   }
 
   renderWallets = () => {
@@ -55,6 +55,9 @@ class Account extends Component {
     if (!(this.props.balance instanceof Array)) {
       if (wallets.length === this.props.balance.wallets.length) {
         wallets = this.props.balance.wallets
+      }
+      if (multiSigWallets.length === this.props.balance.multiSigWallet.length) {
+        multiSigWallets = this.props.balance.multiSigWallet
       }
     }
     return (
@@ -128,7 +131,7 @@ class Account extends Component {
               )
             }
             return (
-              <Card key={w.wallet_name} style={{ boxShadow: 'none', height: 180, width: 350, marginTop: 0, marginRight: 20, marginBottom: 30, background: 'linear-gradient(90deg, rgba(56,51,186,1) 0%, rgba(102,71,254,1) 100%)' }} onClick={() => this.handleWalletClick(w)}>
+              <Card key={w.wallet_name} style={{ boxShadow: 'none', height: 180, width: 350, marginTop: 0, marginRight: 20, marginBottom: 30, background: 'linear-gradient(90deg, rgba(56,51,186,1) 0%, rgba(102,71,254,1) 100%)' }} onClick={() => this.handleMultiSigWalletClick(w)}>
                 <Dimmer active={content == null}>
                   <Loader />
                 </Dimmer>

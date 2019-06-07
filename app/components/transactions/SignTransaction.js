@@ -87,7 +87,6 @@ class SignTransaction extends Component {
     if (!jsonError && json !== '') {
       this.setState({ loader: true })
       const selectedWallet = this.props.account.wallets.filter(w => w.wallet_name === wallet)[0]
-      console.log(selectedWallet)
       selectedWallet.transaction_sign(json).then(res => {
         this.setState({ loader: false })
         this.props.history.push(routes.ACCOUNT)

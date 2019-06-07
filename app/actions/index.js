@@ -129,10 +129,12 @@ export const setBalance = function (account) {
     return dispatch => {
       account.balance.then(info => {
         const wallets = info.balances.map(b => account.cached_wallet_for(b))
+        const multiSigWallet = info.multisig_balances.map(b => account.cached_multisig_wallet_for(b))
         dispatch({
           type: 'SET_BALANCE',
           info,
-          wallets
+          wallets,
+          multiSigWallet
         })
       })
     }

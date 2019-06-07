@@ -1,11 +1,12 @@
 export const balance = (state = [], action) => {
   switch (action.type) {
     case 'SET_BALANCE':
-      const { info, wallets } = action
+      const { info, wallets, multiSigWallet } = action
       return {
         ...state,
         info,
-        wallets
+        wallets,
+        multiSigWallet
       }
     case 'RESET_APP':
       return []

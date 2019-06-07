@@ -9,12 +9,13 @@ import { selectWallet, setBalance, setTransactionJson } from '../actions'
 import * as tfchain from '../tfchain/api'
 import moment from 'moment'
 import routes from '../constants/routes'
-import { filter } from 'lodash'
+import { filter, concat } from 'lodash'
 
 const mapStateToProps = state => ({
   account: state.account,
   wallet: state.wallet,
-  routerLocations: state.routerLocations
+  routerLocations: state.routerLocations,
+  balance: state.balance
 })
 
 const mapDispatchToProps = (dispatch) => ({
@@ -42,6 +43,7 @@ class Transfer extends Component {
       amountError: false,
       wallets: [],
       selectedWallet: this.props.account.wallets[0].wallet_name,
+      isMultiSigOutput: false,
       loader: false,
       datelock: '',
       timelock: '',
@@ -54,7 +56,7 @@ class Transfer extends Component {
   }
 
   handleDestinationChange = ({ target }) => {
-    if (!tfchain.wallet_address_is_valid(target.value) && target.value !== '') {
+    if (!tfchain.wallet_address_is_valid(target.value, { multisig: false }) && target.value !== '') {
       this.setState({ destinationError: true })
     } else {
       this.setState({ destinationError: false })
@@ -76,15 +78,20 @@ class Transfer extends Component {
 
   handleAmountChange = ({ target }) => {
     const { selectedWallet } = this.state
-    if (selectedWallet && target.value !== 0) {
-      const selectedWalletFromProps = this.props.account.wallets.filter(w => w.wallet_name === selectedWallet)[0]
-      selectedWalletFromProps.balance.then(b => {
-        if (!b.spend_amount_is_valid(target.value)) {
-          this.setState({ amountError: true })
-        } else {
-          this.setState({ amountError: false })
-        }
-      })
+    const { balance } = this.props
+    const { multiSigWallet, wallets } = balance
+
+    let selectedWalletFromProps = wallets.filter(w => w.wallet_name === selectedWallet)[0]
+    if (!selectedWalletFromProps) {
+      selectedWalletFromProps = multiSigWallet.filter(w => w.wallet_name === selectedWallet)[0]
+    }
+
+    if (selectedWalletFromProps && target.value !== 0) {
+      if (!selectedWalletFromProps.balance.spend_amount_is_valid(target.value)) {
+        this.setState({ amountError: true })
+      } else {
+        this.setState({ amountError: false })
+      }
     }
     this.setState({ amount: target.value })
   }
@@ -130,7 +137,7 @@ class Transfer extends Component {
   handleAddressOwnerChange = (e, index) => {
     const { ownerAddresses, ownerAddressErrors } = this.state
     const { target } = e
-    if (!tfchain.wallet_address_is_valid(target.value) && target.value !== '') {
+    if (!tfchain.wallet_address_is_valid(target.value, { multisig: false }) && target.value !== '') {
       ownerAddressErrors.splice(index, 1)
       ownerAddressErrors.insert(index, true)
       this.setState({ ownerAddressErrors })
@@ -215,34 +222,67 @@ class Transfer extends Component {
 
   mapWalletsToDropdownOption = () => {
     const { wallets } = this.props.account
-    return wallets.map(w => {
+    const { multisig_wallets: multiSigWallets } = this.props.account
+
+    const nWallets = wallets.map(w => {
       return {
-        key: w.wallet_name,
+        key: `NM: ${w.wallet_name}`,
         text: w.wallet_name,
         value: w.wallet_name
       }
     })
+
+    const mWallets = multiSigWallets.map(w => {
+      const id = w.wallet_name || w.address
+      return {
+        key: `MS: ${id}`,
+        text: `Multisig: ${id}`,
+        value: id
+      }
+    })
+
+    const newWallets = concat(nWallets, mWallets)
+    return newWallets
   }
 
   selectWallet = (event, data) => {
-    const selectedWallet = this.props.account.wallets.filter(w => w.wallet_name === data.value)[0]
+    let newSelectedWallet = this.props.account.wallets.filter(w => w.wallet_name === data.value)[0]
+    if (!newSelectedWallet) {
+      newSelectedWallet = this.props.account.multisig_wallets.filter(w => w.wallet_name === data.value)[0]
+    }
+
     this.setState({ selectedWallet: data.value })
-    this.props.selectWallet(selectedWallet)
+    this.props.selectWallet(newSelectedWallet)
   }
 
   // implement goBack ourselfs, if a user has made a transaction and he presses go back then he should route to account
   // instead of going back to transfer (default behaviour of react router 'goBack' function)
   goBack = () => {
-    const { routerLocations } = this.props
+    const { selectedWallet } = this.state
+    const { routerLocations, balance } = this.props
+    const { multiSigWallet, wallets } = balance
     const previousLocation = routerLocations[routerLocations.length - 2]
     const { location } = previousLocation
     const { pathname } = location
+
+    let goToMultiSig = false
+    let selectedWalletFromProps = wallets.filter(w => w.wallet_name === selectedWallet)[0]
+    if (!selectedWalletFromProps) {
+      selectedWalletFromProps = multiSigWallet.filter(w => w.wallet_name === selectedWallet)[0]
+      goToMultiSig = true
+    }
+
+    console.log(goToMultiSig)
+
     switch (pathname) {
       case '/account':
         return this.props.history.push(routes.ACCOUNT)
       case '/transfer':
         return this.props.history.push(routes.ACCOUNT)
       case '/wallet':
+        if (goToMultiSig) {
+          return this.props.history.push(routes.WALLET_MULTI_SIG)
+        }
         return this.props.history.push(routes.WALLET)
       default:
         return this.props.history.push(routes.WALLET)
@@ -266,7 +306,6 @@ class Transfer extends Component {
     } = this.state
 
     let destinationError = false
-    // let descriptionError = false
 
     if (destination === '') {
       destinationError = true
@@ -279,51 +318,60 @@ class Transfer extends Component {
       const dateLockTimeZone = dateLockDate.getTimezoneOffset()
       timestamp = moment(dateLockDate).utcOffset(dateLockTimeZone).unix()
     }
-    // if (description === '') {
-    //   descriptionError = true
-    // }
+
+    let newSelectedWallet
+    let isMultiSigOutput = true
+    newSelectedWallet = this.props.account.wallets.filter(w => w.wallet_name === selectedWallet)[0] || 0
+    if (newSelectedWallet === 0) {
+      newSelectedWallet = this.props.account.multisig_wallets.filter(w => w.wallet_name === selectedWallet)[0]
+      isMultiSigOutput = false
+    }
 
     if (!multiSigTransaction) {
-      this.buildSingleTransaction(destinationError, destination, amountError, selectedWallet, timestamp, amount, description)
+      this.buildSingleTransaction(destinationError, destination, amountError, newSelectedWallet, isMultiSigOutput, timestamp, amount, description)
     } else {
-      this.buildMultiSignTransaction(amountError, selectedWallet, ownerAddresses, ownerAddressErrors, signatureCount, signatureCountError, timestamp, amount, description)
+      this.buildMultiSignTransaction(amountError, newSelectedWallet, ownerAddresses, ownerAddressErrors, signatureCount, signatureCountError, timestamp, amount, description)
     }
   }
 
-  buildSingleTransaction = (destinationError, destination, amountError, selectedWallet, timestamp, amount, description) => {
-    if (!destinationError && !amountError && selectedWallet != null) {
+  buildSingleTransaction = (destinationError, destination, amountError, selectedWallet, isMultiSigOutput, timestamp, amount, description) => {
+    if (!destinationError && !amountError && selectedWallet) {
       this.renderLoader(true)
-      const selectedWalletFromProps = this.props.account.wallets.filter(w => w.wallet_name === selectedWallet)[0]
-      const builder = selectedWalletFromProps.transaction_new()
-      if (timestamp) {
-        try {
-          builder.output_add(destination, amount.toString(), { lock: timestamp })
-        } catch (error) {
-          toast('transaction failed')
-          return this.setState({ loader: false, errorMessage: error.__str__() })
-        }
-      } else {
-        try {
-          builder.output_add(destination, amount.toString())
-        } catch (error) {
-          toast('transaction failed')
-          return this.setState({ loader: false, errorMessage: error.__str__() })
-        }
-      }
-      builder.send({ data: description }).then(result => {
-        this.setState({ destinationError, amountError, loader: false })
-        this.props.setBalance(this.props.account)
-        if (result.submitted) {
-          toast('Transaction ' + result.transaction.id + ' submitted')
-          return this.goBack()
+      if (selectedWallet.fund_state === 1) {
+        const builder = selectedWallet.transaction_new()
+        if (timestamp) {
+          try {
+            builder.output_add(destination, amount.toString(), { lock: timestamp })
+          } catch (error) {
+            toast('transaction failed')
+            return this.setState({ loader: false, errorMessage: error.__str__() })
+          }
         } else {
-          this.props.setTransactionJson(JSON.stringify(result.transaction.json()))
-          return this.props.history.push(routes.SIGN)
+          try {
+            builder.output_add(destination, amount.toString())
+          } catch (error) {
+            toast('transaction failed')
+            return this.setState({ loader: false, errorMessage: error.__str__() })
+          }
         }
-      }).catch(err => {
-        toast('transaction failed')
-        this.setState({ loader: false, errorMessage: err.__str__() })
-      })
+        builder.send({ data: description }).then(result => {
+          this.setState({ destinationError, amountError, loader: false })
+          this.props.setBalance(this.props.account)
+          if (result.submitted) {
+            toast('Transaction ' + result.transaction.id + ' submitted')
+            return this.goBack()
+          } else {
+            this.props.setTransactionJson(JSON.stringify(result.transaction.json()))
+            return this.props.history.push(routes.SIGN)
+          }
+        }).catch(err => {
+          toast.error('transaction failed')
+          this.setState({ loader: false, errorMessage: err.__str__() })
+        })
+      } else {
+        toast.error('not enough funds')
+        this.setState({ loader: false })
+      }
     } else {
       toast.error('All fields are required !')
     }
@@ -340,8 +388,8 @@ class Transfer extends Component {
 
     if (!signatureCountError && !amountError && selectedWallet != null && !hasOwnerAddressErrors && areAllOwnersFilledIn) {
       this.renderLoader(true)
-      const selectedWalletFromProps = this.props.account.wallets.filter(w => w.wallet_name === selectedWallet)[0]
-      const builder = selectedWalletFromProps.transaction_new()
+      // const selectedWalletFromProps = this.props.account.wallets.filter(w => w.wallet_name === selectedWallet)[0]
+      const builder = selectedWallet.transaction_new()
       if (timestamp) {
         try {
           builder.output_add([signatureCount, ownerAddresses], amount.toString(), { lock: timestamp })
@@ -417,7 +465,7 @@ class Transfer extends Component {
   }
 
   render () {
-    const { amountError, amount, timelock, datelock, selectedWallet } = this.state
+    const { amountError, amount, timelock, datelock, selectedWallet, multiSigTransaction } = this.state
     const walletsOptions = this.mapWalletsToDropdownOption()
 
     if (this.state.loader) {
@@ -428,29 +476,29 @@ class Transfer extends Component {
       )
     }
 
+    const radioChecked = !multiSigTransaction
+
     return (
       <div>
         <div className={styles.container} >
           <h2 >Transfer</h2>
         </div>
         <Divider style={{ background: '#1A253F' }} />
-        <Icon onClick={() => this.props.history.goBack()} style={{ fontSize: 25, marginLeft: 15, marginTop: 15, cursor: 'pointer' }} name='chevron circle left' />
-        <span onClick={() => this.props.history.goBack()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
+        <Icon onClick={() => this.goBack()} style={{ fontSize: 25, marginLeft: 15, marginTop: 15, cursor: 'pointer' }} name='chevron circle left' />
+        <span onClick={() => this.goBack()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
         <Form error style={{ width: '50%', marginLeft: '20%', marginTop: 10, overflowY: 'auto', height: 500, padding: 30 }}>
           <h2 style={{ marginBottom: 20 }}>Send funds to:</h2>
           <Form.Field>
             <Radio
               label={<label style={{ color: 'white' }}>Wallet</label>}
-              value={this.state.multiSigTransaction}
-              checked={!this.state.multiSigTransaction}
+              checked={radioChecked}
               onChange={this.handleMultiSigTransactionCheck}
             />
           </Form.Field>
           <Form.Field>
             <Radio
               label={<label style={{ color: 'white' }}>Multisignature Wallet</label>}
-              value={this.state.multiSigTransaction}
-              checked={this.state.multiSigTransaction}
+              checked={radioChecked}
               onChange={this.handleMultiSigTransactionCheck}
             />
           </Form.Field>
