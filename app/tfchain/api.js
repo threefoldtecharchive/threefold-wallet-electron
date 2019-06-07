@@ -3748,6 +3748,22 @@ export var MultiSignatureBalance =  __class__ ('MultiSignatureBalance', [Balance
 		}
 		return self._addresses_all [0];
 	});},
+	get _get_addresses () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return [self.address];
+	});},
 	get _get_owners () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -3810,6 +3826,7 @@ export var MultiSignatureBalance =  __class__ ('MultiSignatureBalance', [Balance
 });
 Object.defineProperty (MultiSignatureBalance, 'signatures_required', property.call (MultiSignatureBalance, MultiSignatureBalance._get_signatures_required));
 Object.defineProperty (MultiSignatureBalance, 'owners', property.call (MultiSignatureBalance, MultiSignatureBalance._get_owners));
+Object.defineProperty (MultiSignatureBalance, 'addresses', property.call (MultiSignatureBalance, MultiSignatureBalance._get_addresses));
 Object.defineProperty (MultiSignatureBalance, 'address', property.call (MultiSignatureBalance, MultiSignatureBalance._get_address));;
 export var BlockView =  __class__ ('BlockView', [object], {
 	__module__: __name__,

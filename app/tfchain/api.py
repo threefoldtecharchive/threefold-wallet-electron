@@ -1453,6 +1453,10 @@ class MultiSignatureBalance(Balance):
         return self._addresses_all[0]
 
     @property
+    def addresses(self):
+        return [self.address]
+
+    @property
     def owners(self):
         return self._owners
 
