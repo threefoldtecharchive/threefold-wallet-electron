@@ -1298,7 +1298,7 @@ export var BaseWallet =  __class__ ('BaseWallet', [object], {
 		__except0__.__cause__ = null;
 		throw __except0__;
 	});},
-	get _get_has_signing_power () {return __get__ (this, function (self) {
+	get _get_fund_state () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -1312,9 +1312,9 @@ export var BaseWallet =  __class__ ('BaseWallet', [object], {
 		}
 		else {
 		}
-		return self._has_signing_power_getter ();
+		return self._fund_state_getter ();
 	});},
-	get _has_signing_power_getter () {return __get__ (this, function (self) {
+	get _fund_state_getter () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -1328,7 +1328,7 @@ export var BaseWallet =  __class__ ('BaseWallet', [object], {
 		}
 		else {
 		}
-		var __except0__ = NotImplementedError ('_has_signing_power is not implemented');
+		var __except0__ = NotImplementedError ('_fund_state_getter is not implemented');
 		__except0__.__cause__ = null;
 		throw __except0__;
 	});},
@@ -1585,7 +1585,7 @@ Object.defineProperty (BaseWallet, 'address_count', property.call (BaseWallet, B
 Object.defineProperty (BaseWallet, 'addresses', property.call (BaseWallet, BaseWallet._get_addresses));
 Object.defineProperty (BaseWallet, 'address', property.call (BaseWallet, BaseWallet._get_address));
 Object.defineProperty (BaseWallet, 'wallet_name', property.call (BaseWallet, BaseWallet._get_wallet_name, BaseWallet._set_wallet_name));
-Object.defineProperty (BaseWallet, 'has_signing_power', property.call (BaseWallet, BaseWallet._get_has_signing_power));
+Object.defineProperty (BaseWallet, 'fund_state', property.call (BaseWallet, BaseWallet._get_fund_state));
 Object.defineProperty (BaseWallet, 'is_cached', property.call (BaseWallet, BaseWallet._get_is_cached));;
 export var Wallet =  __class__ ('Wallet', [BaseWallet], {
 	__module__: __name__,
@@ -1652,7 +1652,7 @@ export var Wallet =  __class__ ('Wallet', [BaseWallet], {
 		}
 		return false;
 	});},
-	get _has_signing_power_getter () {return __get__ (this, function (self) {
+	get _fund_state_getter () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -1666,7 +1666,7 @@ export var Wallet =  __class__ ('Wallet', [BaseWallet], {
 		}
 		else {
 		}
-		return true;
+		return 0;
 	});},
 	get _get_wallet_index () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -1924,6 +1924,26 @@ export var CachedWallet =  __class__ ('CachedWallet', [Wallet], {
 		}
 		return true;
 	});},
+	get _fund_state_getter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var total_funds = self._balance.coins_unlocked.plus (self._balance.unconfirmed_coins_unlocked);
+		if (total_funds.less_than_or_equal_to (0)) {
+			return -(1);
+		}
+		return 1;
+	});},
 	get balance_get () {return __get__ (this, function (self, chain_info) {
 		if (typeof chain_info == 'undefined' || (chain_info != null && chain_info.hasOwnProperty ("__kwargtrans__"))) {;
 			var chain_info = null;
@@ -2148,7 +2168,7 @@ export var MultiSignatureWalletStub =  __class__ ('MultiSignatureWalletStub', [B
 		}
 		return true;
 	});},
-	get _has_signing_power_getter () {return __get__ (this, function (self) {
+	get _fund_state_getter () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -2162,7 +2182,7 @@ export var MultiSignatureWalletStub =  __class__ ('MultiSignatureWalletStub', [B
 		}
 		else {
 		}
-		return false;
+		return -(1);
 	});},
 	get _addresses_getter () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -2260,10 +2280,11 @@ export var CachedMultiSignatureWallet =  __class__ ('CachedMultiSignatureWallet'
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		self._signing_power = true;
 		if (len (wallets) == 0) {
-			jslog.warning ('creating cached multisig wallet {} ({}) with no signing power, balance:'.format (wallet_name, balance.address), balance);
-			self._signing_power = false;
+			jslog.error ('creating cached multisig wallet {} ({}) with no signing power, balance:'.format (wallet_name, balance.address), balance);
+			var __except0__ = ValueError ('at least one wallet is required, none are given');
+			__except0__.__cause__ = null;
+			throw __except0__;
 		}
 		for (var wallet of wallets) {
 			if (!(isinstance (wallet, Wallet))) {
@@ -2413,7 +2434,7 @@ export var CachedMultiSignatureWallet =  __class__ ('CachedMultiSignatureWallet'
 		}
 		return true;
 	});},
-	get _has_signing_power_getter () {return __get__ (this, function (self) {
+	get _fund_state_getter () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -2427,7 +2448,11 @@ export var CachedMultiSignatureWallet =  __class__ ('CachedMultiSignatureWallet'
 		}
 		else {
 		}
-		return self._signing_power;
+		var total_funds = self._balance.coins_unlocked.plus (self._balance.unconfirmed_coins_unlocked);
+		if (total_funds.less_than_or_equal_to (0)) {
+			return -(1);
+		}
+		return 1;
 	});},
 	get balance_get () {return __get__ (this, function (self, ChainInfo) {
 		if (typeof ChainInfo == 'undefined' || (ChainInfo != null && ChainInfo.hasOwnProperty ("__kwargtrans__"))) {;
