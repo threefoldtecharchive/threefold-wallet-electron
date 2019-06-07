@@ -69,7 +69,7 @@ class NewMultiSigWallet extends Component {
       this.setState({ nameError })
     }
 
-    if (signatureCount < ownerAddresses.length) {
+    if (signatureCount < 0 || signatureCount >= ownerAddresses.length) {
       signatureCountError = true
       this.setState({ signatureCountError: true })
     }
