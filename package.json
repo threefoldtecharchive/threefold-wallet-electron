@@ -68,7 +68,9 @@
       "app/app.html",
       "app/main.prod.js",
       "app/main.prod.js.map",
-      "package.json"
+      "app/icon.png",
+      "package.json",
+      "resources/**/*"
     ],
     "dmg": {
       "contents": [
@@ -92,10 +94,10 @@
     },
     "linux": {
       "target": [
-        "deb",
-        "rpm",
         "snap",
-        "AppImage"
+        "AppImage",
+        "rpm",
+        "deb"
       ],
       "category": "Development"
     },

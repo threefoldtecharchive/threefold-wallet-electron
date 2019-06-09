@@ -43,6 +43,20 @@ To package apps with options:
 $ yarn package --[option]
 ```
 
+## Linux packaging
+
+```bash
+$ yarn package-linux
+```
+Will generate [AppImage](https://appimage.org), snap, deb, rpm packages. We recommend using `AppImage`
+
+### Running AppImage
+Just Download the application, make it executable, and run! No need to install. No system libraries or system preferences are altered. 
+- Make sure to have libfuse installed
+- `chmod +x file.AppImage` 
+- `./file.AppImage`
+
+
 To run End-to-End Test
 
 ```bash

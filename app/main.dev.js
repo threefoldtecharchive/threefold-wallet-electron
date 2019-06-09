@@ -66,15 +66,21 @@ app.on('ready', async () => {
   ) {
     await installExtensions()
   }
+  let path = require("path")
+  let resourcesDir = path.join(path.resolve(__dirname, ".."), "resources")
+  let icoPath =  path.join(resourcesDir, "icon.png")
 
   mainWindow = new BrowserWindow({
     show: false,
     width: 1250,
     height: 800,
     titleBarStyle: 'hidden',
-    resizable: false
+    resizable: false,
   })
 
+  if (process.platform == "linux") {
+    mainWindow.setIcon(icoPath)
+  }
   mainWindow.loadURL(`file://${__dirname}/app.html`)
 
   // @TODO: Use 'ready-to-show' event
