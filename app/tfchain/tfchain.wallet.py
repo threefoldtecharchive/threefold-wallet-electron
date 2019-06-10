@@ -7,7 +7,7 @@ import tfchain.client as tfclient
 import tfchain.errors as tferrors
 
 from tfchain.network import Type as NetworkType
-from tfchain.balance import WalletBalance, WalletsBalance, MultiSigWalletBalance
+from tfchain.balance import WalletBalance, SingleSigWalletBalance, MultiSigWalletBalance
 from tfchain.encoding.siabin import SiaBinaryEncoder
 
 from tfchain.types import ConditionTypes, transactions, FulfillmentTypes
@@ -67,12 +67,6 @@ class TFChainWallet:
         # self._atomicswap = TFChainAtomicSwap(wallet=self)
         # self._threebot = TFChainThreeBot(wallet=self)
         # self._erc20 = TFChainERC20(wallet=self)
-
-    def clone(self):
-        network_type = NetworkType(self.network_type)
-        pairs = [pair for pair in self._pairs]
-        client = self._client.clone()
-        return TFChainWallet(network_type, pairs, client)
 
     @property
     def addresses(self):
@@ -175,8 +169,7 @@ class TFChainWallet:
         """
         The balance "sheet" of the wallet.
         """
-        w = self.clone()
-        aggregator = WalletBalanceAggregator(w, chain_info=chain_info)
+        aggregator = SingleSigWalletBalanceAggregator(self, chain_info=chain_info)
         return aggregator.fetch_and_aggregate()
 
     @property
@@ -184,11 +177,10 @@ class TFChainWallet:
         """
         Get all transactions linked to a personal wallet address.
         """
-        w = self.clone()
         # for each address get all transactions
         def generator():
-            for address in w.addresses:
-                yield w._unlockhash_get(address)
+            for address in self.addresses:
+                yield self._unlockhash_get(address)
         transactions = set()
         def gatherer(result):
             if result.transactions:
@@ -319,7 +311,7 @@ class TFChainWallet:
     #         # update balance
     #         for ci in txn.coin_inputs:
     #             balance.output_add(ci.parent_output, confirmed=False, spent=True)
-    #         addresses = self.addresses + balance.addresses_multisig
+    #         addresses = self.addresses + balance.multisig_addresses
     #         for idx, co in enumerate(txn.coin_outputs):
     #             if str(co.condition.unlockhash) in addresses:
     #                 # add the id to the coin_output, so we can track it has been spent
@@ -353,8 +345,6 @@ class TFChainWallet:
         elif not isinstance(txn, TransactionBaseClass):
             raise TypeError("txn value has invalid type {} and cannot be signed".format(type(txn)))
 
-        wallet = self.clone()
-
         to_submit = submit
         balance_is_cached = (balance != None)
         def cb(balance):
@@ -383,7 +373,7 @@ class TFChainWallet:
             # be able to add whatever content we know we can add
             if isinstance(txn, (TransactionV128, TransactionV129)):
                 # set the parent mint condition
-                txn.parent_mint_condition = wallet.client.minter.condition_get()
+                txn.parent_mint_condition = self.client.minter.condition_get()
                 # define the current fulfillment if it is not defined
                 if not txn.mint_fulfillment_defined():
                     txn.mint_fulfillment = FulfillmentTypes.from_condition(txn.parent_mint_condition)
@@ -400,7 +390,7 @@ class TFChainWallet:
             signature_count = 0
             for request in sig_requests:
                 try:
-                    key_pair = wallet.key_pair_get(request.wallet_address)
+                    key_pair = self.key_pair_get(request.wallet_address)
                     pk = public_key_from_assymetric_key_pair(key_pair)
                     input_hash = request.input_hash_new(public_key=pk)
                     signature = key_pair.sign(input_hash.value)
@@ -426,7 +416,7 @@ class TFChainWallet:
                 txn.id = id
                 if balance_is_cached:
                     # if the balance is cached, also update...
-                    addresses = wallet.addresses + balance.addresses_multisig
+                    addresses = jsarr.concat(self.addresses, balance.multisig_addresses)
                     # ... the balance
                     for idx, ci in enumerate(txn.coin_inputs):
                         if ci.parent_output.condition.unlockhash.__str__() in addresses:
@@ -442,15 +432,15 @@ class TFChainWallet:
                     signed=(signature_count>0),
                     submitted=submit,
                 )
-            return jsasync.chain(wallet._transaction_put(transaction=txn), id_cb)
+            return jsasync.chain(self._transaction_put(transaction=txn), id_cb)
 
         if balance_is_cached:
-            if not isinstance(balance, WalletsBalance):
+            if not isinstance(balance, WalletBalance):
                 raise TypeError("balance is of unexpected type: {} ({})".format(balance, type(balance)))
             # execute the balance cb directly if a cached balance is given
             return cb(balance)
         # chain the balance object first
-        return jsasync.chain(wallet.balance, cb)
+        return jsasync.chain(self.balance, cb)
 
     def key_pair_get(self, unlockhash):
         """
@@ -619,7 +609,7 @@ class TFChainWallet:
 #         if submit:
 #             txn.id = self._transaction_put(transaction=txn)
 #             # update balance of wallet
-#             addresses = self._wallet.addresses + balance.addresses_multisig
+#             addresses = self._wallet.addresses + balance.multisig_addresses
 #             for idx, co in enumerate(txn.coin_outputs):
 #                 if str(co.condition.unlockhash) in addresses:
 #                     # add the id to the coin_output, so we can track it has been spent
@@ -1017,7 +1007,7 @@ class TFChainWallet:
 #             # update balance
 #             for ci in txn.coin_inputs:
 #                 balance.output_add(ci.parent_output, confirmed=False, spent=True)
-#             addresses = self._wallet.addresses + balance.addresses_multisig
+#             addresses = self._wallet.addresses + balance.multisig_addresses
 #             for idx, co in enumerate(txn.coin_outputs):
 #                 if str(co.condition.unlockhash) in addresses:
 #                     balance.output_add(co, confirmed=False, spent=False)
@@ -1314,7 +1304,7 @@ class TFChainWallet:
 #             # update balance
 #             for ci in txn.coin_inputs:
 #                 balance.output_add(ci.parent_output, confirmed=False, spent=True)
-#             addresses = self._wallet.addresses + balance.addresses_multisig
+#             addresses = self._wallet.addresses + balance.multisig_addresses
 #             for idx, co in enumerate(txn.coin_outputs):
 #                 if str(co.condition.unlockhash) in addresses:
 #                     # add the id to the coin_output, so we can track it has been spent
@@ -1543,7 +1533,7 @@ class TFChainWallet:
 #             # update balance
 #             for ci in txn.coin_inputs:
 #                 balance.output_add(ci.parent_output, confirmed=False, spent=True)
-#             addresses = self._wallet.addresses + balance.addresses_multisig
+#             addresses = self._wallet.addresses + balance.multisig_addresses
 #             for idx, co in enumerate(txn.coin_outputs):
 #                 if str(co.condition.unlockhash) in addresses:
 #                     # add the id to the coin_output, so we can track it has been spent
@@ -1648,18 +1638,18 @@ class TransactionSignResult:
 #     def submitted(self):
 #         return self._submitted
 
-class WalletBalanceAggregator:
+class SingleSigWalletBalanceAggregator:
     """
     State class to serve as the red line throughout
-    the chained promise-based balance gathering for a wallet,
-    which can involve the merging of results of multiple addresses,
-    single- and/or multisignature.
+    the chained promise-based balance gathering for a (regular/personal) wallet,
+    which can involve the merging of results of multiple (single-sig) addresses.
     """
 
     def __init__(self, wallet, chain_info=None):
+        if not isinstance(wallet, TFChainWallet):
+            raise TypeError("expected wallet to be of type TFChainWallet, not: {} ({})".format(wallet, type(wallet0)))
         self._wallet = wallet
-        self._balance = WalletsBalance()
-        self._multisig_addresses = []
+        self._balance = SingleSigWalletBalance()
         self._info = chain_info
         if self._info != None and not isinstance(self._info, tfclient.ExplorerBlockchainInfo):
             raise TypeError("info has to be an ExplorerBlockchainInfo object, invalid: {} ({})".format(self._info, type(self._info)))
@@ -1668,14 +1658,12 @@ class WalletBalanceAggregator:
         if self._info != None:
             return jsasync.chain(
                 self._personal_pool_chain_get(),
-                self._multisig_pool_chain_get,
                 self._balance_get,
             )
         return jsasync.chain(
             self._wallet._client.blockchain_info_get(),
             self._collect_chain_info,
             self._personal_pool_chain_get,
-            self._multisig_pool_chain_get,
             self._balance_get,
         )
 
@@ -1693,23 +1681,6 @@ class WalletBalanceAggregator:
             yield self._wallet._unlockhash_get(address)
 
     def _collect_personal_balance(self, result):
-        balance = result.balance(info=self._info)
-        self._balance = self._balance.balance_add(balance)
-        # collect all multisig addresses
-        for address in result.multisig_addresses:
-            self._multisig_addresses.append(address.__str__())
-
-    def _multisig_pool_chain_get(self):
-        return jsasync.promise_pool_new(
-            self._multisig_address_generator,
-            cb=self._collect_multisig_balance,
-        )
-
-    def _multisig_address_generator(self):
-        for address in self._multisig_addresses:
-            yield self._wallet._unlockhash_get(address)
-
-    def _collect_multisig_balance(self, result):
         balance = result.balance(info=self._info)
         self._balance = self._balance.balance_add(balance)
 
@@ -1759,19 +1730,17 @@ class CoinTransactionBuilder():
         txn = self._txn
         self._txn = None
 
-        wallet = self._wallet.clone()
-
         balance_is_cached = (balance != None)
         def balance_cb(balance):
             # fund amount
             amount = Currency.sum(*[co.value for co in txn.coin_outputs])
-            miner_fee = wallet.network_type.minimum_miner_fee()
+            miner_fee = self._wallet.network_type.minimum_miner_fee()
             inputs, remainder, suggested_refund = balance.fund(amount.plus(miner_fee), source=source)
 
             # define the refund condition
             if refund == None: # automatically choose a refund condition if none is given
                 if suggested_refund == None:
-                    refund = ConditionTypes.unlockhash_new(unlockhash=wallet.address)
+                    refund = ConditionTypes.unlockhash_new(unlockhash=self._wallet.address)
                 else:
                     refund = suggested_refund
             else:
@@ -1799,7 +1768,7 @@ class CoinTransactionBuilder():
             # fulfill the signature requests that we can fulfill
             for request in sig_requests:
                 try:
-                    key_pair = wallet.key_pair_get(request.wallet_address)
+                    key_pair = self._wallet.key_pair_get(request.wallet_address)
                     pk = public_key_from_assymetric_key_pair(key_pair)
                     input_hash = request.input_hash_new(public_key=pk)
                     signature = key_pair.sign(input_hash.value)
@@ -1819,9 +1788,9 @@ class CoinTransactionBuilder():
                 txn.id = id
                 if balance_is_cached:
                     # if the balance is cached, also update...
-                    addresses = wallet.addresses
-                    if isinstance(balance, WalletsBalance):
-                        addresses = jsarr.concat(addresses, balance.addresses_multisig)
+                    addresses = self._wallet.addresses
+                    if isinstance(balance, SingleSigWalletBalance):
+                        addresses = jsarr.concat(addresses, balance.multisig_addresses)
                     # ... the balance
                     for idx, ci in enumerate(txn.coin_inputs):
                         if ci.parent_output.condition.unlockhash.__str__() in addresses:
@@ -1833,7 +1802,7 @@ class CoinTransactionBuilder():
                             balance.output_add(txn, idx, confirmed=False, spent=False)
                 # return the semd result
                 return TransactionSendResult(txn, submit)
-            return jsasync.chain(wallet._transaction_put(transaction=txn), id_cb)
+            return jsasync.chain(self._wallet._transaction_put(transaction=txn), id_cb)
 
         if balance != None:
             if not isinstance(balance, WalletBalance):
@@ -1841,4 +1810,4 @@ class CoinTransactionBuilder():
             # if balance is given, execute the balance cb directly
             return balance_cb(balance)
         # else fetch the balance first and get it than
-        return jsasync.chain(wallet.balance, balance_cb)
+        return jsasync.chain(self._wallet.balance, balance_cb)

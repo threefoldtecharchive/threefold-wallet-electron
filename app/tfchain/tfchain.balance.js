@@ -1,6 +1,6 @@
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __proxy__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, abs, all, any, assert, bool, bytearray, bytes, callable, chr, copy, deepcopy, delattr, dict, dir, divmod, enumerate, filter, float, getattr, hasattr, input, int, isinstance, issubclass, len, list, map, max, min, object, ord, pow, print, property, py_TypeError, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
 import {CoinInput} from './tfchain.types.IO.js';
-import {ConditionMultiSignature, UnlockHash, UnlockHashType} from './tfchain.types.ConditionTypes.js';
+import {ConditionMultiSignature, ConditionNil, UnlockHash, UnlockHashType} from './tfchain.types.ConditionTypes.js';
 import {Currency, Hash} from './tfchain.types.PrimitiveTypes.js';
 import * as ConditionTypes from './tfchain.types.ConditionTypes.js';
 import * as transactions from './tfchain.types.transactions.js';
@@ -506,32 +506,6 @@ export var WalletBalance =  __class__ ('WalletBalance', [object], {
 		self._addresses.add (output.condition.unlockhash.__str__ ());
 		self._transactions [txnid] = txn;
 	});},
-	get _get__base () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		var b = WalletBalance ();
-		b._outputs = self._outputs;
-		b._outputs_spent = self._outputs_spent;
-		b._outputs_unconfirmed = self._outputs_unconfirmed;
-		b._outputs_unconfirmed_spent = self._outputs_unconfirmed_spent;
-		b._transactions = self._transactions;
-		b._chain_blockid = self._chain_blockid;
-		b._chain_height = self._chain_height;
-		b._chain_time = self._chain_time;
-		b._addresses = self._addresses;
-		return b;
-	});},
 	get balance_add () {return __get__ (this, function (self, other) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -846,7 +820,6 @@ export var WalletBalance =  __class__ ('WalletBalance', [object], {
 		return tuple ([outputs, collected]);
 	});}
 });
-Object.defineProperty (WalletBalance, '_base', property.call (WalletBalance, WalletBalance._get__base));
 Object.defineProperty (WalletBalance, 'unconfirmed_locked', property.call (WalletBalance, WalletBalance._get_unconfirmed_locked));
 Object.defineProperty (WalletBalance, 'unconfirmed', property.call (WalletBalance, WalletBalance._get_unconfirmed));
 Object.defineProperty (WalletBalance, 'locked', property.call (WalletBalance, WalletBalance._get_locked));
@@ -862,9 +835,114 @@ Object.defineProperty (WalletBalance, 'chain_height', property.call (WalletBalan
 Object.defineProperty (WalletBalance, 'chain_time', property.call (WalletBalance, WalletBalance._get_chain_time, WalletBalance._set_chain_time));
 Object.defineProperty (WalletBalance, 'chain_blockid', property.call (WalletBalance, WalletBalance._get_chain_blockid, WalletBalance._set_chain_blockid));
 Object.defineProperty (WalletBalance, 'addresses', property.call (WalletBalance, WalletBalance._get_addresses));;
+export var SingleSigWalletBalance =  __class__ ('SingleSigWalletBalance', [WalletBalance], {
+	__module__: __name__,
+	get __init__ () {return __get__ (this, function (self) {
+		var kwargs = dict ();
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						default: kwargs [__attrib0__] = __allkwargs0__ [__attrib0__];
+					}
+				}
+				delete kwargs.__kwargtrans__;
+			}
+			var args = tuple ([].slice.apply (arguments).slice (1, __ilastarg0__ + 1));
+		}
+		else {
+			var args = tuple ();
+		}
+		self._multisig_addresses = set ();
+		__super__ (SingleSigWalletBalance, '__init__') (self, ...args, __kwargtrans__ (kwargs));
+	});},
+	get _get_multisig_addresses () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return list (self._multisig_addresses);
+	});},
+	get multisig_address_add () {return __get__ (this, function (self, address) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'address': var address = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (isinstance (address, str)) {
+			var address = UnlockHash.from_json (address);
+		}
+		else if (!(isinstance (address, UnlockHash))) {
+			var __except0__ = py_TypeError ('can only add a multisig address as a UnlockHash or str, not: {} ({})'.format (address, py_typeof (address)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		if (address.uhtype.__ne__ (UnlockHashType.MULTI_SIG)) {
+			var __except0__ = ValueError ('can only add multisig addresses');
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		self._multisig_addresses.add (address.__str__ ());
+	});},
+	get balance_add () {return __get__ (this, function (self, other) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (other == null) {
+			return self;
+		}
+		if (!(isinstance (other, SingleSigWalletBalance))) {
+			var __except0__ = py_TypeError ('other balance has to be of type single-signature wallet balance');
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		self._multisig_addresses = self._multisig_addresses.union (other._multisig_addresses);
+		return __super__ (SingleSigWalletBalance, 'balance_add') (self, other);
+	});}
+});
+Object.defineProperty (SingleSigWalletBalance, 'multisig_addresses', property.call (SingleSigWalletBalance, SingleSigWalletBalance._get_multisig_addresses));;
 export var MultiSigWalletBalance =  __class__ ('MultiSigWalletBalance', [WalletBalance], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, owners, signature_count) {
+		if (typeof owners == 'undefined' || (owners != null && owners.hasOwnProperty ("__kwargtrans__"))) {;
+			var owners = null;
+		};
+		if (typeof signature_count == 'undefined' || (signature_count != null && signature_count.hasOwnProperty ("__kwargtrans__"))) {;
+			var signature_count = null;
+		};
+		var kwargs = dict ();
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -874,30 +952,45 @@ export var MultiSigWalletBalance =  __class__ ('MultiSigWalletBalance', [WalletB
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
 						case 'owners': var owners = __allkwargs0__ [__attrib0__]; break;
 						case 'signature_count': var signature_count = __allkwargs0__ [__attrib0__]; break;
+						default: kwargs [__attrib0__] = __allkwargs0__ [__attrib0__];
 					}
 				}
+				delete kwargs.__kwargtrans__;
 			}
+			var args = tuple ([].slice.apply (arguments).slice (3, __ilastarg0__ + 1));
 		}
 		else {
+			var args = tuple ();
 		}
-		if (!(isinstance (signature_count, int))) {
-			var __except0__ = py_TypeError ('signature count of a MultiSigWallet is expected to be of type int, not {}'.format (py_typeof (signature_count)));
-			__except0__.__cause__ = null;
-			throw __except0__;
+		if (owners == null) {
+			if (signature_count != null) {
+				var __except0__ = ValueError ('signature count should be None if owners is None, not: {} ({})'.format (signature_count, py_typeof (signature_count)));
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
+			self._owners = null;
+			self._signature_count = null;
 		}
-		if (signature_count < 1) {
-			var __except0__ = ValueError ('signature count of a MultiSigWallet has to be at least 1, cannot be {}'.format (signature_count));
-			__except0__.__cause__ = null;
-			throw __except0__;
+		else {
+			if (!(isinstance (signature_count, int))) {
+				var __except0__ = py_TypeError ('signature count of a MultiSigWallet is expected to be of type int, not {}'.format (py_typeof (signature_count)));
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
+			if (signature_count < 1) {
+				var __except0__ = ValueError ('signature count of a MultiSigWallet has to be at least 1, cannot be {}'.format (signature_count));
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
+			if (len (owners) < signature_count) {
+				var __except0__ = ValueError ('the amount of owners ({}) cannot be lower than the specified signature count ({})'.format (len (owners), signature_count));
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
+			self._owners = owners;
+			self._signature_count = signature_count;
 		}
-		if (len (owners) < signature_count) {
-			var __except0__ = ValueError ('the amount of owners ({}) cannot be lower than the specified signature count ({})'.format (len (owners), signature_count));
-			__except0__.__cause__ = null;
-			throw __except0__;
-		}
-		self._owners = owners;
-		self._signature_count = signature_count;
-		__super__ (MultiSigWalletBalance, '__init__') (self);
+		__super__ (MultiSigWalletBalance, '__init__') (self, ...args, __kwargtrans__ (kwargs));
 	});},
 	get _get_address () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -929,7 +1022,50 @@ export var MultiSigWalletBalance =  __class__ ('MultiSigWalletBalance', [WalletB
 		}
 		else {
 		}
+		if (self._owners == null) {
+			return ConditionNil ();
+		}
 		return ConditionMultiSignature (__kwargtrans__ ({unlockhashes: self._owners, min_nr_sig: self._signature_count}));
+	});},
+	get _set_condition () {return __get__ (this, function (self, value) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (!(isinstance (value, ConditionMultiSignature))) {
+			var __except0__ = py_TypeError ('expected value to be ConditionMultiSignature, not: {} ({})'.format (value, py_typeof (value)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		if (self._owners == null) {
+			self._owners = (function () {
+				var __accu0__ = [];
+				for (var owner of value.unlockhashes) {
+					__accu0__.append (owner);
+				}
+				return __accu0__;
+			}) ();
+			self._signature_count = value.required_signatures;
+		}
+		else {
+			var expected_address = self.address;
+			var received_address = value.unlockhash.__str__ ();
+			if (expected_address != received_address) {
+				var __except0__ = ValueError ('received condition has recipient address {} while {} was set and expected'.format (received_address, expected_address));
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
+		}
 	});},
 	get _get_owners () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -944,6 +1080,9 @@ export var MultiSigWalletBalance =  __class__ ('MultiSigWalletBalance', [WalletB
 			}
 		}
 		else {
+		}
+		if (self._owners == null) {
+			return [];
 		}
 		return (function () {
 			var __accu0__ = [];
@@ -967,7 +1106,45 @@ export var MultiSigWalletBalance =  __class__ ('MultiSigWalletBalance', [WalletB
 		}
 		else {
 		}
+		if (self._owners == null) {
+			return -(1);
+		}
 		return self._signature_count;
+	});},
+	get output_add () {return __get__ (this, function (self, txn, index, confirmed, spent) {
+		if (typeof confirmed == 'undefined' || (confirmed != null && confirmed.hasOwnProperty ("__kwargtrans__"))) {;
+			var confirmed = true;
+		};
+		if (typeof spent == 'undefined' || (spent != null && spent.hasOwnProperty ("__kwargtrans__"))) {;
+			var spent = false;
+		};
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'txn': var txn = __allkwargs0__ [__attrib0__]; break;
+						case 'index': var index = __allkwargs0__ [__attrib0__]; break;
+						case 'confirmed': var confirmed = __allkwargs0__ [__attrib0__]; break;
+						case 'spent': var spent = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		__super__ (MultiSigWalletBalance, 'output_add') (self, txn, index, __kwargtrans__ ({confirmed: confirmed, spent: spent}));
+		if (self._owners == null) {
+			if (spent) {
+				var output = txn.coin_inputs [index].parent_output;
+			}
+			else {
+				var output = txn.coin_outputs [index];
+			}
+			self.condition = output.condition;
+		}
 	});},
 	get balance_add () {return __get__ (this, function (self, other) {
 		if (arguments.length) {
@@ -988,19 +1165,20 @@ export var MultiSigWalletBalance =  __class__ ('MultiSigWalletBalance', [WalletB
 			return self;
 		}
 		if (!(isinstance (other, MultiSigWalletBalance))) {
-			if (isinstance (other, tuple ([WalletBalance, WalletsBalance]))) {
-				return WalletsBalance ().balance_add (self).balance_add (other);
-			}
 			var __except0__ = py_TypeError ('other balance has to be of type multi-signature wallet balance');
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		if (self.address != other.address) {
+		if (self._owners == null) {
+			self._owners = other._owners;
+			self._signature_count = other._signature_count;
+		}
+		else if (self.address != other.address) {
 			var __except0__ = ValueError ('other balance is for a different MultiSignature Wallet, cannot be merged');
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		return __super__ (MultiSigWalletBalance, 'balance_add') (self, other._base);
+		return __super__ (MultiSigWalletBalance, 'balance_add') (self, other);
 	});},
 	get fund () {return __get__ (this, function (self, amount, source) {
 		if (typeof source == 'undefined' || (source != null && source.hasOwnProperty ("__kwargtrans__"))) {;
@@ -1057,412 +1235,7 @@ export var MultiSigWalletBalance =  __class__ ('MultiSigWalletBalance', [WalletB
 });
 Object.defineProperty (MultiSigWalletBalance, 'signature_count', property.call (MultiSigWalletBalance, MultiSigWalletBalance._get_signature_count));
 Object.defineProperty (MultiSigWalletBalance, 'owners', property.call (MultiSigWalletBalance, MultiSigWalletBalance._get_owners));
-Object.defineProperty (MultiSigWalletBalance, 'condition', property.call (MultiSigWalletBalance, MultiSigWalletBalance._get_condition));
+Object.defineProperty (MultiSigWalletBalance, 'condition', property.call (MultiSigWalletBalance, MultiSigWalletBalance._get_condition, MultiSigWalletBalance._set_condition));
 Object.defineProperty (MultiSigWalletBalance, 'address', property.call (MultiSigWalletBalance, MultiSigWalletBalance._get_address));;
-export var WalletsBalance =  __class__ ('WalletsBalance', [WalletBalance], {
-	__module__: __name__,
-	get __init__ () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		self._wallets = dict ({});
-		__super__ (WalletsBalance, '__init__') (self);
-	});},
-	get _get_wallets () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		return self._wallets;
-	});},
-	get _get_addresses_multisig () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		return jsobj.get_keys (self.wallets);
-	});},
-	get _multisig_output_add () {return __get__ (this, function (self, address, output, txn, index, confirmed, spent) {
-		if (typeof confirmed == 'undefined' || (confirmed != null && confirmed.hasOwnProperty ("__kwargtrans__"))) {;
-			var confirmed = true;
-		};
-		if (typeof spent == 'undefined' || (spent != null && spent.hasOwnProperty ("__kwargtrans__"))) {;
-			var spent = false;
-		};
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'address': var address = __allkwargs0__ [__attrib0__]; break;
-						case 'output': var output = __allkwargs0__ [__attrib0__]; break;
-						case 'txn': var txn = __allkwargs0__ [__attrib0__]; break;
-						case 'index': var index = __allkwargs0__ [__attrib0__]; break;
-						case 'confirmed': var confirmed = __allkwargs0__ [__attrib0__]; break;
-						case 'spent': var spent = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		var oc = output.condition.unwrap ();
-		if (!(isinstance (oc, ConditionMultiSignature))) {
-			var __except0__ = py_TypeError ("multi signature's output condition cannot be of type {} (expected: ConditionMultiSignature)".format (py_typeof (oc)));
-			__except0__.__cause__ = null;
-			throw __except0__;
-		}
-		if (!(__in__ (address, self._wallets))) {
-			self._wallets [address] = MultiSigWalletBalance (__kwargtrans__ ({owners: output.condition.unlockhashes, signature_count: output.condition.required_signatures}));
-		}
-		self._wallets [address].output_add (txn, index, __kwargtrans__ ({confirmed: confirmed, spent: spent}));
-	});},
-	get output_add () {return __get__ (this, function (self, txn, index, confirmed, spent) {
-		if (typeof confirmed == 'undefined' || (confirmed != null && confirmed.hasOwnProperty ("__kwargtrans__"))) {;
-			var confirmed = true;
-		};
-		if (typeof spent == 'undefined' || (spent != null && spent.hasOwnProperty ("__kwargtrans__"))) {;
-			var spent = false;
-		};
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'txn': var txn = __allkwargs0__ [__attrib0__]; break;
-						case 'index': var index = __allkwargs0__ [__attrib0__]; break;
-						case 'confirmed': var confirmed = __allkwargs0__ [__attrib0__]; break;
-						case 'spent': var spent = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (spent) {
-			var output = txn.coin_inputs [index].parent_output;
-		}
-		else {
-			var output = txn.coin_outputs [index];
-		}
-		var uh = output.condition.unlockhash;
-		if (uh.uhtype.__eq__ (UnlockHashType.MULTI_SIG)) {
-			return self._multisig_output_add (__kwargtrans__ ({address: uh.__str__ (), output: output, txn: txn, index: index, confirmed: confirmed, spent: spent}));
-		}
-		self._addresses.add (uh.__str__ ());
-		return __super__ (WalletsBalance, 'output_add') (self, __kwargtrans__ ({txn: txn, index: index, confirmed: confirmed, spent: spent}));
-	});},
-	get balance_add () {return __get__ (this, function (self, other) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (other == null) {
-			return self;
-		}
-		if (!(isinstance (other, WalletBalance))) {
-			var __except0__ = py_TypeError ('other balance has to be of type wallet balance');
-			__except0__.__cause__ = null;
-			throw __except0__;
-		}
-		if (isinstance (other, MultiSigWalletBalance)) {
-			self._merge_multisig_wallet_balance (other.address, other);
-			return self;
-		}
-		var b = __super__ (WalletsBalance, 'balance_add') (self, other._base);
-		if (b != self) {
-			var __except0__ = Exception ("BUG: instance shouldn't have changed, please fix or report");
-			__except0__.__cause__ = null;
-			throw __except0__;
-		}
-		if (!(isinstance (other, WalletsBalance))) {
-			return b;
-		}
-		for (var [addr, balance] of jsobj.get_items (other._wallets)) {
-			b._merge_multisig_wallet_balance (addr, balance);
-		}
-		return b;
-	});},
-	get _merge_multisig_wallet_balance () {return __get__ (this, function (self, address, balance) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'address': var address = __allkwargs0__ [__attrib0__]; break;
-						case 'balance': var balance = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (!__in__ (address, self._wallets)) {
-			self._wallets [address] = balance;
-			return ;
-		}
-		self._wallets [address] = self._wallets [address].balance_add (balance);
-	});},
-	get fund () {return __get__ (this, function (self, amount, source) {
-		if (typeof source == 'undefined' || (source != null && source.hasOwnProperty ("__kwargtrans__"))) {;
-			var source = null;
-		};
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'amount': var amount = __allkwargs0__ [__attrib0__]; break;
-						case 'source': var source = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		var addresses = set ();
-		var ms_addresses = set ();
-		var refund = null;
-		if (source == null) {
-			for (var co of self.outputs_available) {
-				addresses.add (co.condition.unlockhash.__str__ ());
-			}
-			for (var co of self.outputs_unconfirmed_available) {
-				addresses.add (co.condition.unlockhash.__str__ ());
-			}
-		}
-		else {
-			if (!(isinstance (source, list)) && !(jsobj.is_js_arr (source))) {
-				if (isinstance (source, str)) {
-					var source = UnlockHash.from_json (source);
-				}
-				else if (!(isinstance (source, UnlockHash))) {
-					var __except0__ = py_TypeError ('cannot add source address from type {}'.format (py_typeof (source)));
-					__except0__.__cause__ = null;
-					throw __except0__;
-				}
-				var source = [source];
-			}
-			for (var value of source) {
-				if (isinstance (value, str)) {
-					var value = UnlockHash.from_json (value);
-				}
-				else if (!(isinstance (value, UnlockHash))) {
-					var __except0__ = py_TypeError ('cannot add source address from type {}'.format (py_typeof (value)));
-					__except0__.__cause__ = null;
-					throw __except0__;
-				}
-				if (value.uhtype.__eq__ (UnlockHashType.MULTI_SIG)) {
-					ms_addresses.add (value);
-				}
-				else if (value.uhtype.__eq__ (UnlockHashType.PUBLIC_KEY)) {
-					addresses.add (value);
-				}
-				else {
-					var __except0__ = py_TypeError ('cannot add source address with unsupported UnlockHashType {}'.format (value.uhtype));
-					__except0__.__cause__ = null;
-					throw __except0__;
-				}
-			}
-			if (len (source) == 1) {
-				if (source [0].uhtype.__eq__ (UnlockHashType.PUBLIC_KEY)) {
-					var refund = ConditionTypes.unlockhash_new (__kwargtrans__ ({unlockhash: source [0]}));
-				}
-				else {
-					var addr = source [0].__str__ ();
-					if (__in__ (addr, self.wallets)) {
-						var wallet = self.wallets [addr];
-						var refund = ConditionTypes.multi_signature_new (__kwargtrans__ ({min_nr_sig: wallet.signature_count, unlockhashes: wallet.owners}));
-					}
-				}
-			}
-		}
-		if (len (addresses) == 0 && len (ms_addresses) == 0) {
-			var __except0__ = tferrors.InsufficientFunds ('insufficient funds in this wallet');
-			__except0__.__cause__ = null;
-			throw __except0__;
-		}
-		if (len (addresses) == 0) {
-			var __left0__ = tuple ([[], Currency ()]);
-			var outputs = __left0__ [0];
-			var collected = __left0__ [1];
-		}
-		else {
-			var __left0__ = self._fund_individual (amount, addresses);
-			var outputs = __left0__ [0];
-			var collected = __left0__ [1];
-		}
-		if (collected.greater_than_or_equal_to (amount)) {
-			return tuple ([(function () {
-				var __accu0__ = [];
-				for (var co of outputs) {
-					__accu0__.append (CoinInput.from_coin_output (co));
-				}
-				return __accu0__;
-			}) (), collected.minus (amount), refund]);
-		}
-		if (len (ms_addresses) == 0) {
-			var __except0__ = tferrors.InsufficientFunds ('not enough funds available in the individual wallet to fund the requested amount');
-			__except0__.__cause__ = null;
-			throw __except0__;
-		}
-		var __left0__ = self._fund_multisig (amount, ms_addresses, __kwargtrans__ ({outputs: outputs, collected: collected}));
-		var outputs = __left0__ [0];
-		var collected = __left0__ [1];
-		if (collected.less_than (amount)) {
-			var __except0__ = tferrors.InsufficientFunds ('not enough funds available in the wallets to fund the requested amount');
-			__except0__.__cause__ = null;
-			throw __except0__;
-		}
-		return tuple ([(function () {
-			var __accu0__ = [];
-			for (var co of outputs) {
-				__accu0__.append (CoinInput.from_coin_output (co));
-			}
-			return __accu0__;
-		}) (), collected.minus (amount), refund]);
-	});},
-	get _fund_multisig () {return __get__ (this, function (self, amount, addresses, outputs, collected) {
-		if (typeof outputs == 'undefined' || (outputs != null && outputs.hasOwnProperty ("__kwargtrans__"))) {;
-			var outputs = null;
-		};
-		if (typeof collected == 'undefined' || (collected != null && collected.hasOwnProperty ("__kwargtrans__"))) {;
-			var collected = null;
-		};
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'amount': var amount = __allkwargs0__ [__attrib0__]; break;
-						case 'addresses': var addresses = __allkwargs0__ [__attrib0__]; break;
-						case 'outputs': var outputs = __allkwargs0__ [__attrib0__]; break;
-						case 'collected': var collected = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (outputs == null) {
-			var outputs = [];
-		}
-		if (collected == null) {
-			var collected = Currency ();
-		}
-		for (var [address, wallet] of self.wallets.py_items ()) {
-			if (!__in__ (UnlockHash.from_json (address).__str__ (), addresses)) {
-				continue;
-			}
-			var outputs_available = wallet.outputs_available;
-			var sort_output_by_value = function (a, b) {
-				if (arguments.length) {
-					var __ilastarg0__ = arguments.length - 1;
-					if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-						var __allkwargs0__ = arguments [__ilastarg0__--];
-						for (var __attrib0__ in __allkwargs0__) {
-							switch (__attrib0__) {
-								case 'a': var a = __allkwargs0__ [__attrib0__]; break;
-								case 'b': var b = __allkwargs0__ [__attrib0__]; break;
-							}
-						}
-					}
-				}
-				else {
-				}
-				if (a.value.less_than (b.value)) {
-					return -(1);
-				}
-				if (a.value.greater_than (b.value)) {
-					return 1;
-				}
-				return 0;
-			};
-			var outputs_available = jsarr.py_sort (outputs_available, sort_output_by_value);
-			for (var co of outputs_available) {
-				if (co.value.greater_than_or_equal_to (amount)) {
-					return tuple ([[co], co.value]);
-				}
-				var collected = collected.plus (co.value);
-				outputs.append (co);
-				if (len (outputs) > _MAX_RIVINE_TRANSACTION_INPUTS) {
-					var collected = collected.minus (outputs.py_pop (0).value);
-				}
-				if (collected.greater_than_or_equal_to (amount)) {
-					return tuple ([outputs, collected]);
-				}
-			}
-			if (collected.greater_than_or_equal_to (amount)) {
-				return tuple ([outputs, collected]);
-			}
-			var outputs_available = wallet.outputs_unconfirmed_available;
-			var outputs_available = jsarr.py_sort (outputs_available, sort_output_by_value, __kwargtrans__ ({reverse: true}));
-			for (var co of outputs_available) {
-				if (co.value.greater_than_or_equal_to (amount)) {
-					return tuple ([[co], co.value]);
-				}
-				var collected = collected.plus (co.value);
-				outputs.append (co);
-				if (len (outputs) > _MAX_RIVINE_TRANSACTION_INPUTS) {
-					var collected = collected.minus (outputs.py_pop (0).value);
-				}
-				if (collected.greater_than_or_equal_to (amount)) {
-					return tuple ([outputs, collected]);
-				}
-			}
-		}
-		return tuple ([outputs, collected]);
-	});}
-});
-Object.defineProperty (WalletsBalance, 'addresses_multisig', property.call (WalletsBalance, WalletsBalance._get_addresses_multisig));
-Object.defineProperty (WalletsBalance, 'wallets', property.call (WalletsBalance, WalletsBalance._get_wallets));;
 
 //# sourceMappingURL=tfchain.balance.map

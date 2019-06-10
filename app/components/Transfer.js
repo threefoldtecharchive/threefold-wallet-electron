@@ -274,15 +274,11 @@ class Transfer extends Component {
 
     let goToMultiSig = false
     let selectedWalletFromProps = wallets.filter(w => w.wallet_name === selectedWallet)[0]
-    console.log(selectedWalletFromProps)
     if (!selectedWalletFromProps) {
       selectedWalletFromProps = multiSigWallet.filter(w => w.wallet_name === selectedWallet)[0]
-      console.log(selectedWalletFromProps)
 
       goToMultiSig = true
     }
-
-    console.log(goToMultiSig)
 
     switch (pathname) {
       case '/account':
@@ -347,7 +343,7 @@ class Transfer extends Component {
   buildSingleTransaction = (destinationError, destination, amountError, selectedWallet, isMultiSigOutput, timestamp, amount, description) => {
     if (!destinationError && !amountError && selectedWallet) {
       this.renderLoader(true)
-      if (selectedWallet.fund_state === 1) {
+      if (selectedWallet.fund_state >= 0) {
         const builder = selectedWallet.transaction_new()
         if (timestamp) {
           try {

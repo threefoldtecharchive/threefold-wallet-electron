@@ -10,7 +10,7 @@ import * as ConditionTypes from './tfchain.types.ConditionTypes.js';
 import * as transactions from './tfchain.types.transactions.js';
 import * as FulfillmentTypes from './tfchain.types.FulfillmentTypes.js';
 import {SiaBinaryEncoder} from './tfchain.encoding.siabin.js';
-import {MultiSigWalletBalance, WalletBalance, WalletsBalance} from './tfchain.balance.js';
+import {MultiSigWalletBalance, SingleSigWalletBalance, WalletBalance} from './tfchain.balance.js';
 import {Type as NetworkType} from './tfchain.network.js';
 import * as tferrors from './tfchain.errors.js';
 import * as tfclient from './tfchain.client.js';
@@ -131,31 +131,6 @@ export var TFChainWallet =  __class__ ('TFChainWallet', [object], {
 			var address = uh.__str__ ();
 			self._addresses.append (address);
 		}
-	});},
-	get clone () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		var network_type = NetworkType (self.network_type);
-		var pairs = (function () {
-			var __accu0__ = [];
-			for (var pair of self._pairs) {
-				__accu0__.append (pair);
-			}
-			return __accu0__;
-		}) ();
-		var client = self._client.clone ();
-		return TFChainWallet (network_type, pairs, client);
 	});},
 	get _get_addresses () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -304,8 +279,7 @@ export var TFChainWallet =  __class__ ('TFChainWallet', [object], {
 		}
 		else {
 		}
-		var w = self.clone ();
-		var aggregator = WalletBalanceAggregator (w, __kwargtrans__ ({chain_info: chain_info}));
+		var aggregator = SingleSigWalletBalanceAggregator (self, __kwargtrans__ ({chain_info: chain_info}));
 		return aggregator.fetch_and_aggregate ();
 	});},
 	get _get_transactions () {return __get__ (this, function (self) {
@@ -322,7 +296,6 @@ export var TFChainWallet =  __class__ ('TFChainWallet', [object], {
 		}
 		else {
 		}
-		var w = self.clone ();
 		var generator = function* () {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
@@ -334,8 +307,8 @@ export var TFChainWallet =  __class__ ('TFChainWallet', [object], {
 			}
 			else {
 			}
-			for (var address of w.addresses) {
-				yield w._unlockhash_get (address);
+			for (var address of self.addresses) {
+				yield self._unlockhash_get (address);
 			}
 			};
 		var transactions = set ();
@@ -445,7 +418,6 @@ export var TFChainWallet =  __class__ ('TFChainWallet', [object], {
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		var wallet = self.clone ();
 		var to_submit = submit;
 		var balance_is_cached = balance != null;
 		var cb = function (balance) {
@@ -486,7 +458,7 @@ export var TFChainWallet =  __class__ ('TFChainWallet', [object], {
 				}
 			}
 			if (isinstance (txn, tuple ([TransactionV128, TransactionV129]))) {
-				txn.parent_mint_condition = wallet.client.minter.condition_get ();
+				txn.parent_mint_condition = self.client.minter.condition_get ();
 				if (!(txn.mint_fulfillment_defined ())) {
 					txn.mint_fulfillment = FulfillmentTypes.from_condition (txn.parent_mint_condition);
 				}
@@ -498,7 +470,7 @@ export var TFChainWallet =  __class__ ('TFChainWallet', [object], {
 			var signature_count = 0;
 			for (var request of sig_requests) {
 				try {
-					var key_pair = wallet.key_pair_get (request.wallet_address);
+					var key_pair = self.key_pair_get (request.wallet_address);
 					var pk = public_key_from_assymetric_key_pair (key_pair);
 					var input_hash = request.input_hash_new (__kwargtrans__ ({public_key: pk}));
 					var signature = key_pair.sign (input_hash.value);
@@ -552,7 +524,7 @@ export var TFChainWallet =  __class__ ('TFChainWallet', [object], {
 				}
 				txn.id = id;
 				if (balance_is_cached) {
-					var addresses = wallet.addresses + balance.addresses_multisig;
+					var addresses = jsarr.concat (self.addresses, balance.multisig_addresses);
 					for (var [idx, ci] of enumerate (txn.coin_inputs)) {
 						if (__in__ (ci.parent_output.condition.unlockhash.__str__ (), addresses)) {
 							balance.output_add (txn, idx, __kwargtrans__ ({confirmed: false, spent: true}));
@@ -567,17 +539,17 @@ export var TFChainWallet =  __class__ ('TFChainWallet', [object], {
 				}
 				return TransactionSignResult (__kwargtrans__ ({transaction: txn, signed: signature_count > 0, submitted: submit}));
 			};
-			return jsasync.chain (wallet._transaction_put (__kwargtrans__ ({transaction: txn})), id_cb);
+			return jsasync.chain (self._transaction_put (__kwargtrans__ ({transaction: txn})), id_cb);
 		};
 		if (balance_is_cached) {
-			if (!(isinstance (balance, WalletsBalance))) {
+			if (!(isinstance (balance, WalletBalance))) {
 				var __except0__ = py_TypeError ('balance is of unexpected type: {} ({})'.format (balance, py_typeof (balance)));
 				__except0__.__cause__ = null;
 				throw __except0__;
 			}
 			return cb (balance);
 		}
-		return jsasync.chain (wallet.balance, cb);
+		return jsasync.chain (self.balance, cb);
 	});},
 	get key_pair_get () {return __get__ (this, function (self, unlockhash) {
 		if (arguments.length) {
@@ -789,7 +761,7 @@ export var TransactionSignResult =  __class__ ('TransactionSignResult', [object]
 Object.defineProperty (TransactionSignResult, 'submitted', property.call (TransactionSignResult, TransactionSignResult._get_submitted));
 Object.defineProperty (TransactionSignResult, 'signed', property.call (TransactionSignResult, TransactionSignResult._get_signed));
 Object.defineProperty (TransactionSignResult, 'transaction', property.call (TransactionSignResult, TransactionSignResult._get_transaction));;
-export var WalletBalanceAggregator =  __class__ ('WalletBalanceAggregator', [object], {
+export var SingleSigWalletBalanceAggregator =  __class__ ('SingleSigWalletBalanceAggregator', [object], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, wallet, chain_info) {
 		if (typeof chain_info == 'undefined' || (chain_info != null && chain_info.hasOwnProperty ("__kwargtrans__"))) {;
@@ -810,9 +782,13 @@ export var WalletBalanceAggregator =  __class__ ('WalletBalanceAggregator', [obj
 		}
 		else {
 		}
+		if (!(isinstance (wallet, TFChainWallet))) {
+			var __except0__ = py_TypeError ('expected wallet to be of type TFChainWallet, not: {} ({})'.format (wallet, py_typeof (wallet0)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
 		self._wallet = wallet;
-		self._balance = WalletsBalance ();
-		self._multisig_addresses = [];
+		self._balance = SingleSigWalletBalance ();
 		self._info = chain_info;
 		if (self._info != null && !(isinstance (self._info, tfclient.ExplorerBlockchainInfo))) {
 			var __except0__ = py_TypeError ('info has to be an ExplorerBlockchainInfo object, invalid: {} ({})'.format (self._info, py_typeof (self._info)));
@@ -835,9 +811,9 @@ export var WalletBalanceAggregator =  __class__ ('WalletBalanceAggregator', [obj
 		else {
 		}
 		if (self._info != null) {
-			return jsasync.chain (self._personal_pool_chain_get (), self._multisig_pool_chain_get, self._balance_get);
+			return jsasync.chain (self._personal_pool_chain_get (), self._balance_get);
 		}
-		return jsasync.chain (self._wallet._client.blockchain_info_get (), self._collect_chain_info, self._personal_pool_chain_get, self._multisig_pool_chain_get, self._balance_get);
+		return jsasync.chain (self._wallet._client.blockchain_info_get (), self._collect_chain_info, self._personal_pool_chain_get, self._balance_get);
 	});},
 	get _collect_chain_info () {return __get__ (this, function (self, info) {
 		if (arguments.length) {
@@ -891,61 +867,6 @@ export var WalletBalanceAggregator =  __class__ ('WalletBalanceAggregator', [obj
 		}
 		});},
 	get _collect_personal_balance () {return __get__ (this, function (self, result) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'result': var result = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		var balance = result.balance (__kwargtrans__ ({info: self._info}));
-		self._balance = self._balance.balance_add (balance);
-		for (var address of result.multisig_addresses) {
-			self._multisig_addresses.append (address.__str__ ());
-		}
-	});},
-	get _multisig_pool_chain_get () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		return jsasync.promise_pool_new (self._multisig_address_generator, __kwargtrans__ ({cb: self._collect_multisig_balance}));
-	});},
-	get _multisig_address_generator () {return __get__ (this, function* (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		for (var address of self._multisig_addresses) {
-			yield self._wallet._unlockhash_get (address);
-		}
-		});},
-	get _collect_multisig_balance () {return __get__ (this, function (self, result) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -1067,7 +988,6 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 		}
 		var txn = self._txn;
 		self._txn = null;
-		var wallet = self._wallet.clone ();
 		var balance_is_cached = balance != null;
 		var balance_cb = function (balance) {
 			if (arguments.length) {
@@ -1090,14 +1010,14 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 				}
 				return __accu0__;
 			}) ());
-			var miner_fee = wallet.network_type.minimum_miner_fee ();
+			var miner_fee = self._wallet.network_type.minimum_miner_fee ();
 			var __left0__ = balance.fund (amount.plus (miner_fee), __kwargtrans__ ({source: source}));
 			var inputs = __left0__ [0];
 			var remainder = __left0__ [1];
 			var suggested_refund = __left0__ [2];
 			if (refund == null) {
 				if (suggested_refund == null) {
-					var refund = ConditionTypes.unlockhash_new (__kwargtrans__ ({unlockhash: wallet.address}));
+					var refund = ConditionTypes.unlockhash_new (__kwargtrans__ ({unlockhash: self._wallet.address}));
 				}
 				else {
 					var refund = suggested_refund;
@@ -1122,7 +1042,7 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 			}
 			for (var request of sig_requests) {
 				try {
-					var key_pair = wallet.key_pair_get (request.wallet_address);
+					var key_pair = self._wallet.key_pair_get (request.wallet_address);
 					var pk = public_key_from_assymetric_key_pair (key_pair);
 					var input_hash = request.input_hash_new (__kwargtrans__ ({public_key: pk}));
 					var signature = key_pair.sign (input_hash.value);
@@ -1174,9 +1094,9 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 				}
 				txn.id = id;
 				if (balance_is_cached) {
-					var addresses = wallet.addresses;
-					if (isinstance (balance, WalletsBalance)) {
-						var addresses = jsarr.concat (addresses, balance.addresses_multisig);
+					var addresses = self._wallet.addresses;
+					if (isinstance (balance, SingleSigWalletBalance)) {
+						var addresses = jsarr.concat (addresses, balance.multisig_addresses);
 					}
 					for (var [idx, ci] of enumerate (txn.coin_inputs)) {
 						if (__in__ (ci.parent_output.condition.unlockhash.__str__ (), addresses)) {
@@ -1192,7 +1112,7 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 				}
 				return TransactionSendResult (txn, submit);
 			};
-			return jsasync.chain (wallet._transaction_put (__kwargtrans__ ({transaction: txn})), id_cb);
+			return jsasync.chain (self._wallet._transaction_put (__kwargtrans__ ({transaction: txn})), id_cb);
 		};
 		if (balance != null) {
 			if (!(isinstance (balance, WalletBalance))) {
@@ -1202,7 +1122,7 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 			}
 			return balance_cb (balance);
 		}
-		return jsasync.chain (wallet.balance, balance_cb);
+		return jsasync.chain (self._wallet.balance, balance_cb);
 	});}
 });
 

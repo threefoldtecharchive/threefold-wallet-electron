@@ -607,42 +607,60 @@ class Account:
                     return index_a - index_b
                 balance_pairs = jsarr.sort(balance_pairs, sort_pairs)
                 balances = [pair[1] for pair in balance_pairs]
-                # collect ms balances from the regular balances
-                msbalances = []
+                # collect ms addresses from the regular balances
                 msbalance_addresses = set()
                 for balance in balances:
-                    for msbalance in balance.multisig_balances:
-                        if msbalance.address in msbalance_addresses:
-                            merged = False
-                            for index, existing_msbalance in enumerate(msbalances):
-                                if existing_msbalance.address == msbalance.address:
-                                    msbalances[index] = existing_msbalance.merge(msbalance)
-                                    merged = True
-                                    break
-                            if not merged:
-                                raise RuntimeError("BUG: ms balance {} could not be merged".format(msbalance.address))
-                        else:
-                            msbalance_addresses.add(msbalance.address)
-                            wallet_name = self.multisig_wallet_name_for_multisig_address(msbalance.address)
-                            if wallet_name != None:
-                                msbalance.wallet_name = wallet_name
-                            msbalances.append(msbalance)
-                # add all missing ms balances
-                for wallet in jsobj.dict_values(self._multisig_wallet_info_map):
-                    if wallet.address not in msbalance_addresses:
-                        msbalances.append(wallet.balance)
-                # sort all msbalances
-                def sort_ms_balances_by_name_or_address(a, b):
-                    if a.wallet_name != "":
+                    msbalance_addresses.update(balance.multisig_addresses)
+                # define the define cb to return Account Balance
+                def complete_account_bc(msbalances):
+                    # add all missing ms balances
+                    for wallet in jsobj.dict_values(self._multisig_wallet_info_map):
+                        if wallet.address not in msbalance_addresses:
+                            msbalances.append(wallet.balance)
+                    # sort all msbalances
+                    def sort_ms_balances_by_name_or_address(a, b):
+                        if a.wallet_name != "":
+                            if b.wallet_name != "":
+                                return jsstr.compare(a.wallet_name, b.wallet_name)
+                            return 1
                         if b.wallet_name != "":
-                            return jsstr.compare(a.wallet_name, b.wallet_name)
-                        return 1
-                    if b.wallet_name != "":
-                        return -1
-                    return jsstr.compare(a.address, b.address)
-                msbalances = jsarr.sort(msbalances, sort_ms_balances_by_name_or_address, reverse=True)
-                # return account balance
-                return AccountBalance(self._network_type, self.account_name, chain_info, balances, msbalances)
+                            return -1
+                        return jsstr.compare(a.address, b.address)
+                    msbalances = jsarr.sort(msbalances, sort_ms_balances_by_name_or_address, reverse=True)
+                    # return account balance
+                    return AccountBalance(self._network_type, self.account_name, chain_info, balances, msbalances)
+
+                # if no balance addresses were found,
+                # there is nothing to fetch and we can return as-is
+                if len(msbalance_addresses) == 0:
+                    return complete_account_bc([])
+
+                # fetch the ms balances
+                def msaddress_generator():
+                    for address in msbalance_addresses:
+                        yield self._explorer_client.unlockhash_get(address)
+                def msbalance_aggregate(results):
+                    msbalances = []
+                    for result in results:
+                        balance = result.balance(info=chain_info._tf_chain_info)
+                        wallet_address = balance.address
+                        wallet_name = self.multisig_wallet_name_for_multisig_address(wallet_address) or ""
+                        msbalances.append(MultiSignatureBalance(
+                            balance.owners,
+                            balance.signature_count,
+                            self._network_type,
+                            wallet_name,
+                            balance,
+                            addresses_all=[wallet_address],
+                        ))
+                    return msbalances
+                # pool msbalance fetching and chain with complete_account_bc
+                return jsasync.chain(
+                    jsasync.promise_pool_new(msaddress_generator),
+                    msbalance_aggregate,
+                    complete_account_bc,
+                )
+    
             # define generator
             def generator():
                 index = 0
@@ -781,22 +799,6 @@ class Wallet(BaseWallet):
         self._wallet_name = wallet_name
         self._tfwallet = tfwallet.TFChainWallet(network_type, pairs, client=explorer_client)
 
-    def clone(self):
-        """
-        Clone this wallet.
-
-        :returns: a clone of this wallet
-        :rtype: Wallet
-        """
-        return Wallet(
-            tfnetwork.Type(self._tfwallet.network_type),
-            self._tfwallet.client.clone(),
-            self.wallet_index,
-            self.wallet_name,
-            self.start_index,
-            [pair for pair in self._tfwallet.pairs],
-        )
-
     def _is_cached_getter(self):
         return False
 
@@ -839,15 +841,14 @@ class Wallet(BaseWallet):
         return self._tfwallet.address_count
 
     def balance_get(self, chain_info=None):
-        wallet = self.clone()
         def create_api_balance_obj(balance):
-            return SingleSignatureBalance(wallet._tfwallet.network_type, wallet.wallet_name, balance, wallet.addresses)
+            return SingleSignatureBalance(self._tfwallet.network_type, self.wallet_name, balance, self.addresses)
         bcinfo = None
         if chain_info != None:
             if not isinstance(chain_info, ChainInfo):
                 raise TypeError("chain_info has to be a ChainInfo object, invalid: {} ({})".format(chain_info, type(chain_info)))
             bcinfo = chain_info._tf_chain_info
-        return jsasync.chain(wallet._tfwallet.balance_get(bcinfo), create_api_balance_obj)
+        return jsasync.chain(self._tfwallet.balance_get(bcinfo), create_api_balance_obj)
 
     def transaction_new(self):
         """
@@ -873,7 +874,7 @@ class CachedWallet(Wallet):
     def from_wallet(cls, wallet, balance):
         return cls(
             tfnetwork.Type(wallet._tfwallet.network_type),
-            wallet._tfwallet.client.clone(),
+            wallet._tfwallet.client,
             wallet.wallet_index,
             wallet.wallet_name,
             wallet.start_index,
@@ -1393,25 +1394,9 @@ class Balance:
 
 
 class SingleSignatureBalance(Balance):
-    def __init__(self, *args, **kwargs):
-        # init the balance object
-        super().__init__(*args, **kwargs)
-
-        # init the multisig child balance objects if these exist
-        self._msbalances = []
-        for balance in jsobj.dict_values(self._tfbalance.wallets):
-            self._msbalances.append(MultiSignatureBalance(
-                owners=balance.owners,
-                signatures_required=balance.signature_count,
-                network_type=self._network_type,
-                wallet_name="",
-                tfbalance=balance,
-                addresses_all=[balance.address],
-            ))
-
     @property
-    def multisig_balances(self):
-        return self._msbalances
+    def multisig_addresses(self):
+        return self._tfbalance.multisig_addresses
 
 
 class MultiSignatureBalance(Balance):

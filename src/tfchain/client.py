@@ -7,7 +7,7 @@ import tfchain.polyfill.log as jslog
 
 import tfchain.errors as tferrors
 import tfchain.explorer as tfexplorer
-from tfchain.balance import WalletBalance, WalletsBalance, MultiSigWalletBalance
+from tfchain.balance import WalletBalance, SingleSigWalletBalance, MultiSigWalletBalance
 
 from tfchain.types import transactions, ConditionTypes
 from tfchain.types.transactions.Base import TransactionBaseClass
@@ -55,10 +55,6 @@ class TFChainClient:
     #     """
     #     return self._erc20
 
-    def clone(self):
-        ec = self._explorer_client.clone()
-        return TFChainClient(ec)
-
     @property
     def explorer_addresses(self):
         """
@@ -70,11 +66,10 @@ class TFChainClient:
         """
         Get the current blockchain info, using the last known block, as reported by an explorer.
         """
-        c = self.clone()
         def get_block(result):
             _, raw_block = result
             blockid = Hash.from_json(obj=raw_block['blockid'])
-            return c._block_get(blockid)
+            return self.block_get(blockid)
         def get_block_with_tag(result):
             return ('b', result)
         def get_constants_with_tag(result):
@@ -98,20 +93,11 @@ class TFChainClient:
             )
         return jsasync.chain(
             jsasync.wait(
-                jsasync.chain(c.explorer_get(endpoint="/explorer"), get_block, get_block_with_tag),
-                jsasync.chain(c.explorer_get(endpoint="/explorer/constants"), get_constants_with_tag),
+                jsasync.chain(self.explorer_get(endpoint="/explorer"), get_block, get_block_with_tag),
+                jsasync.chain(self.explorer_get(endpoint="/explorer/constants"), get_constants_with_tag),
             ), get_info)
 
     def block_get(self, value):
-        """
-        Get a block from an available explorer Node.
-        
-        @param value: the identifier or height that points to the desired block
-        """
-        c = self.clone()
-        return c._block_get(value)
-
-    def _block_get(self, value):
         """
         Get a block from an available explorer Node.
         
@@ -199,8 +185,7 @@ class TFChainClient:
 
         @param txid: the identifier (bytes, bytearray, hash or string) that points to the desired transaction
         """
-        ec = self.clone()
-        txid = ec._normalize_id(txid)
+        txid = self._normalize_id(txid)
         endpoint = "/explorer/hashes/"+txid
         def cb(result):
             _, result = result
@@ -210,7 +195,7 @@ class TFChainClient:
                 txnresult = result['transaction']
                 if txnresult['id'] != txid:
                     raise tferrors.ExplorerInvalidResponse("expected transaction ID '{}' not '{}'".format(txid, txnresult['id']), endpoint, result)
-                return ec._transaction_from_explorer_transaction(txnresult, endpoint=endpoint, resp=result)
+                return self._transaction_from_explorer_transaction(txnresult, endpoint=endpoint, resp=result)
             except KeyError as exc:
                 # return a KeyError as an invalid Explorer Response
                 raise tferrors.ExplorerInvalidResponse(str(exc), endpoint, result) from exc
@@ -218,13 +203,13 @@ class TFChainClient:
         # TODO: make a pull request in Rivine to return [parent] block optionally with (or instead of) transaction.
         def fetch_transacton_timestamps(result):
             _, transaction = result
-            p = ec._block_get_by_hash(transaction.blockid)
+            p = self._block_get_by_hash(transaction.blockid)
             def aggregate(result):
                 _, block = result
                 _assign_block_properties_to_transacton(transaction, block)
                 return transaction
             return jsasync.chain(p, aggregate)
-        return jsasync.chain(ec.explorer_get(endpoint=endpoint), cb, fetch_transacton_timestamps)
+        return jsasync.chain(self.explorer_get(endpoint=endpoint), cb, fetch_transacton_timestamps)
 
     def transaction_put(self, transaction):
         """
@@ -262,8 +247,6 @@ class TFChainClient:
 
         @param target: the target wallet to look up transactions for in the explorer, see above for more info
         """
-        ec = self.clone()
-
         unlockhash = ConditionTypes.from_recipient(target).unlockhash.__str__()
         endpoint = "/explorer/hashes/"+unlockhash
 
@@ -287,7 +270,7 @@ class TFChainClient:
                 transactions = []
                 for etxn in resp['transactions']:
                     # parse the explorer transaction
-                    transaction = ec._transaction_from_explorer_transaction(etxn, endpoint=endpoint, resp=resp)
+                    transaction = self._transaction_from_explorer_transaction(etxn, endpoint=endpoint, resp=resp)
                     # append the transaction to the list of transactions
                     transactions.append(transaction)
                 # collect all multisig addresses
@@ -341,7 +324,7 @@ class TFChainClient:
                 return result # return as is, nothing to do
             def generator():
                 for blockid in jsobj.get_keys(transactions):
-                    yield ec._block_get_by_hash(blockid)
+                    yield self._block_get_by_hash(blockid)
             def result_cb(block_result):
                 _, block = block_result
                 for transaction in transactions[block.get_or('blockid', '')]:
@@ -351,7 +334,7 @@ class TFChainClient:
             return jsasync.chain(jsasync.promise_pool_new(generator, cb=result_cb), aggregate)
     
         return jsasync.catch_promise(
-            jsasync.chain(ec.explorer_get(endpoint=endpoint), cb, fetch_transacton_block),
+            jsasync.chain(self.explorer_get(endpoint=endpoint), cb, fetch_transacton_block),
             catch_no_content)
 
 
@@ -363,8 +346,7 @@ class TFChainClient:
 
         @param id: the identifier (bytes, bytearray, hash or string) that points to the desired coin output
         """
-        ec = self.clone()
-        return ec._output_get(id, expected_hash_type='coinoutputid')
+        return self._output_get(id, expected_hash_type='coinoutputid')
 
     def blockstake_output_get(self, id):
         """
@@ -374,8 +356,7 @@ class TFChainClient:
 
         @param id: the identifier (bytes, bytearray, hash or string) that points to the desired blockstake output
         """
-        ec = self.clone()
-        return ec._output_get(id, expected_hash_type='blockstakeoutputid')
+        return self._output_get(id, expected_hash_type='blockstakeoutputid')
 
     def _output_get(self, id, expected_hash_type):
         """
@@ -690,20 +671,26 @@ class ExplorerUnlockhashResult():
         based on the transactions of this report.
         """
         if self._unlockhash.uhtype.__eq__(UnlockHashType.MULTI_SIG):
+            # sanity checks
+            if len(self._multisig_addresses) > 0:
+                raise RuntimeError("BUG: ms addresses should be empty, but have: {}".format(self._multisig_addresses))
+            # populate the balance
             balance = self._multisig_balance(info)
         else:
-            balance = WalletsBalance()
-            # collect the balance
+            balance = SingleSigWalletBalance()
+            # add the ms addresses
+            for address in self._multisig_addresses:
+                balance.multisig_address_add(address)
+            # collect balance balance
             address = self.unlockhash.__str__()
-            msaddresses = [uh.__str__() for uh in self._multisig_addresses]
             for txn in self.transactions:
                 for index, ci in enumerate(txn.coin_inputs):
                     uhstr = ci.parent_output.condition.unlockhash.__str__()
-                    if uhstr == address or uhstr in msaddresses:
+                    if uhstr == address:
                         balance.output_add(txn, index, confirmed=(not txn.unconfirmed), spent=True)
                 for index, co in enumerate(txn.coin_outputs):
                     uhstr = co.condition.unlockhash.__str__()
-                    if uhstr == address or uhstr in msaddresses:
+                    if uhstr == address:
                         balance.output_add(txn, index, confirmed=(not txn.unconfirmed), spent=False)
         # if a client is set, attach the current chain info to it
         if info != None:
@@ -713,7 +700,7 @@ class ExplorerUnlockhashResult():
         return balance
     
     def _multisig_balance(self, info):
-        balance = None
+        balance = MultiSigWalletBalance()
         # collect the balance
         address = self.unlockhash.__str__()
         for txn in self.transactions:
@@ -722,22 +709,15 @@ class ExplorerUnlockhashResult():
                     oc = ci.parent_output.condition.unwrap()
                     if not isinstance(oc, ConditionMultiSignature):
                         raise TypeError("multi signature's output condition cannot be of type {} (expected: ConditionMultiSignature)".format(type(oc)))
-                    if balance == None:
-                        balance = MultiSigWalletBalance(owners=oc.unlockhashes, signature_count=oc.required_signatures)
                     balance.output_add(txn, index, confirmed=(not txn.unconfirmed), spent=True)
             for index, co in enumerate(txn.coin_outputs):
                 if co.condition.unlockhash.__str__() == address:
                     oc = co.condition.unwrap()
                     if not isinstance(oc, ConditionMultiSignature):
                         raise TypeError("multi signature's output condition cannot be of type {} (expected: ConditionMultiSignature)".format(type(oc)))
-                    if balance == None:
-                        balance = MultiSigWalletBalance(owners=oc.unlockhashes, signature_count=oc.required_signatures)
                     balance.output_add(txn, index, confirmed=(not txn.unconfirmed), spent=False)
-            if isinstance(txn, TransactionV128) and balance == None:
-                oc = txn.mint_condition
-                balance = MultiSigWalletBalance(owners=oc.unlockhashes, signature_count=oc.required_signatures)
-        if balance == None:
-            return WalletBalance() # return empty balance
+            if isinstance(txn, TransactionV128):
+                balance.condition = txn.mint_condition
         return balance
 
 class ERC20AddressInfo():
@@ -865,18 +845,12 @@ class TFChainMinterClient():
             raise TypeError("client is expected to be a TFChainClient")
         self._client = client
 
-    def clone(self):
-        tfclient = self._client.clone()
-        return TFChainMinterClient(tfclient)
-
     def condition_get(self, height=None):
         """
         Get the latest (coin) mint condition or the (coin) mint condition at the specified block height.
 
         @param height: if defined the block height at which to look up the (coin) mint condition (if none latest block will be used)
         """
-        tfmc = self.clone()
-
         # define the endpoint
         endpoint = "/explorer/mintcondition"
         if height != None:
@@ -897,7 +871,7 @@ class TFChainMinterClient():
                 raise tferrors.ExplorerInvalidResponse(str(exc), endpoint, resp) from exc
 
         # get + parse the mint condition as a promise
-        return jsasync.chain(tfmc._client.explorer_get(endpoint=endpoint), cb)
+        return jsasync.chain(self._client.explorer_get(endpoint=endpoint), cb)
 
 # class TFChainThreeBotClient():
 #     """

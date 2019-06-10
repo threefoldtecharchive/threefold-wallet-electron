@@ -6,7 +6,7 @@ import tfchain.errors as tferrors
 
 from tfchain.types import ConditionTypes, transactions
 from tfchain.types.PrimitiveTypes import Hash, Currency
-from tfchain.types.ConditionTypes import UnlockHash, UnlockHashType, ConditionMultiSignature
+from tfchain.types.ConditionTypes import UnlockHash, UnlockHashType, ConditionMultiSignature, ConditionNil
 from tfchain.types.IO import CoinInput
 
 
@@ -229,23 +229,6 @@ class WalletBalance(object):
         # add the transaction
         self._transactions[txnid] = txn
 
-    @property
-    def _base(self):
-        """
-        Private helper utility to return this class as a new and pure WalletBalance object
-        """
-        b = WalletBalance()
-        b._outputs = self._outputs
-        b._outputs_spent = self._outputs_spent
-        b._outputs_unconfirmed = self._outputs_unconfirmed
-        b._outputs_unconfirmed_spent = self._outputs_unconfirmed_spent
-        b._transactions = self._transactions
-        b._chain_blockid = self._chain_blockid
-        b._chain_height = self._chain_height
-        b._chain_time = self._chain_time
-        b._addresses = self._addresses
-        return b
-
     def balance_add(self, other):
         """
         Merge the content of the other balance into this balance.
@@ -256,8 +239,6 @@ class WalletBalance(object):
         """
         if other == None:
             return self
-        # if isinstance(other, WalletsBalance) and not isinstance(self, WalletsBalance):
-        #     return WalletsBalance().balance_add(self).balance_add(other)
         if not isinstance(other, WalletBalance):
             raise TypeError("other balance has to be of type wallet balance")
         # another balance is defined, create a new balance that will contain our merge
@@ -434,20 +415,65 @@ class WalletBalance(object):
         # we return whatever we have collected, no matter if it is sufficient
         return outputs, collected
 
+
+class SingleSigWalletBalance(WalletBalance):
+    def __init__(self, *args, **kwargs):
+        # keep a set of multisig addresses
+        self._multisig_addresses = set()
+        # init super class
+        super().__init__(*args, **kwargs)
+
+    @property
+    def multisig_addresses(self):
+        return list(self._multisig_addresses)
+
+    def multisig_address_add(self, address):
+        if isinstance(address, str):
+            address = UnlockHash.from_json(address)
+        elif not isinstance(address, UnlockHash):
+            raise TypeError("can only add a multisig address as a UnlockHash or str, not: {} ({})".format(address, type(address)))
+        if address.uhtype.__ne__(UnlockHashType.MULTI_SIG):
+            raise ValueError("can only add multisig addresses")
+        self._multisig_addresses.add(address.__str__())
+
+    def balance_add(self, other):
+        """
+        Merge the content of the other balance into this balance.
+        If other is None, this call results in a no-op.
+
+        Always assign the result, as it could other than self,
+        should the class type be changed in order to add all content correctly.
+        """
+        if other == None:
+            return self
+        if not isinstance(other, SingleSigWalletBalance):
+            raise TypeError("other balance has to be of type single-signature wallet balance")
+        # merge the linked multi-sig addresses together
+        self._multisig_addresses = self._multisig_addresses.union(other._multisig_addresses)
+        # piggy-back on the super class for the actual merge logic
+        return super().balance_add(other)
+
+
 class MultiSigWalletBalance(WalletBalance):
-    def __init__(self, owners, signature_count):
+    def __init__(self, owners=None, signature_count=None, *args, **kwargs):
         """
         Creates a personal multi signature wallet.
         """
-        if not isinstance(signature_count, int):
-            raise TypeError("signature count of a MultiSigWallet is expected to be of type int, not {}".format(type(signature_count)))
-        if signature_count < 1:
-            raise ValueError("signature count of a MultiSigWallet has to be at least 1, cannot be {}".format(signature_count))
-        if len(owners) < signature_count:
-            raise ValueError("the amount of owners ({}) cannot be lower than the specified signature count ({})".format(len(owners), signature_count))
-        self._owners = owners
-        self._signature_count = signature_count
-        super().__init__()
+        if owners == None:
+            if signature_count != None:
+                raise ValueError("signature count should be None if owners is None, not: {} ({})".format(signature_count, type(signature_count)))
+            self._owners = None
+            self._signature_count = None
+        else:
+            if not isinstance(signature_count, int):
+                raise TypeError("signature count of a MultiSigWallet is expected to be of type int, not {}".format(type(signature_count)))
+            if signature_count < 1:
+                raise ValueError("signature count of a MultiSigWallet has to be at least 1, cannot be {}".format(signature_count))
+            if len(owners) < signature_count:
+                raise ValueError("the amount of owners ({}) cannot be lower than the specified signature count ({})".format(len(owners), signature_count))
+            self._owners = owners
+            self._signature_count = signature_count
+        super().__init__(*args, **kwargs)
 
     @property
     def address(self):
@@ -458,13 +484,30 @@ class MultiSigWalletBalance(WalletBalance):
 
     @property
     def condition(self):
+        if self._owners == None:
+            return ConditionNil()
         return ConditionMultiSignature(unlockhashes=self._owners, min_nr_sig=self._signature_count)
+
+    @condition.setter
+    def condition(self, value):
+        if not isinstance(value, ConditionMultiSignature):
+            raise TypeError("expected value to be ConditionMultiSignature, not: {} ({})".format(value, type(value)))
+        if self._owners == None:
+            self._owners = [owner for owner in value.unlockhashes]
+            self._signature_count = value.required_signatures
+        else:
+            expected_address = self.address
+            received_address = value.unlockhash.__str__()
+            if expected_address != received_address:
+                raise ValueError("received condition has recipient address {} while {} was set and expected".format(received_address, expected_address))
 
     @property
     def owners(self):
         """
         Owners of this MultiSignature Wallet
         """
+        if self._owners == None:
+            return []
         return [owner.__str__() for owner in self._owners]
 
     @property
@@ -472,7 +515,23 @@ class MultiSigWalletBalance(WalletBalance):
         """
         Amount of signatures minimum required
         """
+        if self._owners == None:
+            return -1
         return self._signature_count
+
+    def output_add(self, txn, index, confirmed=True, spent=False):
+        """
+        Add an output to the Wallet's balance.
+        """
+        # add the output
+        super().output_add(txn, index, confirmed=confirmed, spent=spent)
+        # if our owners is None, set it now
+        if self._owners == None:
+            if spent:
+                output = txn.coin_inputs[index].parent_output
+            else:
+                output = txn.coin_outputs[index]
+            self.condition = output.condition
 
     def balance_add(self, other):
         """
@@ -485,14 +544,14 @@ class MultiSigWalletBalance(WalletBalance):
         if other == None:
             return self
         if not isinstance(other, MultiSigWalletBalance):
-            if isinstance(other, (WalletBalance, WalletsBalance)):
-                return WalletsBalance().balance_add(self).balance_add(other)
-            # can only merge 2 multi-signature wallet balances
             raise TypeError("other balance has to be of type multi-signature wallet balance")
-        if self.address != other.address:
+        if self._owners == None:
+            self._owners = other._owners
+            self._signature_count = other._signature_count
+        elif self.address != other.address:
             raise ValueError("other balance is for a different MultiSignature Wallet, cannot be merged")
         # piggy-back on the super class for the actual merge logic
-        return super().balance_add(other._base)
+        return super().balance_add(other)
 
     def fund(self, amount, source=None):
         """
@@ -513,209 +572,3 @@ class MultiSigWalletBalance(WalletBalance):
             # if we already have sufficient, we stop now
             return ([CoinInput.from_coin_output(co) for co in outputs], collected.minus(amount), refund)
         raise tferrors.InsufficientFunds("not enough funds available in the wallet to fund the requested amount")
-
-
-class WalletsBalance(WalletBalance):
-    def __init__(self):
-        """
-        Creates a personal wallet, which also can have children wallets that are meant for
-        all MultiSignature wallets that are related to one or more addresses of the personal wallet.
-        """
-        self._wallets = {}
-        super().__init__()
-
-    @property
-    def wallets(self):
-        """
-        All multisig wallets linked to this wallet.
-        """
-        return self._wallets
-
-    @property
-    def addresses_multisig(self):
-        """
-        All (multisig wallet) addresses for which an output is tracked in this Balance.
-        For each address you'll find a wallet in the `self.wallets` dict property.
-        """
-        return jsobj.get_keys(self.wallets)
-
-    def _multisig_output_add(self, address, output, txn, index, confirmed=True, spent=False):
-        """
-        Add an output to the MultiSignature Wallet's balance.
-        """
-        oc = output.condition.unwrap()
-        if not isinstance(oc, ConditionMultiSignature):
-            raise TypeError("multi signature's output condition cannot be of type {} (expected: ConditionMultiSignature)".format(type(oc)))
-        if not address in self._wallets:
-            self._wallets[address] = MultiSigWalletBalance(
-                owners=output.condition.unlockhashes,
-                signature_count=output.condition.required_signatures)
-        self._wallets[address].output_add(txn, index, confirmed=confirmed, spent=spent)
-
-    def output_add(self, txn, index, confirmed=True, spent=False):
-        """
-        Add an output to the Wallet's balance.
-        """
-        if spent:
-            output = txn.coin_inputs[index].parent_output
-        else:
-            output = txn.coin_outputs[index]
-        uh = output.condition.unlockhash
-        if uh.uhtype.__eq__(UnlockHashType.MULTI_SIG):
-            return self._multisig_output_add(address=uh.__str__(), output=output, txn=txn, index=index, confirmed=confirmed, spent=spent)
-        self._addresses.add(uh.__str__())
-        return super().output_add(txn=txn, index=index, confirmed=confirmed, spent=spent)
-
-    def balance_add(self, other):
-        """
-        Merge the content of the other balance into this balance.
-        If other is None, this call results in a no-op.
-
-        Always assign the result, as it could other than self,
-        should the class type be changed in order to add all content correctly.
-        """
-        if other == None:
-            return self
-        if not isinstance(other, WalletBalance):
-            raise TypeError("other balance has to be of type wallet balance")
-        if isinstance(other, MultiSigWalletBalance):
-            self._merge_multisig_wallet_balance(other.address, other)
-            return self
-        # piggy-back on the super class for the actual output merge logic
-        b = super().balance_add(other._base)
-        if b != self:
-            raise Exception("BUG: instance shouldn't have changed, please fix or report")
-        if not isinstance(other, WalletsBalance):
-            return b # return as nothing else can be merged
-        # merge all the multi-signature wallets
-        for (addr, balance) in jsobj.get_items(other._wallets):
-            b._merge_multisig_wallet_balance(addr, balance)
-        # return the merged balance
-        return b
-
-    def _merge_multisig_wallet_balance(self, address, balance):
-        """
-        Assign or merge a multi-sig wallet balance
-        """
-        if address not in self._wallets:
-            self._wallets[address] = balance
-            return
-        self._wallets[address] = self._wallets[address].balance_add(balance)
-
-    def fund(self, amount, source=None):
-        """
-        Fund the specified amount with the available outputs of this wallet's balance.
-        """
-        # collect addresses and multisig addresses
-        addresses = set()
-        ms_addresses = set()
-        refund = None
-        if source == None:
-            for co in self.outputs_available:
-                addresses.add(co.condition.unlockhash.__str__())
-            for co in self.outputs_unconfirmed_available:
-                addresses.add(co.condition.unlockhash.__str__())
-        else:
-            # if only one address is given, transform it into an acceptable list
-            if not isinstance(source, list) and not jsobj.is_js_arr(source):
-                if isinstance(source, str):
-                    source = UnlockHash.from_json(source)
-                elif not isinstance(source, UnlockHash):
-                    raise TypeError("cannot add source address from type {}".format(type(source)))
-                source = [source]
-            # add one or multiple personal/multisig addresses
-            for value in source:
-                if isinstance(value, str):
-                    value = UnlockHash.from_json(value)
-                elif not isinstance(value, UnlockHash):
-                    raise TypeError("cannot add source address from type {}".format(type(value)))
-                if value.uhtype.__eq__(UnlockHashType.MULTI_SIG):
-                    ms_addresses.add(value)
-                elif value.uhtype.__eq__(UnlockHashType.PUBLIC_KEY):
-                    addresses.add(value)
-                else:
-                    raise TypeError("cannot add source address with unsupported UnlockHashType {}".format(value.uhtype))
-            if len(source) == 1:
-                if source[0].uhtype.__eq__(UnlockHashType.PUBLIC_KEY):
-                    refund = ConditionTypes.unlockhash_new(unlockhash=source[0])
-                else:
-                    addr = source[0].__str__()
-                    if addr in self.wallets:
-                        wallet = self.wallets[addr]
-                        refund = ConditionTypes.multi_signature_new(min_nr_sig=wallet.signature_count, unlockhashes=wallet.owners)
-
-        # ensure at least one address is defined
-        if len(addresses) == 0 and len(ms_addresses) == 0:
-            raise tferrors.InsufficientFunds("insufficient funds in this wallet")
-
-        # if personal addresses are given, try to use these first
-        # as these are the easiest kind to deal with
-        if len(addresses) == 0:
-            outputs, collected = ([], Currency()) # start with nothing
-        else:
-            outputs, collected = self._fund_individual(amount, addresses)
-
-        if collected.greater_than_or_equal_to(amount):
-            # if we already have sufficient, we stop now
-            return ([CoinInput.from_coin_output(co) for co in outputs], collected.minus(amount), refund)
-
-        if len(ms_addresses) == 0:
-            # if no ms_addresses were defined,
-            raise tferrors.InsufficientFunds("not enough funds available in the individual wallet to fund the requested amount")
-        # otherwise keep going for multisig addresses
-        outputs, collected = self._fund_multisig(amount, ms_addresses, outputs=outputs, collected=collected)
-
-        # if we still didn't manage to fund enough, there is nothing we can do
-        if collected.less_than(amount):
-            raise tferrors.InsufficientFunds("not enough funds available in the wallets to fund the requested amount")
-        return ([CoinInput.from_coin_output(co) for co in outputs], collected.minus(amount), refund)
-
-    def _fund_multisig(self, amount, addresses, outputs=None, collected=None):
-        if outputs == None:
-            outputs = []
-        if collected == None:
-            collected = Currency()
-        for address, wallet in self.wallets.items():
-            if UnlockHash.from_json(address).__str__() not in addresses:
-                continue # nothing to do here
-
-            outputs_available = wallet.outputs_available
-            def sort_output_by_value(a, b):
-                if a.value.less_than(b.value):
-                    return -1
-                if a.value.greater_than(b.value):
-                    return 1
-                return 0
-            outputs_available = jsarr.sort(outputs_available, sort_output_by_value)
-            # try to fund only with confirmed outputs, if possible
-            for co in outputs_available:
-                if co.value.greater_than_or_equal_to(amount):
-                    return [co], co.value
-
-                collected = collected.plus(co.value)
-                outputs.append(co)
-                if len(outputs) > _MAX_RIVINE_TRANSACTION_INPUTS:
-                    # to not reach the input limit
-                    collected = collected.minus(outputs.pop(0).value)
-                if collected.greater_than_or_equal_to(amount):
-                    return outputs, collected
-
-            if collected.greater_than_or_equal_to(amount):
-                # if we already have sufficient, we stop now
-                return outputs, collected
-
-            # use unconfirmed balance, not ideal, but acceptable
-            outputs_available = wallet.outputs_unconfirmed_available
-            outputs_available = jsarr.sort(outputs_available, sort_output_by_value, reverse=True)
-            for co in outputs_available:
-                if co.value.greater_than_or_equal_to(amount):
-                    return [co], co.value
-                collected = collected.plus(co.value)
-                outputs.append(co)
-                if len(outputs) > _MAX_RIVINE_TRANSACTION_INPUTS:
-                    # to not reach the input limit
-                    collected = collected.minus(outputs.pop(0).value)
-                if collected.greater_than_or_equal_to(amount):
-                    return outputs, collected
-        # we return whatever we have collected, no matter if it is sufficient
-        return outputs, collected
