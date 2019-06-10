@@ -10,6 +10,7 @@ import BalanceGrid from '../wallet/BalanceGrid'
 import BalanceUnconfirmedGrid from '../wallet/BalanceUnconfirmedGrid'
 import TransactionsList from '../wallet/TransactionList'
 import { truncate } from 'lodash'
+const { shell } = require('electron')
 
 const mapStateToProps = state => ({
   wallet: state.wallet,
@@ -74,7 +75,7 @@ class Wallet extends Component {
     const ownerList = owners.map((owner, index) => {
       return (
         <List.Description key={owner + ` ${index}`}>
-          <p style={{ color: 'white', fontSize: 14 }}>{index + 1}: {owner}</p>
+          <p style={{ color: 'white', fontSize: 14 }}><span style={{ color: 'white', fontSize: 12, fontFamily: 'Menlo-Regular' }}>{index + 1}</span>: {_addressDisplayElement(owner, this.props.account, this.props.chainInfo)}</p>
         </List.Description>
       )
     })
@@ -137,6 +138,15 @@ class Wallet extends Component {
       </div>
     )
   }
+}
+
+// NOTE: should we also link to wallet (when we have wallet name)??!?!
+function _addressDisplayElement (address, account, chainInfo) {
+  const walletName = account.wallet_name_for_address(address)
+  if (walletName) {
+    return <span><a style={{ color: 'white', fontSize: 12, fontFamily: 'Menlo-Regular' }} onClick={() => shell.openExternal(`${chainInfo.explorerAddress}/hash.html?hash=${address}`)}>{address}</a> (wallet {`${walletName}`})</span>
+  }
+  return <span><a style={{ color: 'white', fontSize: 12, fontFamily: 'Menlo-Regular' }} onClick={() => shell.openExternal(`${chainInfo.explorerAddress}/hash.html?hash=${address}`)}>{address}</a></span>
 }
 
 export default connect(

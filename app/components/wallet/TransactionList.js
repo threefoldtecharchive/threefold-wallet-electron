@@ -22,11 +22,8 @@ const listDescriptionStyle = {
 }
 
 const hashFont = {
-  fontFamily: 'Lucida Typewriter',
-  fontSize: 14,
-  marginLeft: 5,
-  position: 'relative',
-  left: 32
+  fontFamily: 'Menlo-Regular',
+  fontSize: 12
 }
 
 const TransactionList = ({ loader, transactions, chainInfo, account }) => {
@@ -47,13 +44,15 @@ const TransactionList = ({ loader, transactions, chainInfo, account }) => {
           <Loader />
         </Dimmer>
         <h3 style={{ color: 'white', marginTop: 0 }}>Transactions</h3>
-        <List style={{ marginLeft: 50, overflow: 'auto', color: 'white' }} divided relaxed>
+        {// TODO: added paddingBottom of 120, there must be a better way than this hack (needed it for multisig wallet transaction lists)
+        }
+        <List style={{ marginLeft: 50, overflow: 'auto', color: 'white', paddingBottom: 120 }} divided relaxed>
           {transactions.map(tx => {
             return (
               <List.Item key={uuid.v4()} style={{ borderBottom: '1px solid grey' }}>
                 <List.Content>
                   {renderTransactionHeader(tx, explorerAddress, accountAddresses)}
-                  {renderTransactionBody(tx, explorerAddress, chainTimestamp)}
+                  {renderTransactionBody(tx, explorerAddress, chainTimestamp, account)}
                 </List.Content>
               </List.Item>
             )
@@ -70,7 +69,7 @@ const TransactionList = ({ loader, transactions, chainInfo, account }) => {
   }
 }
 
-function renderTransactionBody (tx, explorerAddress, chainTimestamp) {
+function renderTransactionBody (tx, explorerAddress, chainTimestamp, account) {
   if (tx.inputs.length > 0) {
     return tx.inputs.map(input => {
       return (
@@ -87,7 +86,7 @@ function renderTransactionBody (tx, explorerAddress, chainTimestamp) {
                 <div key={tx.identifier + '_in_' + sender} style={{ display: 'flex', marginTop: 5 }} onClick={() => shell.openExternal(`${explorerAddress}/hash.html?hash=${sender}`)}>
                   From:
                   <p style={{ fontSize: 14, marginBottom: 0, fontFamily: 'Lucida Typewriter', position: 'relative', left: 19 }}>
-                    {sender}
+                    {_addressDisplayElement(sender, account)}
                   </p>
                 </div>
               )
@@ -96,7 +95,9 @@ function renderTransactionBody (tx, explorerAddress, chainTimestamp) {
           <List.Description style={{ color: 'white', display: 'flex', marginTop: 3 }} as='a'>
             <div key={tx.identifier + '_in_' + input.recipient} style={{ display: 'flex', marginTop: 5 }} onClick={() => shell.openExternal(`${explorerAddress}/hash.html?hash=${input.recipient}`)}>
               To:
-              <p style={hashFont}>{input.recipient}</p>
+              <p style={{ fontSize: 14, marginBottom: 0, fontFamily: 'Lucida Typewriter', position: 'relative', left: 37 }}>
+                {_addressDisplayElement(input.recipient, account)}
+              </p>
             </div>
           </List.Description>
         </div>
@@ -119,7 +120,7 @@ function renderTransactionBody (tx, explorerAddress, chainTimestamp) {
                 <div key={tx.identifier + '_out_' + sender} style={{ display: 'flex', marginTop: 5 }} onClick={() => shell.openExternal(`${explorerAddress}/hash.html?hash=${sender}`)}>
                   From:
                   <p style={{ fontSize: 14, marginBottom: 0, fontFamily: 'Lucida Typewriter', position: 'relative', left: 19 }}>
-                    {sender}
+                    {_addressDisplayElement(sender, account)}
                   </p>
                 </div>
               )
@@ -128,7 +129,9 @@ function renderTransactionBody (tx, explorerAddress, chainTimestamp) {
           <List.Description style={{ color: 'white', display: 'flex', marginTop: 3 }} as='a'>
             <div key={tx.identifier + '_out_' + out.recipient} style={{ display: 'flex', marginTop: 5 }} onClick={() => shell.openExternal(`${explorerAddress}/hash.html?hash=${out.recipient}`)}>
               To:
-              <p style={hashFont}>{out.recipient}</p>
+              <p style={{ fontSize: 14, marginBottom: 0, fontFamily: 'Lucida Typewriter', position: 'relative', left: 37 }}>
+                {_addressDisplayElement(out.recipient, account)}
+              </p>
             </div>
           </List.Description>
         </div>
@@ -137,6 +140,17 @@ function renderTransactionBody (tx, explorerAddress, chainTimestamp) {
   }
 }
 
+function _addressDisplayElement (address, account) {
+  const walletName = account.wallet_name_for_address(address)
+  if (walletName) {
+    return <span><span style={hashFont}>{address}</span> (wallet {`${walletName}`})</span>
+  }
+  return <span><span style={hashFont}>{address}</span></span>
+}
+
+// TODO: this should be above each transaction as we see transactions,
+//       meaning above every input->output relationship,
+//       this way we can fix the algorithm. Currently it is not 100% correct
 function renderTransactionHeader (tx, explorerAddress, accountAddresses) {
   const inputSenders = flatten(tx.inputs.map(input => input.senders))
   const inputReceivers = flatten(tx.inputs.map(input => input.recipient))

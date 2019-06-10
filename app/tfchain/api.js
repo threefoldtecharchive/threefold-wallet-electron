@@ -516,6 +516,23 @@ export var Account =  __class__ ('Account', [object], {
 			throw __except0__;
 		}
 		var address = uh.__str__ ();
+		return self._multisig_wallet_name_for_multisig_address (address);
+	});},
+	get _multisig_wallet_name_for_multisig_address () {return __get__ (this, function (self, address) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'address': var address = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
 		if (__in__ (address, self._multisig_wallet_info_map)) {
 			return self._multisig_wallet_info_map [address].wallet_name;
 		}
@@ -536,6 +553,19 @@ export var Account =  __class__ ('Account', [object], {
 		}
 		else {
 		}
+		if (!(isinstance (address, str))) {
+			var __except0__ = py_TypeError ('address has an invalid type: {} ({})'.format (address, py_typeof (address)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		var uh = UnlockHash.from_json (address);
+		if (uh.uhtype.__eq__ (UnlockHashType.MULTI_SIG)) {
+			return self._multisig_wallet_name_for_multisig_address (uh.__str__ ());
+		}
+		if (uh.uhtype.__ne__ (UnlockHashType.PUBLIC_KEY)) {
+			return null;
+		}
+		var address = uh.__str__ ();
 		var wallet = self._wallet_for_address (address);
 		if (wallet == null) {
 			return null;

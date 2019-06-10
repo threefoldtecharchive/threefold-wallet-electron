@@ -334,11 +334,23 @@ class Account:
             raise ValueError("address is not a multisig address: {}".format(address))
         address = uh.__str__()
         # get address
+        return self._multisig_wallet_name_for_multisig_address(address)
+
+    def _multisig_wallet_name_for_multisig_address(self, address):
         if address in self._multisig_wallet_info_map:
             return self._multisig_wallet_info_map[address].wallet_name
         return None
 
     def wallet_name_for_address(self, address):
+        # validate address
+        if not isinstance(address, str):
+            raise TypeError("address has an invalid type: {} ({})".format(address, type(address)))
+        uh = UnlockHash.from_json(address)
+        if uh.uhtype.__eq__(UnlockHashType.MULTI_SIG):
+            return self._multisig_wallet_name_for_multisig_address(uh.__str__())
+        if uh.uhtype.__ne__(UnlockHashType.PUBLIC_KEY):
+            return None
+        address = uh.__str__()
         wallet = self._wallet_for_address(address)
         if wallet == None:
             return None
