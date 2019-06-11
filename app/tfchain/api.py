@@ -1214,6 +1214,7 @@ def _normalize_value_as_int(value):
         return int(value)
     if not isinstance(value, int):
         raise TypeError("invalid int value: {} ({})".format(value, type(value)))
+    return value
 
 def _create_signer_cb_for_wallet(wallet, balance=None):
     def cb(result):

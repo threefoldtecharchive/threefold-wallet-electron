@@ -2802,6 +2802,7 @@ export var _normalize_value_as_int = function (value) {
 		__except0__.__cause__ = null;
 		throw __except0__;
 	}
+	return value;
 };
 export var _create_signer_cb_for_wallet = function (wallet, balance) {
 	if (typeof balance == 'undefined' || (balance != null && balance.hasOwnProperty ("__kwargtrans__"))) {;
