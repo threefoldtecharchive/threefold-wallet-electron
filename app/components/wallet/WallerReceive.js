@@ -5,7 +5,7 @@ import { Icon, Input, Divider, Dropdown, Segment, Label } from 'semantic-ui-reac
 import styles from '../home/Home.css'
 import Footer from '../footer'
 import QRCode from 'qrcode.react'
-import { flatten, find } from 'lodash'
+import { flatten } from 'lodash'
 import { CopyToClipboard } from 'react-copy-to-clipboard'
 import { toast } from 'react-toastify'
 
@@ -19,16 +19,16 @@ class WalletReceive extends Component {
     let selectedWallet
     let selectedAddress
     if (this.props.account.selected_wallet) {
-      selectedWallet = this.props.account.selected_wallet.wallet_name
-      selectedAddress = this.props.account.selected_wallet.address
+      selectedWallet = this.props.account.selected_wallet
+      selectedAddress = this.props.account.selected_wallet.addresses[0]
     }
-    if (!selectedWallet && !selectedAddress) {
-      selectedWallet = this.props.account.wallets[0].wallet_name
-      selectedAddress = this.props.account.wallets[0].address
+    if (!selectedWallet) {
+      selectedWallet = this.props.account.wallets[0]
+      selectedAddress = this.props.account.wallets[0].addresses[0]
     }
 
     this.state = {
-      name: selectedWallet,
+      name: selectedWallet.wallet_name,
       selectedWallet,
       selectedAddress,
       amount: 0,
@@ -50,8 +50,7 @@ class WalletReceive extends Component {
   mapAddressesToDropdownOption = () => {
     const { selectedWallet } = this.state
     if (selectedWallet) {
-      const wallet = find(this.props.account.wallets, w => w.wallet_name === selectedWallet)
-      return flatten(wallet.addresses.map(w => {
+      return flatten(selectedWallet.addresses.map(w => {
         return {
           key: w,
           text: w,
@@ -62,8 +61,12 @@ class WalletReceive extends Component {
   }
 
   selectWallet = (event, data) => {
-    const wallet = find(this.props.account.wallets, w => w.wallet_name === data.value)
-    this.setState({ selectedWallet: data.value, selectedAddress: wallet.addresses[0] })
+    let selectedWallet = this.props.account.wallet_for_name(data.value)
+    if (!selectedWallet) {
+      this.props.account.wallet_for_address(data.value)
+    }
+    this.props.account.select_wallet({ name: selectedWallet.wallet_name, address: selectedWallet.address })
+    this.setState({ selectedWallet, selectedAddress: selectedWallet.addresses[0] })
   }
 
   selectAddress = (event, data) => {
@@ -105,7 +108,7 @@ class WalletReceive extends Component {
             selection
             options={walletsOptions}
             onChange={this.selectWallet}
-            value={selectedWallet}
+            value={selectedWallet.wallet_name}
           />
           <label style={{ color: 'white' }}>Address</label>
           <Dropdown
@@ -115,7 +118,7 @@ class WalletReceive extends Component {
             selection
             options={addressOptions}
             onChange={this.selectAddress}
-            value={selectedAddress}
+            value={selectedWallet.address}
           />
           {this.renderQRCode()}
           <CopyToClipboard text={selectedAddress}

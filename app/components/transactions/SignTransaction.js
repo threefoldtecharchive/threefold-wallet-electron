@@ -106,11 +106,11 @@ class SignTransaction extends Component {
   }
 
   signAndSend = () => {
-    const { jsonError, json, selectedWallet: wallet } = this.state
+    const { jsonError, json } = this.state
     if (!jsonError && json !== '') {
       this.setState({ loader: true })
-      const selectedWallet = this.props.account.multisig_wallets.filter(w => w.wallet_name === wallet)[0]
-      selectedWallet.transaction_sign(json).then(res => {
+
+      this.props.account.selected_wallet.transaction_sign(json).then(res => {
         this.setState({ loader: false })
         this.props.history.push(routes.ACCOUNT)
         toast('transaction signed successfully and submitted to tx pool')
