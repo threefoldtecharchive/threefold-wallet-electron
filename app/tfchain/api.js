@@ -388,7 +388,7 @@ export var Account =  __class__ ('Account', [object], {
 				return __accu0__;
 			}) ();
 		}
-		return AccountBalance (self.network_type, self.account_name, __kwargtrans__ ({balances: balances, msbalances: msbalances}));
+		return AccountBalance (self._network_type, self.account_name, __kwargtrans__ ({balances: balances, msbalances: msbalances}));
 	});},
 	get _get_selected_wallet_name () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -2669,7 +2669,7 @@ export var _create_signer_cb_for_wallet = function (wallet, balance) {
 };
 export var AccountBalance =  __class__ ('AccountBalance', [object], {
 	__module__: __name__,
-	get __init__ () {return __get__ (this, function (self, network_type, account_name, balances, msbalances) {
+	get __init__ () {return __get__ (this, function (self, account_name, balances, msbalances) {
 		if (typeof balances == 'undefined' || (balances != null && balances.hasOwnProperty ("__kwargtrans__"))) {;
 			var balances = null;
 		};
@@ -2683,7 +2683,6 @@ export var AccountBalance =  __class__ ('AccountBalance', [object], {
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'network_type': var network_type = __allkwargs0__ [__attrib0__]; break;
 						case 'account_name': var account_name = __allkwargs0__ [__attrib0__]; break;
 						case 'balances': var balances = __allkwargs0__ [__attrib0__]; break;
 						case 'msbalances': var msbalances = __allkwargs0__ [__attrib0__]; break;
@@ -2693,20 +2692,15 @@ export var AccountBalance =  __class__ ('AccountBalance', [object], {
 		}
 		else {
 		}
-		if (!(isinstance (network_type, tfnetwork.Type))) {
-			var __except0__ = py_TypeError ('network_type has to be of type tfchain.network.Type, not be of type {}'.format (py_typeof (network_type)));
-			__except0__.__cause__ = null;
-			throw __except0__;
-		}
-		self._network_type = network_type;
 		if (!(isinstance (account_name, str))) {
 			var __except0__ = py_TypeError ('account_name has to be of type str, not be of type {}'.format (py_typeof (account_name)));
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
 		self._account_name = account_name;
-		self._balances = (balances == null ? [] : balances);
-		self._msbalances = (msbalances == null ? [] : msbalances);
+		var balances = (balances == null ? [] : balances);
+		var msbalances = (msbalances == null ? [] : msbalances);
+		self._balances = jsarr.concat (balances, msbalances);
 	});},
 	get _get_coins_unlocked () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -2724,7 +2718,7 @@ export var AccountBalance =  __class__ ('AccountBalance', [object], {
 		}
 		return Currency.sum (...(function () {
 			var __accu0__ = [];
-			for (var balance of self.balances) {
+			for (var balance of self._balances) {
 				__accu0__.append (balance.coins_unlocked);
 			}
 			return __accu0__;
@@ -2746,7 +2740,7 @@ export var AccountBalance =  __class__ ('AccountBalance', [object], {
 		}
 		return Currency.sum (...(function () {
 			var __accu0__ = [];
-			for (var balance of self.balances) {
+			for (var balance of self._balances) {
 				__accu0__.append (balance.coins_locked);
 			}
 			return __accu0__;
@@ -2784,7 +2778,7 @@ export var AccountBalance =  __class__ ('AccountBalance', [object], {
 		}
 		return Currency.sum (...(function () {
 			var __accu0__ = [];
-			for (var balance of self.balances) {
+			for (var balance of self._balances) {
 				__accu0__.append (balance.unconfirmed_coins_unlocked);
 			}
 			return __accu0__;
@@ -2806,7 +2800,7 @@ export var AccountBalance =  __class__ ('AccountBalance', [object], {
 		}
 		return Currency.sum (...(function () {
 			var __accu0__ = [];
-			for (var balance of self.balances) {
+			for (var balance of self._balances) {
 				__accu0__.append (balance.unconfirmed_coins_locked);
 			}
 			return __accu0__;

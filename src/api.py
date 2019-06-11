@@ -1132,23 +1132,21 @@ def _create_signer_cb_for_wallet(wallet, balance=None):
 
 
 class AccountBalance:
-    def __init__(self, network_type, account_name, balances=None, msbalances=None):
-        if not isinstance(network_type, tfnetwork.Type):
-            raise TypeError("network_type has to be of type tfchain.network.Type, not be of type {}".format(type(network_type)))
-        self._network_type = network_type
+    def __init__(self, account_name, balances=None, msbalances=None):
         if not isinstance(account_name, str):
             raise TypeError("account_name has to be of type str, not be of type {}".format(type(account_name)))
         self._account_name = account_name
-        self._balances = [] if balances == None else balances
-        self._msbalances = [] if msbalances == None else msbalances
+        balances = [] if balances == None else balances
+        msbalances = [] if msbalances == None else msbalances
+        self._balances = jsarr.concat(balances, msbalances)
 
     @property
     def coins_unlocked(self):
-        return Currency.sum(*[balance.coins_unlocked for balance in self.balances])
+        return Currency.sum(*[balance.coins_unlocked for balance in self._balances])
 
     @property
     def coins_locked(self):
-        return Currency.sum(*[balance.coins_locked for balance in self.balances])
+        return Currency.sum(*[balance.coins_locked for balance in self._balances])
 
     @property
     def coins_total(self):
@@ -1156,11 +1154,11 @@ class AccountBalance:
 
     @property
     def unconfirmed_coins_unlocked(self):
-        return Currency.sum(*[balance.unconfirmed_coins_unlocked for balance in self.balances])
+        return Currency.sum(*[balance.unconfirmed_coins_unlocked for balance in self._balances])
 
     @property
     def unconfirmed_coins_locked(self):
-        return Currency.sum(*[balance.unconfirmed_coins_locked for balance in self.balances])
+        return Currency.sum(*[balance.unconfirmed_coins_locked for balance in self._balances])
 
     @property
     def unconfirmed_coins_total(self):
