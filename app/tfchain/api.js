@@ -471,6 +471,16 @@ export var Account =  __class__ ('Account', [object], {
 		var address = __left0__ [1];
 		var singlesig = __left0__ [2];
 		var multisig = __left0__ [3];
+		if (py_name != null && !(isinstance (py_name, str))) {
+			var __except0__ = py_TypeError ('invalid name for select_wallet: {} ({})'.format (py_name, py_typeof (py_name)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		if (address != null && !(isinstance (address, str))) {
+			var __except0__ = py_TypeError ('invalid address for select_wallet: {} ({})'.format (address, py_typeof (address)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
 		var name_defined = false;
 		var address_defined = false;
 		if (py_name != null && py_name != '') {

@@ -442,7 +442,7 @@ export var TFChainWallet =  __class__ ('TFChainWallet', [object], {
 				for (var co of balance.outputs_unconfirmed_available) {
 					known_outputs [co.id.__str__ ()] = co;
 				}
-				for (var mswallet of balance.wallets.py_values ()) {
+				for (var mswallet of jsobj.dict_values (balance.wallets)) {
 					for (var co of mswallet.outputs_available) {
 						known_outputs [co.id.__str__ ()] = co;
 					}

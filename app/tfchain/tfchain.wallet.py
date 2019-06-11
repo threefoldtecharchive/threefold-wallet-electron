@@ -358,7 +358,7 @@ class TFChainWallet:
                     known_outputs[co.id.__str__()] = co
                 for co in balance.outputs_unconfirmed_available:
                     known_outputs[co.id.__str__()] = co
-                for mswallet in balance.wallets.values():
+                for mswallet in jsobj.dict_values(balance.wallets):
                     for co in mswallet.outputs_available:
                         known_outputs[co.id.__str__()] = co
                     for co in mswallet.outputs_unconfirmed_available:

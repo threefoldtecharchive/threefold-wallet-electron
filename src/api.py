@@ -290,6 +290,12 @@ class Account:
             ('singlesig', True),
             ('multisig', True),
         ])
+        # validate opts
+        if name != None and not isinstance(name, str):
+            raise TypeError("invalid name for select_wallet: {} ({})".format(name, type(name)))
+        if address != None and not isinstance(address, str):
+            raise TypeError("invalid address for select_wallet: {} ({})".format(address, type(address)))
+        # keep track if name and address is defined
         name_defined = False
         address_defined = False
         # if name is given, try to select by name
