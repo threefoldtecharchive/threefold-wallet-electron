@@ -696,10 +696,10 @@ class Account:
         # return pooled promise
         return jsasync.promise_pool_new(generator)
 
-    def _collect_unknown_multisig_wallet_balances(self, wallets):
+    def _collect_unknown_multisig_wallet_balances(self):
         known_ms_addresses = set(self.addresses_get({'singlesig': False}))
         unknown_ms_wallet_addresses = []
-        for wallet in wallets:
+        for wallet in self._wallets:
             for msaddress in wallet.linked_multisig_wallet_addresses:
                 if msaddress in known_ms_addresses:
                     continue

@@ -1395,7 +1395,7 @@ export var Account =  __class__ ('Account', [object], {
 			};
 		return jsasync.promise_pool_new (generator);
 	});},
-	get _collect_unknown_multisig_wallet_balances () {return __get__ (this, function (self, wallets) {
+	get _collect_unknown_multisig_wallet_balances () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -1403,7 +1403,6 @@ export var Account =  __class__ ('Account', [object], {
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'wallets': var wallets = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
@@ -1412,7 +1411,7 @@ export var Account =  __class__ ('Account', [object], {
 		}
 		var known_ms_addresses = set (self.addresses_get (dict ({'singlesig': false})));
 		var unknown_ms_wallet_addresses = [];
-		for (var wallet of wallets) {
+		for (var wallet of self._wallets) {
 			for (var msaddress of wallet.linked_multisig_wallet_addresses) {
 				if (__in__ (msaddress, known_ms_addresses)) {
 					continue;
