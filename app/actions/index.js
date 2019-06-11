@@ -52,23 +52,19 @@ export const saveWallet = function (wallet) {
 export const setChainConstants = function (account) {
   if (account && !(account instanceof Array)) {
     return dispatch => {
-      account.chain_info_get().then(info => {
+      account.update_account().then(acc => {
+        const { chain_info: chaininfo } = acc
         const chainInfo = {
-          chainHeight: info.chain_height,
-          chainName: info.chain_name,
-          chainNetwork: info.chain_network,
-          chainTimestamp: info.chain_timestamp,
-          chainVersion: info.chain_version,
-          explorerAddress: info.explorer_address
+          chainHeight: chaininfo.chain_height,
+          chainName: chaininfo.chain_name,
+          chainNetwork: chaininfo.chain_network,
+          chainTimestamp: chaininfo.chain_timestamp,
+          chainVersion: chaininfo.chain_version,
+          explorerAddress: chaininfo.explorer_address
         }
         dispatch({
           type: 'SET_CHAIN_CONSTANTS',
           chainInfo
-        })
-      }).catch(err => {
-        dispatch({
-          type: 'SET_CHAIN_CONSTANTS',
-          err
         })
       })
     }
@@ -83,31 +79,26 @@ export const setChainConstants = function (account) {
 export const getTransactionsNotifications = function (account) {
   if (account && !(account instanceof Array)) {
     return dispatch => {
-      account.chain_info_get().then(info => {
-        account.wallets.map(w => {
-          const block = info.last_block_get({
-            addresses: w.addresses
+      const { chain_info: chaininfo } = account
+
+      account.wallets.map(w => {
+        const block = chaininfo.last_block_get({
+          addresses: w.addresses
+        })
+        if (block.transactions.length > 0) {
+          block.transactions.forEach(tx => {
+            if (tx.inputs.length > 0) {
+              toast('Incomming transaction received')
+            }
+            if (tx.outputs.length > 0) {
+              toast('Outgoing transaction received')
+            }
           })
-          if (block.transactions.length > 0) {
-            block.transactions.forEach(tx => {
-              if (tx.inputs.length > 0) {
-                toast('Incomming transaction received')
-              }
-              if (tx.outputs.length > 0) {
-                toast('Outgoing transaction received')
-              }
-            })
-          }
-        })
-        dispatch({
-          type: 'GET_TX_FOR_WALLET',
-          tx: null
-        })
-      }).catch(err => {
-        dispatch({
-          type: 'GET_TX_FOR_WALLET',
-          tx: err
-        })
+        }
+      })
+      dispatch({
+        type: 'GET_TX_FOR_WALLET',
+        tx: null
       })
     }
   } else {
@@ -127,14 +118,10 @@ export const resetApp = function () {
 export const setBalance = function (account) {
   if (account && !(account instanceof Array)) {
     return dispatch => {
-      account.balance.then(info => {
-        const wallets = info.balances.map(b => account.cached_wallet_for(b))
-        const multiSigWallet = info.multisig_balances.map(b => account.cached_multisig_wallet_for(b))
+      account.update_account().then(acc => {
         dispatch({
           type: 'SET_BALANCE',
-          info,
-          wallets,
-          multiSigWallet
+          account: acc
         })
       })
     }

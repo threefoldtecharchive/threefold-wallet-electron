@@ -28,6 +28,8 @@ export const account = (state = [], action) => {
         if (err) console.log(err)
       })
       return action.account
+    case 'SET_BALANCE':
+      return action.account
     case 'RESET_APP':
       return []
     default:

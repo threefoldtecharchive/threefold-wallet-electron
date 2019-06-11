@@ -11,7 +11,7 @@ import { truncate } from 'lodash'
 
 const mapStateToProps = state => ({
   account: state.account,
-  balance: state.balance
+  is_loaded: state.account.is_loaded
 })
 
 const mapDispatchToProps = (dispatch) => ({
@@ -39,10 +39,9 @@ class Account extends Component {
   }
 
   handleWalletClick = (wallet) => {
-    if (this.props.balance.wallets) {
-      this.props.selectWallet(wallet)
-      this.props.history.push(routes.WALLET)
-    }
+    this.props.selectWallet(wallet)
+    this.props.account.select_wallet(wallet.wallet_name)
+    this.props.history.push(routes.WALLET)
   }
 
   handleMultiSigWalletClick = (wallet) => {
@@ -53,39 +52,30 @@ class Account extends Component {
   renderWallets = () => {
     let wallets = this.props.account.wallets
     let multiSigWallets = this.props.account.multisig_wallets
-    if (!(this.props.balance instanceof Array)) {
-      if (this.props.balance.wallets && this.props.balance.wallets.length > 0) {
-        wallets = this.props.balance.wallets
-      }
-      if (this.props.balance.multiSigWallet && this.props.balance.multiSigWallet.length > 0) {
-        multiSigWallets = this.props.balance.multiSigWallet
-      }
-    }
+    console.log(this.props.account.is_loaded)
     return (
       <div>
         <Card.Group style={{ marginTop: 20, marginLeft: 20, marginBottom: -20 }}>
           {wallets.map(w => {
             let content = null
-            if (this.props.balance.wallets) {
-              if (this.props.balance.wallets.length === wallets.length) {
-                content = (
-                  <Card.Content>
-                    <div>
-                      <Icon name='chevron right' style={{ position: 'absolute', right: 20, top: 130, fontSize: 25, opacity: '0.3', color: 'white' }} />
-                      <Card.Description style={{ color: 'white', marginTop: 10, marginBottom: 10, fontFamily: 'SF UI Text Light', display: 'flex' }}>
-                        <Icon name='unlock' style={{ fontSize: 16, marginLeft: 20 }} /> <p style={{ marginLeft: 30, marginTop: -8 }}>{w.balance.coins_unlocked.str({ precision: 3 })} TFT</p>
-                      </Card.Description>
-                      <Card.Description style={{ textAlign: 'left', color: 'white', marginTop: 20, marginBottom: 10, fontFamily: 'SF UI Text Light', display: 'flex' }}>
-                        <Icon name='lock' style={{ fontSize: 16, marginLeft: 20 }} /> <p style={{ marginLeft: 33, marginTop: -3, fontFamily: 'SF UI Text Light', fontSize: 18 }}>{w.balance.coins_locked.str({ precision: 3 })} TFT</p>
-                      </Card.Description>
-                      <Divider />
-                      <Card.Header style={{ textAlign: 'center', color: 'white', fontSize: 18, textTransform: 'uppercase', marginTop: 20, fontFamily: 'SF UI Text Light' }}>
+            if (this.props.is_loaded) {
+              content = (
+                <Card.Content>
+                  <div>
+                    <Icon name='chevron right' style={{ position: 'absolute', right: 20, top: 130, fontSize: 25, opacity: '0.3', color: 'white' }} />
+                    <Card.Description style={{ color: 'white', marginTop: 10, marginBottom: 10, fontFamily: 'SF UI Text Light', display: 'flex' }}>
+                      <Icon name='unlock' style={{ fontSize: 16, marginLeft: 20 }} /> <p style={{ marginLeft: 30, marginTop: -8 }}>{w.balance.coins_unlocked.str({ precision: 3 })} TFT</p>
+                    </Card.Description>
+                    <Card.Description style={{ textAlign: 'left', color: 'white', marginTop: 20, marginBottom: 10, fontFamily: 'SF UI Text Light', display: 'flex' }}>
+                      <Icon name='lock' style={{ fontSize: 16, marginLeft: 20 }} /> <p style={{ marginLeft: 33, marginTop: -3, fontFamily: 'SF UI Text Light', fontSize: 18 }}>{w.balance.coins_locked.str({ precision: 3 })} TFT</p>
+                    </Card.Description>
+                    <Divider />
+                    <Card.Header style={{ textAlign: 'center', color: 'white', fontSize: 18, textTransform: 'uppercase', marginTop: 20, fontFamily: 'SF UI Text Light' }}>
                         wallet {w.wallet_name || truncate(w.address, { length: 14 })}
-                      </Card.Header>
-                    </div>
-                  </Card.Content>
-                )
-              }
+                    </Card.Header>
+                  </div>
+                </Card.Content>
+              )
             }
             return (
               <Card key={w.wallet_name || w.address} style={{ boxShadow: 'none', height: 180, width: 350, marginTop: 0, marginRight: 20, marginBottom: 30, background: 'linear-gradient(90deg, rgba(56,51,186,1) 0%, rgba(102,71,254,1) 100%)' }} onClick={() => this.handleWalletClick(w)}>
@@ -109,7 +99,7 @@ class Account extends Component {
         <Card.Group style={{ marginTop: 20, marginLeft: 20 }}>
           {multiSigWallets.map(w => {
             let content = null
-            if (multiSigWallets) {
+            if (this.props.is_loaded) {
               content = (
                 <Card.Content>
                   <div>
@@ -155,26 +145,25 @@ class Account extends Component {
 
   renderAccountBalances = () => {
     let content = null
-    if (!(this.props.balance instanceof Array)) {
-      const {
-        coins_total: coinsTotal,
-        coins_locked: coinsLocked,
-        coins_unlocked: coinsUnlocked,
-        unconfirmed_coins_total: unconfirmedTotalCoins,
-        unconfirmed_coins_unlocked: unconfirmedUnlockedCoins,
-        unconfirmed_coins_locked: unconfirmedLockedCoins
-      } = this.props.balance.info
 
+    const {
+      coins_total: coinsTotal,
+      coins_locked: coinsLocked,
+      coins_unlocked: coinsUnlocked,
+      unconfirmed_coins_total: unconfirmedTotalCoins,
+      unconfirmed_coins_unlocked: unconfirmedUnlockedCoins,
+      unconfirmed_coins_locked: unconfirmedLockedCoins
+    } = this.props.account.balance
+
+    if (this.props.is_loaded) {
       content = (
         <div>
           <h3 style={{ color: 'white', marginTop: 0 }}>Total Balance</h3>
           <h4 style={{ color: 'white', marginTop: 0 }}>{coinsTotal.str({ precision: 3 })} TFT</h4>
           {unconfirmedTotalCoins.greater_than(0) ? (<span style={{ color: 'white', marginTop: 0, fontSize: 12 }}>unconfirmed: {unconfirmedTotalCoins.str({ precision: 3 })} TFT</span>) : (<p />)}
-
           <h4 style={{ color: 'white' }}><Icon name='lock' />Locked Balance</h4>
           <h4 style={{ color: 'white', marginTop: 0 }}>{coinsLocked.str({ precision: 3 })}  TFT</h4>
           {unconfirmedLockedCoins.greater_than(0) ? (<span style={{ color: 'white', marginTop: 0, fontSize: 12 }}>unconfirmed: {unconfirmedLockedCoins.str({ precision: 3 })} TFT</span>) : (<p />)}
-
           <h4 style={{ color: 'white' }}><Icon name='unlock' />Unlocked Balance</h4>
           <h4 style={{ color: 'white', marginTop: 0, marginBottom: 0 }}>{coinsUnlocked.str({ precision: 3 })}  TFT</h4>
           {unconfirmedUnlockedCoins.greater_than(0) ? (<span style={{ color: 'white', marginTop: 0, fontSize: 12 }}>unconfirmed: {unconfirmedUnlockedCoins.str({ precision: 3 })} TFT </span>) : (<p />)}
