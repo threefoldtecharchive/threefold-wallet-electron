@@ -121,6 +121,11 @@ export var Account =  __class__ ('Account', [object], {
 		var seed = __left0__ [0];
 		var network_type = __left0__ [1];
 		var explorer_addresses = __left0__ [2];
+		if (!(isinstance (account_name, str))) {
+			var __except0__ = py_TypeError ('account_name is not a str, while this was not expected. Invalid: {} ({})'.format (account_name, py_typeof (account_name)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
 		if (!(account_name)) {
 			var __except0__ = ValueError ('no account_name is given, while it is required');
 			__except0__.__cause__ = null;
@@ -388,7 +393,7 @@ export var Account =  __class__ ('Account', [object], {
 				return __accu0__;
 			}) ();
 		}
-		return AccountBalance (self._network_type, self.account_name, __kwargtrans__ ({balances: balances, msbalances: msbalances}));
+		return AccountBalance (self.account_name, __kwargtrans__ ({balances: balances, msbalances: msbalances}));
 	});},
 	get _get_selected_wallet_name () {return __get__ (this, function (self) {
 		if (arguments.length) {

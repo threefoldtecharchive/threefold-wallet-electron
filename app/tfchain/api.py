@@ -121,6 +121,8 @@ class Account:
         seed, network_type, explorer_addresses = jsfunc.opts_get(opts, 'seed', 'network', 'addresses')
 
         # validate params
+        if not isinstance(account_name, str):
+            raise TypeError("account_name is not a str, while this was not expected. Invalid: {} ({})".format(account_name, type(account_name)))
         if not account_name:
             raise ValueError("no account_name is given, while it is required")
         self._previous_account_name = None
@@ -253,7 +255,6 @@ class Account:
         if multisig:
             balances = [wallet.balance for wallet in self._multisig_wallets]
         return AccountBalance(
-            self._network_type,
             self.account_name,
             balances=balances,
             msbalances=msbalances,
