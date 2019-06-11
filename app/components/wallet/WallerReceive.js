@@ -11,9 +11,7 @@ import { toast } from 'react-toastify'
 import { selectWallet } from '../../actions'
 
 const mapStateToProps = state => ({
-  wallet: state.wallet,
-  account: state.account,
-  balance: state.balance
+  account: state.account
 })
 
 const mapDispatchToProps = (dispatch) => ({
@@ -22,25 +20,22 @@ const mapDispatchToProps = (dispatch) => ({
   }
 })
 
-class WalletSettings extends Component {
+class WalletReceive extends Component {
   constructor (props) {
     super(props)
     let selectedWallet
     let selectedAddress
-    if (this.props.wallet instanceof Array) {
-      // If wallet in properties is array (means no global state for wallet is set, meaning coming from account page most likely)
-      // select the first wallet / address from the account props
+    if (this.props.account.selected_wallet) {
+      selectedWallet = this.props.account.selected_wallet.wallet_name
+      selectedAddress = this.props.account.selected_wallet.address
+    }
+    if (!selectedWallet && !selectedAddress) {
       selectedWallet = this.props.account.wallets[0].wallet_name
       selectedAddress = this.props.account.wallets[0].address
-    } else {
-      // If wallet in properties is selected (meaning coming from a wallet page)
-      // select this wallet as default value in dropdown
-      selectedWallet = this.props.wallet.wallet_name
-      selectedAddress = this.props.wallet.address
     }
 
     this.state = {
-      name: this.props.wallet.wallet_name,
+      name: this.props.account.selected_wallet.wallet_name,
       selectedWallet,
       selectedAddress,
       amount: 0,
@@ -147,4 +142,4 @@ class WalletSettings extends Component {
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(WalletSettings)
+)(WalletReceive)

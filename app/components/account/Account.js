@@ -39,7 +39,7 @@ class Account extends Component {
   }
 
   handleWalletClick = (wallet) => {
-    this.props.selectWallet(wallet)
+    // this.props.selectWallet(wallet)
     this.props.account.select_wallet(wallet.wallet_name)
     this.props.history.push(routes.WALLET)
   }
@@ -52,7 +52,6 @@ class Account extends Component {
   renderWallets = () => {
     let wallets = this.props.account.wallets
     let multiSigWallets = this.props.account.multisig_wallets
-    console.log(this.props.account.is_loaded)
     return (
       <div>
         <Card.Group style={{ marginTop: 20, marginLeft: 20, marginBottom: -20 }}>

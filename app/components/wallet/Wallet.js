@@ -11,10 +11,8 @@ import BalanceUnconfirmedGrid from './BalanceUnconfirmedGrid'
 import TransactionsList from './TransactionList'
 
 const mapStateToProps = state => ({
-  wallet: state.wallet,
   routerLocations: state.routerLocations,
   chainInfo: state.chainConstants,
-  balance: state.balance,
   account: state.account
 })
 
@@ -45,7 +43,7 @@ class Wallet extends Component {
     const routeToReceive = () => this.props.history.push(routes.WALLET_RECEIVE)
     const routeToTransfer = () => this.props.history.push(routes.TRANSFER)
     const routeToSign = () => this.props.history.push(routes.SIGN_TRANSACTIONS)
-    const walletBalance = this.props.balance.info.balances.filter(w => w.wallet_name === this.props.wallet.wallet_name)[0]
+    const walletBalance = this.props.account.selected_wallet.balance
 
     if (walletBalance.unconfirmed_coins_total.greater_than(0)) {
       return (
@@ -71,12 +69,12 @@ class Wallet extends Component {
 
   render () {
     // If refreshed in development and data in store is deleted, route to account.
-    if ((this.props.balance instanceof Array)) {
+    if (!this.props.account.selected_wallet) {
       this.props.history.push(routes.ACCOUNT)
       return null
     }
 
-    const wallet = this.props.balance.info.balances.filter(w => w.wallet_name === this.props.wallet.wallet_name)[0]
+    const wallet = this.props.account.selected_wallet
 
     return (
       <div>
@@ -97,7 +95,7 @@ class Wallet extends Component {
           <span onClick={() => this.goBack()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
           {this.renderWalletBalanceGrid()}
           <Segment style={{ width: '90%', height: '37vh', overflow: 'auto', overflowY: 'scroll', margin: 'auto', background: '#29272E', marginTop: 150 }}>
-            <TransactionsList account={this.props.account} loader={this.state.loader} transactions={wallet.transactions} chainInfo={this.props.chainInfo} />
+            <TransactionsList account={this.props.account} loader={this.state.loader} transactions={wallet.balance.transactions} chainInfo={this.props.chainInfo} />
           </Segment>
         </div>
         <Footer />

@@ -446,7 +446,7 @@ export var Account =  __class__ ('Account', [object], {
 		}
 		else {
 		}
-		self._selected_wallet;
+		return self._selected_wallet;
 	});},
 	get select_wallet () {return __get__ (this, function (self, py_name) {
 		if (typeof py_name == 'undefined' || (py_name != null && py_name.hasOwnProperty ("__kwargtrans__"))) {;

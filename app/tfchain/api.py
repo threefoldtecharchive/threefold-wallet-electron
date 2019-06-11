@@ -280,7 +280,7 @@ class Account:
 
     @property
     def selected_wallet(self):
-        self._selected_wallet
+        return self._selected_wallet
 
     def select_wallet(self, name=None):
         if name == None or name == "":
