@@ -253,7 +253,7 @@ class Account:
         if multisig:
             balances = [wallet.balance for wallet in self._multisig_wallets]
         return AccountBalance(
-            self.network_type,
+            self._network_type,
             self.account_name,
             balances=balances,
             msbalances=msbalances,
