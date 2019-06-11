@@ -9,7 +9,6 @@ import { toast } from 'react-toastify'
 import { selectWallet } from '../../actions'
 
 const mapStateToProps = state => ({
-  wallet: state.wallet,
   account: state.account
 })
 
@@ -24,20 +23,19 @@ class WalletSettings extends Component {
     super(props)
     let selectedWallet
     let selectedAddress
-    if (this.props.wallet instanceof Array) {
-      // If wallet in properties is array (means no global state for wallet is set, meaning coming from account page most likely)
-      // select the first wallet / address from the account props
-      selectedWallet = this.props.account.multisig_wallets[0].wallet.wallet_name
-      selectedAddress = this.props.account.multisig_wallets[0].wallet.address
-    } else {
-      // If wallet in properties is selected (meaning coming from a wallet page)
-      // select this wallet as default value in dropdown
-      selectedWallet = this.props.wallet.wallet_name
-      selectedAddress = this.props.wallet.address
+    if (this.props.account.selected_wallet) {
+      selectedWallet = this.props.account.selected_wallet.wallet_name
+      selectedAddress = this.props.account.selected_wallet.address
+    }
+    if (!selectedWallet && !selectedAddress) {
+      selectedWallet = this.props.account.multisig_wallets[0].wallet_name
+      selectedAddress = this.props.account.multisig_wallets[0].address
     }
 
+    console.log(selectedAddress)
+
     this.state = {
-      name: this.props.wallet.wallet_name,
+      name: selectedWallet.wallet_name,
       selectedWallet,
       selectedAddress,
       amount: 0,
@@ -56,9 +54,9 @@ class WalletSettings extends Component {
         <span onClick={() => this.props.history.goBack()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
         <div style={{ width: '50%', margin: 'auto' }}>
           <Segment style={{ width: '110%', padding: 30, height: 100, margin: 'auto', background: '#29272E', marginTop: 50, marginBottom: 50 }}>
-            <span style={{ textAlign: 'center', margin: 'auto' }}>{this.props.wallet.address}</span>
+            <span style={{ textAlign: 'center', margin: 'auto' }}>{this.state.selectedAddress}</span>
           </Segment>
-          <CopyToClipboard text={this.props.wallet.address}
+          <CopyToClipboard text={this.state.selectedAddress}
             onCopy={() => this.setState({ copied: true })}>
             <Label onClick={() => toast('Copied to clipboard')} style={{ display: 'block', margin: 'auto', width: 200, cursor: 'pointer' }}><Icon name='clipboard' /> copy address to clipboard</Label>
           </CopyToClipboard>

@@ -9,7 +9,6 @@ import Footer from '../footer'
 import { toast } from 'react-toastify'
 
 const mapStateToProps = state => ({
-  wallet: state.wallet,
   account: state.account
 })
 
@@ -29,7 +28,7 @@ class WalletSettings extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      name: this.props.wallet.wallet_name,
+      name: this.props.account.selected_wallet.wallet_name,
       openDeleteModal: false,
       deleteName: '',
       deleteNameError: false
@@ -42,11 +41,12 @@ class WalletSettings extends Component {
 
   saveWallet = () => {
     const { name } = this.state
-    const { wallet } = this.props
-
+    const { account } = this.props
+    const { selected_wallet: selectedWallet } = account
     let newWallet
+
     try {
-      newWallet = this.props.account.multisig_wallet_update(name, wallet.owners, wallet.signatures_required)
+      newWallet = this.props.account.multisig_wallet_update(name, selectedWallet.owners, selectedWallet.signatures_required)
     } catch (err) {
       if (err) {
         console.log(err)

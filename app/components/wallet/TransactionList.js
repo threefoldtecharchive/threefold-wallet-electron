@@ -141,9 +141,9 @@ function renderTransactionBody (tx, explorerAddress, chainTimestamp, account) {
 }
 
 function _addressDisplayElement (address, account) {
-  const walletName = account.wallet_name_for_address(address)
-  if (walletName) {
-    return <span><span style={hashFont}>{address}</span> (wallet {`${walletName}`})</span>
+  const wallet = account.wallet_for_address(address)
+  if (wallet && wallet.wallet_name) {
+    return <span><span style={hashFont}>{address}</span> (wallet {`${wallet.wallet_name}`})</span>
   }
   return <span><span style={hashFont}>{address}</span></span>
 }

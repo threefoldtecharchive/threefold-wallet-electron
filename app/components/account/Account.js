@@ -4,7 +4,7 @@ import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
 import { Segment, Button, Icon, Divider, Card, Loader, Dimmer } from 'semantic-ui-react'
 import routes from '../../constants/routes'
-import { selectWallet, setBalance } from '../../actions'
+import { setBalance } from '../../actions'
 import styles from '../home/Home.css'
 import Footer from '../footer'
 import { truncate } from 'lodash'
@@ -15,9 +15,6 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = (dispatch) => ({
-  selectWallet: (wallet) => {
-    dispatch(selectWallet(wallet))
-  },
   setBalance: (account) => {
     dispatch(setBalance(account))
   }
@@ -33,19 +30,14 @@ class Account extends Component {
     }
   }
 
-  componentDidMount () {
-    // Unselect wallet from props
-    this.props.selectWallet([])
-  }
-
   handleWalletClick = (wallet) => {
-    // this.props.selectWallet(wallet)
     this.props.account.select_wallet(wallet.wallet_name)
     this.props.history.push(routes.WALLET)
   }
 
   handleMultiSigWalletClick = (wallet) => {
-    this.props.selectWallet(wallet)
+    this.props.account.select_wallet(wallet.wallet_name)
+    console.log(this.props.account.selected_wallet)
     this.props.history.push(routes.WALLET_MULTI_SIG)
   }
 

@@ -13,10 +13,8 @@ import { truncate } from 'lodash'
 const { shell } = require('electron')
 
 const mapStateToProps = state => ({
-  wallet: state.wallet,
   routerLocations: state.routerLocations,
   chainInfo: state.chainConstants,
-  balance: state.balance,
   account: state.account
 })
 
@@ -47,7 +45,7 @@ class Wallet extends Component {
     const routeToReceive = () => this.props.history.push(routes.WALLET_MULTI_RECEIVE)
     const routeToTransfer = () => this.props.history.push(routes.TRANSFER)
     const routeToSign = () => this.props.history.push(routes.SIGN_TRANSACTIONS)
-    const walletBalance = this.props.balance.multiSigWallet.filter(w => w.wallet_name === this.props.wallet.wallet_name || w.address === this.props.wallet.address)[0]
+    const walletBalance = this.props.account.selected_wallet
     if (walletBalance.balance.unconfirmed_coins_total.greater_than(0)) {
       return (
         <BalanceUnconfirmedGrid
@@ -71,7 +69,7 @@ class Wallet extends Component {
   }
 
   renderOwnerList = () => {
-    const { owners } = this.props.wallet
+    const { owners } = this.props.account.selected_wallet
     const ownerList = owners.map((owner, index) => {
       return (
         <List.Description key={owner + ` ${index}`}>
@@ -91,14 +89,12 @@ class Wallet extends Component {
 
   render () {
     // If refreshed in development and data in store is deleted, route to account.
-    if ((this.props.balance instanceof Array)) {
+    if (!this.props.account.selected_wallet) {
       this.props.history.push(routes.ACCOUNT)
       return null
     }
 
-    const wallet = this.props.balance.multiSigWallet.filter(w => {
-      return w.wallet_name === this.props.wallet.wallet_name || w.address === this.props.wallet.address
-    })[0]
+    const wallet = this.props.account.selected_wallet
     const active = true
     return (
       <div>
@@ -142,9 +138,9 @@ class Wallet extends Component {
 
 // NOTE: should we also link to wallet (when we have wallet name)??!?!
 function _addressDisplayElement (address, account, chainInfo) {
-  const walletName = account.wallet_name_for_address(address)
-  if (walletName) {
-    return <span><a style={{ color: 'white', fontSize: 12, fontFamily: 'Menlo-Regular' }} onClick={() => shell.openExternal(`${chainInfo.explorerAddress}/hash.html?hash=${address}`)}>{address}</a> (wallet {`${walletName}`})</span>
+  const wallet = account.wallet_for_address(address)
+  if (wallet && wallet.wallet_name) {
+    return <span><a style={{ color: 'white', fontSize: 12, fontFamily: 'Menlo-Regular' }} onClick={() => shell.openExternal(`${chainInfo.explorerAddress}/hash.html?hash=${address}`)}>{address}</a> (wallet {`${wallet.wallet_name}`})</span>
   }
   return <span><a style={{ color: 'white', fontSize: 12, fontFamily: 'Menlo-Regular' }} onClick={() => shell.openExternal(`${chainInfo.explorerAddress}/hash.html?hash=${address}`)}>{address}</a></span>
 }

@@ -12,7 +12,6 @@ import * as tfchain from '../../tfchain/api'
 import { filter } from 'lodash'
 
 const mapStateToProps = state => ({
-  wallet: state.wallet,
   account: state.account
 })
 
@@ -30,7 +29,6 @@ class NewMultiSigWallet extends Component {
     super(props)
     this.state = {
       name: '',
-      startIndex: this.props.account.next_available_wallet_start_index(),
       signatureCount: 2,
       ownerAddressErrors: [false, false],
       ownerAddresses: ['', ''],
@@ -52,10 +50,6 @@ class NewMultiSigWallet extends Component {
       this.setState({ signatureCountError: false })
     }
     this.setState({ signatureCount: target.value })
-  }
-
-  handleIndexChange = ({ target }) => {
-    this.setState({ startIndex: target.value })
   }
 
   createWallet = () => {
