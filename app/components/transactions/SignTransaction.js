@@ -30,14 +30,11 @@ class SignTransaction extends Component {
   constructor (props) {
     super(props)
     let selectedWallet
-    let selectedAddress
     if (this.props.account.selected_wallet) {
-      selectedWallet = this.props.account.selected_wallet.wallet_name
-      selectedAddress = this.props.account.selected_wallet.address
+      selectedWallet = this.props.account.selected_wallet
     }
-    if (!selectedWallet && !selectedAddress) {
-      selectedWallet = this.props.account.wallets[0].wallet_name
-      selectedAddress = this.props.account.wallets[0].address
+    if (!selectedWallet) {
+      selectedWallet = this.props.account.wallets[0]
     }
 
     this.state = {
@@ -75,12 +72,12 @@ class SignTransaction extends Component {
   }
 
   selectWallet = (event, data) => {
-    let selectedWallet = this.props.account.wallets.filter(w => w.wallet_name === data.value)[0]
-    if (!selectedWallet) {
-      selectedWallet = this.props.account.multisig_wallets.filter(w => w.wallet_name === data.value)[0]
+    let wallet = this.props.account.wallet_for_name(data.value)
+    if (!wallet) {
+      wallet = this.props.account.wallet_for_address(data.value)
     }
-    this.setState({ selectedWallet: data.value })
-    this.props.account.select_wallet({ name: selectedWallet.wallet_name })
+    this.setState({ selectedWallet: wallet })
+    this.props.account.select_wallet({ name: wallet.wallet_name, address: wallet.address })
   }
 
   goBackToWallet = () => {
@@ -112,7 +109,7 @@ class SignTransaction extends Component {
     const { jsonError, json, selectedWallet: wallet } = this.state
     if (!jsonError && json !== '') {
       this.setState({ loader: true })
-      const selectedWallet = this.props.account.wallets.filter(w => w.wallet_name === wallet)[0]
+      const selectedWallet = this.props.account.multisig_wallets.filter(w => w.wallet_name === wallet)[0]
       selectedWallet.transaction_sign(json).then(res => {
         this.setState({ loader: false })
         this.props.history.push(routes.ACCOUNT)
@@ -133,7 +130,6 @@ class SignTransaction extends Component {
     }
 
     const { selectedWallet } = this.state
-
     const walletsOptions = this.mapWalletsToDropdownOption()
     const { json } = this.props
     return (
@@ -153,7 +149,7 @@ class SignTransaction extends Component {
               selection
               options={walletsOptions}
               onChange={this.selectWallet}
-              value={selectedWallet}
+              value={selectedWallet.wallet_name}
             />
           </Form.Field>
           <Form.Field style={{ marginTop: 30 }}>
