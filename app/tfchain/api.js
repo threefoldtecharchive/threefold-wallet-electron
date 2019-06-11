@@ -2636,8 +2636,8 @@ export var MultiSignatureCoinTransactionBuilder =  __class__ ('MultiSignatureCoi
 			throw __except0__;
 		}
 		self._wallet = wallet;
-		if (len (wallets) < 2) {
-			var __except0__ = ValueError ('expected at least 2 owners, invalid: {} ({})'.format (wallets, py_typeof (wallets)));
+		if (len (wallets) < 1) {
+			var __except0__ = ValueError ('expected at least one owners, invalid: {} ({})'.format (wallets, py_typeof (wallets)));
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}

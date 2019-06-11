@@ -1149,8 +1149,8 @@ class MultiSignatureCoinTransactionBuilder:
         if not isinstance(wallet, MultiSignatureWallet):
             raise TypeError("expected wallet to be a MultiSignatureWallet object, not: {} ({})".format(wallet, type(wallet)))
         self._wallet = wallet
-        if len(wallets) < 2:
-            raise ValueError("expected at least 2 owners, invalid: {} ({})".format(wallets, type(wallets)))
+        if len(wallets) < 1:
+            raise ValueError("expected at least one owners, invalid: {} ({})".format(wallets, type(wallets)))
         for ow in wallets:
             if not isinstance(ow, SingleSignatureWallet):
                 raise TypeError("expected wallet to be a SingleSignatureWallet object, not: {} ({})".format(ow, type(ow)))
