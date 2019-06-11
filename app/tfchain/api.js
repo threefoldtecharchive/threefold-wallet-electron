@@ -448,9 +448,9 @@ export var Account =  __class__ ('Account', [object], {
 		}
 		return self._selected_wallet;
 	});},
-	get select_wallet () {return __get__ (this, function (self, py_name) {
-		if (typeof py_name == 'undefined' || (py_name != null && py_name.hasOwnProperty ("__kwargtrans__"))) {;
-			var py_name = null;
+	get select_wallet () {return __get__ (this, function (self, opts) {
+		if (typeof opts == 'undefined' || (opts != null && opts.hasOwnProperty ("__kwargtrans__"))) {;
+			var opts = null;
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -459,19 +459,63 @@ export var Account =  __class__ ('Account', [object], {
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+						case 'opts': var opts = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
 		}
 		else {
 		}
-		if (py_name == null || py_name == '') {
-			self._selected_wallet = null;
+		var __left0__ = jsfunc.opts_get_with_defaults (opts, [tuple (['name', null]), tuple (['address', null]), tuple (['singlesig', true]), tuple (['multisig', true])]);
+		var py_name = __left0__ [0];
+		var address = __left0__ [1];
+		var singlesig = __left0__ [2];
+		var multisig = __left0__ [3];
+		var name_defined = false;
+		var address_defined = false;
+		if (py_name != null && py_name != '') {
+			var name_defined = true;
+			var wallet = self.wallet_for_name (py_name, dict ({'singlesig': singlesig, 'multisig': multisig}));
+			if (address != null && address != '') {
+				if (!__in__ (address, wallet.addresses)) {
+					var __except0__ = ValueError ('found wallet for name {} but given address {} is not owned by wallet'.format (py_name, address));
+					__except0__.__cause__ = null;
+					throw __except0__;
+				}
+			}
+			if (wallet != null) {
+				self._selected_wallet = wallet;
+				return ;
+			}
 		}
-		else {
-			self._selected_wallet = self.wallet_for_name (py_name);
+		if (address != null && address != '') {
+			var address_defined = true;
+			var wallet = self.wallet_for_address (address, dict ({'singlesig': singlesig, 'multisig': multisig}));
+			if (address != null && address != '') {
+				if (!__in__ (address, wallet.addresses)) {
+					var __except0__ = ValueError ('found wallet for name {} but given address {} is not owned by wallet'.format (py_name, address));
+					__except0__.__cause__ = null;
+					throw __except0__;
+				}
+			}
+			if (wallet != null) {
+				self._selected_wallet = wallet;
+				return ;
+			}
 		}
+		var reasons = [];
+		if (name_defined) {
+			reasons.append ('for name {}'.format (py_name));
+		}
+		if (address_defined) {
+			reasons.append ('for address {}'.format (address));
+		}
+		if (len (reasons) > 0) {
+			var __except0__ = ValueError ('no wallet found to sellect {}'.format (' or '.join (reasons)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		self._selected_wallet = null;
 	});},
 	get wallet_for_name () {return __get__ (this, function (self, py_name, opts) {
 		if (typeof opts == 'undefined' || (opts != null && opts.hasOwnProperty ("__kwargtrans__"))) {;

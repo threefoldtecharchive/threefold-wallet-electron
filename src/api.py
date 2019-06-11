@@ -282,11 +282,55 @@ class Account:
     def selected_wallet(self):
         return self._selected_wallet
 
-    def select_wallet(self, name=None):
-        if name == None or name == "":
-            self._selected_wallet = None
-        else:
-            self._selected_wallet = self.wallet_for_name(name)
+    def select_wallet(self, opts=None):
+        # get opts
+        name, address, singlesig, multisig = jsfunc.opts_get_with_defaults(opts, [
+            ('name', None),
+            ('address', None),
+            ('singlesig', True),
+            ('multisig', True),
+        ])
+        name_defined = False
+        address_defined = False
+        # if name is given, try to select by name
+        if name != None and name != "":
+            name_defined = True
+            wallet = self.wallet_for_name(name, {
+                'singlesig': singlesig,
+                'multisig': multisig,
+            })
+            if address != None and address != "":
+                if address not in wallet.addresses:
+                    raise ValueError("found wallet for name {} but given address {} is not owned by wallet".format(name, address))
+            if wallet != None:
+                self._selected_wallet = wallet
+                return
+        # if an address is given, try to select by address
+        if address != None and address != "":
+            address_defined = True
+            wallet = self.wallet_for_address(address, {
+                'singlesig': singlesig,
+                'multisig': multisig,
+            })
+            if address != None and address != "":
+                if address not in wallet.addresses:
+                    raise ValueError("found wallet for name {} but given address {} is not owned by wallet".format(name, address))
+            if wallet != None:
+                self._selected_wallet = wallet
+                return
+
+        # see if we have reasons to fail
+        reasons = []
+        if name_defined:
+            reasons.append("for name {}".format(name))
+        if address_defined:
+            reasons.append("for address {}".format(address))
+        if len(reasons) > 0:
+            raise ValueError("no wallet found to sellect {}".format(" or ".join(reasons)))
+
+        # deselect wallet
+        self._selected_wallet = None
+
 
     def wallet_for_name(self, name, opts=None):
         singlesig, multisig = jsfunc.opts_get_with_defaults(opts, [
