@@ -1082,6 +1082,7 @@ class CoinTransactionBuilder:
         @param amount: int or str that defines the amount of TFT to set, see explanation above
         """
         lock = jsfunc.opts_get(opts, 'lock')
+        recipient = _normalize_recipient(recipient)
         self._builder.output_add(recipient, amount, lock=lock)
         return self
 
@@ -1114,6 +1115,7 @@ class MultiSignatureCoinTransactionBuilder:
 
     def output_add(self, recipient, amount, opts=None):
         lock = jsfunc.opts_get(opts, 'lock')
+        recipient = _normalize_recipient(recipient)
         self._builder.output_add(recipient, amount, lock=lock)
         return self
 
@@ -1144,6 +1146,21 @@ class MultiSignatureCoinTransactionBuilder:
 
         return jsasync.chain(p, result_cb)
 
+def _normalize_recipient(recipient):
+    if jsobj.is_js_arr(recipient) and len(recipient) == 2:
+        if jsobj.is_js_arr(recipient[0]):
+            recipient[1] = _normalize_value_as_int(recipient[1])
+        elif jsobj.is_js_arr(recipient[1]):
+            recipient[0] = _normalize_value_as_int(recipient[0])
+    return recipient
+
+def _normalize_value_as_int(value):
+    if isinstance(value, str):
+        return jsstr.to_int(value)
+    if isinstance(value, float):
+        return int(value)
+    if not isinstance(value, int):
+        raise TypeError("invalid int value: {} ({})".format(value, type(value)))
 
 def _create_signer_cb_for_wallet(wallet, balance=None):
     def cb(result):

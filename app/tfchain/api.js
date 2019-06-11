@@ -2542,6 +2542,7 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 		else {
 		}
 		var lock = jsfunc.opts_get (opts, 'lock');
+		var recipient = _normalize_recipient (recipient);
 		self._builder.output_add (recipient, amount, __kwargtrans__ ({lock: lock}));
 		return self;
 	});},
@@ -2627,6 +2628,7 @@ export var MultiSignatureCoinTransactionBuilder =  __class__ ('MultiSignatureCoi
 		else {
 		}
 		var lock = jsfunc.opts_get (opts, 'lock');
+		var recipient = _normalize_recipient (recipient);
 		self._builder.output_add (recipient, amount, __kwargtrans__ ({lock: lock}));
 		return self;
 	});},
@@ -2684,6 +2686,56 @@ export var MultiSignatureCoinTransactionBuilder =  __class__ ('MultiSignatureCoi
 		return jsasync.chain (p, result_cb);
 	});}
 });
+export var _normalize_recipient = function (recipient) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'recipient': var recipient = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (jsobj.is_js_arr (recipient) && len (recipient) == 2) {
+		if (jsobj.is_js_arr (recipient [0])) {
+			recipient [1] = _normalize_value_as_int (recipient [1]);
+		}
+		else if (jsobj.is_js_arr (recipient [1])) {
+			recipient [0] = _normalize_value_as_int (recipient [0]);
+		}
+	}
+	return recipient;
+};
+export var _normalize_value_as_int = function (value) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (isinstance (value, str)) {
+		return jsstr.to_int (value);
+	}
+	if (isinstance (value, float)) {
+		return int (value);
+	}
+	if (!(isinstance (value, int))) {
+		var __except0__ = py_TypeError ('invalid int value: {} ({})'.format (value, py_typeof (value)));
+		__except0__.__cause__ = null;
+		throw __except0__;
+	}
+};
 export var _create_signer_cb_for_wallet = function (wallet, balance) {
 	if (typeof balance == 'undefined' || (balance != null && balance.hasOwnProperty ("__kwargtrans__"))) {;
 		var balance = null;
