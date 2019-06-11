@@ -238,6 +238,28 @@ class Account:
         return self._chain_info
 
     @property
+    def balance(self):
+        return self.balance_get()
+
+    def balance_get(self, opts=None):
+        singlesig, multisig = jsfunc.opts_get_with_defaults(opts, [
+            ('singlesig', True),
+            ('multisig', True),
+        ])
+        balances = []
+        if singlesig:
+            balances = [wallet.balance for wallet in self._wallets]
+        msbalances = []
+        if multisig:
+            balances = [wallet.balance for wallet in self._multisig_wallets]
+        return AccountBalance(
+            self.network_type,
+            self.account_name,
+            balances=balances,
+            msbalances=msbalances,
+        )
+
+    @property
     def selected_wallet_name(self):
         sw = self.selected_wallet
         if sw == None:
@@ -1107,6 +1129,42 @@ def _create_signer_cb_for_wallet(wallet, balance=None):
             return result
         return wallet.transaction_sign(wallet, balance=balance)
     return cb
+
+
+class AccountBalance:
+    def __init__(self, network_type, account_name, balances=None, msbalances=None):
+        if not isinstance(network_type, tfnetwork.Type):
+            raise TypeError("network_type has to be of type tfchain.network.Type, not be of type {}".format(type(network_type)))
+        self._network_type = network_type
+        if not isinstance(account_name, str):
+            raise TypeError("account_name has to be of type str, not be of type {}".format(type(account_name)))
+        self._account_name = account_name
+        self._balances = [] if balances == None else balances
+        self._msbalances = [] if msbalances == None else msbalances
+
+    @property
+    def coins_unlocked(self):
+        return Currency.sum(*[balance.coins_unlocked for balance in self.balances])
+
+    @property
+    def coins_locked(self):
+        return Currency.sum(*[balance.coins_locked for balance in self.balances])
+
+    @property
+    def coins_total(self):
+        return self.coins_unlocked.plus(self.coins_locked)
+
+    @property
+    def unconfirmed_coins_unlocked(self):
+        return Currency.sum(*[balance.unconfirmed_coins_unlocked for balance in self.balances])
+
+    @property
+    def unconfirmed_coins_locked(self):
+        return Currency.sum(*[balance.unconfirmed_coins_locked for balance in self.balances])
+
+    @property
+    def unconfirmed_coins_total(self):
+        return self.unconfirmed_coins_unlocked.plus(self.unconfirmed_coins_locked)
 
 
 class Balance:
