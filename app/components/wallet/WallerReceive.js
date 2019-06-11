@@ -28,7 +28,7 @@ class WalletReceive extends Component {
     }
 
     this.state = {
-      name: this.props.account.selected_wallet.wallet_name,
+      name: selectedWallet,
       selectedWallet,
       selectedAddress,
       amount: 0,
