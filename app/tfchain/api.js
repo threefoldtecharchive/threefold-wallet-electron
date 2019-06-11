@@ -158,6 +158,23 @@ export var Account =  __class__ ('Account', [object], {
 		self._multisig_wallets = [];
 		self._chain_info = ChainInfo ();
 		self._selected_wallet = null;
+		self._loaded = false;
+	});},
+	get _get_is_loaded () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._loaded;
 	});},
 	get _get_previous_account_name () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -1290,6 +1307,7 @@ export var Account =  __class__ ('Account', [object], {
 			}
 			else {
 			}
+			self._loaded = true;
 			return self;
 		};
 		return jsasync.chain (self._update_chain_info (), self._update_known_multisig_wallet_balances, self._update_singlesig_wallet_balances, self._collect_unknown_multisig_wallet_balances, cb_return_self);
@@ -1486,7 +1504,8 @@ Object.defineProperty (Account, 'seed', property.call (Account, Account._get_see
 Object.defineProperty (Account, 'mnemonic', property.call (Account, Account._get_mnemonic));
 Object.defineProperty (Account, 'default_explorer_addresses_used', property.call (Account, Account._get_default_explorer_addresses_used));
 Object.defineProperty (Account, 'account_name', property.call (Account, Account._get_account_name, Account._set_account_name));
-Object.defineProperty (Account, 'previous_account_name', property.call (Account, Account._get_previous_account_name));;
+Object.defineProperty (Account, 'previous_account_name', property.call (Account, Account._get_previous_account_name));
+Object.defineProperty (Account, 'is_loaded', property.call (Account, Account._get_is_loaded));;
 export var BaseWallet =  __class__ ('BaseWallet', [object], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, wallet_name) {
@@ -1506,6 +1525,23 @@ export var BaseWallet =  __class__ ('BaseWallet', [object], {
 		}
 		self._wallet_name = null;
 		self.wallet_name = wallet_name;
+		self._loaded = false;
+	});},
+	get _get_is_loaded () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._loaded;
 	});},
 	get _get_wallet_name () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -1538,13 +1574,12 @@ export var BaseWallet =  __class__ ('BaseWallet', [object], {
 		}
 		else {
 		}
+		if (value == null) {
+			self._wallet_name = '';
+			return ;
+		}
 		if (!(isinstance (value, str))) {
 			var __except0__ = py_TypeError ('wallet_name has to be a non-empty str, not be {} ({})'.format (value, py_typeof (value)));
-			__except0__.__cause__ = null;
-			throw __except0__;
-		}
-		if (value == '') {
-			var __except0__ = ValueError ('wallet_name cannot be an empty str');
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
@@ -1816,7 +1851,8 @@ Object.defineProperty (BaseWallet, 'is_multisig', property.call (BaseWallet, Bas
 Object.defineProperty (BaseWallet, 'address_count', property.call (BaseWallet, BaseWallet._get_address_count));
 Object.defineProperty (BaseWallet, 'addresses', property.call (BaseWallet, BaseWallet._get_addresses));
 Object.defineProperty (BaseWallet, 'address', property.call (BaseWallet, BaseWallet._get_address));
-Object.defineProperty (BaseWallet, 'wallet_name', property.call (BaseWallet, BaseWallet._get_wallet_name, BaseWallet._set_wallet_name));;
+Object.defineProperty (BaseWallet, 'wallet_name', property.call (BaseWallet, BaseWallet._get_wallet_name, BaseWallet._set_wallet_name));
+Object.defineProperty (BaseWallet, 'is_loaded', property.call (BaseWallet, BaseWallet._get_is_loaded));;
 export var SingleSignatureWallet =  __class__ ('SingleSignatureWallet', [BaseWallet], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, network_type, explorer_client, wallet_index, wallet_name, start_index, pairs) {
@@ -2065,7 +2101,24 @@ export var SingleSignatureWallet =  __class__ ('SingleSignatureWallet', [BaseWal
 		}
 		else {
 		}
-		return jsasync.chain (self._tfwallet.balance_get (account.chain_info._tf_chain_info), self._balance_setter);
+		var cb = function (balance) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'balance': var balance = __allkwargs0__ [__attrib0__]; break;
+						}
+					}
+				}
+			}
+			else {
+			}
+			self.balance = balance;
+			self._loaded = true;
+		};
+		return jsasync.chain (self._tfwallet.balance_get (account.chain_info._tf_chain_info), cb);
 	});}
 });
 Object.defineProperty (SingleSignatureWallet, 'linked_multisig_wallet_addresses', property.call (SingleSignatureWallet, SingleSignatureWallet._get_linked_multisig_wallet_addresses));
@@ -2438,6 +2491,7 @@ export var MultiSignatureWallet =  __class__ ('MultiSignatureWallet', [BaseWalle
 			else {
 			}
 			self.balance = result.balance (account.chain_info._tf_chain_info);
+			self._loaded = true;
 		};
 		return jsasync.chain (account._explorer_client.unlockhash_get (self.address), cb);
 	});}

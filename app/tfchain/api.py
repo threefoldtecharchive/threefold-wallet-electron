@@ -157,6 +157,17 @@ class Account:
         self._chain_info = ChainInfo()
         self._selected_wallet = None
 
+        # loaded state
+        self._loaded = False
+
+    @property
+    def is_loaded(self):
+        """
+        :returns: True if this account was loaded initially, False otherwise
+        :rtype: bool
+        """
+        return self._loaded
+
     @property
     def previous_account_name(self):
         """
@@ -661,6 +672,7 @@ class Account:
 
     def update_account(self):
         def cb_return_self():
+            self._loaded = True
             return self
         return jsasync.chain(
             self._update_chain_info(),
@@ -725,6 +737,11 @@ class BaseWallet:
     def __init__(self, wallet_name):
         self._wallet_name = None
         self.wallet_name = wallet_name
+        self._loaded = False
+
+    @property
+    def is_loaded(self):
+        return self._loaded
 
     @property
     def wallet_name(self):
@@ -735,10 +752,11 @@ class BaseWallet:
         return self._wallet_name
     @wallet_name.setter
     def wallet_name(self, value):
+        if value == None:
+            self._wallet_name = ""
+            return
         if not isinstance(value, str):
             raise TypeError("wallet_name has to be a non-empty str, not be {} ({})".format(value, type(value)))
-        if value == "":
-            raise ValueError("wallet_name cannot be an empty str")
         self._wallet_name = value
 
     @property
@@ -918,7 +936,10 @@ class SingleSignatureWallet(BaseWallet):
         return self._tfwallet.transaction_sign(txn=transaction, submit=True, balance=(self._balance._tfbalance))
 
     def _update(self, account):
-        return jsasync.chain(self._tfwallet.balance_get(account.chain_info._tf_chain_info), self._balance_setter)
+        def cb(balance):
+            self.balance = balance
+            self._loaded = True
+        return jsasync.chain(self._tfwallet.balance_get(account.chain_info._tf_chain_info), cb)
 
 
 class MultiSignatureWallet(BaseWallet):
@@ -1024,6 +1045,7 @@ class MultiSignatureWallet(BaseWallet):
     def _update(self, account):
         def cb(result):
             self.balance = result.balance(account.chain_info._tf_chain_info)
+            self._loaded = True
         return jsasync.chain(account._explorer_client.unlockhash_get(self.address), cb)
 
 
