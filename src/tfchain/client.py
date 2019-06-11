@@ -531,16 +531,25 @@ class ExplorerOutputResult():
 
 
 class ExplorerBlockchainInfo():
-    def __init__(self, constants, last_block, explorer_address):
-        if not isinstance(constants, BlockchainConstants):
-            raise TypeError("expected constants to be of type BlockchainConstants, not type {}".format(type(constants)))
-        self._constants = constants
-        if not isinstance(last_block, ExplorerBlock):
-            raise TypeError("expected constants to be of type ExplorerBlock, not type {}".format(type(constants)))
-        self._last_block = last_block
-        if not isinstance(explorer_address, str) or explorer_address == "":
-            raise TypeError("expected explorer address to be a non-empty str, not be {} ({})".format(explorer_address, type(explorer_address)))
-        self._explorer_address = explorer_address
+    def __init__(self, constants=None, last_block=None, explorer_address=None):
+        if constants == None:
+            self._constants = BlockchainConstants()
+        else:
+            if not isinstance(constants, BlockchainConstants):
+                raise TypeError("expected constants to be of type BlockchainConstants, not type {}".format(type(constants)))
+            self._constants = constants
+        if last_block == None:
+            self._last_block = ExplorerBlock()
+        else:
+            if not isinstance(last_block, ExplorerBlock):
+                raise TypeError("expected constants to be of type ExplorerBlock, not type {}".format(type(constants)))
+            self._last_block = last_block
+        if explorer_address == None:
+            self._explorer_address = ""
+        else:
+            if not isinstance(explorer_address, str) or explorer_address == "":
+                raise TypeError("expected explorer address to be a non-empty str, not be {} ({})".format(explorer_address, type(explorer_address)))
+            self._explorer_address = explorer_address
 
     @property
     def explorer_address(self):
@@ -586,7 +595,7 @@ class ExplorerBlockchainInfo():
 
 
 class BlockchainConstants:
-    def __init__(self, chain_name, chain_version, chain_network):
+    def __init__(self, chain_name=None, chain_version=None, chain_network=None):
         """
         Create a new BlockchainConstants object.
 
@@ -597,9 +606,9 @@ class BlockchainConstants:
         :param chain_network: the network type of the (block)chain (standard, testnet or devnet)
         :type chain_network: str
         """
-        self._chain_name = chain_name
-        self._chain_version = chain_version
-        self._chain_network = chain_network
+        self._chain_name = chain_name or ""
+        self._chain_version = chain_version or ""
+        self._chain_network = chain_network or ""
 
     @property
     def chain_name(self):
@@ -740,16 +749,16 @@ class ERC20AddressInfo():
         return self._confirmations
 
 class ExplorerBlock():
-    def __init__(self, id, parentid, height, timestamp, transactions, miner_payouts):
+    def __init__(self, id=None, parentid=None, height=None, timestamp=None, transactions=None, miner_payouts=None):
         """
         A Block, registered on a TF blockchain, as reported by an explorer.
         """
-        self._id = id
-        self._parentid = parentid
-        self._height = height
-        self._timestamp = timestamp
-        self._transactions = transactions
-        self._miner_payouts = miner_payouts
+        self._id = id or Hash()
+        self._parentid = parentid or Hash()
+        self._height = height or 0
+        self._timestamp = timestamp or 0
+        self._transactions = transactions or []
+        self._miner_payouts = miner_payouts or []
     
     @property
     def id(self):

@@ -1162,6 +1162,15 @@ Object.defineProperty (ExplorerOutputResult, 'output', property.call (ExplorerOu
 export var ExplorerBlockchainInfo =  __class__ ('ExplorerBlockchainInfo', [object], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, constants, last_block, explorer_address) {
+		if (typeof constants == 'undefined' || (constants != null && constants.hasOwnProperty ("__kwargtrans__"))) {;
+			var constants = null;
+		};
+		if (typeof last_block == 'undefined' || (last_block != null && last_block.hasOwnProperty ("__kwargtrans__"))) {;
+			var last_block = null;
+		};
+		if (typeof explorer_address == 'undefined' || (explorer_address != null && explorer_address.hasOwnProperty ("__kwargtrans__"))) {;
+			var explorer_address = null;
+		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -1178,24 +1187,39 @@ export var ExplorerBlockchainInfo =  __class__ ('ExplorerBlockchainInfo', [objec
 		}
 		else {
 		}
-		if (!(isinstance (constants, BlockchainConstants))) {
-			var __except0__ = py_TypeError ('expected constants to be of type BlockchainConstants, not type {}'.format (py_typeof (constants)));
-			__except0__.__cause__ = null;
-			throw __except0__;
+		if (constants == null) {
+			self._constants = BlockchainConstants ();
 		}
-		self._constants = constants;
-		if (!(isinstance (last_block, ExplorerBlock))) {
-			var __except0__ = py_TypeError ('expected constants to be of type ExplorerBlock, not type {}'.format (py_typeof (constants)));
-			__except0__.__cause__ = null;
-			throw __except0__;
+		else {
+			if (!(isinstance (constants, BlockchainConstants))) {
+				var __except0__ = py_TypeError ('expected constants to be of type BlockchainConstants, not type {}'.format (py_typeof (constants)));
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
+			self._constants = constants;
 		}
-		self._last_block = last_block;
-		if (!(isinstance (explorer_address, str)) || explorer_address == '') {
-			var __except0__ = py_TypeError ('expected explorer address to be a non-empty str, not be {} ({})'.format (explorer_address, py_typeof (explorer_address)));
-			__except0__.__cause__ = null;
-			throw __except0__;
+		if (last_block == null) {
+			self._last_block = ExplorerBlock ();
 		}
-		self._explorer_address = explorer_address;
+		else {
+			if (!(isinstance (last_block, ExplorerBlock))) {
+				var __except0__ = py_TypeError ('expected constants to be of type ExplorerBlock, not type {}'.format (py_typeof (constants)));
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
+			self._last_block = last_block;
+		}
+		if (explorer_address == null) {
+			self._explorer_address = '';
+		}
+		else {
+			if (!(isinstance (explorer_address, str)) || explorer_address == '') {
+				var __except0__ = py_TypeError ('expected explorer address to be a non-empty str, not be {} ({})'.format (explorer_address, py_typeof (explorer_address)));
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
+			self._explorer_address = explorer_address;
+		}
 	});},
 	get _get_explorer_address () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -1303,6 +1327,15 @@ Object.defineProperty (ExplorerBlockchainInfo, 'explorer_address', property.call
 export var BlockchainConstants =  __class__ ('BlockchainConstants', [object], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, chain_name, chain_version, chain_network) {
+		if (typeof chain_name == 'undefined' || (chain_name != null && chain_name.hasOwnProperty ("__kwargtrans__"))) {;
+			var chain_name = null;
+		};
+		if (typeof chain_version == 'undefined' || (chain_version != null && chain_version.hasOwnProperty ("__kwargtrans__"))) {;
+			var chain_version = null;
+		};
+		if (typeof chain_network == 'undefined' || (chain_network != null && chain_network.hasOwnProperty ("__kwargtrans__"))) {;
+			var chain_network = null;
+		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -1319,9 +1352,9 @@ export var BlockchainConstants =  __class__ ('BlockchainConstants', [object], {
 		}
 		else {
 		}
-		self._chain_name = chain_name;
-		self._chain_version = chain_version;
-		self._chain_network = chain_network;
+		self._chain_name = chain_name || '';
+		self._chain_version = chain_version || '';
+		self._chain_network = chain_network || '';
 	});},
 	get _get_chain_name () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -1647,6 +1680,24 @@ Object.defineProperty (ERC20AddressInfo, 'address_tft', property.call (ERC20Addr
 export var ExplorerBlock =  __class__ ('ExplorerBlock', [object], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, id, parentid, height, timestamp, transactions, miner_payouts) {
+		if (typeof id == 'undefined' || (id != null && id.hasOwnProperty ("__kwargtrans__"))) {;
+			var id = null;
+		};
+		if (typeof parentid == 'undefined' || (parentid != null && parentid.hasOwnProperty ("__kwargtrans__"))) {;
+			var parentid = null;
+		};
+		if (typeof height == 'undefined' || (height != null && height.hasOwnProperty ("__kwargtrans__"))) {;
+			var height = null;
+		};
+		if (typeof timestamp == 'undefined' || (timestamp != null && timestamp.hasOwnProperty ("__kwargtrans__"))) {;
+			var timestamp = null;
+		};
+		if (typeof transactions == 'undefined' || (transactions != null && transactions.hasOwnProperty ("__kwargtrans__"))) {;
+			var transactions = null;
+		};
+		if (typeof miner_payouts == 'undefined' || (miner_payouts != null && miner_payouts.hasOwnProperty ("__kwargtrans__"))) {;
+			var miner_payouts = null;
+		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -1666,12 +1717,12 @@ export var ExplorerBlock =  __class__ ('ExplorerBlock', [object], {
 		}
 		else {
 		}
-		self._id = id;
-		self._parentid = parentid;
-		self._height = height;
-		self._timestamp = timestamp;
-		self._transactions = transactions;
-		self._miner_payouts = miner_payouts;
+		self._id = id || Hash ();
+		self._parentid = parentid || Hash ();
+		self._height = height || 0;
+		self._timestamp = timestamp || 0;
+		self._transactions = transactions || [];
+		self._miner_payouts = miner_payouts || [];
 	});},
 	get _get_id () {return __get__ (this, function (self) {
 		if (arguments.length) {

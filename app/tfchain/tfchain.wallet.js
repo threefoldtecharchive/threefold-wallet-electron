@@ -108,7 +108,7 @@ export var TFChainWallet =  __class__ ('TFChainWallet', [object], {
 		else {
 		}
 		if (!(isinstance (network_type, NetworkType))) {
-			var __except0__ = py_TypeError ('network_type is expected to be a tfchain.network.Type, not be of type {}'.format (py_typeof (network_type)));
+			var __except0__ = py_TypeError ('network_type is expected to be a tfchain.network.Type, invalid: {} ({})'.format (network_type, py_typeof (network_type)));
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}

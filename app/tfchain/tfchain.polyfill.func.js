@@ -17,13 +17,13 @@ export var opts_get = function (opts) {
 	else {
 		var argv = tuple ();
 	}
-	var argv_dict = dict ((function () {
+	var argv_dict = (function () {
 		var __accu0__ = [];
 		for (var arg of argv) {
 			__accu0__.append (tuple ([arg, null]));
 		}
 		return __accu0__;
-	}) ());
+	}) ();
 	return opts_get_with_defaults (opts, argv_dict);
 };
 export var opts_get_with_defaults = function (opts, argv) {
@@ -45,7 +45,7 @@ export var opts_get_with_defaults = function (opts, argv) {
 	if (opts == null) {
 		var opts = dict ({});
 	}
-	for (var [arg, py_default] of jsobj.get_items (argv)) {
+	for (var [arg, py_default] of argv) {
 		args.append ((__in__ (arg, opts) ? opts [arg] : py_default));
 	}
 	if (len (args) == 0) {
