@@ -110,7 +110,11 @@ class SignTransaction extends Component {
     if (!jsonError && json !== '') {
       this.setState({ loader: true })
 
-      this.props.account.selected_wallet.transaction_sign(json).then(res => {
+      const { selectedWallet } = this.state
+      console.log(selectedWallet)
+      const result = selectedWallet.transaction_sign(json)
+      console.log(result)
+      result.then(res => {
         this.setState({ loader: false })
         this.props.history.push(routes.ACCOUNT)
         toast('transaction signed successfully and submitted to tx pool')

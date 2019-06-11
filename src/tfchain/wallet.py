@@ -358,11 +358,6 @@ class TFChainWallet:
                     known_outputs[co.id.__str__()] = co
                 for co in balance.outputs_unconfirmed_available:
                     known_outputs[co.id.__str__()] = co
-                for mswallet in jsobj.dict_values(balance.wallets):
-                    for co in mswallet.outputs_available:
-                        known_outputs[co.id.__str__()] = co
-                    for co in mswallet.outputs_unconfirmed_available:
-                        known_outputs[co.id.__str__()] = co
                 # mark the coin inputs that are known as available outputs by this wallet
                 for ci in txn.coin_inputs:
                     parentid = ci.parentid.__str__()
@@ -416,7 +411,8 @@ class TFChainWallet:
                 txn.id = id
                 if balance_is_cached:
                     # if the balance is cached, also update...
-                    addresses = jsarr.concat(self.addresses, balance.multisig_addresses)
+                    if not balance.is_multisig:
+                        addresses = jsarr.concat(self.addresses, balance.multisig_addresses)
                     # ... the balance
                     for idx, ci in enumerate(txn.coin_inputs):
                         if ci.parent_output.condition.unlockhash.__str__() in addresses:
@@ -1789,7 +1785,7 @@ class CoinTransactionBuilder():
                 if balance_is_cached:
                     # if the balance is cached, also update...
                     addresses = self._wallet.addresses
-                    if isinstance(balance, SingleSigWalletBalance):
+                    if not balance.is_multisig:
                         addresses = jsarr.concat(addresses, balance.multisig_addresses)
                     # ... the balance
                     for idx, ci in enumerate(txn.coin_inputs):

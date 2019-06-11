@@ -442,14 +442,6 @@ export var TFChainWallet =  __class__ ('TFChainWallet', [object], {
 				for (var co of balance.outputs_unconfirmed_available) {
 					known_outputs [co.id.__str__ ()] = co;
 				}
-				for (var mswallet of jsobj.dict_values (balance.wallets)) {
-					for (var co of mswallet.outputs_available) {
-						known_outputs [co.id.__str__ ()] = co;
-					}
-					for (var co of mswallet.outputs_unconfirmed_available) {
-						known_outputs [co.id.__str__ ()] = co;
-					}
-				}
 				for (var ci of txn.coin_inputs) {
 					var parentid = ci.parentid.__str__ ();
 					if (__in__ (parentid, known_outputs)) {
@@ -524,7 +516,9 @@ export var TFChainWallet =  __class__ ('TFChainWallet', [object], {
 				}
 				txn.id = id;
 				if (balance_is_cached) {
-					var addresses = jsarr.concat (self.addresses, balance.multisig_addresses);
+					if (!(balance.is_multisig)) {
+						var addresses = jsarr.concat (self.addresses, balance.multisig_addresses);
+					}
 					for (var [idx, ci] of enumerate (txn.coin_inputs)) {
 						if (__in__ (ci.parent_output.condition.unlockhash.__str__ (), addresses)) {
 							balance.output_add (txn, idx, __kwargtrans__ ({confirmed: false, spent: true}));
@@ -1095,7 +1089,7 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 				txn.id = id;
 				if (balance_is_cached) {
 					var addresses = self._wallet.addresses;
-					if (isinstance (balance, SingleSigWalletBalance)) {
+					if (!(balance.is_multisig)) {
 						var addresses = jsarr.concat (addresses, balance.multisig_addresses);
 					}
 					for (var [idx, ci] of enumerate (txn.coin_inputs)) {

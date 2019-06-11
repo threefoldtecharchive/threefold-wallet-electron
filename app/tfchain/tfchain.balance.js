@@ -36,6 +36,40 @@ export var WalletBalance =  __class__ ('WalletBalance', [object], {
 		self._chain_blockid = Hash ();
 		self._addresses = set ();
 	});},
+	get _get_is_multisig () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._is_multisig_getter ();
+	});},
+	get _is_multisig_getter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var __except0__ = NotImplementedError ('_is_multisig_getter is not implemented');
+		__except0__.__cause__ = null;
+		throw __except0__;
+	});},
 	get _get_addresses () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -834,7 +868,8 @@ Object.defineProperty (WalletBalance, 'transactions', property.call (WalletBalan
 Object.defineProperty (WalletBalance, 'chain_height', property.call (WalletBalance, WalletBalance._get_chain_height, WalletBalance._set_chain_height));
 Object.defineProperty (WalletBalance, 'chain_time', property.call (WalletBalance, WalletBalance._get_chain_time, WalletBalance._set_chain_time));
 Object.defineProperty (WalletBalance, 'chain_blockid', property.call (WalletBalance, WalletBalance._get_chain_blockid, WalletBalance._set_chain_blockid));
-Object.defineProperty (WalletBalance, 'addresses', property.call (WalletBalance, WalletBalance._get_addresses));;
+Object.defineProperty (WalletBalance, 'addresses', property.call (WalletBalance, WalletBalance._get_addresses));
+Object.defineProperty (WalletBalance, 'is_multisig', property.call (WalletBalance, WalletBalance._get_is_multisig));;
 export var SingleSigWalletBalance =  __class__ ('SingleSigWalletBalance', [WalletBalance], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self) {
@@ -858,6 +893,22 @@ export var SingleSigWalletBalance =  __class__ ('SingleSigWalletBalance', [Walle
 		}
 		self._multisig_addresses = set ();
 		__super__ (SingleSigWalletBalance, '__init__') (self, ...args, __kwargtrans__ (kwargs));
+	});},
+	get _is_multisig_getter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return false;
 	});},
 	get _get_multisig_addresses () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -991,6 +1042,22 @@ export var MultiSigWalletBalance =  __class__ ('MultiSigWalletBalance', [WalletB
 			self._signature_count = signature_count;
 		}
 		__super__ (MultiSigWalletBalance, '__init__') (self, ...args, __kwargtrans__ (kwargs));
+	});},
+	get _is_multisig_getter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return true;
 	});},
 	get _get_address () {return __get__ (this, function (self) {
 		if (arguments.length) {

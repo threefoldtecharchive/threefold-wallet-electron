@@ -30,6 +30,12 @@ class WalletBalance(object):
         self._addresses = set()
 
     @property
+    def is_multisig(self):
+        return self._is_multisig_getter()
+    def _is_multisig_getter(self):
+        raise NotImplementedError("_is_multisig_getter is not implemented")
+
+    @property
     def addresses(self):
         """
         All (personal wallet) addresses for which an output is tracked in this Balance.
@@ -423,6 +429,9 @@ class SingleSigWalletBalance(WalletBalance):
         # init super class
         super().__init__(*args, **kwargs)
 
+    def _is_multisig_getter(self):
+        return False
+
     @property
     def multisig_addresses(self):
         return list(self._multisig_addresses)
@@ -474,6 +483,9 @@ class MultiSigWalletBalance(WalletBalance):
             self._owners = owners
             self._signature_count = signature_count
         super().__init__(*args, **kwargs)
+
+    def _is_multisig_getter(self):
+        return True
 
     @property
     def address(self):

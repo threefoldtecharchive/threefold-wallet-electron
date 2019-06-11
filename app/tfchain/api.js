@@ -1877,7 +1877,10 @@ export var BaseWallet =  __class__ ('BaseWallet', [object], {
 		__except0__.__cause__ = null;
 		throw __except0__;
 	});},
-	get transaction_sign () {return __get__ (this, function (self, transaction) {
+	get transaction_sign () {return __get__ (this, function (self, transaction, balance) {
+		if (typeof balance == 'undefined' || (balance != null && balance.hasOwnProperty ("__kwargtrans__"))) {;
+			var balance = null;
+		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -1886,6 +1889,7 @@ export var BaseWallet =  __class__ ('BaseWallet', [object], {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
 						case 'transaction': var transaction = __allkwargs0__ [__attrib0__]; break;
+						case 'balance': var balance = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
@@ -2136,7 +2140,10 @@ export var SingleSignatureWallet =  __class__ ('SingleSignatureWallet', [BaseWal
 		if (isinstance (transaction, str)) {
 			var transaction = jsjson.json_loads (transaction);
 		}
-		return self._tfwallet.transaction_sign (__kwargtrans__ ({txn: transaction, submit: true, balance: self._balance._tfbalance}));
+		if (balance == null) {
+			var balance = self._balance._tfbalance;
+		}
+		return self._tfwallet.transaction_sign (__kwargtrans__ ({txn: transaction, submit: true, balance: balance}));
 	});},
 	get _update () {return __get__ (this, function (self, account) {
 		if (arguments.length) {
@@ -2406,7 +2413,10 @@ export var MultiSignatureWallet =  __class__ ('MultiSignatureWallet', [BaseWalle
 		}
 		return MultiSignatureCoinTransactionBuilder (self, self._owner_wallets);
 	});},
-	get transaction_sign () {return __get__ (this, function (self, transaction) {
+	get transaction_sign () {return __get__ (this, function (self, transaction, balance) {
+		if (typeof balance == 'undefined' || (balance != null && balance.hasOwnProperty ("__kwargtrans__"))) {;
+			var balance = null;
+		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -2415,6 +2425,7 @@ export var MultiSignatureWallet =  __class__ ('MultiSignatureWallet', [BaseWalle
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
 						case 'transaction': var transaction = __allkwargs0__ [__attrib0__]; break;
+						case 'balance': var balance = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
@@ -2423,10 +2434,12 @@ export var MultiSignatureWallet =  __class__ ('MultiSignatureWallet', [BaseWalle
 		}
 		var first_signer = self._owner_wallets [0];
 		var other_signers = self._owner_wallets.__getslice__ (1, null, 1);
-		var balance = self._balance;
+		if (balance == null) {
+			var balance = self._balance._tfbalance;
+		}
 		var p = first_signer.transaction_sign (transaction, __kwargtrans__ ({balance: balance}));
 		for (var signer of other_signers) {
-			var p = jsasync.chain (p, _create_signer_cb_for_wallet (signer, __kwargtrans__ ({balance: balance._tfbalance})));
+			var p = jsasync.chain (p, _create_signer_cb_for_wallet (signer, __kwargtrans__ ({balance: balance})));
 		}
 		return p;
 	});},
@@ -2731,7 +2744,7 @@ export var MultiSignatureCoinTransactionBuilder =  __class__ ('MultiSignatureCoi
 			}
 			var first_signer = signers [0];
 			var signers = signers.__getslice__ (1, null, 1);
-			var cp = first_signer.transaction_sign (result.transaction, __kwargtrans__ ({balance: balance}));
+			var cp = first_signer.transaction_sign (result.transaction, __kwargtrans__ ({balance: tfbalance}));
 			for (var signer of signers) {
 				var cp = jsasync.chain (cp, _create_signer_cb_for_wallet (signer, __kwargtrans__ ({balance: tfbalance})));
 			}

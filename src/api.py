@@ -879,7 +879,7 @@ class BaseWallet:
         """
         raise NotImplementedError("transaction_new is not implemented")
 
-    def transaction_sign(self, transaction):
+    def transaction_sign(self, transaction, balance=None):
         """
         :returns: signs an existing transaction
         """
@@ -981,8 +981,10 @@ class SingleSignatureWallet(BaseWallet):
         :returns: signs an existing transaction
         """
         if isinstance(transaction, str):
-           transaction = jsjson.json_loads(transaction) 
-        return self._tfwallet.transaction_sign(txn=transaction, submit=True, balance=(self._balance._tfbalance))
+           transaction = jsjson.json_loads(transaction)
+        if balance == None:
+            balance = self._balance._tfbalance
+        return self._tfwallet.transaction_sign(txn=transaction, submit=True, balance=balance)
 
     def _update(self, account):
         def cb(balance):
@@ -1057,13 +1059,14 @@ class MultiSignatureWallet(BaseWallet):
     def transaction_new(self):
         return MultiSignatureCoinTransactionBuilder(self, self._owner_wallets)
 
-    def transaction_sign(self, transaction):
+    def transaction_sign(self, transaction, balance=None):
         first_signer = self._owner_wallets[0]
         other_signers = self._owner_wallets[1:]
-        balance = self._balance
+        if balance == None:
+            balance = self._balance._tfbalance
         p = first_signer.transaction_sign(transaction, balance=balance)
         for signer in other_signers:
-            p = jsasync.chain(p, _create_signer_cb_for_wallet(signer, balance=balance._tfbalance))
+            p = jsasync.chain(p, _create_signer_cb_for_wallet(signer, balance=balance))
         return p
 
     def add_owner_wallet(self, wallet):
@@ -1189,7 +1192,7 @@ class MultiSignatureCoinTransactionBuilder:
             first_signer = signers[0]
             signers = signers[1:]
 
-            cp = first_signer.transaction_sign(result.transaction, balance=balance)
+            cp = first_signer.transaction_sign(result.transaction, balance=tfbalance)
             for signer in signers:
                 cp = jsasync.chain(cp, _create_signer_cb_for_wallet(signer, balance=tfbalance))
             return cp
