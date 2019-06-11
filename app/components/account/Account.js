@@ -35,13 +35,12 @@ class Account extends Component {
   }
 
   handleWalletClick = (wallet) => {
-    this.props.account.select_wallet(wallet.wallet_name)
+    this.props.account.select_wallet({ name: wallet.wallet_name })
     this.props.history.push(routes.WALLET)
   }
 
   handleMultiSigWalletClick = (wallet) => {
-    this.props.account.select_wallet(wallet.wallet_name)
-    console.log(this.props.account.selected_wallet)
+    this.props.account.select_wallet({ address: wallet.address, name: wallet.wallet_name })
     this.props.history.push(routes.WALLET_MULTI_SIG)
   }
 

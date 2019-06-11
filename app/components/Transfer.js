@@ -253,7 +253,7 @@ class Transfer extends Component {
     }
     this.setState({ selectedWallet: data.value })
 
-    this.props.account.select_wallet(newSelectedWallet.wallet_name)
+    this.props.account.select_wallet({ name: newSelectedWallet.wallet_name })
   }
 
   // implement goBack ourselfs, if a user has made a transaction and he presses go back then he should route to account

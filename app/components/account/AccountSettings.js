@@ -143,7 +143,7 @@ class AccountSettings extends Component {
   }
 
   goToWalletSettings = (w) => {
-    this.props.account.select_wallet(w.wallet_name)
+    this.props.account.select_wallet({ name: w.wallet_name })
     return this.props.history.push(routes.WALLET_SETTINGS)
   }
 

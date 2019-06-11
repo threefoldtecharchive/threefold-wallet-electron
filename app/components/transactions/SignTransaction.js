@@ -80,7 +80,7 @@ class SignTransaction extends Component {
       selectedWallet = this.props.account.multisig_wallets.filter(w => w.wallet_name === data.value)[0]
     }
     this.setState({ selectedWallet: data.value })
-    this.props.account.select_wallet(selectedWallet.wallet_name)
+    this.props.account.select_wallet({ name: selectedWallet.wallet_name })
   }
 
   goBackToWallet = () => {
