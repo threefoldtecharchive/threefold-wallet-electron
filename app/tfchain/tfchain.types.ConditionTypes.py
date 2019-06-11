@@ -352,7 +352,7 @@ class UnlockHash(BaseDataTypeClass):
         if not isinstance(obj, str):
             raise TypeError("UnlockHash is expected to be a str, not {}".format(type(obj)))
         if len(obj) != UnlockHash._TOTAL_SIZE_HEX:
-            raise ValueError("UnlockHash is expexcted to be of length {} when stringified, not of length {}".format(UnlockHash._TOTAL_SIZE_HEX, len(obj)))
+            raise ValueError("UnlockHash is expexcted to be of length {} when stringified, not of length {}, invalid: {} ({})".format(UnlockHash._TOTAL_SIZE_HEX, len(obj), obj, type(obj)))
 
         t = UnlockHashType(int(jsarr.slice_array(obj, 0, UnlockHash._TYPE_SIZE_HEX)))
         h = Hash(value=obj[UnlockHash._TYPE_SIZE_HEX:UnlockHash._TYPE_SIZE_HEX+UnlockHash._HASH_SIZE_HEX])

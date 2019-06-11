@@ -521,13 +521,13 @@ class Account:
         for wallet in self._wallets:
             if wallet.wallet_index == candidate.wallet_index:
                 continue
-            if wallet.wallet_name == candidate.wallet_name:
+            if wallet.wallet_name != None and candidate.wallet_name != None and wallet.wallet_name == candidate.wallet_name:
                 raise ValueError("a wallet already exists with wallet_name {}".format(candidate.wallet_name))
             if len(addresses_set.intersection(set(wallet.addresses))) != 0:
                 raise ValueError("cannot use addresses for wallet {} as it overlaps with the addresses of wallet {}".format(candidate.wallet_name, wallet.wallet_name))
         # ensure also no name conflcits with multisig wallets
         for mswallet in self._multisig_wallets:
-            if mswallet.wallet_name == candidate.wallet_name:
+            if mswallet.wallet_name != None and candidate.wallet_name != None and mswallet.wallet_name == candidate.wallet_name:
                 raise ValueError("a multisig wallet with the name {} is already stored in this account".format(candidate.wallet_name))
 
     def multisig_wallet_new(self, name, owners, signatures_required, update=True):
@@ -565,8 +565,7 @@ class Account:
             raise ValueError("at least one owner of the multisig wallet has to be owned by this account")
         # ensure the address doesn't exist yet
         if wallet.address in self.addresses_get({'singlesig': False}):
-            raise ValueError("multisig wallet {} already exists as {} and cannot be created again".format(
-                wallet.address, wallet.wallet_name))
+            return # stop here
         if update and balance == None:
             # fetch wallet balance in background
             wallet._update(self)
@@ -613,7 +612,7 @@ class Account:
                 return
 
     def _validate_multisig_name(self, name):
-        if name in self.wallet_names:
+        if name != None and name in self.wallet_names:
             raise ValueError("a wallet already exists with wallet_name {}".format(name))
 
     def next_available_wallet_start_index(self):

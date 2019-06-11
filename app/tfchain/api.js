@@ -994,7 +994,7 @@ export var Account =  __class__ ('Account', [object], {
 			if (wallet.wallet_index == candidate.wallet_index) {
 				continue;
 			}
-			if (wallet.wallet_name == candidate.wallet_name) {
+			if (wallet.wallet_name != null && candidate.wallet_name != null && wallet.wallet_name == candidate.wallet_name) {
 				var __except0__ = ValueError ('a wallet already exists with wallet_name {}'.format (candidate.wallet_name));
 				__except0__.__cause__ = null;
 				throw __except0__;
@@ -1006,7 +1006,7 @@ export var Account =  __class__ ('Account', [object], {
 			}
 		}
 		for (var mswallet of self._multisig_wallets) {
-			if (mswallet.wallet_name == candidate.wallet_name) {
+			if (mswallet.wallet_name != null && candidate.wallet_name != null && mswallet.wallet_name == candidate.wallet_name) {
 				var __except0__ = ValueError ('a multisig wallet with the name {} is already stored in this account'.format (candidate.wallet_name));
 				__except0__.__cause__ = null;
 				throw __except0__;
@@ -1099,9 +1099,7 @@ export var Account =  __class__ ('Account', [object], {
 			throw __except0__;
 		}
 		if (__in__ (wallet.address, self.addresses_get (dict ({'singlesig': false})))) {
-			var __except0__ = ValueError ('multisig wallet {} already exists as {} and cannot be created again'.format (wallet.address, wallet.wallet_name));
-			__except0__.__cause__ = null;
-			throw __except0__;
+			return ;
 		}
 		if (py_update && balance == null) {
 			wallet._update (self);
@@ -1228,7 +1226,7 @@ export var Account =  __class__ ('Account', [object], {
 		}
 		else {
 		}
-		if (__in__ (py_name, self.wallet_names)) {
+		if (py_name != null && __in__ (py_name, self.wallet_names)) {
 			var __except0__ = ValueError ('a wallet already exists with wallet_name {}'.format (py_name));
 			__except0__.__cause__ = null;
 			throw __except0__;

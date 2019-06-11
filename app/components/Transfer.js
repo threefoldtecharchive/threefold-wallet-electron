@@ -380,7 +380,7 @@ class Transfer extends Component {
     const hasOwnerAddressErrors = ownerAddressErrors.filter(e => e === true).length > 0
     const areAllOwnersFilledIn = filter(ownerAddresses, o => o === '').length === 0
 
-    if (signatureCount < ownerAddresses.length) {
+    if (signatureCount < 1 || signatureCount > ownerAddresses.length) {
       signatureCountError = true
       this.setState({ signatureCountError: true })
     }
@@ -401,6 +401,7 @@ class Transfer extends Component {
           builder.output_add([signatureCount, ownerAddresses], amount.toString())
         } catch (error) {
           toast('transaction failed')
+          console.log(error)
           return this.setState({ loader: false, errorMessage: error.__str__() })
         }
       }
