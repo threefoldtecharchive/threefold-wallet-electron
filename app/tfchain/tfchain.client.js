@@ -583,9 +583,12 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 					throw __except0__;
 				}
 				var transactions = [];
-				for (var etxn of resp ['transactions']) {
-					var transaction = self._transaction_from_explorer_transaction (etxn, __kwargtrans__ ({endpoint: endpoint, resp: resp}));
-					transactions.append (transaction);
+				var resp_transactions = resp ['transactions'];
+				if (resp_transactions != null && jsobj.is_js_arr (resp_transactions)) {
+					for (var etxn of resp_transactions) {
+						var transaction = self._transaction_from_explorer_transaction (etxn, __kwargtrans__ ({endpoint: endpoint, resp: resp}));
+						transactions.append (transaction);
+					}
 				}
 				var multisig_addresses = (function () {
 					var __accu0__ = [];

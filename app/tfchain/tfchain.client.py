@@ -268,11 +268,13 @@ class TFChainClient:
                     raise tferrors.ExplorerInvalidResponse("expected hash type 'unlockhash' not '{}'".format(resp['hashtype']), endpoint, resp)
                 # parse the transactions
                 transactions = []
-                for etxn in resp['transactions']:
-                    # parse the explorer transaction
-                    transaction = self._transaction_from_explorer_transaction(etxn, endpoint=endpoint, resp=resp)
-                    # append the transaction to the list of transactions
-                    transactions.append(transaction)
+                resp_transactions = resp['transactions']
+                if resp_transactions != None and jsobj.is_js_arr(resp_transactions):
+                    for etxn in resp_transactions:
+                        # parse the explorer transaction
+                        transaction = self._transaction_from_explorer_transaction(etxn, endpoint=endpoint, resp=resp)
+                        # append the transaction to the list of transactions
+                        transactions.append(transaction)
                 # collect all multisig addresses
                 multisig_addresses = [UnlockHash.from_json(obj=uh) for uh in resp.get_or('multisigaddresses', None) or []]
                 for addr in multisig_addresses:
