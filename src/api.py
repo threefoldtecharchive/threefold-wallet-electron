@@ -659,7 +659,7 @@ class Account:
             }
         }
 
-    def update(self):
+    def update_account(self):
         def cb_return_self():
             return self
         return jsasync.chain(

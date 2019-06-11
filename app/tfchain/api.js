@@ -1265,7 +1265,7 @@ export var Account =  __class__ ('Account', [object], {
 		var rsei = __left0__ [1];
 		return dict ({'version': 1, 'data': dict ({'payload': ct, 'salt': rsei.salt, 'iv': rsei.init_vector})});
 	});},
-	get py_update () {return __get__ (this, function (self) {
+	get update_account () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
