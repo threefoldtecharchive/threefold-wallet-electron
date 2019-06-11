@@ -6,16 +6,9 @@ import styles from '../home/Home.css'
 import Footer from '../footer'
 import { CopyToClipboard } from 'react-copy-to-clipboard'
 import { toast } from 'react-toastify'
-import { selectWallet } from '../../actions'
 
 const mapStateToProps = state => ({
   account: state.account
-})
-
-const mapDispatchToProps = (dispatch) => ({
-  selectWallet: (wallet) => {
-    dispatch(selectWallet(wallet))
-  }
 })
 
 class WalletSettings extends Component {
@@ -69,5 +62,5 @@ class WalletSettings extends Component {
 
 export default connect(
   mapStateToProps,
-  mapDispatchToProps
+  null
 )(WalletSettings)

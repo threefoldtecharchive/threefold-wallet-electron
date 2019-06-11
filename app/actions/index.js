@@ -35,20 +35,6 @@ export const selectAccount = function (account) {
   }
 }
 
-export const selectWallet = function (wallet) {
-  return {
-    type: 'SELECT_WALLET',
-    wallet
-  }
-}
-
-export const saveWallet = function (wallet) {
-  return {
-    type: 'SAVE_WALLET',
-    wallet
-  }
-}
-
 export const setChainConstants = function (account) {
   if (account && !(account instanceof Array)) {
     return dispatch => {

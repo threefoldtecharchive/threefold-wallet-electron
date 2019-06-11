@@ -5,7 +5,7 @@ import { Form, Button, Dropdown, Icon, Divider, TextArea, Label, Message, Dimmer
 import styles from '../home/Home.css'
 import Footer from '../footer'
 import routes from '../../constants/routes'
-import { selectWallet, setBalance, clearTransactionJson } from '../../actions'
+import { setBalance, clearTransactionJson } from '../../actions'
 import { CopyToClipboard } from 'react-copy-to-clipboard'
 import { toast } from 'react-toastify'
 import { concat, truncate } from 'lodash'
@@ -18,9 +18,6 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = (dispatch) => ({
-  selectWallet: (wallet) => {
-    dispatch(selectWallet(wallet))
-  },
   setBalance: (account) => {
     dispatch(setBalance(account))
   },
@@ -42,16 +39,7 @@ class SignTransaction extends Component {
 
   mapWalletsToDropdownOption = () => {
     if (this.props.account) {
-      let { wallets } = this.props.account
-      let { multisig_wallets: multiSigWallets } = this.props.account
-      if (!(this.props.balance instanceof Array)) {
-        if (this.props.balance.wallets && this.props.balance.wallets.length > 0) {
-          wallets = this.props.balance.wallets
-        }
-        if (this.props.balance.multiSigWallet && this.props.balance.multiSigWallet.length > 0) {
-          multiSigWallets = this.props.balance.multiSigWallet
-        }
-      }
+      let { wallets, multisig_wallets: multiSigWallets } = this.props.account
 
       const nWallets = wallets.map(w => {
         return {
@@ -78,7 +66,7 @@ class SignTransaction extends Component {
   selectWallet = (event, data) => {
     const selectedWallet = this.props.account.wallets.filter(w => w.wallet.name === data.value)[0]
     this.setState({ selectedWallet: data.value })
-    this.props.selectWallet(selectedWallet)
+    this.props.account.select_wallet(selectedWallet.wallet_name)
   }
 
   goBackToWallet = () => {

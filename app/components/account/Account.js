@@ -30,6 +30,10 @@ class Account extends Component {
     }
   }
 
+  componentWillMount () {
+    this.props.account.select_wallet(null)
+  }
+
   handleWalletClick = (wallet) => {
     this.props.account.select_wallet(wallet.wallet_name)
     this.props.history.push(routes.WALLET)

@@ -5,7 +5,7 @@ import { Form, Button, Icon, Divider, TextArea, Label } from 'semantic-ui-react'
 import styles from '../home/Home.css'
 import Footer from '../footer'
 import routes from '../../constants/routes'
-import { selectWallet, setBalance, clearTransactionJson } from '../../actions'
+import { setBalance, clearTransactionJson } from '../../actions'
 import { CopyToClipboard } from 'react-copy-to-clipboard'
 import { toast } from 'react-toastify'
 
@@ -16,9 +16,6 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = (dispatch) => ({
-  selectWallet: (wallet) => {
-    dispatch(selectWallet(wallet))
-  },
   setBalance: (account) => {
     dispatch(setBalance(account))
   },

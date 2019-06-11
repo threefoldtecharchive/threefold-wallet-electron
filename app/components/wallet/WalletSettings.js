@@ -3,20 +3,16 @@ import { connect } from 'react-redux'
 import React, { Component } from 'react'
 import { Form, Button, Icon, Header } from 'semantic-ui-react'
 import styles from '../home/Home.css'
-import { saveWallet, saveAccount, setBalance } from '../../actions'
+import { saveAccount, setBalance } from '../../actions'
 import DeleteModal from './DeleteWalletModal'
 import Footer from '../footer'
 import { toast } from 'react-toastify'
 
 const mapStateToProps = state => ({
-  wallet: state.wallet,
   account: state.account
 })
 
 const mapDispatchToProps = (dispatch) => ({
-  saveWallet: (wallet) => {
-    dispatch(saveWallet(wallet))
-  },
   saveAccount: (account) => {
     dispatch(saveAccount(account))
   },
@@ -28,12 +24,13 @@ const mapDispatchToProps = (dispatch) => ({
 class WalletSettings extends Component {
   constructor (props) {
     super(props)
+    const { account } = this.props
     this.state = {
-      name: this.props.wallet.wallet_name,
+      name: account.selected_wallet.wallet_name,
       openDeleteModal: false,
       deleteName: '',
-      startIndex: this.props.wallet.start_index,
-      addressLength: this.props.wallet.addresses.length,
+      startIndex: account.selected_wallet.start_index,
+      addressLength: account.selected_wallet.addresses.length,
       deleteNameError: false
     }
   }
@@ -44,23 +41,17 @@ class WalletSettings extends Component {
 
   saveWallet = () => {
     const { name, startIndex, addressLength } = this.state
+    const { account } = this.props
+    const walletIndex = account.selected_wallet.wallet_index
 
-    const previousWalletName = this.props.wallet.wallet_name
-
-    const walletIndex = this.props.wallet.wallet_index
-
-    let newWallet
     try {
-      newWallet = this.props.account.wallet_update(walletIndex, name, startIndex, addressLength)
+      this.props.account.wallet_update(walletIndex, name, startIndex, addressLength)
     } catch (err) {
       if (err) {
-        toast.error('Deleting wallet failed')
+        console.log(err)
+        toast.error('Saving wallet failed')
       }
     }
-
-    Object.assign(newWallet, { _previous_wallet_name: previousWalletName })
-
-    this.props.saveWallet(newWallet)
     this.props.saveAccount(this.props.account)
     toast('Wallet saved')
     return this.props.history.push('/wallet')
@@ -94,7 +85,7 @@ class WalletSettings extends Component {
     }
 
     try {
-      this.props.account.wallet_delete(this.props.wallet.start_index, deleteName)
+      this.props.account.wallet_delete(this.props.account.selected_wallet.start_index, deleteName)
     } catch (err) {
       if (err) {
         toast.error('Deleting wallet failed')

@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 import React, { Component } from 'react'
 import { Form, Button, Icon, Header } from 'semantic-ui-react'
 import styles from '../home/Home.css'
-import { saveWallet, saveAccount, setBalance } from '../../actions'
+import { saveAccount, setBalance } from '../../actions'
 import DeleteModal from '../wallet/DeleteWalletModal'
 import Footer from '../footer'
 import { toast } from 'react-toastify'
@@ -13,9 +13,6 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = (dispatch) => ({
-  saveWallet: (wallet) => {
-    dispatch(saveWallet(wallet))
-  },
   saveAccount: (account) => {
     dispatch(saveAccount(account))
   },
@@ -43,10 +40,9 @@ class WalletSettings extends Component {
     const { name } = this.state
     const { account } = this.props
     const { selected_wallet: selectedWallet } = account
-    let newWallet
 
     try {
-      newWallet = this.props.account.multisig_wallet_update(name, selectedWallet.owners, selectedWallet.signatures_required)
+      this.props.account.multisig_wallet_update(name, selectedWallet.owners, selectedWallet.signatures_required)
     } catch (err) {
       if (err) {
         console.log(err)
@@ -54,7 +50,6 @@ class WalletSettings extends Component {
       }
     }
 
-    this.props.saveWallet(newWallet)
     this.props.saveAccount(this.props.account)
     this.props.setBalance(this.props.account)
     toast('Multisig Wallet saved')
@@ -76,12 +71,13 @@ class WalletSettings extends Component {
 
   deleteWallet = () => {
     const { deleteName, name } = this.state
+    const { account } = this.props
     if (deleteName !== name) {
       return this.setState({ deleteNameError: true })
     }
 
     try {
-      this.props.account.multisig_wallet_delete(this.props.wallet.address, deleteName)
+      this.props.account.multisig_wallet_delete(account.selected_wallet.address, deleteName)
     } catch (err) {
       if (err) {
         toast.error('Deleting wallet failed')

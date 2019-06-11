@@ -5,7 +5,7 @@ import { Form, Button, Input, Icon, Dropdown, Divider, Loader, Dimmer, Message, 
 import styles from './home/Home.css'
 import Footer from './footer'
 import { toast } from 'react-toastify'
-import { selectWallet, setBalance, setTransactionJson } from '../actions'
+import { setBalance, setTransactionJson } from '../actions'
 import * as tfchain from '../tfchain/api'
 import moment from 'moment'
 import routes from '../constants/routes'
@@ -13,15 +13,10 @@ import { filter, concat, truncate } from 'lodash'
 
 const mapStateToProps = state => ({
   account: state.account,
-  wallet: state.wallet,
-  routerLocations: state.routerLocations,
-  balance: state.balance
+  routerLocations: state.routerLocations
 })
 
 const mapDispatchToProps = (dispatch) => ({
-  selectWallet: (wallet) => {
-    dispatch(selectWallet(wallet))
-  },
   setBalance: (account) => {
     dispatch(setBalance(account))
   },
@@ -33,6 +28,13 @@ const mapDispatchToProps = (dispatch) => ({
 class Transfer extends Component {
   constructor (props) {
     super(props)
+    let selectedWallet
+    if (this.props.account.selected_wallet) {
+      selectedWallet = this.props.account.selected_wallet.wallet_name
+    } else {
+      selectedWallet = this.props.account.wallets[0].wallet_name
+    }
+
     this.state = {
       generateSeed: false,
       destination: '',
@@ -42,7 +44,7 @@ class Transfer extends Component {
       descriptionError: false,
       amountError: false,
       wallets: [],
-      selectedWallet: this.props.wallet.wallet_name,
+      selectedWallet,
       isMultiSigOutput: false,
       loader: false,
       datelock: '',
@@ -221,16 +223,7 @@ class Transfer extends Component {
   }
 
   mapWalletsToDropdownOption = () => {
-    let { wallets } = this.props.account
-    let { multisig_wallets: multiSigWallets } = this.props.account
-    if (!(this.props.balance instanceof Array)) {
-      if (this.props.balance.wallets && this.props.balance.wallets.length > 0) {
-        wallets = this.props.balance.wallets
-      }
-      if (this.props.balance.multiSigWallet && this.props.balance.multiSigWallet.length > 0) {
-        multiSigWallets = this.props.balance.multiSigWallet
-      }
-    }
+    let { wallets, multisig_wallets: multiSigWallets } = this.props.account
 
     const nWallets = wallets.map(w => {
       return {
@@ -259,24 +252,23 @@ class Transfer extends Component {
       newSelectedWallet = this.props.account.multisig_wallets.filter(w => w.wallet_name === data.value || w.address === data.value)[0]
     }
     this.setState({ selectedWallet: data.value })
-    this.props.selectWallet(newSelectedWallet)
+
+    this.props.account.select_wallet(newSelectedWallet.wallet_name)
   }
 
   // implement goBack ourselfs, if a user has made a transaction and he presses go back then he should route to account
   // instead of going back to transfer (default behaviour of react router 'goBack' function)
   goBack = () => {
     const { selectedWallet } = this.state
-    const { routerLocations, balance } = this.props
-    const { multiSigWallet, wallets } = balance
+    const { routerLocations, account } = this.props
     const previousLocation = routerLocations[routerLocations.length - 2]
     const { location } = previousLocation
     const { pathname } = location
 
     let goToMultiSig = false
-    let selectedWalletFromProps = wallets.filter(w => w.wallet_name === selectedWallet)[0]
+    let selectedWalletFromProps = account.wallets.filter(w => w.wallet_name === selectedWallet)[0]
     if (!selectedWalletFromProps) {
-      selectedWalletFromProps = multiSigWallet.filter(w => w.wallet_name === selectedWallet)[0]
-
+      selectedWalletFromProps = account.multisig_wallets.filter(w => w.wallet_name === selectedWallet)[0]
       goToMultiSig = true
     }
 

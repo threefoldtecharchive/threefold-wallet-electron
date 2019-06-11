@@ -4,7 +4,7 @@ import React, { Component } from 'react'
 import { Form, Button, Icon, Header, List, Segment, Divider } from 'semantic-ui-react'
 import routes from '../../constants/routes'
 import styles from '../home/Home.css'
-import { saveAccount, deleteAccount, setBalance, selectWallet } from '../../actions'
+import { saveAccount, deleteAccount, setBalance } from '../../actions'
 import DeleteModal from './DeleteAccountModal'
 import DeleteWalletModal from '../wallet/DeleteWalletModal'
 import ShowSeedModal from './ShowSeedModal'
@@ -22,9 +22,6 @@ const mapDispatchToProps = (dispatch) => ({
   },
   deleteAccount: (account) => {
     dispatch(deleteAccount(account))
-  },
-  selectWallet: (wallet) => {
-    dispatch(selectWallet(wallet))
   },
   setBalance: (account) => {
     dispatch(setBalance(account))
@@ -146,7 +143,7 @@ class AccountSettings extends Component {
   }
 
   goToWalletSettings = (w) => {
-    this.props.selectWallet(w)
+    this.props.account.select_wallet(w.wallet_name)
     return this.props.history.push(routes.WALLET_SETTINGS)
   }
 

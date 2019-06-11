@@ -8,16 +8,9 @@ import QRCode from 'qrcode.react'
 import { flatten, find } from 'lodash'
 import { CopyToClipboard } from 'react-copy-to-clipboard'
 import { toast } from 'react-toastify'
-import { selectWallet } from '../../actions'
 
 const mapStateToProps = state => ({
   account: state.account
-})
-
-const mapDispatchToProps = (dispatch) => ({
-  selectWallet: (wallet) => {
-    dispatch(selectWallet(wallet))
-  }
 })
 
 class WalletReceive extends Component {
@@ -141,5 +134,5 @@ class WalletReceive extends Component {
 
 export default connect(
   mapStateToProps,
-  mapDispatchToProps
+  null
 )(WalletReceive)

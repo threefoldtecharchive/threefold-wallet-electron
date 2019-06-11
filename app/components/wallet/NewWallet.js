@@ -10,7 +10,6 @@ import Footer from '../footer'
 import { toast } from 'react-toastify'
 
 const mapStateToProps = state => ({
-  wallet: state.wallet,
   account: state.account
 })
 
