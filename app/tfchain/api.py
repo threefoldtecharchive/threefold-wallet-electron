@@ -1093,7 +1093,7 @@ class CoinTransactionBuilder:
         :returns: a promise that resolves with a transaction ID or rejects with an Exception
         """
         data = jsfunc.opts_get(opts, 'data')
-        return self._builder.send(data=data, balance=self._wallet.balance)
+        return self._builder.send(data=data, balance=self._wallet.balance._tfbalance)
 
 
 class MultiSignatureCoinTransactionBuilder:
@@ -1394,7 +1394,7 @@ class TransactionView:
         else:
             height = transaction.height
             timestamp = transaction.timestamp
-            blockid = transaction.blockid.__str__()
+            blockid = None if transaction.blockid == None else transaction.blockid.str()
 
         if addresses == None:
             # return early

@@ -80,10 +80,10 @@ class Wallet extends Component {
       <div>
         <div className={styles.backButton} data-tid='backButton'>
           <Link to={routes.WALLET_SETTINGS}>
-            <Icon style={{ fontSize: 25, position: 'absolute', right: 20, cursor: 'pointer' }} name='setting' />
+            <Icon style={{ fontSize: 25, position: 'absolute', right: 20, cursor: 'pointer', top: 40 }} name='setting' />
           </Link>
           <Link to={routes.HOME}>
-            <Icon style={{ fontSize: 25, position: 'absolute', right: 70, cursor: 'pointer' }} name='sign-out' />
+            <Icon style={{ fontSize: 25, position: 'absolute', right: 70, cursor: 'pointer', top: 40 }} name='sign-out' />
           </Link>
         </div>
         <div className={styles.container} >

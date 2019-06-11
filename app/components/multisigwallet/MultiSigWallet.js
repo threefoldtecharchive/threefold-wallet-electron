@@ -107,10 +107,10 @@ class Wallet extends Component {
             <div>
               <div className={styles.backButton} data-tid='backButton'>
                 <Link to={routes.WALLET_MULTI_SETTINGS}>
-                  <Icon style={{ fontSize: 25, position: 'absolute', right: 20, cursor: 'pointer' }} name='setting' />
+                  <Icon style={{ fontSize: 25, position: 'absolute', right: 20, cursor: 'pointer', top: 40 }} name='setting' />
                 </Link>
                 <Link to={routes.HOME}>
-                  <Icon style={{ fontSize: 25, position: 'absolute', right: 70, cursor: 'pointer' }} name='sign-out' />
+                  <Icon style={{ fontSize: 25, position: 'absolute', right: 70, cursor: 'pointer', top: 40 }} name='sign-out' />
                 </Link>
               </div>
               <div className={styles.container} >
@@ -124,7 +124,7 @@ class Wallet extends Component {
                 <Segment style={{ width: '90%', height: 100, overflow: 'auto', overflowY: 'scroll', margin: 'auto', background: '#29272E', marginTop: 150 }}>
                   {this.renderOwnerList()}
                 </Segment>
-                <Segment style={{ width: '90%', height: '37vh', overflow: 'auto', overflowY: 'scroll', margin: 'auto', background: '#29272E', marginTop: 20 }}>
+                <Segment style={{ width: '90%', height: '23vh', overflow: 'auto', overflowY: 'scroll', margin: 'auto', background: '#29272E', marginTop: 20 }}>
                   <TransactionsList account={this.props.account} loader={this.state.loader} transactions={wallet.balance.transactions} chainInfo={this.props.chainInfo} />
                 </Segment>
               </div>

@@ -29,10 +29,21 @@ const mapDispatchToProps = (dispatch) => ({
 class SignTransaction extends Component {
   constructor (props) {
     super(props)
+    let selectedWallet
+    let selectedAddress
+    if (this.props.account.selected_wallet) {
+      selectedWallet = this.props.account.selected_wallet.wallet_name
+      selectedAddress = this.props.account.selected_wallet.address
+    }
+    if (!selectedWallet && !selectedAddress) {
+      selectedWallet = this.props.account.wallets[0].wallet_name
+      selectedAddress = this.props.account.wallets[0].address
+    }
+
     this.state = {
       jsonError: false,
       json: '',
-      selectedWallet: this.props.account.wallets[0].wallet_name,
+      selectedWallet: selectedWallet,
       loader: false
     }
   }
@@ -64,7 +75,10 @@ class SignTransaction extends Component {
   }
 
   selectWallet = (event, data) => {
-    const selectedWallet = this.props.account.wallets.filter(w => w.wallet.name === data.value)[0]
+    let selectedWallet = this.props.account.wallets.filter(w => w.wallet_name === data.value)[0]
+    if (!selectedWallet) {
+      selectedWallet = this.props.account.multisig_wallets.filter(w => w.wallet_name === data.value)[0]
+    }
     this.setState({ selectedWallet: data.value })
     this.props.account.select_wallet(selectedWallet.wallet_name)
   }
@@ -118,6 +132,8 @@ class SignTransaction extends Component {
       )
     }
 
+    const { selectedWallet } = this.state
+
     const walletsOptions = this.mapWalletsToDropdownOption()
     const { json } = this.props
     return (
@@ -137,7 +153,7 @@ class SignTransaction extends Component {
               selection
               options={walletsOptions}
               onChange={this.selectWallet}
-              value={walletsOptions[0].value}
+              value={selectedWallet}
             />
           </Form.Field>
           <Form.Field style={{ marginTop: 30 }}>

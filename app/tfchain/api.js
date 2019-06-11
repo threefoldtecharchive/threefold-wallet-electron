@@ -2566,7 +2566,7 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 		else {
 		}
 		var data = jsfunc.opts_get (opts, 'data');
-		return self._builder.send (__kwargtrans__ ({data: data, balance: self._wallet.balance}));
+		return self._builder.send (__kwargtrans__ ({data: data, balance: self._wallet.balance._tfbalance}));
 	});}
 });
 export var MultiSignatureCoinTransactionBuilder =  __class__ ('MultiSignatureCoinTransactionBuilder', [object], {
@@ -3483,7 +3483,7 @@ export var TransactionView =  __class__ ('TransactionView', [object], {
 		else {
 			var height = transaction.height;
 			var timestamp = transaction.timestamp;
-			var blockid = transaction.blockid.__str__ ();
+			var blockid = (transaction.blockid == null ? null : transaction.blockid.str ());
 		}
 		if (addresses == null) {
 			return cls (identifier, height, timestamp, blockid, [], []);

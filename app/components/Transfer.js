@@ -80,8 +80,8 @@ class Transfer extends Component {
 
   handleAmountChange = ({ target }) => {
     const { selectedWallet } = this.state
-    const { balance } = this.props
-    const { multiSigWallet, wallets } = balance
+    const { account } = this.props
+    const { wallets, multisig_wallets: multiSigWallet } = account
 
     let selectedWalletFromProps = wallets.filter(w => w.wallet_name === selectedWallet)[0]
     if (!selectedWalletFromProps) {
@@ -335,7 +335,7 @@ class Transfer extends Component {
   buildSingleTransaction = (destinationError, destination, amountError, selectedWallet, isMultiSigOutput, timestamp, amount, description) => {
     if (!destinationError && !amountError && selectedWallet) {
       this.renderLoader(true)
-      if (selectedWallet.fund_state >= 0) {
+      if (selectedWallet.can_spent) {
         const builder = selectedWallet.transaction_new()
         if (timestamp) {
           try {
@@ -367,6 +367,7 @@ class Transfer extends Component {
           this.setState({ loader: false, errorMessage: err.__str__() })
         })
       } else {
+        console.log(selectedWallet)
         toast.error('not enough funds')
         this.setState({ loader: false })
       }
