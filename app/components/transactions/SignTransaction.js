@@ -12,9 +12,7 @@ import { concat, truncate } from 'lodash'
 
 const mapStateToProps = state => ({
   account: state.account,
-  wallet: state.wallet,
-  json: state.transactions.json,
-  balance: state.balance
+  json: state.transactions.json
 })
 
 const mapDispatchToProps = (dispatch) => ({
@@ -109,15 +107,21 @@ class SignTransaction extends Component {
     const { jsonError, json } = this.state
     if (!jsonError && json !== '') {
       this.setState({ loader: true })
-
       const { selectedWallet } = this.state
-      console.log(selectedWallet)
       const result = selectedWallet.transaction_sign(json)
-      console.log(result)
       result.then(res => {
+        const { signed, submitted } = res
+        if (signed && submitted) {
+          this.props.history.push(routes.ACCOUNT)
+          toast('transaction signed successfully and submitted to tx pool')
+        } else {
+          toast.error('Singing transaction failed')
+        }
+        return this.setState({ loader: false })
+      }).catch(err => {
+        console.log(err)
         this.setState({ loader: false })
-        this.props.history.push(routes.ACCOUNT)
-        toast('transaction signed successfully and submitted to tx pool')
+        toast.error('Singing transaction failed')
       })
     } else {
       this.setState({ jsonError: true })
@@ -125,6 +129,11 @@ class SignTransaction extends Component {
   }
 
   render () {
+    const { selectedWallet } = this.state
+    const walletsOptions = this.mapWalletsToDropdownOption()
+    const { json } = this.state
+
+    // if tx singing is loading show spinner
     if (this.state.loader) {
       return (
         <Dimmer active={this.state.loader}>
@@ -133,9 +142,6 @@ class SignTransaction extends Component {
       )
     }
 
-    const { selectedWallet } = this.state
-    const walletsOptions = this.mapWalletsToDropdownOption()
-    const { json } = this.props
     return (
       <div>
         <div className={styles.container} >
