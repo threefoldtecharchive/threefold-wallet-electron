@@ -114,6 +114,7 @@ export const setBalance = function (account) {
   } else {
     return {
       type: 'SET_BALANCE',
+      account: null,
       info: null
     }
   }
