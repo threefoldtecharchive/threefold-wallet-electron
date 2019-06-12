@@ -412,10 +412,8 @@ class TFChainWallet:
             def id_cb(id):
                 txn.id = id
                 if balance_is_cached:
-                    # if the balance is cached, also update...
-                    if not balance.is_multisig:
-                        addresses = jsarr.concat(self.addresses, balance.multisig_addresses)
-                    # ... the balance
+                    addresses = balance.addresses
+                    # if the balance is cached, also update the balance
                     for idx, ci in enumerate(txn.coin_inputs):
                         if ci.parent_output.condition.unlockhash.__str__() in addresses:
                             balance.output_add(txn, idx, confirmed=False, spent=True)
@@ -1785,11 +1783,7 @@ class CoinTransactionBuilder():
             def id_cb(id):
                 txn.id = id
                 if balance_is_cached:
-                    # if the balance is cached, also update...
-                    addresses = self._wallet.addresses
-                    if not balance.is_multisig:
-                        addresses = jsarr.concat(addresses, balance.multisig_addresses)
-                    # ... the balance
+                    addresses = balance.addresses
                     for idx, ci in enumerate(txn.coin_inputs):
                         if ci.parent_output.condition.unlockhash.__str__() in addresses:
                             balance.output_add(txn, idx, confirmed=False, spent=True)

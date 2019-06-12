@@ -533,9 +533,7 @@ export var TFChainWallet =  __class__ ('TFChainWallet', [object], {
 				}
 				txn.id = id;
 				if (balance_is_cached) {
-					if (!(balance.is_multisig)) {
-						var addresses = jsarr.concat (self.addresses, balance.multisig_addresses);
-					}
+					var addresses = balance.addresses;
 					for (var [idx, ci] of enumerate (txn.coin_inputs)) {
 						if (__in__ (ci.parent_output.condition.unlockhash.__str__ (), addresses)) {
 							balance.output_add (txn, idx, __kwargtrans__ ({confirmed: false, spent: true}));
@@ -1105,10 +1103,7 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 				}
 				txn.id = id;
 				if (balance_is_cached) {
-					var addresses = self._wallet.addresses;
-					if (!(balance.is_multisig)) {
-						var addresses = jsarr.concat (addresses, balance.multisig_addresses);
-					}
+					var addresses = balance.addresses;
 					for (var [idx, ci] of enumerate (txn.coin_inputs)) {
 						if (__in__ (ci.parent_output.condition.unlockhash.__str__ (), addresses)) {
 							balance.output_add (txn, idx, __kwargtrans__ ({confirmed: false, spent: true}));
