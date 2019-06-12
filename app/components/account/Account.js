@@ -200,16 +200,16 @@ class Account extends Component {
           <div style={{ width: '65%', overflowY: 'auto', height: '80vh', paddingBottom: 100 }}>
             {this.renderWallets()}
           </div>
-          <div style={{ width: '35%', height: '100vh', marginTop: 20 }}>
+          <div style={{ width: '35%', height: '100vh', marginTop: 20, overflowY: 'auto' }}>
             {this.renderAccountBalances()}
+            <div style={{ margin: 'auto', width: '90%', height: 100 }}>
+              <Button className={styles.acceptButton} onClick={() => this.props.history.push(routes.WALLET_RECEIVE)} style={{ marginTop: 20, float: 'left', marginRight: 15, color: 'white' }} size='big'>Receive</Button>
+              <Button className={styles.cancelButton} onClick={() => this.props.history.push(routes.TRANSFER)} style={{ marginTop: 20, marginRight: 10, float: 'left', background: 'none', color: 'white' }} size='big'>Transfer</Button>
+            </div>
+            <div style={{ margin: 'auto', width: '90%', height: 100 }}>
+              <Button className={styles.acceptButton} onClick={() => this.props.history.push(routes.SIGN_TRANSACTIONS)} style={{ marginTop: 20, marginRight: 10, float: 'left', background: 'none', color: 'white' }} size='big'>Sign Transaction</Button>
+            </div>
           </div>
-        </div>
-        <div style={{ position: 'absolute', bottom: 240, right: 50 }}>
-          <Button className={styles.acceptButton} onClick={() => this.props.history.push(routes.SIGN_TRANSACTIONS)} style={{ marginTop: 20, marginRight: 10, float: 'left', background: 'none', color: 'white' }} size='big'>Sign Transaction</Button>
-        </div>
-        <div style={{ position: 'absolute', bottom: 150, right: 50 }}>
-          <Button className={styles.acceptButton} onClick={() => this.props.history.push(routes.WALLET_RECEIVE)} style={{ marginTop: 20, float: 'left', marginRight: 15, color: 'white' }} size='big'>Receive</Button>
-          <Button className={styles.cancelButton} onClick={() => this.props.history.push(routes.TRANSFER)} style={{ marginTop: 20, marginRight: 10, float: 'left', background: 'none', color: 'white' }} size='big'>Transfer</Button>
         </div>
         <Footer />
       </div>
