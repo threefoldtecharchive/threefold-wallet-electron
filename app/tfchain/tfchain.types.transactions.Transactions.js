@@ -92,7 +92,6 @@ export var from_json = function (obj, id) {
 	}
 	jslog.warning ('transaction of version {} not recognised and rendered as an opaque transaction:'.format (tt), obj);
 	var txn = OpaqueTransaction.from_json (obj);
-	txn.version_set (tt);
 	return txn;
 };
 

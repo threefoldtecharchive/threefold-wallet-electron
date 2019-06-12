@@ -48,7 +48,11 @@ function renderModalBody (multiSigTransaction, selectedWallet, amount, owners, d
           <List.Content>
             <List.Header>From</List.Header>
             <List.Description>
-              {selectedWallet.wallet_name || selectedWallet.address}
+              { selectedWallet.wallet_name ? (
+                <span>{selectedWallet.wallet_name}</span>
+              ) : (
+                <span style={{ fontSize: 12, fontFamily: 'Menlo-Regular' }}>{selectedWallet.address}</span>
+              )}
             </List.Description>
           </List.Content>
         </List.Item>
@@ -66,7 +70,7 @@ function renderModalBody (multiSigTransaction, selectedWallet, amount, owners, d
           <List.Content>
             <List.Header>To: </List.Header>
             <List.Description>
-              {destination}
+              <span style={{ fontSize: 12, fontFamily: 'Menlo-Regular' }}>{destination}</span>
             </List.Description>
           </List.Content>
         </List.Item>
@@ -91,7 +95,11 @@ function renderModalBody (multiSigTransaction, selectedWallet, amount, owners, d
           <List.Content>
             <List.Header>From</List.Header>
             <List.Description>
-              {selectedWallet.wallet_name || selectedWallet.address}
+              { selectedWallet.wallet_name ? (
+                <span>{selectedWallet.wallet_name}</span>
+              ) : (
+                <span style={{ fontSize: 12, fontFamily: 'Menlo-Regular' }}>{selectedWallet.address}</span>
+              )}
             </List.Description>
           </List.Content>
         </List.Item>
@@ -111,7 +119,7 @@ function renderModalBody (multiSigTransaction, selectedWallet, amount, owners, d
             {owners.map((owner, index) => {
               return (
                 <List.Description key={owner + ' ' + index}>
-                  {index + 1}: {owner}
+                  <span style={{ fontSize: 12, fontFamily: 'Menlo-Regular' }}>{index + 1}</span>: <span style={{ fontSize: 12, fontFamily: 'Menlo-Regular' }}>{owner}</span>
                 </List.Description>
               )
             })}

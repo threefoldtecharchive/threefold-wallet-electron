@@ -1047,15 +1047,7 @@ export var FulfillmentMultiSignature =  __class__ ('FulfillmentMultiSignature', 
 				if (signature == null) {
 					return ;
 				}
-				if (pair.has_signed) {
-					if (pair.signature.__eq__ (signature)) {
-						return ;
-					}
-					var __except0__ = ValueError ('cannot add public_key {} as it already exists within a pair of this MultiSignature Fulfillment with another signature: {} != {}'.format (spk, signature.__str__ (), pair.signature.__str__ ()));
-					__except0__.__cause__ = null;
-					throw __except0__;
-				}
-				else {
+				if (!(pair.has_signed)) {
 					pair.signature = signature;
 					return ;
 				}

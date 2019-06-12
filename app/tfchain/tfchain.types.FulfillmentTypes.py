@@ -349,14 +349,10 @@ class FulfillmentMultiSignature(FulfillmentBaseClass):
             if pair.public_key.__str__() == spk:
                 if signature == None:
                     return # if no signature is provided, we can just return as-is, nothng to do
-                if pair.has_signed: # if we have signed and a signature is provided, ensure it is equal
-                    if pair.signature.__eq__(signature):
-                        return
-                    raise ValueError("cannot add public_key {} as it already exists within a pair of this MultiSignature Fulfillment with another signature: {} != {}".format(
-                        spk, signature.__str__(), pair.signature.__str__()))
-                else: # not signed yet, and signature is now provided, assign it
+                if not pair.has_signed: # if we have not signed yet, assign it now
                     pair.signature = signature
                     return
+        # allows for duplicates
         self._pairs.append(PublicKeySignaturePair(public_key=public_key, signature=signature))
 
     # Implements SignatureCallbackBase.

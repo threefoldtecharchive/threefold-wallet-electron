@@ -66,11 +66,14 @@ class TransactionBaseClass():
         """
         txn = cls()
         tv = obj.get_or('version', -1)
-        if txn.version.__ne__(tv):
-            raise ValueError(
-                "transaction is expected to be of version {}, not version {}".format(txn.version, tv))
+        txn._from_json_txn_version_validator(tv)
         txn._from_json_data_object(obj.get_or('data', jsobj.new_dict()))
         return txn
+
+    def _from_json_txn_version_validator(self, tv):
+        if self.version.__ne__(tv):
+            raise ValueError(
+                "transaction is expected to be of version {}, not version {}".format(self.version.value, tv))
 
     @property
     def version(self):
@@ -455,5 +458,8 @@ class OpaqueTransaction(TransactionBaseClass):
             raise TypeError("version is of wrong type: invalid: {} ({})".format(version, type(version)))
         self._version = TransactionVersion(version)
 
-    def _custom_version_getter(self):
-        return self._version
+    def _from_json_txn_version_validator(self, tv):
+        if self.version.value == -1:
+            self._version = TransactionVersion(tv)
+            return
+        super()._from_json_txn_version_validator(tv)

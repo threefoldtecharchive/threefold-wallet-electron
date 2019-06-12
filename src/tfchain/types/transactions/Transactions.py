@@ -109,5 +109,4 @@ def from_json(obj, id=None):
         "transaction of version {} not recognised and rendered as an opaque transaction:".format(tt),
         obj)
     txn = OpaqueTransaction.from_json(obj)
-    txn.version_set(tt)
     return txn

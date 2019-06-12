@@ -153,13 +153,30 @@ export var TransactionBaseClass =  __class__ ('TransactionBaseClass', [object], 
 		}
 		var txn = cls ();
 		var tv = obj.get_or ('version', -(1));
-		if (txn.version.__ne__ (tv)) {
-			var __except0__ = ValueError ('transaction is expected to be of version {}, not version {}'.format (txn.version, tv));
+		txn._from_json_txn_version_validator (tv);
+		txn._from_json_data_object (obj.get_or ('data', jsobj.new_dict ()));
+		return txn;
+	});},
+	get _from_json_txn_version_validator () {return __get__ (this, function (self, tv) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'tv': var tv = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (self.version.__ne__ (tv)) {
+			var __except0__ = ValueError ('transaction is expected to be of version {}, not version {}'.format (self.version.value, tv));
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		txn._from_json_data_object (obj.get_or ('data', jsobj.new_dict ()));
-		return txn;
 	});},
 	get _get_version () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -1464,7 +1481,7 @@ export var OpaqueTransaction =  __class__ ('OpaqueTransaction', [TransactionBase
 		}
 		self._version = TransactionVersion (version);
 	});},
-	get _custom_version_getter () {return __get__ (this, function (self) {
+	get _from_json_txn_version_validator () {return __get__ (this, function (self, tv) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -1472,13 +1489,18 @@ export var OpaqueTransaction =  __class__ ('OpaqueTransaction', [TransactionBase
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'tv': var tv = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
 		}
 		else {
 		}
-		return self._version;
+		if (self.version.value == -(1)) {
+			self._version = TransactionVersion (tv);
+			return ;
+		}
+		__super__ (OpaqueTransaction, '_from_json_txn_version_validator') (self, tv);
 	});}
 });
 
