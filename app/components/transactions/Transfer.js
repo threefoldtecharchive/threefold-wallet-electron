@@ -2,14 +2,15 @@
 import { connect } from 'react-redux'
 import React, { Component } from 'react'
 import { Form, Button, Input, Icon, Dropdown, Divider, Loader, Dimmer, Message, Radio, Popup } from 'semantic-ui-react'
-import styles from './home/Home.css'
-import Footer from './footer'
+import styles from '../home/Home.css'
+import Footer from '../footer'
 import { toast } from 'react-toastify'
-import { setBalance, setTransactionJson } from '../actions'
-import * as tfchain from '../tfchain/api'
+import { setBalance, setTransactionJson } from '../../actions'
+import * as tfchain from '../../tfchain/api'
 import moment from 'moment'
-import routes from '../constants/routes'
+import routes from '../../constants/routes'
 import { filter, concat, truncate } from 'lodash'
+import TransactionConfirmationModal from './TransactionConfirmationModal'
 
 const mapStateToProps = state => ({
   account: state.account,
@@ -36,16 +37,14 @@ class Transfer extends Component {
     }
 
     this.state = {
-      generateSeed: false,
       destination: '',
       description: '',
-      amount: 0,
+      amount: 1,
       destinationError: false,
       descriptionError: false,
       amountError: false,
       wallets: [],
       selectedWallet,
-      isMultiSigOutput: false,
       loader: false,
       datelock: '',
       timelock: '',
@@ -53,7 +52,8 @@ class Transfer extends Component {
       signatureCount: 2,
       ownerAddressErrors: [false, false],
       ownerAddresses: ['', ''],
-      signatureCountError: false
+      signatureCountError: false,
+      openConfirmationModal: false
     }
   }
 
@@ -92,7 +92,29 @@ class Transfer extends Component {
 
   handleMultiSigTransactionCheck = () => {
     const newState = !this.state.multiSigTransaction
+    this.resetFormValues()
     this.setState({ multiSigTransaction: newState })
+  }
+
+  resetFormValues = () => {
+    this.setState({
+      destination: '',
+      description: '',
+      amount: 1,
+      destinationError: false,
+      descriptionError: false,
+      amountError: false,
+      wallets: [],
+      loader: false,
+      datelock: '',
+      timelock: '',
+      multiSigTransaction: false,
+      signatureCount: 2,
+      ownerAddressErrors: [false, false],
+      ownerAddresses: ['', ''],
+      signatureCountError: false,
+      openConfirmationModal: false
+    })
   }
 
   handleSignatureCountChange = ({ target }) => {
@@ -183,7 +205,7 @@ class Transfer extends Component {
         <Form.Field style={{ marginTop: 10 }}>
           <Input
             error={destinationError}
-            style={{ background: '#0c111d !important', color: '#7784a9' }}
+            style={{ background: '#0c111d !important', color: '#7784a9', width: 700 }}
             icon={<Icon name='send' style={{ color: '#0e72f5' }} />}
             iconPosition='left'
             placeholder='destination address'
@@ -279,28 +301,67 @@ class Transfer extends Component {
     }
   }
 
-  submitTransaction = () => {
+  checkSingleTransactionFormValues = () => {
     const {
-      description,
       destination,
-      amount,
       selectedWallet,
       amountError,
-      datelock,
-      timelock,
-      multiSigTransaction,
-      ownerAddressErrors,
-      ownerAddresses,
-      signatureCount,
-      signatureCountError
+      amount
     } = this.state
-    const { account } = this.props
 
     let destinationError = false
-
+    let amountErrorValidation = false
     if (destination === '') {
       destinationError = true
     }
+
+    if (amount <= 0) {
+      amountErrorValidation = true
+    }
+
+    if (!destinationError && !amountError && selectedWallet) {
+      if (selectedWallet.can_spent) {
+        return true
+      } else {
+        return toast.error('not enough funds')
+      }
+    }
+    this.setState({ destinationError, amountError: amountErrorValidation })
+    toast.error('form is not filled in correctly')
+    return false
+  }
+
+  checkMultisigTransactionFormValues = () => {
+    const {
+      selectedWallet,
+      ownerAddressErrors,
+      ownerAddresses,
+      signatureCount,
+      amount
+    } = this.state
+
+    const hasOwnerAddressErrors = ownerAddressErrors.filter(e => e === true).length > 0
+    const areAllOwnersFilledIn = filter(ownerAddresses, o => o === '').length === 0
+
+    let amountErrorValidation = false
+    if (amount <= 0) {
+      amountErrorValidation = true
+    }
+
+    let signatureCountErrorValidation
+    if (signatureCount < 1 || signatureCount > ownerAddresses.length) {
+      signatureCountErrorValidation = true
+    }
+
+    if (!signatureCountErrorValidation && !amountErrorValidation && selectedWallet != null && !hasOwnerAddressErrors && areAllOwnersFilledIn) {
+      return true
+    }
+    this.setState({ signatureCountError: signatureCountErrorValidation, amountError: amountErrorValidation })
+    return false
+  }
+
+  buildSingleTransaction = () => {
+    const { selectedWallet, description, destination, amount, datelock, timelock } = this.state
 
     let timestamp
     if (datelock !== '') {
@@ -310,107 +371,80 @@ class Transfer extends Component {
       timestamp = moment(dateLockDate).utcOffset(dateLockTimeZone).unix()
     }
 
-    let isMultiSigOutput = false
-    let newSelectedWallet = account.wallet_for_name(selectedWallet.wallet_name)
-    if (!newSelectedWallet) {
-      newSelectedWallet = account.wallet_for_address(selectedWallet.address)
-      isMultiSigOutput = true
-    }
-
-    if (!multiSigTransaction) {
-      this.buildSingleTransaction(destinationError, destination, amountError, newSelectedWallet, isMultiSigOutput, timestamp, amount, description)
-    } else {
-      this.buildMultiSignTransaction(amountError, newSelectedWallet, ownerAddresses, ownerAddressErrors, signatureCount, signatureCountError, timestamp, amount, description)
-    }
-  }
-
-  buildSingleTransaction = (destinationError, destination, amountError, selectedWallet, isMultiSigOutput, timestamp, amount, description) => {
-    if (!destinationError && !amountError && selectedWallet) {
-      this.renderLoader(true)
-      if (selectedWallet.can_spent) {
-        const builder = selectedWallet.transaction_new()
-        if (timestamp) {
-          try {
-            builder.output_add(destination, amount.toString(), { lock: timestamp })
-          } catch (error) {
-            toast('transaction failed')
-            return this.setState({ loader: false, errorMessage: error.__str__() })
-          }
-        } else {
-          try {
-            builder.output_add(destination, amount.toString())
-          } catch (error) {
-            toast('transaction failed')
-            return this.setState({ loader: false, errorMessage: error.__str__() })
-          }
-        }
-        builder.send({ data: description }).then(result => {
-          this.setState({ destinationError, amountError, loader: false })
-          this.props.setBalance(this.props.account)
-          if (result.submitted) {
-            toast('Transaction ' + result.transaction.id + ' submitted')
-            return this.goBack()
-          } else {
-            this.props.setTransactionJson(JSON.stringify(result.transaction.json()))
-            return this.props.history.push(routes.SIGN)
-          }
-        }).catch(err => {
-          toast.error('transaction failed')
-          this.setState({ loader: false, errorMessage: err.__str__() })
-        })
-      } else {
-        toast.error('not enough funds')
-        this.setState({ loader: false })
-      }
-    } else {
-      toast.error('All fields are required !')
-    }
-  }
-
-  buildMultiSignTransaction = (amountError, selectedWallet, ownerAddresses, ownerAddressErrors, signatureCount, signatureCountError, timestamp, amount, description) => {
-    const hasOwnerAddressErrors = ownerAddressErrors.filter(e => e === true).length > 0
-    const areAllOwnersFilledIn = filter(ownerAddresses, o => o === '').length === 0
-
-    if (signatureCount < 1 || signatureCount > ownerAddresses.length) {
-      signatureCountError = true
-      this.setState({ signatureCountError: true })
-    }
-
-    if (!signatureCountError && !amountError && selectedWallet != null && !hasOwnerAddressErrors && areAllOwnersFilledIn) {
-      this.renderLoader(true)
-      const builder = selectedWallet.transaction_new()
-      if (timestamp) {
-        try {
-          builder.output_add([signatureCount, ownerAddresses], amount.toString(), { lock: timestamp })
-        } catch (error) {
-          toast('transaction failed')
-          return this.setState({ loader: false, errorMessage: error.__str__() })
-        }
-      } else {
-        try {
-          builder.output_add([signatureCount, ownerAddresses], amount.toString())
-        } catch (error) {
-          toast('transaction failed')
-          return this.setState({ loader: false, errorMessage: error.__str__() })
-        }
-      }
-      builder.send({ data: description }).then(result => {
-        this.setState({ ownerAddressErrors, amountError, loader: false })
-        this.props.setBalance(this.props.account)
-        if (result.submitted) {
-          toast('Multisign Transaction ' + result.transaction.id + ' submitted')
-          return this.goBack()
-        } else {
-          this.props.setTransactionJson(JSON.stringify(result.transaction.json()))
-          return this.props.history.push(routes.SIGN)
-        }
-      }).catch(err => {
+    this.renderLoader(true)
+    const builder = selectedWallet.transaction_new()
+    if (timestamp) {
+      try {
+        builder.output_add(destination, amount.toString(), { lock: timestamp })
+      } catch (error) {
         toast('transaction failed')
-        this.setState({ loader: false, errorMessage: err.__str__() })
-      })
+        return this.setState({ loader: false, errorMessage: error.__str__() })
+      }
     } else {
-      toast.error('All fields are required !')
+      try {
+        builder.output_add(destination, amount.toString())
+      } catch (error) {
+        toast('transaction failed')
+        return this.setState({ loader: false, errorMessage: error.__str__() })
+      }
     }
+    builder.send({ data: description }).then(result => {
+      this.setState({ destinationError: false, amountError: false, loader: false })
+      this.props.setBalance(this.props.account)
+      if (result.submitted) {
+        toast('Transaction ' + result.transaction.id + ' submitted')
+        return this.goBack()
+      } else {
+        this.props.setTransactionJson(JSON.stringify(result.transaction.json()))
+        return this.props.history.push(routes.SIGN)
+      }
+    }).catch(err => {
+      toast.error('transaction failed')
+      this.setState({ loader: false, errorMessage: err.__str__() })
+    })
+  }
+
+  buildMultiSignTransaction = () => {
+    const { selectedWallet, signatureCount, ownerAddresses, amount, description, datelock, timelock } = this.state
+    let timestamp
+    if (datelock !== '') {
+      const concatDate = datelock + ' ' + timelock
+      const dateLockDate = new Date(concatDate)
+      const dateLockTimeZone = dateLockDate.getTimezoneOffset()
+      timestamp = moment(dateLockDate).utcOffset(dateLockTimeZone).unix()
+    }
+
+    this.renderLoader(true)
+    const builder = selectedWallet.transaction_new()
+    if (timestamp) {
+      try {
+        builder.output_add([signatureCount, ownerAddresses], amount.toString(), { lock: timestamp })
+      } catch (error) {
+        toast('transaction failed')
+        return this.setState({ loader: false, errorMessage: error.__str__() })
+      }
+    } else {
+      try {
+        builder.output_add([signatureCount, ownerAddresses], amount.toString())
+      } catch (error) {
+        toast('transaction failed')
+        return this.setState({ loader: false, errorMessage: error.__str__() })
+      }
+    }
+    builder.send({ data: description }).then(result => {
+      this.setState({ ownerAddressErrors: [false, false], amountError: false, loader: false })
+      this.props.setBalance(this.props.account)
+      if (result.submitted) {
+        toast('Multisign Transaction ' + result.transaction.id + ' submitted')
+        return this.goBack()
+      } else {
+        this.props.setTransactionJson(JSON.stringify(result.transaction.json()))
+        return this.props.history.push(routes.SIGN)
+      }
+    }).catch(err => {
+      toast('transaction failed')
+      this.setState({ loader: false, errorMessage: err.__str__() })
+    })
   }
 
   renderLoader = (active) => {
@@ -442,8 +476,15 @@ class Transfer extends Component {
   }
 
   renderAmountError = () => {
-    const { amountError } = this.state
-    if (amountError) {
+    const { amountError, amount } = this.state
+    if (amountError && amount <= 0) {
+      return (
+        <Message
+          error
+          header={'Amount cannot be negative or 0'}
+        />
+      )
+    } else if (amountError && amount > 0) {
       return (
         <Message
           error
@@ -453,8 +494,34 @@ class Transfer extends Component {
     }
   }
 
+  closeConfirmationModal = () => {
+    this.setState({ openConfirmationModal: false })
+  }
+
+  confirmTransaction = () => {
+    const { multiSigTransaction } = this.state
+
+    if (multiSigTransaction) {
+      this.buildMultiSignTransaction()
+    } else {
+      this.buildSingleTransaction()
+    }
+  }
+
+  openConfirmationModal = () => {
+    if (this.state.multiSigTransaction) {
+      if (this.checkMultisigTransactionFormValues()) {
+        this.setState({ openConfirmationModal: true })
+      }
+    } else {
+      if (this.checkSingleTransactionFormValues()) {
+        this.setState({ openConfirmationModal: true })
+      }
+    }
+  }
+
   render () {
-    const { amountError, amount, timelock, datelock, selectedWallet, multiSigTransaction } = this.state
+    const { amountError, amount, timelock, datelock, selectedWallet, multiSigTransaction, openConfirmationModal, destination, ownerAddresses, signatureCount } = this.state
     const walletsOptions = this.mapWalletsToDropdownOption()
 
     if (this.state.loader) {
@@ -469,13 +536,26 @@ class Transfer extends Component {
 
     return (
       <div>
+        <TransactionConfirmationModal
+          open={openConfirmationModal}
+          closeModal={this.closeConfirmationModal}
+          confirmTransaction={this.confirmTransaction}
+          multiSigTransaction={multiSigTransaction}
+          destination={destination}
+          selectedWallet={selectedWallet}
+          amount={amount}
+          owners={ownerAddresses}
+          signatureCount={signatureCount}
+          timelock={timelock}
+          datelock={datelock}
+        />
         <div className={styles.container} >
           <h2 >Transfer</h2>
         </div>
         <Divider style={{ background: '#1A253F' }} />
         <Icon onClick={() => this.goBack()} style={{ fontSize: 25, marginLeft: 15, marginTop: 15, cursor: 'pointer' }} name='chevron circle left' />
         <span onClick={() => this.goBack()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
-        <Form error style={{ width: '50%', marginLeft: '20%', marginTop: 10, overflowY: 'auto', height: 500, padding: 30 }}>
+        <Form error style={{ width: '60%', marginLeft: '10%', marginTop: 10, overflowY: 'auto', height: 550, padding: 30 }}>
           <h2 style={{ marginBottom: 20 }}>Send funds to:</h2>
           <Form.Field>
             <Radio
@@ -516,7 +596,7 @@ class Transfer extends Component {
         </Form>
         <div style={{ position: 'absolute', bottom: 110, right: 50 }}>
           <Button className={styles.cancelButton} onClick={() => this.props.history.goBack()} style={{ marginTop: 20, float: 'left', background: '#2B3C72', color: 'white', marginRight: 15 }} size='big'>Cancel</Button>
-          <Button className={styles.acceptButton} onClick={() => this.submitTransaction()} style={{ marginTop: 20, marginRight: 10, float: 'left', background: '#015DE1', color: 'white' }} size='big'>Send</Button>
+          <Button className={styles.acceptButton} onClick={() => this.openConfirmationModal()} style={{ marginTop: 20, marginRight: 10, float: 'left', background: '#015DE1', color: 'white' }} size='big'>Send</Button>
         </div>
         <Footer />
       </div>
