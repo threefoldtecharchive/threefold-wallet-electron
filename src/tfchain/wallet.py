@@ -379,7 +379,9 @@ class TFChainWallet:
                 # possible if the wallet does not own any of the still required signatures,
                 # or for example because the wallet does not know about the parent outputs of
                 # the inputs still to be signed
-                return TransactionSignResult(txn, False, False)
+                def nop_cb(resolve, reject):
+                    resolve(TransactionSignResult(txn, False, False))
+                return jsasync.promise_new(nop_cb)
 
             # fulfill the signature requests that we can fulfill
             signature_count = 0

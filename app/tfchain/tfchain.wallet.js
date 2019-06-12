@@ -457,7 +457,24 @@ export var TFChainWallet =  __class__ ('TFChainWallet', [object], {
 			}
 			var sig_requests = txn.signature_requests_new ();
 			if (len (sig_requests) == 0) {
-				return TransactionSignResult (txn, false, false);
+				var nop_cb = function (resolve, reject) {
+					if (arguments.length) {
+						var __ilastarg0__ = arguments.length - 1;
+						if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+							var __allkwargs0__ = arguments [__ilastarg0__--];
+							for (var __attrib0__ in __allkwargs0__) {
+								switch (__attrib0__) {
+									case 'resolve': var resolve = __allkwargs0__ [__attrib0__]; break;
+									case 'reject': var reject = __allkwargs0__ [__attrib0__]; break;
+								}
+							}
+						}
+					}
+					else {
+					}
+					resolve (TransactionSignResult (txn, false, false));
+				};
+				return jsasync.promise_new (nop_cb);
 			}
 			var signature_count = 0;
 			for (var request of sig_requests) {
