@@ -1044,9 +1044,21 @@ export var FulfillmentMultiSignature =  __class__ ('FulfillmentMultiSignature', 
 		var spk = public_key.__str__ ();
 		for (var pair of self._pairs) {
 			if (pair.public_key.__str__ () == spk) {
-				var __except0__ = ValueError ('cannot add public_key {} as it already exists within a pair of this MultiSignature Fulfillment'.format (spk));
-				__except0__.__cause__ = null;
-				throw __except0__;
+				if (signature == null) {
+					return ;
+				}
+				if (pair.has_signed) {
+					if (pair.signature.__eq__ (signature)) {
+						return ;
+					}
+					var __except0__ = ValueError ('cannot add public_key {} as it already exists within a pair of this MultiSignature Fulfillment with another signature: {} != {}'.format (spk, signature.__str__ (), pair.signature.__str__ ()));
+					__except0__.__cause__ = null;
+					throw __except0__;
+				}
+				else {
+					pair.signature = signature;
+					return ;
+				}
 			}
 		}
 		self._pairs.append (PublicKeySignaturePair (__kwargtrans__ ({public_key: public_key, signature: signature})));
@@ -1319,6 +1331,22 @@ export var PublicKeySignaturePair =  __class__ ('PublicKeySignaturePair', [BaseD
 		}
 		self._public_key = PublicKey (__kwargtrans__ ({specifier: pk.specifier, hash: pk.hash}));
 	});},
+	get _get_has_signed () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._signature != null;
+	});},
 	get _get_signature () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -1355,6 +1383,9 @@ export var PublicKeySignaturePair =  __class__ ('PublicKeySignaturePair', [BaseD
 		}
 		if (value == null) {
 			self._signature = null;
+		}
+		else if (isinstance (value, ED25519Signature)) {
+			self._signature = ED25519Signature (__kwargtrans__ ({value: value.value}));
 		}
 		else {
 			self._signature = ED25519Signature (__kwargtrans__ ({value: value}));
@@ -1412,6 +1443,7 @@ export var PublicKeySignaturePair =  __class__ ('PublicKeySignaturePair', [BaseD
 	});}
 });
 Object.defineProperty (PublicKeySignaturePair, 'signature', property.call (PublicKeySignaturePair, PublicKeySignaturePair._get_signature, PublicKeySignaturePair._set_signature));
+Object.defineProperty (PublicKeySignaturePair, 'has_signed', property.call (PublicKeySignaturePair, PublicKeySignaturePair._get_has_signed));
 Object.defineProperty (PublicKeySignaturePair, 'public_key', property.call (PublicKeySignaturePair, PublicKeySignaturePair._get_public_key, PublicKeySignaturePair._set_public_key));;
 export var FulfillmentAtomicSwap =  __class__ ('FulfillmentAtomicSwap', [FulfillmentBaseClass], {
 	__module__: __name__,

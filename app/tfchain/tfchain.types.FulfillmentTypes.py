@@ -347,7 +347,16 @@ class FulfillmentMultiSignature(FulfillmentBaseClass):
         spk = public_key.__str__()
         for pair in self._pairs:
             if pair.public_key.__str__() == spk:
-                raise ValueError("cannot add public_key {} as it already exists within a pair of this MultiSignature Fulfillment".format(spk))
+                if signature == None:
+                    return # if no signature is provided, we can just return as-is, nothng to do
+                if pair.has_signed: # if we have signed and a signature is provided, ensure it is equal
+                    if pair.signature.__eq__(signature):
+                        return
+                    raise ValueError("cannot add public_key {} as it already exists within a pair of this MultiSignature Fulfillment with another signature: {} != {}".format(
+                        spk, signature.__str__(), pair.signature.__str__()))
+                else: # not signed yet, and signature is now provided, assign it
+                    pair.signature = signature
+                    return
         self._pairs.append(PublicKeySignaturePair(public_key=public_key, signature=signature))
 
     # Implements SignatureCallbackBase.
@@ -426,6 +435,10 @@ class PublicKeySignaturePair(BaseDataTypeClass):
         self._public_key = PublicKey(specifier=pk.specifier, hash=pk.hash)
 
     @property
+    def has_signed(self):
+        return self._signature != None
+
+    @property
     def signature(self):
         if self._signature == None:
             return ED25519Signature()
@@ -435,7 +448,10 @@ class PublicKeySignaturePair(BaseDataTypeClass):
         if value == None:
             self._signature = None
         else:
-            self._signature = ED25519Signature(value=value)
+            if isinstance(value, ED25519Signature):
+                self._signature = ED25519Signature(value=value.value)
+            else:
+                self._signature = ED25519Signature(value=value)
 
     def json(self):
         return {
