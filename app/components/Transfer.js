@@ -30,9 +30,9 @@ class Transfer extends Component {
     super(props)
     let selectedWallet
     if (this.props.account.selected_wallet) {
-      selectedWallet = this.props.account.selected_wallet.wallet_name
+      selectedWallet = this.props.account.selected_wallet
     } else {
-      selectedWallet = this.props.account.wallets[0].wallet_name
+      selectedWallet = this.props.account.wallets[0]
     }
 
     this.state = {
@@ -80,16 +80,8 @@ class Transfer extends Component {
 
   handleAmountChange = ({ target }) => {
     const { selectedWallet } = this.state
-    const { account } = this.props
-    const { wallets, multisig_wallets: multiSigWallet } = account
-
-    let selectedWalletFromProps = wallets.filter(w => w.wallet_name === selectedWallet)[0]
-    if (!selectedWalletFromProps) {
-      selectedWalletFromProps = multiSigWallet.filter(w => w.wallet_name === selectedWallet)[0]
-    }
-
-    if (selectedWalletFromProps && target.value !== 0) {
-      if (!selectedWalletFromProps.balance.spend_amount_is_valid(target.value)) {
+    if (selectedWallet && target.value !== 0) {
+      if (!selectedWallet.balance.spend_amount_is_valid(target.value)) {
         this.setState({ amountError: true })
       } else {
         this.setState({ amountError: false })
@@ -247,13 +239,13 @@ class Transfer extends Component {
   }
 
   selectWallet = (event, data) => {
-    let newSelectedWallet = this.props.account.wallets.filter(w => w.wallet_name === data.value)[0]
-    if (!newSelectedWallet) {
-      newSelectedWallet = this.props.account.multisig_wallets.filter(w => w.wallet_name === data.value || w.address === data.value)[0]
+    let selectedWallet = this.props.account.wallet_for_name(data.value)
+    if (!selectedWallet) {
+      selectedWallet = this.props.account.wallet_for_address(data.value)
     }
-    this.setState({ selectedWallet: data.value })
+    this.setState({ selectedWallet })
 
-    this.props.account.select_wallet({ name: newSelectedWallet.wallet_name })
+    this.props.account.select_wallet({ name: selectedWallet.wallet_name, address: selectedWallet.address })
   }
 
   // implement goBack ourselfs, if a user has made a transaction and he presses go back then he should route to account
@@ -266,9 +258,9 @@ class Transfer extends Component {
     const { pathname } = location
 
     let goToMultiSig = false
-    let selectedWalletFromProps = account.wallets.filter(w => w.wallet_name === selectedWallet)[0]
-    if (!selectedWalletFromProps) {
-      selectedWalletFromProps = account.multisig_wallets.filter(w => w.wallet_name === selectedWallet)[0]
+    let multisigOrSinglesig = account.wallet_for_name(selectedWallet.wallet_name)
+    if (!multisigOrSinglesig) {
+      multisigOrSinglesig = account.wallet_for_address(selectedWallet.address)
       goToMultiSig = true
     }
 
@@ -302,6 +294,7 @@ class Transfer extends Component {
       signatureCount,
       signatureCountError
     } = this.state
+    const { account } = this.props
 
     let destinationError = false
 
@@ -317,12 +310,11 @@ class Transfer extends Component {
       timestamp = moment(dateLockDate).utcOffset(dateLockTimeZone).unix()
     }
 
-    let newSelectedWallet
-    let isMultiSigOutput = true
-    newSelectedWallet = this.props.account.wallets.filter(w => w.wallet_name === selectedWallet)[0] || 0
-    if (newSelectedWallet === 0) {
-      newSelectedWallet = this.props.account.multisig_wallets.filter(w => w.wallet_name === selectedWallet)[0]
-      isMultiSigOutput = false
+    let isMultiSigOutput = false
+    let newSelectedWallet = account.wallet_for_name(selectedWallet.wallet_name)
+    if (!newSelectedWallet) {
+      newSelectedWallet = account.wallet_for_address(selectedWallet.address)
+      isMultiSigOutput = true
     }
 
     if (!multiSigTransaction) {
@@ -367,7 +359,6 @@ class Transfer extends Component {
           this.setState({ loader: false, errorMessage: err.__str__() })
         })
       } else {
-        console.log(selectedWallet)
         toast.error('not enough funds')
         this.setState({ loader: false })
       }
@@ -387,7 +378,6 @@ class Transfer extends Component {
 
     if (!signatureCountError && !amountError && selectedWallet != null && !hasOwnerAddressErrors && areAllOwnersFilledIn) {
       this.renderLoader(true)
-      // const selectedWalletFromProps = this.props.account.wallets.filter(w => w.wallet_name === selectedWallet)[0]
       const builder = selectedWallet.transaction_new()
       if (timestamp) {
         try {
@@ -401,7 +391,6 @@ class Transfer extends Component {
           builder.output_add([signatureCount, ownerAddresses], amount.toString())
         } catch (error) {
           toast('transaction failed')
-          console.log(error)
           return this.setState({ loader: false, errorMessage: error.__str__() })
         }
       }
@@ -520,7 +509,7 @@ class Transfer extends Component {
               selection
               options={walletsOptions}
               onChange={this.selectWallet}
-              value={selectedWallet}
+              value={selectedWallet.wallet_name === '' ? selectedWallet.address : selectedWallet.wallet_name}
             />
           </Form.Field>
           {this.renderErrorMessage()}

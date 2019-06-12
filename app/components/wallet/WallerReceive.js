@@ -63,7 +63,7 @@ class WalletReceive extends Component {
   selectWallet = (event, data) => {
     let selectedWallet = this.props.account.wallet_for_name(data.value)
     if (!selectedWallet) {
-      this.props.account.wallet_for_address(data.value)
+      selectedWallet = this.props.account.wallet_for_address(data.value)
     }
     this.props.account.select_wallet({ name: selectedWallet.wallet_name, address: selectedWallet.address })
     this.setState({ selectedWallet, selectedAddress: selectedWallet.addresses[0] })
