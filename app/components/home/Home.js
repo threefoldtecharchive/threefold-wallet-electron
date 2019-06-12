@@ -1,7 +1,6 @@
 // @flow
 import { connect } from 'react-redux'
 import React, { Component } from 'react'
-import { Link } from 'react-router-dom'
 import { Button, Divider, Message, Label, Icon } from 'semantic-ui-react'
 import routes from '../../constants/routes'
 import styles from './Home.css'
@@ -91,8 +90,8 @@ class Home extends Component {
     if (accountNames.length === 0) {
       return (
         <div style={{ margin: 'auto' }}>
-          <h3>No wallets created yet, create one now</h3>
-          <Link to={routes.NEW}><Button size='big' style={{ width: 180, marginTop: 35 }}>New Account</Button></Link>
+          <h3>No account created yet, create one now</h3>
+          <Button onClick={() => this.props.history.push(routes.NEW)} className={styles.acceptButton} size='big' style={{ width: 220, marginTop: 35 }}>New Account</Button>
         </div>
       )
     }
