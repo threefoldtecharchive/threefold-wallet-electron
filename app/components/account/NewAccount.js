@@ -1,7 +1,7 @@
 // @flow
 import { connect } from 'react-redux'
 import React, { Component } from 'react'
-import { Form, Checkbox, Button, Message, Icon, TextArea, Radio, Divider, Popup, Input } from 'semantic-ui-react'
+import { Form, Checkbox, Button, Message, Icon, TextArea, Radio, Divider, Popup, Input, Label } from 'semantic-ui-react'
 import routes from '../../constants/routes'
 import styles from '../home/Home.css'
 import { addAccount, setBalance, setChainConstants, getTransactionsNotifications } from '../../actions'
@@ -9,6 +9,7 @@ import SeedConfirmationModal from './SeedConfirmationModal'
 import { difference } from 'lodash'
 import * as tfchain from '../../tfchain/api'
 import { toast } from 'react-toastify'
+import { CopyToClipboard } from 'react-copy-to-clipboard'
 
 const mapDispatchToProps = (dispatch) => ({
   AddAccount: (account) => {
@@ -306,6 +307,11 @@ class NewAccount extends Component {
           </Form.Field>
         </Form>
         {this.renderSeedWarning()}
+        {this.state.seed ? (
+          <CopyToClipboard text={this.state.seed} onCopy={() => console.log('copied')}>
+            <Label onClick={() => toast('Seed copied to clipboard')} style={{ display: 'block', margin: 'auto', width: 200, cursor: 'pointer', marginTop: 20 }}><Icon name='clipboard' /> copy seed to clipboard</Label>
+          </CopyToClipboard>
+        ) : (null)}
         <div className={styles.container} >
           <Button className={styles.cancelButton} size='big' type='submit' style={{ marginTop: 10, marginRight: 10, background: 'none', color: 'white', width: 180 }} onClick={() => this.props.history.push(routes.HOME)}>Cancel</Button>
           <Button className={styles.acceptButton} size='big' type='submit' onClick={this.openConfirmationModal} style={{ marginTop: 10, margin: 'auto', color: 'white', width: 220 }}>Create account</Button>
