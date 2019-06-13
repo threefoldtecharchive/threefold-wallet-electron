@@ -27,6 +27,11 @@ const mapDispatchToProps = (dispatch) => ({
 class Sign extends Component {
   goBackToWallet = () => {
     this.props.clearTransactionJson()
+    this.props.history.push(routes.WALLET)
+  }
+
+  goBackToAccount = () => {
+    this.props.clearTransactionJson()
     this.props.history.push(routes.ACCOUNT)
   }
 
@@ -38,8 +43,8 @@ class Sign extends Component {
           <h2 >Sign Transaction</h2>
         </div>
         <Divider style={{ background: '#1A253F' }} />
-        <Icon onClick={() => this.props.history.goBack()} style={{ fontSize: 25, marginLeft: 15, marginTop: 15, cursor: 'pointer' }} name='chevron circle left' />
-        <span onClick={() => this.props.history.goBack()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
+        <Icon onClick={() => this.goBackToWallet()} style={{ fontSize: 25, marginLeft: 15, marginTop: 15, cursor: 'pointer' }} name='chevron circle left' />
+        <span onClick={() => this.goBackToWallet()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
         <Form error style={{ width: '50%', margin: 'auto', marginTop: 0 }}>
           <Form.Field style={{ marginTop: 30 }}>
             <p style={{ fontSize: 14 }}>Before completing this transaction, one or more signatures are required. Copy this transaction JSON and send it to the persons that must sign this.</p>
@@ -58,7 +63,7 @@ class Sign extends Component {
           </CopyToClipboard>
         </Form>
         <div style={{ position: 'absolute', bottom: 150, right: 80 }}>
-          <Button className={styles.cancelButton} onClick={() => this.goBackToWallet()} style={{ marginTop: 20, float: 'left', background: '#2B3C72', color: 'white', marginRight: 15 }} size='big'>Go to account</Button>
+          <Button className={styles.cancelButton} onClick={() => this.goBackToAccount()} style={{ marginTop: 20, float: 'left', background: '#2B3C72', color: 'white', marginRight: 15 }} size='big'>Go to account</Button>
         </div>
         <Footer />
       </div>
