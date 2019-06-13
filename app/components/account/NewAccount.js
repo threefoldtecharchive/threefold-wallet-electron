@@ -11,6 +11,10 @@ import * as tfchain from '../../tfchain/api'
 import { toast } from 'react-toastify'
 import { CopyToClipboard } from 'react-copy-to-clipboard'
 
+const mapStateToProps = state => ({
+  accounts: state.accounts
+})
+
 const mapDispatchToProps = (dispatch) => ({
   AddAccount: (account) => {
     dispatch(addAccount(account))
@@ -27,6 +31,7 @@ class NewAccount extends Component {
   constructor (props) {
     super(props)
     this.state = {
+      accounts: this.props.accounts,
       generateSeed: false,
       seed: '',
       name: '',
@@ -132,7 +137,7 @@ class NewAccount extends Component {
   }
 
   renderNameError = () => {
-    const { nameError, name } = this.state
+    const { accounts, nameError, name } = this.state
     if (!nameError) {
       return null
     }
@@ -152,6 +157,14 @@ class NewAccount extends Component {
         />
       )
     }
+    if (accounts.some(a => a.name.localeCompare(name, { sensitivity: 'base' }) === 0)) {
+      return (
+        <Message
+          error
+          header={'Name is already used by an existing account'}
+        />
+      )
+    }
     return (
       <Message
         error
@@ -163,7 +176,7 @@ class NewAccount extends Component {
   handleNetworkChange = (e, { value }) => this.setState({ network: value })
 
   checkFormValues = () => {
-    const { name, seed, password, passwordConfirmation } = this.state
+    const { accounts, name, seed, password, passwordConfirmation } = this.state
     let seedError = false
     let nameError = false
     let passwordError = false
@@ -174,6 +187,8 @@ class NewAccount extends Component {
     }
 
     if (name === '' || name.length > 48) {
+      nameError = true
+    } else if (accounts.some(a => a.name.localeCompare(name, { sensitivity: 'base' }) === 0)) {
       nameError = true
     }
 
@@ -347,6 +362,6 @@ class NewAccount extends Component {
   }
 }
 export default connect(
-  null,
+  mapStateToProps,
   mapDispatchToProps
 )(NewAccount)

@@ -13,7 +13,8 @@ import { toast } from 'react-toastify'
 import uuid from 'uuid'
 
 const mapStateToProps = state => ({
-  account: state.account.state
+  account: state.account.state,
+  accounts: state.accounts
 })
 
 const mapDispatchToProps = (dispatch) => ({
@@ -32,6 +33,8 @@ class AccountSettings extends Component {
   constructor (props) {
     super(props)
     this.state = {
+      accounts: this.props.accounts,
+      originalName: this.props.account.account_name,
       name: this.props.account.account_name,
       nameError: false,
       walletName: '',
@@ -52,7 +55,8 @@ class AccountSettings extends Component {
   }
 
   saveAccount = () => {
-    const { name, nameError } = this.state
+    const { name, accounts, originalName } = this.state
+    let { nameError } = this.state
 
     if (nameError) {
       toast.error('form is not filled in correctly')
@@ -61,6 +65,10 @@ class AccountSettings extends Component {
     if (name === '' || name.length > 48) {
       this.setState({ nameError: true })
       toast.error('account name is invalid')
+      return false
+    } else if (name !== originalName && accounts.some(a => a.name.localeCompare(name, { sensitivity: 'base' }) === 0)) {
+      this.setState({ nameError: true })
+      toast.error('account name is already used')
       return false
     }
 
@@ -160,7 +168,7 @@ class AccountSettings extends Component {
   }
 
   renderNameError = () => {
-    const { nameError, name } = this.state
+    const { nameError, name, accounts } = this.state
     if (!nameError) {
       return null
     }
@@ -177,6 +185,14 @@ class AccountSettings extends Component {
         <Message
           error
           header={'Name cannot be longer than 48 characters'}
+        />
+      )
+    }
+    if (accounts.some(a => a.name.localeCompare(name, { sensitivity: 'base' }) === 0)) {
+      return (
+        <Message
+          error
+          header={'Name is already used by another existing account'}
         />
       )
     }

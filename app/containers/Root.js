@@ -55,7 +55,14 @@ class Root extends Component {
     const loadAccountsFromStorage = this.props.loadAccounts
     storage.getAll(function (err, data) {
       if (err) throw err
-      loadAccountsFromStorage(Object.values(data))
+      let accounts = []
+      for (let [key, value] of Object.entries(data)) {
+        accounts.push({
+          data: value,
+          name: key
+        })
+      }
+      loadAccountsFromStorage(accounts)
     })
 
     // Refresh account balance every 1 minutes

@@ -27,7 +27,7 @@ class Login extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      name: this.props.account.account_name,
+      name: this.props.account.name,
       password: '',
       passwordError: false
     }
@@ -43,7 +43,7 @@ class Login extends Component {
       return this.setState({ passwordError: true })
     }
     try {
-      const account = tfchain.Account.deserialize(this.props.account.account_name, password, this.props.account)
+      const account = tfchain.Account.deserialize(this.props.account.name, password, this.props.account.data)
       this.props.SelectAccount(account)
       this.props.updateAccount(account)
       this.props.GetTransactionsNotifications(account)
@@ -67,7 +67,7 @@ class Login extends Component {
     return (
       <div style={{ margin: 'auto' }}>
         <div style={{ marginTop: 200, textAlign: 'center' }} >
-          <h2>Sign in to account: {this.props.account.account_name}</h2>
+          <h2>Sign in to account: {this.props.account.name}</h2>
           <Form style={{ width: '50%', margin: 'auto', marginTop: 40 }} onSubmit={this.login}>
             <Form.Field error={passwordError}>
               <Input onKeyDown={this.onKeyDown} type='password' style={{ width: '50%' }} icon={<Icon name='key' style={{ color: '#0e72f5' }} />} iconPosition='left' placeholder='password' value={password} onChange={this.handlePasswordChange} />

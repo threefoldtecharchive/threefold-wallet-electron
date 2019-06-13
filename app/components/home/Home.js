@@ -4,18 +4,21 @@ import React, { Component } from 'react'
 import { Button, Divider, Message, Label, Icon } from 'semantic-ui-react'
 import routes from '../../constants/routes'
 import styles from './Home.css'
-import { selectAccount, resetApp, resetError } from '../../actions'
+import { loadAccounts, selectAccount, resetApp, resetError } from '../../actions'
 import { CopyToClipboard } from 'react-copy-to-clipboard'
 import { toast } from 'react-toastify'
 const storage = require('electron-json-storage')
 const { shell } = require('electron')
 
 const mapStateToProps = state => ({
-  loadAccounts: state.loadAccounts,
+  accounts: state.accounts,
   error: state.error
 })
 
 const mapDispatchToProps = (dispatch) => ({
+  loadAccounts: (accounts) => {
+    dispatch(loadAccounts(accounts))
+  },
   selectAccount: (account) => {
     dispatch(selectAccount(account))
   },
@@ -31,8 +34,7 @@ class Home extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      accounts: [],
-      accountNames: []
+      accounts: []
     }
   }
 
@@ -41,16 +43,23 @@ class Home extends Component {
     this.props.resetApp()
 
     const _this = this
+    const loadAccountsFromStorage = this.props.loadAccounts
     storage.getAll(function (err, data) {
       if (err) throw err
-      _this.setState({ accountNames: Object.keys(data), accounts: data })
+      let accounts = []
+      for (let [key, value] of Object.entries(data)) {
+        accounts.push({
+          data: value,
+          name: key
+        })
+      }
+      _this.setState({ accounts })
+      loadAccountsFromStorage(accounts)
     })
   }
 
   selectAccount = (account) => {
-    const selectedAccount = Object.assign(this.state.accounts[account], { account_name: account })
-
-    this.props.selectAccount(selectedAccount)
+    this.props.selectAccount(account)
     this.props.resetError()
     return this.props.history.push('/login')
   }
@@ -86,8 +95,8 @@ class Home extends Component {
   }
 
   renderAccounts = () => {
-    const { accountNames } = this.state
-    if (accountNames.length === 0) {
+    const { accounts } = this.state
+    if (accounts.length === 0) {
       return (
         <div style={{ margin: 'auto' }}>
           <h3>No account created yet, create one now</h3>
@@ -98,11 +107,11 @@ class Home extends Component {
     return (
       <div>
         <h3>Sign in to one of your accounts</h3>
-        {accountNames.map(account => {
+        {accounts.map(account => {
           return (
-            <div key={account} className={styles.account} style={{ cursor: 'pointer', width: 300, margin: 'auto', marginTop: 15, marginBottom: 15 }} onClick={() => this.selectAccount(account)}>
+            <div key={account.name} className={styles.account} style={{ cursor: 'pointer', width: 300, margin: 'auto', marginTop: 15, marginBottom: 15 }} onClick={() => this.selectAccount(account)}>
               <div className={styles.accountBlockPart}>
-                {account}
+                {account.name}
               </div>
               <div className={styles.accountBlockPartLower} />
             </div>
