@@ -35,9 +35,9 @@ const TransactionList = ({ loader, transactions, chainInfo, account }) => {
     )
   }
 
-  const { explorer_address: explorerAddress, chain_timestamp: chainTimestamp } = chainInfo
-  const accountAddresses = account.addresses
-  if (transactions.length > 0) {
+  if (transactions && transactions.length > 0) {
+    const { explorer_address: explorerAddress, chain_timestamp: chainTimestamp } = chainInfo
+    const accountAddresses = account.addresses
     return (
       <div>
         <Dimmer active={loader} >

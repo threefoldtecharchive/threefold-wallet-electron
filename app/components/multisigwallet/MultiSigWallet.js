@@ -14,7 +14,6 @@ const { shell } = require('electron')
 
 const mapStateToProps = state => ({
   routerLocations: state.routerLocations,
-  chainInfo: state.account.state.chain_info,
   account: state.account.state
 })
 
@@ -94,6 +93,9 @@ class Wallet extends Component {
       return null
     }
 
+    const { account } = this.props
+    const { chain_info: chainConstants } = account
+
     const wallet = this.props.account.selected_wallet
     const active = true
     return (
@@ -125,7 +127,7 @@ class Wallet extends Component {
                   {this.renderOwnerList()}
                 </Segment>
                 <Segment style={{ width: '90%', height: '23vh', overflow: 'auto', overflowY: 'scroll', margin: 'auto', background: '#29272E', marginTop: 20 }}>
-                  <TransactionsList account={this.props.account} loader={this.state.loader} transactions={wallet.balance.transactions} chainInfo={this.props.chainInfo} />
+                  <TransactionsList account={this.props.account} loader={this.state.loader} transactions={wallet.balance.transactions} chainInfo={chainConstants} />
                 </Segment>
               </div>
             </div>
