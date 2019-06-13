@@ -1,7 +1,7 @@
 // @flow
 import { connect } from 'react-redux'
 import React, { Component } from 'react'
-import { Form, Button, Icon, Header, List, Segment, Divider } from 'semantic-ui-react'
+import { Form, Button, Message, Icon, Header, List, Segment, Divider } from 'semantic-ui-react'
 import routes from '../../constants/routes'
 import styles from '../home/Home.css'
 import { saveAccount, deleteAccount, updateAccount } from '../../actions'
@@ -33,6 +33,7 @@ class AccountSettings extends Component {
     super(props)
     this.state = {
       name: this.props.account.account_name,
+      nameError: false,
       walletName: '',
       openDeleteModal: false,
       openDeleteWalletModal: false,
@@ -46,11 +47,22 @@ class AccountSettings extends Component {
   }
 
   handleNameChange = ({ target }) => {
-    this.setState({ name: target.value })
+    const nameError = target.value === '' || target.value.length > 48
+    this.setState({ name: target.value, nameError })
   }
 
   saveAccount = () => {
-    const { name } = this.state
+    const { name, nameError } = this.state
+
+    if (nameError) {
+      toast.error('form is not filled in correctly')
+      return false
+    }
+    if (name === '' || name.length > 48) {
+      this.setState({ nameError: true })
+      toast.error('account name is invalid')
+      return false
+    }
 
     let newAccount = this.props.account
     newAccount.account_name = name
@@ -147,8 +159,37 @@ class AccountSettings extends Component {
     return this.props.history.push(routes.WALLET_SETTINGS)
   }
 
+  renderNameError = () => {
+    const { nameError, name } = this.state
+    if (!nameError) {
+      return null
+    }
+    if (name === '') {
+      return (
+        <Message
+          error
+          header={'Name cannot be empty'}
+        />
+      )
+    }
+    if (name.length > 48) {
+      return (
+        <Message
+          error
+          header={'Name cannot be longer than 48 characters'}
+        />
+      )
+    }
+    return (
+      <Message
+        error
+        header={'Name is invalid for an unknown reason'}
+      />
+    )
+  }
+
   render () {
-    const { name, openDeleteModal, deleteName, deleteNameError, openDeleteWalletModal, deleteWalletName, deleteWalletNameError, showSeedModal } = this.state
+    const { name, openDeleteModal, deleteName, deleteNameError, openDeleteWalletModal, deleteWalletName, deleteWalletNameError, showSeedModal, nameError } = this.state
     return (
       <div>
         <DeleteModal
@@ -184,9 +225,10 @@ class AccountSettings extends Component {
             <Header.Subheader style={{ color: 'white' }}>Manage your account settings</Header.Subheader>
           </Header>
           <Form error style={{ width: '50%', margin: 'auto', marginTop: 10, marginBottom: 50 }}>
-            <Form.Field>
+            <Form.Field error={nameError}>
               <label style={{ float: 'left', color: 'white' }}>Name</label>
-              <input placeholder='01X.....' value={name} onChange={this.handleNameChange} />
+              <input placeholder='account name' value={name} onChange={this.handleNameChange} />
+              {this.renderNameError()}
             </Form.Field>
             <Button className={styles.cancelButton} size='big' style={{ marginTop: 10, marginRight: 10, background: 'none', color: 'white', width: 180 }} onClick={() => this.props.history.push(routes.ACCOUNT)}>Cancel</Button>
             <Button className={styles.acceptButton} size='big' type='submit' onClick={this.saveAccount} style={{ marginTop: 10, margin: 'auto', background: '#015DE1', color: 'white', width: 180 }}>Save</Button>

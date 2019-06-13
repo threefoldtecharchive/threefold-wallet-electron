@@ -67,7 +67,7 @@ class NewAccount extends Component {
   }
 
   handleNameChange = ({ target }) => {
-    if (target.value !== '') {
+    if (target.value !== '' && target.value.length <= 48) {
       this.setState({ nameError: false })
     }
     this.setState({ name: target.value })
@@ -131,6 +131,35 @@ class NewAccount extends Component {
     }
   }
 
+  renderNameError = () => {
+    const { nameError, name } = this.state
+    if (!nameError) {
+      return null
+    }
+    if (name === '') {
+      return (
+        <Message
+          error
+          header={'Name cannot be empty'}
+        />
+      )
+    }
+    if (name.length > 48) {
+      return (
+        <Message
+          error
+          header={'Name cannot be longer than 48 characters'}
+        />
+      )
+    }
+    return (
+      <Message
+        error
+        header={'Name is invalid for an unknown reason'}
+      />
+    )
+  }
+
   handleNetworkChange = (e, { value }) => this.setState({ network: value })
 
   checkFormValues = () => {
@@ -144,7 +173,7 @@ class NewAccount extends Component {
       seedError = true
     }
 
-    if (name === '') {
+    if (name === '' || name.length > 48) {
       nameError = true
     }
 
@@ -283,6 +312,7 @@ class NewAccount extends Component {
           <Form.Field error={nameError}>
             <label style={{ float: 'left', color: 'white' }}>* Account name</label>
             <Input value={name} onChange={this.handleNameChange} />
+            {this.renderNameError()}
           </Form.Field>
           <Form.Field error={passwordError}>
             <label style={{ float: 'left', color: 'white' }}>* Password</label>
