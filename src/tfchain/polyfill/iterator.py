@@ -13,6 +13,6 @@ def generator_new(generator):
         """)
     __pragma__("js", "{}", """
     }
-    result makeIterator();
+    result = makeIterator();
     """)
     return result
