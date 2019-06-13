@@ -35,9 +35,10 @@ export const account = (state = [], action) => {
         state: action.account
       }
     case 'UPDATE_ACCOUNT':
+      const chainInfo = action.account.chain_info
       return {
         state: action.account,
-        currentBlockId: action.account.chain_info.last_block_get().identifier,
+        currentBlockId: chainInfo ? chainInfo.last_block_get().identifier : "",
         walletCount: action.account.wallet_count,
         walletLoadedCount: action.account.wallet_loaded_count
       }
