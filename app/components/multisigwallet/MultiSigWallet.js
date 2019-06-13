@@ -14,7 +14,7 @@ const { shell } = require('electron')
 
 const mapStateToProps = state => ({
   routerLocations: state.routerLocations,
-  chainInfo: state.chainConstants,
+  chainInfo: state.account.state.chain_info,
   account: state.account.state
 })
 

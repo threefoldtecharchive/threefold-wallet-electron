@@ -46,7 +46,7 @@ export const account = (state = [], action) => {
       const chainInfo = action.account.chain_info
       return {
         state: action.account,
-        currentBlockId: chainInfo ? chainInfo.last_block_get().identifier : "",
+        currentBlockId: chainInfo ? chainInfo.last_block_get().identifier : '',
         walletCount: action.account.wallet_count,
         walletLoadedCount: action.account.wallet_loaded_count
       }
