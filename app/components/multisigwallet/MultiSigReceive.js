@@ -25,8 +25,6 @@ class WalletSettings extends Component {
       selectedAddress = this.props.account.multisig_wallets[0].address
     }
 
-    console.log(selectedAddress)
-
     this.state = {
       name: selectedWallet.wallet_name,
       selectedWallet,

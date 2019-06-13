@@ -1261,15 +1261,37 @@ export var Account =  __class__ ('Account', [object], {
 			throw __except0__;
 		}
 		if (__in__ (wallet.address, self.addresses_get (dict ({'singlesig': false})))) {
-			return self.wallet_get (dict ({'address': wallet.address}));
+			var wallet = self.wallet_get (dict ({'address': wallet.address}));
 		}
-		if (py_update && balance == null) {
-			var p = wallet._update (self);
-			if (update_cb != null) {
-				var p = jsasync.chain (p, update_cb);
+		else {
+			self._multisig_wallets.append (wallet);
+		}
+		if (py_update) {
+			if (balance == null) {
+				var p = wallet._update (self);
+				if (update_cb != null) {
+					var p = jsasync.chain (p, (function __lambda__ (_) {
+						if (arguments.length) {
+							var __ilastarg0__ = arguments.length - 1;
+							if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+								var __allkwargs0__ = arguments [__ilastarg0__--];
+								for (var __attrib0__ in __allkwargs0__) {
+									switch (__attrib0__) {
+										case '_': var _ = __allkwargs0__ [__attrib0__]; break;
+									}
+								}
+							}
+						}
+						else {
+						}
+						return update_cb (wallet);
+					}));
+				}
+			}
+			else {
+				update_cb (wallet);
 			}
 		}
-		self._multisig_wallets.append (wallet);
 		return wallet;
 	});},
 	get _sort_multisig_wallets () {return __get__ (this, function (self) {
@@ -1726,7 +1748,22 @@ export var Account =  __class__ ('Account', [object], {
 				else {
 				}
 				var balance = result.balance (self.chain_info._tf_chain_info);
-				var wallet = self._multisig_wallet_new (null, balance.owners, balance.signature_count, __kwargtrans__ ({balance: balance, update_cb: itcb}));
+				self._multisig_wallet_new (null, balance.owners, balance.signature_count, __kwargtrans__ ({balance: balance, update_cb: (function __lambda__ (wallet) {
+					if (arguments.length) {
+						var __ilastarg0__ = arguments.length - 1;
+						if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+							var __allkwargs0__ = arguments [__ilastarg0__--];
+							for (var __attrib0__ in __allkwargs0__) {
+								switch (__attrib0__) {
+									case 'wallet': var wallet = __allkwargs0__ [__attrib0__]; break;
+								}
+							}
+						}
+					}
+					else {
+					}
+					return itcb (self, wallet);
+				})}));
 			};
 			var sort_multisig_wallets = function () {
 				if (arguments.length) {
@@ -2514,6 +2551,9 @@ export var MultiSignatureWallet =  __class__ ('MultiSignatureWallet', [BaseWalle
 		self._owners = jsarr.py_sort (owners, sort_by_uh);
 		self._signatures_required = signatures_required;
 		self._balance = null;
+		if (balance != null) {
+			self._loaded = true;
+		}
 		self.balance = balance;
 		if (len (owner_wallets) == 0) {
 			var __except0__ = ValueError ('expected at least one owner wallet');

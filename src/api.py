@@ -654,14 +654,18 @@ class Account:
             raise ValueError("at least one owner of the multisig wallet has to be owned by this account")
         # ensure the address doesn't exist yet
         if wallet.address in self.addresses_get({'singlesig': False}):
-            return self.wallet_get({'address': wallet.address})
-        if update and balance == None:
-            # fetch wallet balance in background
-            p = wallet._update(self)
-            if update_cb != None:
-                p = jsasync.chain(p, update_cb)
+            wallet = self.wallet_get({'address': wallet.address})
+        else: # append if it didn't exist yet
+            self._multisig_wallets.append(wallet)
+        if update:
+            if balance == None:
+                # fetch wallet balance in background
+                p = wallet._update(self)
+                if update_cb != None:
+                    p = jsasync.chain(p, (lambda _: update_cb(wallet)))
+            else:
+                update_cb(wallet)
         # store and return the wallet info
-        self._multisig_wallets.append(wallet)
         return wallet
 
     def _sort_multisig_wallets(self):
@@ -822,7 +826,7 @@ class Account:
                     yield self._explorer_client.unlockhash_get(address)
             def cb(result):
                 balance = result.balance(self.chain_info._tf_chain_info)
-                wallet = self._multisig_wallet_new(None, balance.owners, balance.signature_count, balance=balance, update_cb=itcb)
+                self._multisig_wallet_new(None, balance.owners, balance.signature_count, balance=balance, update_cb=(lambda wallet: itcb(self, wallet)))
             def sort_multisig_wallets():
                 self._sort_multisig_wallets()
             # pool and chain promises
@@ -1076,6 +1080,8 @@ class MultiSignatureWallet(BaseWallet):
         self._owners = jsarr.sort(owners, sort_by_uh)
         self._signatures_required = signatures_required
         self._balance = None
+        if balance != None:
+            self._loaded = True
         self.balance = balance
         if len(owner_wallets) == 0:
             raise ValueError("expected at least one owner wallet")
