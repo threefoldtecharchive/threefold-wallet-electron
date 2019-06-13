@@ -9,12 +9,22 @@ import styles from '../home/Home.css'
 import Footer from '../footer'
 import { truncate } from 'lodash'
 
-const mapStateToProps = state => ({
-  account: state.account.state,
-  is_loaded: state.account.state.is_loaded,
-  walletLoadedCount: state.account.walletLoadedCount,
-  walletCount: state.account.walletCount
-})
+const mapStateToProps = state => {
+  if (!state.account.state) {
+    return {
+      account: null,
+      is_loaded: false,
+      walletLoadedCount: 0,
+      walletCount: 0
+    }
+  }
+  return {
+    account: state.account.state,
+    is_loaded: state.account.state.is_loaded,
+    walletLoadedCount: state.account.walletLoadedCount,
+    walletCount: state.account.walletCount
+  }
+}
 
 const mapDispatchToProps = (dispatch) => ({
   updateAccount: (account) => {
@@ -178,7 +188,7 @@ class Account extends Component {
 
   render () {
     // If refreshed in development and data in store is deleted, route to home.
-    if ((this.props.account instanceof Array)) {
+    if (!this.props.account || (this.props.account instanceof Array)) {
       this.props.history.push(routes.HOME)
       return null
     }

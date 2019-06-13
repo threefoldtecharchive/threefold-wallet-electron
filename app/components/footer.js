@@ -7,11 +7,17 @@ const pjson = require('../../package.json')
 
 const mapStateToProps = state => ({
   account: state.account.state,
-  is_loaded: state.account.state.is_loaded
+  is_loaded: state.account.state && state.account.state.is_loaded
 })
 
 class Footer extends Component {
   render () {
+    if (!this.props.is_loaded) {
+      return (
+        <div style={{ position: 'absolute', height: 70, bottom: 0, width: '100%', background: '#131216', borderTopStyle: 'solid', borderTopWidth: 2, borderTopColor: '#1A253F', padding: 25 }} />
+      )
+    }
+
     const { account } = this.props
     const { chain_info: chainConstants } = account
     let error = false
@@ -20,12 +26,6 @@ class Footer extends Component {
     }
     const date = moment(chainConstants.chain_timestamp * 1000).format('MMMM Do , HH:mm')
     const tz = momentTz.tz.guess()
-
-    if (!this.props.is_loaded) {
-      return (
-        <div style={{ position: 'absolute', height: 70, bottom: 0, width: '100%', background: '#131216', borderTopStyle: 'solid', borderTopWidth: 2, borderTopColor: '#1A253F', padding: 25 }} />
-      )
-    }
 
     return (
       <div style={{ position: 'absolute', height: 70, bottom: 0, width: '100%', background: '#131216', borderTopStyle: 'solid', borderTopWidth: 2, borderTopColor: '#1A253F', padding: 25 }}>
