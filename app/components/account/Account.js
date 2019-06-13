@@ -4,19 +4,21 @@ import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
 import { Segment, Button, Icon, Divider, Card, Loader, Dimmer } from 'semantic-ui-react'
 import routes from '../../constants/routes'
-import { setBalance } from '../../actions'
+import { updateAccount } from '../../actions'
 import styles from '../home/Home.css'
 import Footer from '../footer'
 import { truncate } from 'lodash'
 
 const mapStateToProps = state => ({
-  account: state.account,
-  is_loaded: state.account.is_loaded
+  account: state.account.state,
+  is_loaded: state.account.state.is_loaded,
+  walletLoadedCount: state.account.walletLoadedCount,
+  walletCount: state.account.walletCount
 })
 
 const mapDispatchToProps = (dispatch) => ({
-  setBalance: (account) => {
-    dispatch(setBalance(account))
+  updateAccount: (account) => {
+    dispatch(updateAccount(account))
   }
 })
 
@@ -45,6 +47,9 @@ class Account extends Component {
   }
 
   renderWallets = () => {
+    console.log('i AM rendered')
+    console.log(this.props)
+
     let wallets = this.props.account.wallets
     let multiSigWallets = this.props.account.multisig_wallets
     return (
@@ -52,7 +57,7 @@ class Account extends Component {
         <Card.Group style={{ marginTop: 20, marginLeft: 20, marginBottom: -20 }}>
           {wallets.map(w => {
             let content = null
-            if (this.props.is_loaded) {
+            if (w.is_loaded) {
               content = (
                 <Card.Content>
                   <div>
@@ -93,7 +98,7 @@ class Account extends Component {
         <Card.Group style={{ marginTop: 20, marginLeft: 20 }}>
           {multiSigWallets.map(w => {
             let content = null
-            if (this.props.is_loaded) {
+            if (w.is_loaded) {
               content = (
                 <Card.Content>
                   <div>

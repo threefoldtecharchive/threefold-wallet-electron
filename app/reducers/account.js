@@ -7,9 +7,13 @@ export const account = (state = [], action) => {
       storage.set(action.account.account_name, addedAccount, function (err) {
         if (err) throw err
       })
-      return action.account
+      return {
+        state: action.account
+      }
     case 'SELECT_ACCOUNT':
-      return action.account
+      return {
+        state: action.account
+      }
     case 'DELETE_ACCOUNT':
       // first delete account
       storage.remove(action.account.account_name, function (err) {
@@ -27,9 +31,16 @@ export const account = (state = [], action) => {
       storage.set(action.account.account_name, action.account.serialize(), function (err) {
         if (err) console.log(err)
       })
-      return action.account
-    case 'SET_BALANCE':
-      return action.account
+      return {
+        state: action.account
+      }
+    case 'UPDATE_ACCOUNT':
+      return {
+        state: action.account,
+        currentBlockId: action.account.chain_info.last_block_get().identifier,
+        walletCount: action.account.wallet_count,
+        walletLoadedCount: action.account.wallet_loaded_count
+      }
     case 'RESET_APP':
       return []
     default:

@@ -3,21 +3,21 @@ import { connect } from 'react-redux'
 import React, { Component } from 'react'
 import { Form, Button, Icon, Header } from 'semantic-ui-react'
 import styles from '../home/Home.css'
-import { saveAccount, setBalance } from '../../actions'
+import { saveAccount, updateAccount } from '../../actions'
 import DeleteModal from './DeleteWalletModal'
 import Footer from '../footer'
 import { toast } from 'react-toastify'
 
 const mapStateToProps = state => ({
-  account: state.account
+  account: state.account.state
 })
 
 const mapDispatchToProps = (dispatch) => ({
   saveAccount: (account) => {
     dispatch(saveAccount(account))
   },
-  setBalance: (account) => {
-    dispatch(setBalance(account))
+  updateAccount: (account) => {
+    dispatch(updateAccount(account))
   }
 })
 
@@ -92,7 +92,7 @@ class WalletSettings extends Component {
       }
     }
     this.props.saveAccount(this.props.account)
-    this.props.setBalance(this.props.account)
+    this.props.updateAccount(this.props.account)
     this.setState({ deleteNameError: false })
     toast('Wallet deleted')
     return this.props.history.push('/account')

@@ -35,33 +35,6 @@ export const selectAccount = function (account) {
   }
 }
 
-export const setChainConstants = function (account) {
-  if (account && !(account instanceof Array)) {
-    return dispatch => {
-      account.update_account().then(acc => {
-        const { chain_info: chaininfo } = acc
-        const chainInfo = {
-          chainHeight: chaininfo.chain_height,
-          chainName: chaininfo.chain_name,
-          chainNetwork: chaininfo.chain_network,
-          chainTimestamp: chaininfo.chain_timestamp,
-          chainVersion: chaininfo.chain_version,
-          explorerAddress: chaininfo.explorer_address
-        }
-        dispatch({
-          type: 'SET_CHAIN_CONSTANTS',
-          chainInfo
-        })
-      })
-    }
-  } else {
-    return {
-      type: 'SET_CHAIN_CONSTANTS',
-      info: null
-    }
-  }
-}
-
 export const getTransactionsNotifications = function (account) {
   if (account && !(account instanceof Array)) {
     return dispatch => {
@@ -101,19 +74,24 @@ export const resetApp = function () {
   }
 }
 
-export const setBalance = function (account) {
+export const updateAccount = function (account) {
   if (account && !(account instanceof Array)) {
     return dispatch => {
-      account.update_account().then(acc => {
+      account.update_account((acc, _) => {
         dispatch({
-          type: 'SET_BALANCE',
+          type: 'UPDATE_ACCOUNT',
+          account: acc
+        })
+      }).then(acc => {
+        dispatch({
+          type: 'UPDATE_ACCOUNT',
           account: acc
         })
       })
     }
   } else {
     return {
-      type: 'SET_BALANCE',
+      type: 'UPDATE_ACCOUNT',
       account: null,
       info: null
     }

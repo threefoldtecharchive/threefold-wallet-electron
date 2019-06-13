@@ -4,7 +4,7 @@ import React, { Component } from 'react'
 import { Form, Button, Icon, Header, List, Segment, Divider } from 'semantic-ui-react'
 import routes from '../../constants/routes'
 import styles from '../home/Home.css'
-import { saveAccount, deleteAccount, setBalance } from '../../actions'
+import { saveAccount, deleteAccount, updateAccount } from '../../actions'
 import DeleteModal from './DeleteAccountModal'
 import DeleteWalletModal from '../wallet/DeleteWalletModal'
 import ShowSeedModal from './ShowSeedModal'
@@ -13,7 +13,7 @@ import { toast } from 'react-toastify'
 import uuid from 'uuid'
 
 const mapStateToProps = state => ({
-  account: state.account
+  account: state.account.state
 })
 
 const mapDispatchToProps = (dispatch) => ({
@@ -23,8 +23,8 @@ const mapDispatchToProps = (dispatch) => ({
   deleteAccount: (account) => {
     dispatch(deleteAccount(account))
   },
-  setBalance: (account) => {
-    dispatch(setBalance(account))
+  updateAccount: (account) => {
+    dispatch(updateAccount(account))
   }
 })
 

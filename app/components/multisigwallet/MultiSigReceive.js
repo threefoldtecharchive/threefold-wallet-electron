@@ -8,7 +8,7 @@ import { CopyToClipboard } from 'react-copy-to-clipboard'
 import { toast } from 'react-toastify'
 
 const mapStateToProps = state => ({
-  account: state.account
+  account: state.account.state
 })
 
 class WalletSettings extends Component {

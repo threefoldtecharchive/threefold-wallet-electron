@@ -3,7 +3,7 @@ import { connect, Provider } from 'react-redux'
 import React, { Component } from 'react'
 import { ConnectedRouter } from 'connected-react-router'
 import Routes from '../Routes'
-import { loadAccounts, setBalance, setChainConstants, getTransactionsNotifications, setError } from '../actions'
+import { loadAccounts, updateAccount, getTransactionsNotifications, setError } from '../actions'
 
 const os = require('os')
 const storage = require('electron-json-storage')
@@ -12,18 +12,15 @@ const path = require('path')
 storage.setDataPath(os.tmpdir())
 
 const mapStateToProps = state => ({
-  account: state.account
+  account: state.account.state
 })
 
 const mapDispatchToProps = (dispatch) => ({
   loadAccounts: (accounts) => {
     dispatch(loadAccounts(accounts))
   },
-  setBalance: (account) => {
-    dispatch(setBalance(account))
-  },
-  setChainConstants: (account) => {
-    dispatch(setChainConstants(account))
+  updateAccount: (account) => {
+    dispatch(updateAccount(account))
   },
   getTransactionsNotifications: (account) => {
     dispatch(getTransactionsNotifications(account))
@@ -64,8 +61,7 @@ class Root extends Component {
     // Refresh account balance every 1 minutes
     this.intervalID = setInterval(() => {
       const { account } = this.props
-      this.props.setBalance(account)
-      this.props.setChainConstants(account)
+      this.props.updateAccount(account)
       this.props.getTransactionsNotifications(account)
     }, 60000)
   }
