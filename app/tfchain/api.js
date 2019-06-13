@@ -403,7 +403,7 @@ export var Account =  __class__ ('Account', [object], {
 		}
 		var msbalances = [];
 		if (multisig) {
-			var balances = (function () {
+			var msbalances = (function () {
 				var __accu0__ = [];
 				for (var wallet of self._multisig_wallets) {
 					__accu0__.append (wallet.balance);

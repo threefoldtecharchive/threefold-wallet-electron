@@ -47,9 +47,6 @@ class Account extends Component {
   }
 
   renderWallets = () => {
-    console.log('i AM rendered')
-    console.log(this.props)
-
     let wallets = this.props.account.wallets
     let multiSigWallets = this.props.account.multisig_wallets
     return (

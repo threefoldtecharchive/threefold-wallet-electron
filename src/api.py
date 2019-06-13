@@ -265,7 +265,7 @@ class Account:
             balances = [wallet.balance for wallet in self._wallets]
         msbalances = []
         if multisig:
-            balances = [wallet.balance for wallet in self._multisig_wallets]
+            msbalances = [wallet.balance for wallet in self._multisig_wallets]
         return AccountBalance(
             self.account_name,
             balances=balances,
