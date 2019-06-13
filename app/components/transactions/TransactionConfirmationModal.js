@@ -40,78 +40,22 @@ function renderModalBody (multiSigTransaction, selectedWallet, amount, owners, d
     timestamp = moment(dateLockDate).utcOffset(dateLockTimeZone).toString()
   }
 
-  if (!multiSigTransaction) {
-    return (
-      <List style={{ color: 'black' }}>
-        <List.Item>
-          <Icon name='right triangle' />
-          <List.Content>
-            <List.Header>From</List.Header>
-            <List.Description>
-              { selectedWallet.wallet_name ? (
-                <span>{selectedWallet.wallet_name}</span>
-              ) : (
-                <span style={{ fontSize: 12, fontFamily: 'Menlo-Regular' }}>{selectedWallet.address}</span>
-              )}
-            </List.Description>
-          </List.Content>
-        </List.Item>
-        <List.Item>
-          <Icon name='right triangle' />
-          <List.Content>
-            <List.Header>Amount: </List.Header>
-            <List.Description>
-              {amount} TFT
-            </List.Description>
-          </List.Content>
-        </List.Item>
-        <List.Item>
-          <Icon name='right triangle' />
-          <List.Content>
-            <List.Header>To: </List.Header>
-            <List.Description>
-              <span style={{ fontSize: 12, fontFamily: 'Menlo-Regular' }}>{destination}</span>
-            </List.Description>
-          </List.Content>
-        </List.Item>
-        {timestamp ? (
-          <List.Item>
-            <Icon name='right triangle' />
-            <List.Content>
-              <List.Header>Timestamp: </List.Header>
-              <List.Description>
-                {timestamp}
-              </List.Description>
-            </List.Content>
-          </List.Item>
-        ) : (null)}
-      </List>
-    )
-  } else {
-    return (
-      <List style={{ color: 'black' }}>
-        <List.Item>
-          <Icon name='right triangle' />
-          <List.Content>
-            <List.Header>From</List.Header>
-            <List.Description>
-              { selectedWallet.wallet_name ? (
-                <span>{selectedWallet.wallet_name}</span>
-              ) : (
-                <span style={{ fontSize: 12, fontFamily: 'Menlo-Regular' }}>{selectedWallet.address}</span>
-              )}
-            </List.Description>
-          </List.Content>
-        </List.Item>
-        <List.Item>
-          <Icon name='right triangle' />
-          <List.Content>
-            <List.Header>Amount: </List.Header>
-            <List.Description>
-              {amount} TFT
-            </List.Description>
-          </List.Content>
-        </List.Item>
+  // single recipient if single sig transaction
+  let recipients = (
+    <List.Item>
+      <Icon name='right triangle' />
+      <List.Content>
+        <List.Header>To: </List.Header>
+        <List.Description>
+          <span style={{ fontSize: 12, fontFamily: 'Menlo-Regular' }}>{destination}</span>
+        </List.Description>
+      </List.Content>
+    </List.Item>
+  )
+  if (multiSigTransaction) {
+    // multiple recipients if multi sig transaction
+    recipients = (
+      <React.Fragment>
         <List.Item>
           <Icon name='right triangle' />
           <List.Content>
@@ -134,20 +78,48 @@ function renderModalBody (multiSigTransaction, selectedWallet, amount, owners, d
             </List.Description>
           </List.Content>
         </List.Item>
-        {timestamp ? (
-          <List.Item>
-            <Icon name='right triangle' />
-            <List.Content>
-              <List.Header>Timestamp: </List.Header>
-              <List.Description>
-                {timestamp}
-              </List.Description>
-            </List.Content>
-          </List.Item>
-        ) : (null)}
-      </List>
+      </React.Fragment>
     )
   }
+
+  return (
+    <List style={{ color: 'black' }}>
+      <List.Item>
+        <Icon name='right triangle' />
+        <List.Content>
+          <List.Header>From</List.Header>
+          <List.Description>
+            { selectedWallet.wallet_name ? (
+              <span>{selectedWallet.wallet_name}</span>
+            ) : (
+              <span style={{ fontSize: 12, fontFamily: 'Menlo-Regular' }}>{selectedWallet.address}</span>
+            )}
+          </List.Description>
+        </List.Content>
+      </List.Item>
+      <List.Item>
+        <Icon name='right triangle' />
+        <List.Content>
+          <List.Header>Amount: </List.Header>
+          <List.Description>
+            {amount} TFT
+          </List.Description>
+        </List.Content>
+      </List.Item>
+      {recipients}
+      {timestamp ? (
+        <List.Item>
+          <Icon name='right triangle' />
+          <List.Content>
+            <List.Header>Timestamp: </List.Header>
+            <List.Description>
+              {timestamp}
+            </List.Description>
+          </List.Content>
+        </List.Item>
+      ) : (null)}
+    </List>
+  )
 }
 
 export default confirmationModal
