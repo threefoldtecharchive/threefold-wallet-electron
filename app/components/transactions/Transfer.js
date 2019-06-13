@@ -9,8 +9,14 @@ import { setBalance, setTransactionJson } from '../../actions'
 import * as tfchain from '../../tfchain/api'
 import moment from 'moment'
 import routes from '../../constants/routes'
-import { filter, concat, truncate } from 'lodash'
+import { filter, concat, truncate, flatten } from 'lodash'
 import TransactionConfirmationModal from './TransactionConfirmationModal'
+
+const TransactionTypes = {
+  SINGLE: 'SINGLE',
+  MULTISIG: 'MULTISIG',
+  INTERNAL: 'INTERNAL'
+}
 
 const mapStateToProps = state => ({
   account: state.account,
@@ -30,13 +36,18 @@ class Transfer extends Component {
   constructor (props) {
     super(props)
     let selectedWallet
+    let selectedWalletRecipient
     if (this.props.account.selected_wallet) {
       selectedWallet = this.props.account.selected_wallet
+      selectedWalletRecipient = this.props.account.selected_wallet
     } else {
       selectedWallet = this.props.account.wallets[0]
+      selectedWalletRecipient = this.props.account.wallets[0]
     }
 
+    const selectedRecipientAddress = selectedWallet.address
     this.state = {
+      transactionType: TransactionTypes.SINGLE,
       destination: '',
       description: '',
       amount: 1,
@@ -45,10 +56,11 @@ class Transfer extends Component {
       amountError: false,
       wallets: [],
       selectedWallet,
+      selectedWalletRecipient,
+      selectedRecipientAddress,
       loader: false,
       datelock: '',
       timelock: '',
-      multiSigTransaction: false,
       signatureCount: 2,
       ownerAddressErrors: [false, false],
       ownerAddresses: ['', ''],
@@ -90,10 +102,9 @@ class Transfer extends Component {
     this.setState({ amount: target.value })
   }
 
-  handleMultiSigTransactionCheck = () => {
-    const newState = !this.state.multiSigTransaction
+  handleMultiSigTransactionCheck = (txtype) => {
     this.resetFormValues()
-    this.setState({ multiSigTransaction: newState })
+    this.setState({ transactionType: txtype })
   }
 
   resetFormValues = () => {
@@ -108,7 +119,6 @@ class Transfer extends Component {
       loader: false,
       datelock: '',
       timelock: '',
-      multiSigTransaction: false,
       signatureCount: 2,
       ownerAddressErrors: [false, false],
       ownerAddresses: ['', ''],
@@ -199,8 +209,8 @@ class Transfer extends Component {
   }
 
   renderDestinationForm = () => {
-    const { multiSigTransaction, destinationError, destination, signatureCount } = this.state
-    if (!multiSigTransaction) {
+    const { transactionType, destinationError, destination, signatureCount } = this.state
+    if (transactionType === TransactionTypes.SINGLE) {
       return (
         <Form.Field style={{ marginTop: 10 }}>
           <Input
@@ -215,7 +225,7 @@ class Transfer extends Component {
           {this.renderDestinationError()}
         </Form.Field>
       )
-    } else {
+    } else if (transactionType === TransactionTypes.MULTISIG) {
       return (
         <Form.Field style={{ marginTop: 10 }}>
           <Form.Field >
@@ -232,6 +242,40 @@ class Transfer extends Component {
           </Form.Field>
           {this.renderDestinationError()}
         </Form.Field>
+      )
+    } else if (transactionType === TransactionTypes.INTERNAL) {
+      const walletsOptions = this.mapWalletsToDropdownOption()
+      const addressOptions = this.mapRecipientAddressesToDropdownOption()
+      const { selectedWalletRecipient, selectedRecipientAddress } = this.state
+
+      return (
+        <React.Fragment>
+          <Form.Field style={{ marginTop: 10 }}>
+            <label style={{ color: 'white' }}>Select your destination wallet</label>
+            <Dropdown
+              placeholder='Select Wallet'
+              fluid
+              selection
+              options={walletsOptions}
+              onChange={this.selectWalletRecipient}
+              value={selectedWalletRecipient.wallet_name === '' ? selectedWalletRecipient.address : selectedWalletRecipient.wallet_name}
+            />
+          </Form.Field>
+          {selectedWalletRecipient.is_multisig ? (null) : (
+            <Form.Field>
+              <label style={{ color: 'white' }}>Destination Address</label>
+              <Dropdown
+                style={{ width: 690, marginLeft: 'auto', marginRight: 'auto', marginBottom: 20, marginTop: 10 }}
+                placeholder='Select Address'
+                fluid
+                selection
+                options={addressOptions}
+                onChange={this.selectAddress}
+                value={selectedRecipientAddress}
+              />
+            </Form.Field>
+          )}
+        </React.Fragment>
       )
     }
   }
@@ -268,6 +312,32 @@ class Transfer extends Component {
     this.setState({ selectedWallet })
 
     this.props.account.select_wallet({ name: selectedWallet.wallet_name, address: selectedWallet.address })
+  }
+
+  selectWalletRecipient = (event, data) => {
+    let selectedWalletRecipient = this.props.account.wallet_for_name(data.value)
+    if (!selectedWalletRecipient) {
+      selectedWalletRecipient = this.props.account.wallet_for_address(data.value)
+    }
+    this.setState({ selectedWalletRecipient, selectedRecipientAddress: selectedWalletRecipient.address })
+  }
+
+  mapRecipientAddressesToDropdownOption = () => {
+    const { selectedWalletRecipient } = this.state
+
+    if (selectedWalletRecipient) {
+      return flatten(selectedWalletRecipient.addresses.map(w => {
+        return {
+          key: w,
+          text: w,
+          value: w
+        }
+      }))
+    }
+  }
+
+  selectAddress = (event, data) => {
+    this.setState({ selectedRecipientAddress: data.value })
   }
 
   // implement goBack ourselfs, if a user has made a transaction and he presses go back then he should route to account
@@ -360,6 +430,36 @@ class Transfer extends Component {
     return false
   }
 
+  checkInternalTransactionFormValues = () => {
+    const {
+      selectedWalletRecipient,
+      selectedWallet,
+      amountError,
+      amount
+    } = this.state
+
+    let amountErrorValidation = false
+    let selectedWalletReciepentError = false
+    if (amount <= 0) {
+      amountErrorValidation = true
+    }
+
+    if (!selectedWalletRecipient) {
+      selectedWalletReciepentError = true
+    }
+
+    if (!selectedWalletReciepentError && !amountError && selectedWallet) {
+      if (selectedWallet.can_spent) {
+        return true
+      } else {
+        return toast.error('not enough funds')
+      }
+    }
+    this.setState({ amountError: amountErrorValidation })
+    toast.error('form is not filled in correctly')
+    return false
+  }
+
   buildSingleTransaction = () => {
     const { selectedWallet, description, destination, amount, datelock, timelock } = this.state
 
@@ -447,6 +547,51 @@ class Transfer extends Component {
     })
   }
 
+  buildInternalTransation = () => {
+    const { selectedWallet, description, selectedRecipientAddress, selectedWalletRecipient, amount, datelock, timelock } = this.state
+
+    let timestamp
+    if (datelock !== '') {
+      const concatDate = datelock + ' ' + timelock
+      const dateLockDate = new Date(concatDate)
+      const dateLockTimeZone = dateLockDate.getTimezoneOffset()
+      timestamp = moment(dateLockDate).utcOffset(dateLockTimeZone).unix()
+    }
+
+    this.renderLoader(true)
+    const builder = selectedWallet.transaction_new()
+    const recipient = selectedWalletRecipient.recipient_get({ address: selectedRecipientAddress })
+    if (timestamp) {
+      try {
+        builder.output_add(recipient, amount.toString(), { lock: timestamp })
+      } catch (error) {
+        toast('transaction failed')
+        return this.setState({ loader: false, errorMessage: error.__str__() })
+      }
+    } else {
+      try {
+        builder.output_add(recipient, amount.toString())
+      } catch (error) {
+        toast('transaction failed')
+        return this.setState({ loader: false, errorMessage: error.__str__() })
+      }
+    }
+    builder.send({ data: description }).then(result => {
+      this.setState({ destinationError: false, amountError: false, loader: false })
+      this.props.setBalance(this.props.account)
+      if (result.submitted) {
+        toast('Transaction ' + result.transaction.id + ' submitted')
+        return this.goBack()
+      } else {
+        this.props.setTransactionJson(JSON.stringify(result.transaction.json()))
+        return this.props.history.push(routes.SIGN)
+      }
+    }).catch(err => {
+      toast.error('transaction failed')
+      this.setState({ loader: false, errorMessage: err.__str__() })
+    })
+  }
+
   renderLoader = (active) => {
     this.setState({ loader: active })
   }
@@ -499,29 +644,50 @@ class Transfer extends Component {
   }
 
   confirmTransaction = () => {
-    const { multiSigTransaction } = this.state
+    const { transactionType } = this.state
 
-    if (multiSigTransaction) {
+    if (transactionType === TransactionTypes.MULTISIG) {
       this.buildMultiSignTransaction()
-    } else {
+    } else if (transactionType === TransactionTypes.SINGLE) {
       this.buildSingleTransaction()
+    } else if (transactionType === TransactionTypes.INTERNAL) {
+      this.buildInternalTransation()
     }
   }
 
   openConfirmationModal = () => {
-    if (this.state.multiSigTransaction) {
+    const { transactionType } = this.state
+    if (transactionType === TransactionTypes.MULTISIG) {
       if (this.checkMultisigTransactionFormValues()) {
         this.setState({ openConfirmationModal: true })
       }
-    } else {
+    } else if (transactionType === TransactionTypes.SINGLE) {
       if (this.checkSingleTransactionFormValues()) {
+        this.setState({ openConfirmationModal: true })
+      }
+    } else if (transactionType === TransactionTypes.INTERNAL) {
+      if (this.checkInternalTransactionFormValues()) {
         this.setState({ openConfirmationModal: true })
       }
     }
   }
 
   render () {
-    const { amountError, amount, timelock, datelock, selectedWallet, multiSigTransaction, openConfirmationModal, destination, ownerAddresses, signatureCount } = this.state
+    const {
+      amountError,
+      amount,
+      timelock,
+      datelock,
+      selectedWallet,
+      openConfirmationModal,
+      destination,
+      ownerAddresses,
+      signatureCount,
+      transactionType,
+      selectedWalletRecipient,
+      selectedRecipientAddress
+    } = this.state
+
     const walletsOptions = this.mapWalletsToDropdownOption()
 
     if (this.state.loader) {
@@ -532,15 +698,15 @@ class Transfer extends Component {
       )
     }
 
-    const radioChecked = !multiSigTransaction
-
     return (
       <div>
         <TransactionConfirmationModal
           open={openConfirmationModal}
           closeModal={this.closeConfirmationModal}
           confirmTransaction={this.confirmTransaction}
-          multiSigTransaction={multiSigTransaction}
+          transactionType={transactionType}
+          selectedWalletRecipient={selectedWalletRecipient}
+          selectedRecipientAddress={selectedRecipientAddress}
           destination={destination}
           selectedWallet={selectedWallet}
           amount={amount}
@@ -557,20 +723,29 @@ class Transfer extends Component {
         <span onClick={() => this.goBack()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
         <Form error style={{ width: '60%', marginLeft: '10%', marginTop: 10, overflowY: 'auto', height: 550, padding: 30 }}>
           <h2 style={{ marginBottom: 20 }}>Send funds to:</h2>
-          <Form.Field>
-            <Radio
-              label={<label style={{ color: 'white' }}>Wallet</label>}
-              checked={radioChecked}
-              onChange={this.handleMultiSigTransactionCheck}
-            />
-          </Form.Field>
-          <Form.Field>
-            <Radio
-              label={<label style={{ color: 'white' }}>Multisignature Wallet</label>}
-              checked={!radioChecked}
-              onChange={this.handleMultiSigTransactionCheck}
-            />
-          </Form.Field>
+          <div style={{ display: 'flex' }}>
+            <Form.Field style={{ marginRight: 25 }}>
+              <Radio
+                label={<label style={{ color: 'white' }}>Wallet</label>}
+                checked={transactionType === TransactionTypes.SINGLE}
+                onChange={() => this.handleMultiSigTransactionCheck(TransactionTypes.SINGLE)}
+              />
+            </Form.Field>
+            <Form.Field style={{ marginRight: 25 }}>
+              <Radio
+                label={<label style={{ color: 'white' }}>Multisignature Wallet</label>}
+                checked={transactionType === TransactionTypes.MULTISIG}
+                onChange={() => this.handleMultiSigTransactionCheck(TransactionTypes.MULTISIG)}
+              />
+            </Form.Field>
+            <Form.Field style={{ marginRight: 25 }}>
+              <Radio
+                label={<label style={{ color: 'white' }}>One of your Wallets</label>}
+                checked={transactionType === TransactionTypes.INTERNAL}
+                onChange={() => this.handleMultiSigTransactionCheck(TransactionTypes.INTERNAL)}
+              />
+            </Form.Field>
+          </div>
           {this.renderDestinationForm()}
           <Form.Field style={{ marginTop: 30 }}>
             <Input type='number' error={amountError} label='Amount TFT' style={{ background: '#0c111d !important', color: '#7784a9', width: 150 }} placeholder='amount' value={amount} onChange={this.handleAmountChange} />

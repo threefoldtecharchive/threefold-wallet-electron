@@ -4,13 +4,13 @@ import moment from 'moment-timezone'
 
 const closeOnEscape = true
 
-const confirmationModal = ({ open, closeModal, transaction, confirmTransaction, multiSigTransaction, selectedWallet, amount, owners, destination, signatureCount, datelock, timelock }) => (
+const confirmationModal = ({ open, closeModal, transaction, confirmTransaction, transactionType, selectedWallet, amount, owners, destination, signatureCount, datelock, timelock, selectedWalletRecipient, selectedRecipientAddress }) => (
   <Modal open={open} closeOnEscape={closeOnEscape} onClose={closeModal}>
     <Modal.Header>Confirm transaction</Modal.Header>
     <Modal.Content image>
       <Modal.Description>
         <Header>Do you wish to confirm this transaction?</Header>
-        {renderModalBody(multiSigTransaction, selectedWallet, amount, owners, destination, signatureCount, timelock, datelock)}
+        {renderModalBody(transactionType, selectedWallet, amount, owners, destination, signatureCount, timelock, datelock, selectedWalletRecipient, selectedRecipientAddress)}
       </Modal.Description>
     </Modal.Content>
     <Modal.Actions>
@@ -28,7 +28,7 @@ const confirmationModal = ({ open, closeModal, transaction, confirmTransaction, 
   </Modal>
 )
 
-function renderModalBody (multiSigTransaction, selectedWallet, amount, owners, destination, signatureCount, timelock, datelock) {
+function renderModalBody (transactionType, selectedWallet, amount, owners, destination, signatureCount, timelock, datelock, selectedWalletRecipient, selectedRecipientAddress) {
   if (!selectedWallet) {
     return null
   }
@@ -52,7 +52,7 @@ function renderModalBody (multiSigTransaction, selectedWallet, amount, owners, d
       </List.Content>
     </List.Item>
   )
-  if (multiSigTransaction) {
+  if (transactionType === 'MULTISIG') {
     // multiple recipients if multi sig transaction
     recipients = (
       <React.Fragment>
@@ -80,6 +80,16 @@ function renderModalBody (multiSigTransaction, selectedWallet, amount, owners, d
         </List.Item>
       </React.Fragment>
     )
+  } else if (transactionType === 'INTERNAL') {
+    recipients = (<List.Item>
+      <Icon name='right triangle' />
+      <List.Content>
+        <List.Header>To: </List.Header>
+        <List.Description>
+          wallet {selectedWalletRecipient.wallet_name}, address: <span style={{ fontSize: 12, fontFamily: 'Menlo-Regular' }}>{selectedRecipientAddress}</span>
+        </List.Description>
+      </List.Content>
+    </List.Item>)
   }
 
   return (
