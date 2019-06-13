@@ -3,6 +3,7 @@ import { Icon } from 'semantic-ui-react'
 import { connect } from 'react-redux'
 import moment from 'moment'
 import momentTz from 'moment-timezone'
+const pjson = require('../../package.json')
 
 const mapStateToProps = state => ({
   account: state.account.state,
@@ -37,7 +38,7 @@ class Footer extends Component {
             <Icon name='circle' style={{ color: 'green', marginLeft: 10 }} />
             <label>connected to {chainConstants.chain_network}</label>
             <label style={{ position: 'absolute', right: 450 }}><Icon name='h square' /> {chainConstants.chain_height} @ {date} {tz}</label>
-            <label style={{ position: 'absolute', right: 50 }}>version 0.1.0</label>
+            <label style={{ position: 'absolute', right: 50 }}>version {pjson.version}</label>
           </div>
         }
       </div>
