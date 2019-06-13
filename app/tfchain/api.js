@@ -1202,12 +1202,15 @@ export var Account =  __class__ ('Account', [object], {
 		self._sort_multisig_wallets ();
 		return wallet;
 	});},
-	get _multisig_wallet_new () {return __get__ (this, function (self, py_name, owners, signatures_required, balance, py_update) {
+	get _multisig_wallet_new () {return __get__ (this, function (self, py_name, owners, signatures_required, balance, py_update, update_cb) {
 		if (typeof balance == 'undefined' || (balance != null && balance.hasOwnProperty ("__kwargtrans__"))) {;
 			var balance = null;
 		};
 		if (typeof py_update == 'undefined' || (py_update != null && py_update.hasOwnProperty ("__kwargtrans__"))) {;
 			var py_update = true;
+		};
+		if (typeof update_cb == 'undefined' || (update_cb != null && update_cb.hasOwnProperty ("__kwargtrans__"))) {;
+			var update_cb = null;
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -1221,6 +1224,7 @@ export var Account =  __class__ ('Account', [object], {
 						case 'signatures_required': var signatures_required = __allkwargs0__ [__attrib0__]; break;
 						case 'balance': var balance = __allkwargs0__ [__attrib0__]; break;
 						case 'py_update': var py_update = __allkwargs0__ [__attrib0__]; break;
+						case 'update_cb': var update_cb = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
@@ -1260,7 +1264,10 @@ export var Account =  __class__ ('Account', [object], {
 			return self.wallet_get (dict ({'address': wallet.address}));
 		}
 		if (py_update && balance == null) {
-			wallet._update (self);
+			var p = wallet._update (self);
+			if (update_cb != null) {
+				var p = jsasync.chain (p, update_cb);
+			}
 		}
 		self._multisig_wallets.append (wallet);
 		return wallet;
@@ -1470,7 +1477,28 @@ export var Account =  __class__ ('Account', [object], {
 			self._loaded = true;
 			return self;
 		};
-		return jsasync.chain (self._update_chain_info (), self._update_known_multisig_wallet_balances (itcb), self._update_singlesig_wallet_balances (itcb), self._collect_unknown_multisig_wallet_balances (itcb), cb_return_self);
+		if (itcb == null) {
+			var stub_cb = function (_, w) {
+				if (arguments.length) {
+					var __ilastarg0__ = arguments.length - 1;
+					if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+						var __allkwargs0__ = arguments [__ilastarg0__--];
+						for (var __attrib0__ in __allkwargs0__) {
+							switch (__attrib0__) {
+								case '_': var _ = __allkwargs0__ [__attrib0__]; break;
+								case 'w': var w = __allkwargs0__ [__attrib0__]; break;
+							}
+						}
+					}
+				}
+				else {
+				}
+				jslog.debug (w.wallet_name);
+				return null;
+			};
+			var itcb = stub_cb;
+		}
+		return jsasync.chain (self._update_chain_info (), self._update_singlesig_wallet_balances (itcb), self._update_known_multisig_wallet_balances (itcb), self._collect_unknown_multisig_wallet_balances (itcb), cb_return_self);
 	});},
 	get _update_chain_info () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -1505,64 +1533,7 @@ export var Account =  __class__ ('Account', [object], {
 		};
 		return jsasync.chain (self._explorer_client.blockchain_info_get (), cb);
 	});},
-	get _update_known_multisig_wallet_balances () {return __get__ (this, function (self, itcb) {
-		if (typeof itcb == 'undefined' || (itcb != null && itcb.hasOwnProperty ("__kwargtrans__"))) {;
-			var itcb = null;
-		};
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'itcb': var itcb = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		var body = function () {
-			if (arguments.length) {
-				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-					var __allkwargs0__ = arguments [__ilastarg0__--];
-					for (var __attrib0__ in __allkwargs0__) {
-					}
-				}
-			}
-			else {
-			}
-			if (len (self._multisig_wallets) == 0) {
-				return null;
-			}
-			var generator = function* () {
-				if (arguments.length) {
-					var __ilastarg0__ = arguments.length - 1;
-					if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-						var __allkwargs0__ = arguments [__ilastarg0__--];
-						for (var __attrib0__ in __allkwargs0__) {
-						}
-					}
-				}
-				else {
-				}
-				for (var wallet of self._multisig_wallets) {
-					yield wallet._update (self);
-					if (itcb != null) {
-						itcb (self, wallet);
-					}
-				}
-				};
-			return jsasync.promise_pool_new (generator);
-		};
-		return body;
-	});},
 	get _update_singlesig_wallet_balances () {return __get__ (this, function (self, itcb) {
-		if (typeof itcb == 'undefined' || (itcb != null && itcb.hasOwnProperty ("__kwargtrans__"))) {;
-			var itcb = null;
-		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -1603,10 +1574,85 @@ export var Account =  __class__ ('Account', [object], {
 				else {
 				}
 				for (var wallet of self._wallets) {
-					yield wallet._update (self);
-					if (itcb != null) {
-						itcb (self, wallet);
+					yield jsasync.chain (wallet._update (self), (function __lambda__ (_) {
+						if (arguments.length) {
+							var __ilastarg0__ = arguments.length - 1;
+							if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+								var __allkwargs0__ = arguments [__ilastarg0__--];
+								for (var __attrib0__ in __allkwargs0__) {
+									switch (__attrib0__) {
+										case '_': var _ = __allkwargs0__ [__attrib0__]; break;
+									}
+								}
+							}
+						}
+						else {
+						}
+						return itcb (self, wallet);
+					}));
+				}
+				};
+			return jsasync.promise_pool_new (generator);
+		};
+		return body;
+	});},
+	get _update_known_multisig_wallet_balances () {return __get__ (this, function (self, itcb) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'itcb': var itcb = __allkwargs0__ [__attrib0__]; break;
 					}
+				}
+			}
+		}
+		else {
+		}
+		var body = function () {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+					}
+				}
+			}
+			else {
+			}
+			if (len (self._multisig_wallets) == 0) {
+				return null;
+			}
+			var generator = function* () {
+				if (arguments.length) {
+					var __ilastarg0__ = arguments.length - 1;
+					if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+						var __allkwargs0__ = arguments [__ilastarg0__--];
+						for (var __attrib0__ in __allkwargs0__) {
+						}
+					}
+				}
+				else {
+				}
+				for (var wallet of self._multisig_wallets) {
+					yield jsasync.chain (wallet._update (self), (function __lambda__ (_) {
+						if (arguments.length) {
+							var __ilastarg0__ = arguments.length - 1;
+							if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+								var __allkwargs0__ = arguments [__ilastarg0__--];
+								for (var __attrib0__ in __allkwargs0__) {
+									switch (__attrib0__) {
+										case '_': var _ = __allkwargs0__ [__attrib0__]; break;
+									}
+								}
+							}
+						}
+						else {
+						}
+						return itcb (self, wallet);
+					}));
 				}
 				};
 			return jsasync.promise_pool_new (generator);
@@ -1614,9 +1660,6 @@ export var Account =  __class__ ('Account', [object], {
 		return body;
 	});},
 	get _collect_unknown_multisig_wallet_balances () {return __get__ (this, function (self, itcb) {
-		if (typeof itcb == 'undefined' || (itcb != null && itcb.hasOwnProperty ("__kwargtrans__"))) {;
-			var itcb = null;
-		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -1683,10 +1726,7 @@ export var Account =  __class__ ('Account', [object], {
 				else {
 				}
 				var balance = result.balance (self.chain_info._tf_chain_info);
-				var wallet = self._multisig_wallet_new (null, balance.owners, balance.signature_count, __kwargtrans__ ({balance: balance}));
-				if (itcb != null) {
-					itcb (self, wallet);
-				}
+				var wallet = self._multisig_wallet_new (null, balance.owners, balance.signature_count, __kwargtrans__ ({balance: balance, update_cb: itcb}));
 			};
 			var sort_multisig_wallets = function () {
 				if (arguments.length) {

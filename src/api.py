@@ -630,7 +630,7 @@ class Account:
         self._sort_multisig_wallets()
         return wallet
 
-    def _multisig_wallet_new(self, name, owners, signatures_required, balance=None, update=True):
+    def _multisig_wallet_new(self, name, owners, signatures_required, balance=None, update=True, update_cb=None):
         # ensure name is valid
         if name == None:
             name = ""
@@ -657,7 +657,9 @@ class Account:
             return self.wallet_get({'address': wallet.address})
         if update and balance == None:
             # fetch wallet balance in background
-            wallet._update(self)
+            p = wallet._update(self)
+            if update_cb != None:
+                p = jsasync.chain(p, update_cb)
         # store and return the wallet info
         self._multisig_wallets.append(wallet)
         return wallet
@@ -762,10 +764,15 @@ class Account:
         def cb_return_self():
             self._loaded = True
             return self
+        if itcb == None:
+            def stub_cb(_, w):
+                jslog.debug(w.wallet_name)
+                return None
+            itcb = stub_cb
         return jsasync.chain(
             self._update_chain_info(),
-            self._update_known_multisig_wallet_balances(itcb),
             self._update_singlesig_wallet_balances(itcb),
+            self._update_known_multisig_wallet_balances(itcb),
             self._collect_unknown_multisig_wallet_balances(itcb),
             cb_return_self
         )
@@ -776,34 +783,30 @@ class Account:
             return None
         return jsasync.chain(self._explorer_client.blockchain_info_get(), cb)
 
-    def _update_known_multisig_wallet_balances(self, itcb=None):
-        def body():
-            if len(self._multisig_wallets) == 0:
-                return None # nothing to do
-            # define generator
-            def generator():
-                for wallet in self._multisig_wallets:
-                    yield wallet._update(self)
-                    if itcb != None:
-                        itcb(self, wallet)
-            return jsasync.promise_pool_new(generator)
-        return body
-
-    def _update_singlesig_wallet_balances(self, itcb=None):
+    def _update_singlesig_wallet_balances(self, itcb):
         def body():
             if len(self._wallets) == 0:
                 return None # nothing to do
             # define generator
             def generator():
                 for wallet in self._wallets:
-                    yield wallet._update(self)
-                    if itcb != None:
-                        itcb(self, wallet)
+                    yield jsasync.chain(wallet._update(self), lambda _: itcb(self, wallet))
             # return pooled promise
             return jsasync.promise_pool_new(generator)
         return body
 
-    def _collect_unknown_multisig_wallet_balances(self, itcb=None):
+    def _update_known_multisig_wallet_balances(self, itcb):
+        def body():
+            if len(self._multisig_wallets) == 0:
+                return None # nothing to do
+            # define generator
+            def generator():
+                for wallet in self._multisig_wallets:
+                    yield jsasync.chain(wallet._update(self), lambda _: itcb(self, wallet))
+            return jsasync.promise_pool_new(generator)
+        return body
+
+    def _collect_unknown_multisig_wallet_balances(self, itcb):
         def body():
             known_ms_addresses = set(self.addresses_get({'singlesig': False}))
             unknown_ms_wallet_addresses = []
@@ -819,9 +822,7 @@ class Account:
                     yield self._explorer_client.unlockhash_get(address)
             def cb(result):
                 balance = result.balance(self.chain_info._tf_chain_info)
-                wallet = self._multisig_wallet_new(None, balance.owners, balance.signature_count, balance=balance)
-                if itcb != None:
-                    itcb(self, wallet)
+                wallet = self._multisig_wallet_new(None, balance.owners, balance.signature_count, balance=balance, update_cb=itcb)
             def sort_multisig_wallets():
                 self._sort_multisig_wallets()
             # pool and chain promises
