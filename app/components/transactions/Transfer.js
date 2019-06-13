@@ -5,7 +5,7 @@ import { Form, Button, Input, Icon, Dropdown, Divider, Loader, Dimmer, Message, 
 import styles from '../home/Home.css'
 import Footer from '../footer'
 import { toast } from 'react-toastify'
-import { setBalance, setTransactionJson } from '../../actions'
+import { updateAccount, setTransactionJson } from '../../actions'
 import * as tfchain from '../../tfchain/api'
 import moment from 'moment'
 import routes from '../../constants/routes'
@@ -19,13 +19,13 @@ const TransactionTypes = {
 }
 
 const mapStateToProps = state => ({
-  account: state.account,
+  account: state.account.state,
   routerLocations: state.routerLocations
 })
 
 const mapDispatchToProps = (dispatch) => ({
-  setBalance: (account) => {
-    dispatch(setBalance(account))
+  updateAccount: (account) => {
+    dispatch(updateAccount(account))
   },
   setTransactionJson: (json) => {
     dispatch(setTransactionJson(json))
@@ -490,7 +490,7 @@ class Transfer extends Component {
     }
     builder.send({ data: description }).then(result => {
       this.setState({ destinationError: false, amountError: false, loader: false })
-      this.props.setBalance(this.props.account)
+      this.props.updateAccount(this.props.account)
       if (result.submitted) {
         toast('Transaction ' + result.transaction.id + ' submitted')
         return this.goBack()
@@ -533,7 +533,7 @@ class Transfer extends Component {
     }
     builder.send({ data: description }).then(result => {
       this.setState({ ownerAddressErrors: [false, false], amountError: false, loader: false })
-      this.props.setBalance(this.props.account)
+      this.props.updateAccount(this.props.account)
       if (result.submitted) {
         toast('Multisign Transaction ' + result.transaction.id + ' submitted')
         return this.goBack()
@@ -578,7 +578,7 @@ class Transfer extends Component {
     }
     builder.send({ data: description }).then(result => {
       this.setState({ destinationError: false, amountError: false, loader: false })
-      this.props.setBalance(this.props.account)
+      this.props.updateAccount(this.props.account)
       if (result.submitted) {
         toast('Transaction ' + result.transaction.id + ' submitted')
         return this.goBack()

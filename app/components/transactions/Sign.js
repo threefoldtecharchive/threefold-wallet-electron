@@ -5,19 +5,19 @@ import { Form, Button, Icon, Divider, TextArea, Label } from 'semantic-ui-react'
 import styles from '../home/Home.css'
 import Footer from '../footer'
 import routes from '../../constants/routes'
-import { setBalance, clearTransactionJson } from '../../actions'
+import { updateAccount, clearTransactionJson } from '../../actions'
 import { CopyToClipboard } from 'react-copy-to-clipboard'
 import { toast } from 'react-toastify'
 
 const mapStateToProps = state => ({
-  account: state.account,
+  account: state.account.state,
   wallet: state.wallet,
   json: state.transactions.json
 })
 
 const mapDispatchToProps = (dispatch) => ({
-  setBalance: (account) => {
-    dispatch(setBalance(account))
+  updateAccount: (account) => {
+    dispatch(updateAccount(account))
   },
   clearTransactionJson: () => {
     dispatch(clearTransactionJson())

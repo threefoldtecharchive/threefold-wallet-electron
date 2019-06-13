@@ -5,19 +5,19 @@ import { Form, Button, Dropdown, Icon, Divider, TextArea, Label, Message, Dimmer
 import styles from '../home/Home.css'
 import Footer from '../footer'
 import routes from '../../constants/routes'
-import { setBalance, clearTransactionJson } from '../../actions'
+import { updateAccount, clearTransactionJson } from '../../actions'
 import { CopyToClipboard } from 'react-copy-to-clipboard'
 import { toast } from 'react-toastify'
 import { concat, truncate } from 'lodash'
 
 const mapStateToProps = state => ({
-  account: state.account,
+  account: state.account.state,
   json: state.transactions.json
 })
 
 const mapDispatchToProps = (dispatch) => ({
-  setBalance: (account) => {
-    dispatch(setBalance(account))
+  updateAccount: (account) => {
+    dispatch(updateAccount(account))
   },
   clearTransactionJson: () => {
     dispatch(clearTransactionJson())

@@ -4,7 +4,7 @@ import React, { Component } from 'react'
 import { Form, Checkbox, Button, Message, Icon, TextArea, Radio, Divider, Popup, Input, Label } from 'semantic-ui-react'
 import routes from '../../constants/routes'
 import styles from '../home/Home.css'
-import { addAccount, setBalance, setChainConstants, getTransactionsNotifications } from '../../actions'
+import { addAccount, updateAccount, getTransactionsNotifications } from '../../actions'
 import SeedConfirmationModal from './SeedConfirmationModal'
 import { difference } from 'lodash'
 import * as tfchain from '../../tfchain/api'
@@ -15,11 +15,8 @@ const mapDispatchToProps = (dispatch) => ({
   AddAccount: (account) => {
     dispatch(addAccount(account))
   },
-  SetBalance: (account) => {
-    dispatch(setBalance(account))
-  },
-  SetChainConstants: (account) => {
-    dispatch(setChainConstants(account))
+  updateAccount: (account) => {
+    dispatch(updateAccount(account))
   },
   GetTransactionsNotifications: (account) => {
     dispatch(getTransactionsNotifications(account))
@@ -195,8 +192,7 @@ class NewAccount extends Component {
 
       this.props.AddAccount(account)
 
-      this.props.SetBalance(account)
-      this.props.SetChainConstants(account)
+      this.props.updateAccount(account)
       this.props.GetTransactionsNotifications(account)
       // account creation succeeded so remove error if there was one
       this.setState({ accountCreationError: false })

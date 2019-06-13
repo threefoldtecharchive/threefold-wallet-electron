@@ -15,7 +15,7 @@ const { shell } = require('electron')
 const mapStateToProps = state => ({
   routerLocations: state.routerLocations,
   chainInfo: state.chainConstants,
-  account: state.account
+  account: state.account.state
 })
 
 class Wallet extends Component {
