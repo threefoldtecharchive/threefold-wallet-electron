@@ -46,7 +46,7 @@ class Transfer extends Component {
       transactionType: TransactionTypes.SINGLE,
       destination: '',
       description: '',
-      amount: 1,
+      amount: null,
       destinationError: false,
       descriptionError: false,
       amountError: false,
@@ -129,7 +129,7 @@ class Transfer extends Component {
     this.setState({
       destination: '',
       description: '',
-      amount: 1,
+      amount: null,
       destinationError: false,
       descriptionError: false,
       amountError: false,
@@ -434,18 +434,17 @@ class Transfer extends Component {
     const {
       destination,
       selectedWallet,
-      amountError,
       amount
     } = this.state
+    let { amountError } = this.state
 
     let destinationError = false
-    let amountErrorValidation = false
     if (destination === '') {
       destinationError = true
     }
 
-    if (amount <= 0) {
-      amountErrorValidation = true
+    if (!amount || amount <= 0) {
+      amountError = true
     }
 
     if (!destinationError && !amountError && selectedWallet) {
@@ -455,7 +454,7 @@ class Transfer extends Component {
         return toast.error('not enough funds')
       }
     }
-    this.setState({ destinationError, amountError: amountErrorValidation })
+    this.setState({ destinationError, amountError: amountError })
     toast.error('form is not filled in correctly')
     return false
   }
@@ -468,13 +467,13 @@ class Transfer extends Component {
       signatureCount,
       amount
     } = this.state
+    let { amountError } = this.state
 
     const hasOwnerAddressErrors = ownerAddressErrors.filter(e => e === true).length > 0
     const areAllOwnersFilledIn = filter(ownerAddresses, o => o === '').length === 0
 
-    let amountErrorValidation = false
-    if (amount <= 0) {
-      amountErrorValidation = true
+    if (!amount || amount <= 0) {
+      amountError = true
     }
 
     let signatureCountErrorValidation
@@ -482,10 +481,10 @@ class Transfer extends Component {
       signatureCountErrorValidation = true
     }
 
-    if (!signatureCountErrorValidation && !amountErrorValidation && selectedWallet != null && !hasOwnerAddressErrors && areAllOwnersFilledIn) {
+    if (!signatureCountErrorValidation && !amountError && selectedWallet != null && !hasOwnerAddressErrors && areAllOwnersFilledIn) {
       return true
     }
-    this.setState({ signatureCountError: signatureCountErrorValidation, amountError: amountErrorValidation })
+    this.setState({ signatureCountError: signatureCountErrorValidation, amountError: amountError })
     return false
   }
 
@@ -493,16 +492,15 @@ class Transfer extends Component {
     const {
       selectedWalletRecipient,
       selectedWallet,
-      amountError,
       amount
     } = this.state
+    let { amountError } = this.state
 
-    let amountErrorValidation = false
-    let selectedWalletReciepentError = false
-    if (amount <= 0) {
-      amountErrorValidation = true
+    if (!amount || amount <= 0) {
+      amountError = true
     }
 
+    let selectedWalletReciepentError = false
     if (!selectedWalletRecipient) {
       selectedWalletReciepentError = true
     }
@@ -514,7 +512,7 @@ class Transfer extends Component {
         return toast.error('not enough funds')
       }
     }
-    this.setState({ amountError: amountErrorValidation })
+    this.setState({ amountError: amountError })
     toast.error('form is not filled in correctly')
     return false
   }
