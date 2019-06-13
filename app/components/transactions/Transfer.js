@@ -65,7 +65,15 @@ class Transfer extends Component {
 
   componentWillMount () {
     const walletsOptions = this.mapOtherWalletsToDropdownOption(this.state.selectedWallet)
-    let selectedWalletRecipient = this.props.account.wallet_for_name(walletsOptions[0].value)
+    let selectedWalletRecipient = null
+    if (walletsOptions.length === 0) {
+      this.setState({
+        selectedWalletRecipient
+      })
+      return
+    }
+
+    selectedWalletRecipient = this.props.account.wallet_for_name(walletsOptions[0].value)
     if (!selectedWalletRecipient) {
       selectedWalletRecipient = this.props.account.wallet_for_address(walletsOptions[0].value)
     }
@@ -255,7 +263,6 @@ class Transfer extends Component {
       )
     } else if (transactionType === TransactionTypes.INTERNAL) {
       const { walletsOptions, addressOptions, selectedWalletRecipient, selectedRecipientAddress } = this.state
-      console.log(selectedWalletRecipient, selectedRecipientAddress, addressOptions)
       return (
         <React.Fragment>
           <Form.Field style={{ marginTop: 10 }}>
@@ -342,20 +349,26 @@ class Transfer extends Component {
       selectedWallet = this.props.account.wallet_for_address(data.value)
     }
     const walletsOptions = this.mapOtherWalletsToDropdownOption(selectedWallet)
-    let selectedWalletRecipient = this.props.account.wallet_for_name(walletsOptions[0].value)
-    if (!selectedWalletRecipient) {
-      selectedWalletRecipient = this.props.account.wallet_for_address(walletsOptions[0].value)
+    if (walletsOptions.length === 0) {
+      this.setState({
+        selectedWalletRecipient: null,
+        selectedWallet
+      })
+    } else {
+      let selectedWalletRecipient = this.props.account.wallet_for_name(walletsOptions[0].value)
+      if (!selectedWalletRecipient) {
+        selectedWalletRecipient = this.props.account.wallet_for_address(walletsOptions[0].value)
+      }
+      const addressOptions = this.mapRecipientAddressesToDropdownOption(selectedWalletRecipient)
+      const selectedRecipientAddress = selectedWalletRecipient.address
+      this.setState({
+        walletsOptions,
+        addressOptions,
+        selectedWalletRecipient,
+        selectedRecipientAddress,
+        selectedWallet
+      })
     }
-    const addressOptions = this.mapRecipientAddressesToDropdownOption(selectedWalletRecipient)
-    const selectedRecipientAddress = selectedWalletRecipient.address
-    this.setState({
-      walletsOptions,
-      addressOptions,
-      selectedWalletRecipient,
-      selectedRecipientAddress,
-      selectedWallet
-    })
-
     this.props.account.select_wallet({ name: selectedWallet.wallet_name, address: selectedWallet.address })
   }
 
@@ -784,13 +797,14 @@ class Transfer extends Component {
                 onChange={() => this.handleMultiSigTransactionCheck(TransactionTypes.MULTISIG)}
               />
             </Form.Field>
-            <Form.Field style={{ marginRight: 25 }}>
-              <Radio
-                label={<label style={{ color: 'white' }}>One of your Wallets</label>}
-                checked={transactionType === TransactionTypes.INTERNAL}
-                onChange={() => this.handleMultiSigTransactionCheck(TransactionTypes.INTERNAL)}
-              />
-            </Form.Field>
+            { selectedWalletRecipient ? (
+              <Form.Field style={{ marginRight: 25 }}>
+                <Radio
+                  label={<label style={{ color: 'white' }}>One of your Wallets</label>}
+                  checked={transactionType === TransactionTypes.INTERNAL}
+                  onChange={() => this.handleMultiSigTransactionCheck(TransactionTypes.INTERNAL)}
+                />
+              </Form.Field>) : null }
           </div>
           {this.renderDestinationForm()}
           <Form.Field style={{ marginTop: 30 }}>
