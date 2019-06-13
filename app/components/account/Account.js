@@ -205,7 +205,7 @@ class Account extends Component {
         </div>
         <div className={styles.container} >
           {/* <h2 >{this.props.account.account_name}</h2> */}
-          <h2>Account</h2>
+          <h2>Account {this.props.account.account_name}</h2>
         </div>
         <Divider style={{ background: '#1A253F' }} />
         <div style={{ display: 'flex' }}>
