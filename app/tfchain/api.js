@@ -7,6 +7,7 @@ import * as tfclient from './tfchain.client.js';
 import * as wbalance from './tfchain.balance.js';
 import * as tfexplorer from './tfchain.explorer.js';
 import * as tfnetwork from './tfchain.network.js';
+import * as tferrors from './tfchain.errors.js';
 import * as tfsiabin from './tfchain.encoding.siabin.js';
 import * as bip39 from './tfchain.crypto.mnemonic.js';
 import * as jsarr from './tfchain.polyfill.array.js';
@@ -466,6 +467,57 @@ export var Account =  __class__ ('Account', [object], {
 		}
 		else {
 		}
+		var wallet = self.wallet_get (__kwargtrans__ ({opts: opts}));
+		self._selected_wallet = wallet;
+	});},
+	get recipient_get () {return __get__ (this, function (self, opts) {
+		if (typeof opts == 'undefined' || (opts != null && opts.hasOwnProperty ("__kwargtrans__"))) {;
+			var opts = null;
+		};
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'opts': var opts = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var wallet = self.wallet_get (__kwargtrans__ ({opts: opts}));
+		if (wallet == null) {
+			var wallet = self.wallet;
+			if (wallet == null) {
+				var __except0__ = tferrors.NotFoundError ('no wallets found, and no single-signature wallets to select');
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
+		}
+		var address = jsfunc.opts_get (opts, ['address']);
+		return wallet.recipient_get (__kwargtrans__ ({opts: dict ({'address': address})}));
+	});},
+	get wallet_get () {return __get__ (this, function (self, opts) {
+		if (typeof opts == 'undefined' || (opts != null && opts.hasOwnProperty ("__kwargtrans__"))) {;
+			var opts = null;
+		};
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'opts': var opts = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
 		var __left0__ = jsfunc.opts_get_with_defaults (opts, [tuple (['name', null]), tuple (['address', null]), tuple (['singlesig', true]), tuple (['multisig', true])]);
 		var py_name = __left0__ [0];
 		var address = __left0__ [1];
@@ -494,8 +546,7 @@ export var Account =  __class__ ('Account', [object], {
 				}
 			}
 			if (wallet != null) {
-				self._selected_wallet = wallet;
-				return ;
+				return wallet;
 			}
 		}
 		if (address != null && address != '') {
@@ -509,8 +560,7 @@ export var Account =  __class__ ('Account', [object], {
 				}
 			}
 			if (wallet != null) {
-				self._selected_wallet = wallet;
-				return ;
+				return wallet;
 			}
 		}
 		var reasons = [];
@@ -521,11 +571,11 @@ export var Account =  __class__ ('Account', [object], {
 			reasons.append ('for address {}'.format (address));
 		}
 		if (len (reasons) > 0) {
-			var __except0__ = ValueError ('no wallet found to sellect {}'.format (' or '.join (reasons)));
+			var __except0__ = tferrors.NotFoundError ('no wallet found to sellect {}'.format (' or '.join (reasons)));
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		self._selected_wallet = null;
+		return null;
 	});},
 	get wallet_for_name () {return __get__ (this, function (self, py_name, opts) {
 		if (typeof opts == 'undefined' || (opts != null && opts.hasOwnProperty ("__kwargtrans__"))) {;
@@ -1773,6 +1823,28 @@ export var BaseWallet =  __class__ ('BaseWallet', [object], {
 		__except0__.__cause__ = null;
 		throw __except0__;
 	});},
+	get recipient_get () {return __get__ (this, function (self, opts) {
+		if (typeof opts == 'undefined' || (opts != null && opts.hasOwnProperty ("__kwargtrans__"))) {;
+			var opts = null;
+		};
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'opts': var opts = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var __except0__ = NotImplementedError ('_recipient_getter is not implemented');
+		__except0__.__cause__ = null;
+		throw __except0__;
+	});},
 	get _get_can_spent () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -2061,6 +2133,40 @@ export var SingleSignatureWallet =  __class__ ('SingleSignatureWallet', [BaseWal
 		}
 		return false;
 	});},
+	get recipient_get () {return __get__ (this, function (self, opts) {
+		if (typeof opts == 'undefined' || (opts != null && opts.hasOwnProperty ("__kwargtrans__"))) {;
+			var opts = null;
+		};
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'opts': var opts = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var address = jsfunc.opts_get (opts, ['address']);
+		if (address == null) {
+			return self.address;
+		}
+		if (!(wallet_address_is_valid (address, __kwargtrans__ ({opts: dict ({'multisig': false})})))) {
+			var __except0__ = py_TypeError ('address is invalid: {} ({})'.format (address, py_typeof (address)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		if (!(__in__ (address, self.addresses))) {
+			var __except0__ = py_TypeError ('address {} is not owned by wallet {}'.format (address, self.wallet_name));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		return address;
+	});},
 	get _balance_getter () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -2323,6 +2429,39 @@ export var MultiSignatureWallet =  __class__ ('MultiSignatureWallet', [BaseWalle
 		else {
 		}
 		return true;
+	});},
+	get recipient_get () {return __get__ (this, function (self, opts) {
+		if (typeof opts == 'undefined' || (opts != null && opts.hasOwnProperty ("__kwargtrans__"))) {;
+			var opts = null;
+		};
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'opts': var opts = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var address = jsfunc.opts_get (opts, ['address']);
+		if (address != null) {
+			if (!(wallet_address_is_valid (address, __kwargtrans__ ({opts: dict ({'multisig': true})})))) {
+				var __except0__ = py_TypeError ('address is invalid: {} ({})'.format (address, py_typeof (address)));
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
+			if (!(__in__ (address, self.address))) {
+				var __except0__ = py_TypeError ('address {} is not owned by multisig wallet {}'.format (address, self.wallet_name));
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
+		}
+		return [self.signatures_required, self.owners];
 	});},
 	get _get_owners () {return __get__ (this, function (self) {
 		if (arguments.length) {

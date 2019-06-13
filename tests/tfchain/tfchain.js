@@ -165,8 +165,10 @@ const _all = {
 
     assert.throws(() => account.multisig_wallet_new('our_wallet', [defaultWallet.address, '01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0'], 1))
     assert.throws(() => account.multisig_wallet_new('our_wallet', ['01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0', defaultWallet.address], 1))
-    assert.throws(() => account.multisig_wallet_new('foo wallet', [defaultWallet.address, '01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0'], 1))
-    assert.throws(() => account.multisig_wallet_new('foo wallet', ['01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0', defaultWallet.address], 1))
+
+    // creating a ms wallet address that already exists will be ignored
+    account.multisig_wallet_new('foo wallet', [defaultWallet.address, '01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0'], 1)
+    account.multisig_wallet_new('foo wallet', ['01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0', defaultWallet.address], 1)
 
     // update the multisig wallet
     const msWalletACopy = account.multisig_wallet_update('foo', [defaultWallet.address, '01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0'], 1)

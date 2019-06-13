@@ -16,6 +16,7 @@ import tfchain.polyfill.array as jsarr
 
 import tfchain.crypto.mnemonic as bip39
 import tfchain.encoding.siabin as tfsiabin
+import tfchain.errors as tferrors
 import tfchain.network as tfnetwork
 import tfchain.explorer as tfexplorer
 import tfchain.balance as wbalance
@@ -283,6 +284,22 @@ class Account:
         return self._selected_wallet
 
     def select_wallet(self, opts=None):
+        wallet = self.wallet_get(opts=opts)
+        self._selected_wallet = wallet
+
+
+    def recipient_get(self, opts=None):
+        wallet = self.wallet_get(opts=opts)
+        if wallet == None:
+            wallet = self.wallet
+            if wallet == None:
+                raise tferrors.NotFoundError("no wallets found, and no single-signature wallets to select")
+        address = jsfunc.opts_get(opts, ['address'])
+        return wallet.recipient_get(opts={
+            'address': address,
+        })
+
+    def wallet_get(self, opts=None):
         # get opts
         name, address, singlesig, multisig = jsfunc.opts_get_with_defaults(opts, [
             ('name', None),
@@ -309,8 +326,7 @@ class Account:
                 if address not in wallet.addresses:
                     raise ValueError("found wallet for name {} but given address {} is not owned by wallet".format(name, address))
             if wallet != None:
-                self._selected_wallet = wallet
-                return
+                return wallet
         # if an address is given, try to select by address
         if address != None and address != "":
             address_defined = True
@@ -322,8 +338,7 @@ class Account:
                 if address not in wallet.addresses:
                     raise ValueError("found wallet for name {} but given address {} is not owned by wallet".format(name, address))
             if wallet != None:
-                self._selected_wallet = wallet
-                return
+                return wallet
 
         # see if we have reasons to fail
         reasons = []
@@ -332,10 +347,10 @@ class Account:
         if address_defined:
             reasons.append("for address {}".format(address))
         if len(reasons) > 0:
-            raise ValueError("no wallet found to sellect {}".format(" or ".join(reasons)))
+            raise tferrors.NotFoundError("no wallet found to sellect {}".format(" or ".join(reasons)))
 
-        # deselect wallet
-        self._selected_wallet = None
+        # no wallet found
+        return None
 
 
     def wallet_for_name(self, name, opts=None):
@@ -848,6 +863,9 @@ class BaseWallet:
     def _is_multisig_getter(self):
         raise NotImplementedError("_address_count_getter is not implemented")
 
+    def recipient_get(self, opts=None):
+        raise NotImplementedError("_recipient_getter is not implemented")
+
     @property
     def can_spent(self):
         """
@@ -956,6 +974,16 @@ class SingleSignatureWallet(BaseWallet):
     def _is_multisig_getter(self):
         return False
 
+    def recipient_get(self, opts=None):
+        address = jsfunc.opts_get(opts, ['address'])
+        if address == None:
+            return self.address
+        if not wallet_address_is_valid(address, opts={'multisig': False}):
+            raise TypeError("address is invalid: {} ({})".format(address, type(address)))
+        if not address in self.addresses:
+            raise TypeError("address {} is not owned by wallet {}".format(address, self.wallet_name))
+        return address
+
     def _balance_getter(self):
        return self._balance
 
@@ -1031,6 +1059,15 @@ class MultiSignatureWallet(BaseWallet):
 
     def _is_multisig_getter(self):
         return True
+
+    def recipient_get(self, opts=None):
+        address = jsfunc.opts_get(opts, ['address'])
+        if address != None:
+            if not wallet_address_is_valid(address, opts={'multisig': True}):
+                raise TypeError("address is invalid: {} ({})".format(address, type(address)))
+            if not address in self.address:
+                raise TypeError("address {} is not owned by multisig wallet {}".format(address, self.wallet_name))
+        return [self.signatures_required, self.owners]
 
     @property
     def owners(self):

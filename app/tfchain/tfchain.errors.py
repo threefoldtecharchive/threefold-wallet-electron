@@ -10,6 +10,13 @@ class TFChainBaseException(Exception):
     def str(self):
         return self.__str__()
 
+
+class NotFoundError(TFChainBaseException):
+    """
+    NotFoundError error
+    """
+
+
 class InvalidPublicKeySpecifier(TFChainBaseException):
     """
     InvalidPublicKeySpecifier error

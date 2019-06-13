@@ -21,6 +21,9 @@ export var TFChainBaseException =  __class__ ('TFChainBaseException', [Exception
 		return self.__str__ ();
 	});}
 });
+export var NotFoundError =  __class__ ('NotFoundError', [TFChainBaseException], {
+	__module__: __name__,
+});
 export var InvalidPublicKeySpecifier =  __class__ ('InvalidPublicKeySpecifier', [TFChainBaseException], {
 	__module__: __name__,
 });
