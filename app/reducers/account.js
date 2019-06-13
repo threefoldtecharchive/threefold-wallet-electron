@@ -19,7 +19,12 @@ export const account = (state = [], action) => {
       storage.remove(action.account.account_name, function (err) {
         if (err) console.log(err)
       })
-      return null
+      return {
+        state: null,
+        currentBlockId: '',
+        walletCount: 0,
+        walletLoadedCount: 0
+      }
     case 'SAVE_ACCOUNT':
       // first delete account
       if (action.account.previous_account_name) {
