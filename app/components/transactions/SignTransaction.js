@@ -114,14 +114,17 @@ class SignTransaction extends Component {
         if (signed && submitted) {
           this.props.history.push(routes.ACCOUNT)
           toast('transaction signed successfully and submitted to tx pool')
+        } else if (submitted) {
+          this.props.history.push(routes.ACCOUNT)
+          toast('transaction submitted to tx pool')
         } else {
-          toast.error('Singing transaction failed')
+          toast.error('transaction could not be signed or submitted')
         }
         return this.setState({ loader: false })
       }).catch(err => {
         console.log(err)
         this.setState({ loader: false })
-        toast.error('Singing transaction failed')
+        toast.error('Signing transaction failed')
       })
     } else {
       this.setState({ jsonError: true })
@@ -159,7 +162,7 @@ class SignTransaction extends Component {
               selection
               options={walletsOptions}
               onChange={this.selectWallet}
-              value={selectedWallet.wallet_name}
+              value={selectedWallet.wallet_name || selectedWallet.address}
             />
           </Form.Field>
           <Form.Field style={{ marginTop: 30 }}>
