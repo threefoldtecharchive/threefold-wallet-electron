@@ -46,7 +46,7 @@ class Transfer extends Component {
       transactionType: TransactionTypes.SINGLE,
       destination: '',
       description: '',
-      amount: null,
+      amount: undefined,
       destinationError: false,
       descriptionError: false,
       amountError: false,
@@ -129,7 +129,7 @@ class Transfer extends Component {
     this.setState({
       destination: '',
       description: '',
-      amount: null,
+      amount: undefined,
       destinationError: false,
       descriptionError: false,
       amountError: false,
@@ -470,7 +470,13 @@ class Transfer extends Component {
     let { amountError } = this.state
 
     const hasOwnerAddressErrors = ownerAddressErrors.filter(e => e === true).length > 0
-    const areAllOwnersFilledIn = filter(ownerAddresses, o => o === '').length === 0
+    let areAllOwnersFilledIn = false
+    let newOwnerAddressErrors = []
+    ownerAddressErrors.forEach((e, index) => {
+      const addressFilledIn = ownerAddresses[index] === ''
+      areAllOwnersFilledIn = areAllOwnersFilledIn || addressFilledIn
+      newOwnerAddressErrors.push(e || addressFilledIn)
+    })
 
     if (!amount || amount <= 0) {
       amountError = true
@@ -484,7 +490,12 @@ class Transfer extends Component {
     if (!signatureCountErrorValidation && !amountError && selectedWallet != null && !hasOwnerAddressErrors && areAllOwnersFilledIn) {
       return true
     }
-    this.setState({ signatureCountError: signatureCountErrorValidation, amountError: amountError })
+    this.setState({
+      signatureCountError: signatureCountErrorValidation,
+      amountError: amountError,
+      ownerAddressErrors: newOwnerAddressErrors
+    })
+    toast.error('form is not filled in correctly')
     return false
   }
 
@@ -679,7 +690,7 @@ class Transfer extends Component {
 
   renderAmountError = () => {
     const { amountError, amount } = this.state
-    if (amountError && amount <= 0) {
+    if (amountError && (!amount || amount <= 0)) {
       return (
         <Message
           error
