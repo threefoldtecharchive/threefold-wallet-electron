@@ -1098,7 +1098,7 @@ export var Account =  __class__ ('Account', [object], {
 			if (wallet.wallet_index == candidate.wallet_index) {
 				continue;
 			}
-			if (wallet.wallet_name != null && candidate.wallet_name != null && wallet.wallet_name == candidate.wallet_name) {
+			if (wallet.wallet_name && candidate.wallet_name && wallet.wallet_name == candidate.wallet_name) {
 				var __except0__ = ValueError ('a wallet already exists with wallet_name {}'.format (candidate.wallet_name));
 				__except0__.__cause__ = null;
 				throw __except0__;
@@ -1330,7 +1330,7 @@ export var Account =  __class__ ('Account', [object], {
 		}
 		else {
 		}
-		if (py_name != null && __in__ (py_name, self.wallet_names)) {
+		if (py_name && __in__ (py_name, self.wallet_names)) {
 			var __except0__ = ValueError ('a wallet already exists with wallet_name {}'.format (py_name));
 			__except0__.__cause__ = null;
 			throw __except0__;

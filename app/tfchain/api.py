@@ -586,7 +586,7 @@ class Account:
         for wallet in self._wallets:
             if wallet.wallet_index == candidate.wallet_index:
                 continue
-            if wallet.wallet_name != None and candidate.wallet_name != None and wallet.wallet_name == candidate.wallet_name:
+            if wallet.wallet_name and candidate.wallet_name and wallet.wallet_name == candidate.wallet_name:
                 raise ValueError("a wallet already exists with wallet_name {}".format(candidate.wallet_name))
             if len(addresses_set.intersection(set(wallet.addresses))) != 0:
                 raise ValueError("cannot use addresses for wallet {} as it overlaps with the addresses of wallet {}".format(candidate.wallet_name, wallet.wallet_name))
@@ -677,7 +677,7 @@ class Account:
                 return
 
     def _validate_multisig_name(self, name):
-        if name != None and name in self.wallet_names:
+        if name and name in self.wallet_names:
             raise ValueError("a wallet already exists with wallet_name {}".format(name))
 
     def next_available_wallet_start_index(self):
