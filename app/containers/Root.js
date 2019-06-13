@@ -11,10 +11,6 @@ const path = require('path')
 
 storage.setDataPath(os.tmpdir())
 
-const mapStateToProps = state => ({
-  account: state.account.state
-})
-
 const mapDispatchToProps = (dispatch) => ({
   loadAccounts: (accounts) => {
     dispatch(loadAccounts(accounts))
@@ -83,6 +79,6 @@ class Root extends Component {
 }
 
 export default connect(
-  mapStateToProps,
+  null,
   mapDispatchToProps
 )(Root)
