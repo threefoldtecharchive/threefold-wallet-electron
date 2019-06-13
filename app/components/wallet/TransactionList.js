@@ -35,7 +35,7 @@ const TransactionList = ({ loader, transactions, chainInfo, account }) => {
     )
   }
 
-  const { explorerAddress, chain_timestamp: chainTimestamp } = chainInfo
+  const { explorer_address: explorerAddress, chain_timestamp: chainTimestamp } = chainInfo
   const accountAddresses = account.addresses
   if (transactions.length > 0) {
     return (
