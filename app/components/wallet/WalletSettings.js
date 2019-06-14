@@ -9,7 +9,8 @@ import Footer from '../footer'
 import { toast } from 'react-toastify'
 
 const mapStateToProps = state => ({
-  account: state.account.state
+  account: state.account.state,
+  accounts: state.accounts
 })
 
 const mapDispatchToProps = (dispatch) => ({
@@ -26,6 +27,7 @@ class WalletSettings extends Component {
     super(props)
     const { account } = this.props
     this.state = {
+      accounts: this.props.accounts,
       name: account.selected_wallet.wallet_name,
       openDeleteModal: false,
       deleteName: '',
@@ -113,7 +115,9 @@ class WalletSettings extends Component {
         <div style={{ position: 'absolute', top: 40, height: 50, width: '100%' }} data-tid='backButton'>
           <Icon onClick={() => this.props.history.goBack()} style={{ fontSize: 25, position: 'absolute', left: 15, top: 41, cursor: 'pointer' }} name='chevron circle left' />
           <span onClick={() => this.props.history.goBack()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'absolute', top: 42, left: 48 }}>Go Back</span>
-          <Icon onClick={this.openDeleteModal} style={{ fontSize: 25, position: 'absolute', right: 70, top: 41, cursor: 'pointer' }} name='trash' />
+          { this.props.account.wallets.length > 1 ? (
+            <Icon onClick={this.openDeleteModal} style={{ fontSize: 25, position: 'absolute', right: 70, top: 41, cursor: 'pointer' }} name='trash' />
+          ) : null }
         </div>
         <div className={styles.container} >
           <Header as='h2' icon style={{ color: 'white', marginTop: 50 }}>
@@ -124,7 +128,7 @@ class WalletSettings extends Component {
           <Form error style={{ width: '50%', margin: 'auto', marginTop: 10 }}>
             <Form.Field>
               <label style={{ float: 'left', color: 'white' }}>Name</label>
-              <input placeholder='01X.....' value={name} onChange={this.handleNameChange} />
+              <input placeholder='wallet name' value={name} onChange={this.handleNameChange} />
             </Form.Field>
             <Form.Field>
               <label style={{ float: 'left', color: 'white' }}>Start index</label>

@@ -117,7 +117,9 @@ class AccountSettings extends Component {
                   <Divider />
                   <List.Content floated='right'>
                     <Icon name='settings'style={{ color: 'white', marginRight: 30, cursor: 'pointer' }} onClick={() => this.goToWalletSettings(w)} />
-                    <Icon name='trash' style={{ color: 'white', marginRight: 30, cursor: 'pointer' }} onClick={() => this.openDeleteWalletModal(w)} />
+                    { this.props.account.wallets.length > 1 ? (
+                      <Icon name='trash' style={{ color: 'white', marginRight: 30, cursor: 'pointer' }} onClick={() => this.openDeleteWalletModal(w)} />
+                    ) : null }
                   </List.Content>
                   <List.Content style={{ float: 'left' }}>{w.wallet_name}</List.Content>
                 </List.Item>
