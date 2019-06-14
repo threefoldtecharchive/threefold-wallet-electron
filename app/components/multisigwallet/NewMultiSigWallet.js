@@ -149,7 +149,7 @@ class NewMultiSigWallet extends Component {
               onChange={(e) => this.handleAddressOwnerChange(e, index)}
             />
             {ownerAddresses.length > 2
-              ? (<Icon name='trash' onClick={() => this.removeOwnerAddress(owner, index)} style={{ fontSize: 20, position: 'relative', top: 10, marginLeft: 20 }} />)
+              ? (<Icon name='trash' onClick={() => this.removeOwnerAddress(index)} style={{ fontSize: 20, position: 'relative', top: 10, marginLeft: 20 }} />)
               : (null)}
           </div>
           {ownerAddressErrors[index]
