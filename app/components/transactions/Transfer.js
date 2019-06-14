@@ -489,7 +489,7 @@ class Transfer extends Component {
     let areAllOwnersFilledIn = false
     let newOwnerAddressErrors = []
     ownerAddressErrors.forEach((e, index) => {
-      const addressFilledIn = ownerAddresses[index] === ''
+      const addressFilledIn = ownerAddresses[index] !== ''
       areAllOwnersFilledIn = areAllOwnersFilledIn || addressFilledIn
       newOwnerAddressErrors.push(e || addressFilledIn)
     })
@@ -498,7 +498,7 @@ class Transfer extends Component {
       amountError = true
     }
 
-    let signatureCountErrorValidation
+    let signatureCountErrorValidation = false
     if (signatureCount < 1 || signatureCount > ownerAddresses.length) {
       signatureCountErrorValidation = true
     }
