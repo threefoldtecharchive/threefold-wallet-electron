@@ -1,7 +1,7 @@
 // @flow
 import { connect } from 'react-redux'
 import React, { Component } from 'react'
-import { Form, Button, Icon, Header } from 'semantic-ui-react'
+import { Message, Form, Button, Icon, Header } from 'semantic-ui-react'
 import styles from '../home/Home.css'
 import { saveAccount, updateAccount } from '../../actions'
 import DeleteModal from '../wallet/DeleteWalletModal'
@@ -25,7 +25,9 @@ class WalletSettings extends Component {
   constructor (props) {
     super(props)
     this.state = {
+      originalName: this.props.account.selected_wallet.wallet_name,
       name: this.props.account.selected_wallet.wallet_name,
+      nameError: false,
       openDeleteModal: false,
       deleteName: '',
       deleteNameError: false
@@ -33,11 +35,24 @@ class WalletSettings extends Component {
   }
 
   handleNameChange = ({ target }) => {
-    this.setState({ name: target.value })
+    let nameError = false
+    if (target.value === '' || target.value.length > 48) {
+      nameError = true
+    }
+    this.setState({ name: target.value, nameError })
   }
 
   saveWallet = () => {
-    const { name } = this.state
+    const { name, originalName } = this.state
+    if (name === '' || name.length > 48) {
+      this.setState({ nameError: true })
+      toast.error('wallet name is invalid')
+      return false
+    } else if (name === originalName) {
+      toast('Multisig Wallet saved')
+      return this.props.history.push('/walletmultisig')
+    }
+
     const { account } = this.props
     const { selected_wallet: selectedWallet } = account
 
@@ -69,10 +84,30 @@ class WalletSettings extends Component {
     this.setState({ deleteName: target.value })
   }
 
+  renderNameError = () => {
+    const { nameError, name } = this.state
+    if (nameError) {
+      if (name === '') {
+        return (
+          <Message negative>
+            <p style={{ fontSize: 12 }}>Name cannot be empty</p>
+          </Message>
+        )
+      }
+      if (name.length > 48) {
+        return (
+          <Message negative>
+            <p style={{ fontSize: 12 }}>Name cannot be longer than 48 characters</p>
+          </Message>
+        )
+      }
+    }
+  }
+
   deleteWallet = () => {
-    const { deleteName, name } = this.state
+    const { deleteName, originalName } = this.state
     const { account } = this.props
-    if (deleteName !== name) {
+    if (deleteName !== originalName) {
       return this.setState({ deleteNameError: true })
     }
 
@@ -117,6 +152,7 @@ class WalletSettings extends Component {
             <Form.Field>
               <label style={{ float: 'left', color: 'white' }}>Name</label>
               <input placeholder='wallet name' value={name} onChange={this.handleNameChange} />
+              {this.renderNameError()}
             </Form.Field>
             <Button className={styles.cancelButton} size='big' style={{ marginTop: 10, marginRight: 10, background: 'none', color: 'white', width: 180 }} onClick={() => this.props.history.goBack()}>Cancel</Button>
             <Button className={styles.acceptButton} size='big' type='submit' onClick={this.saveWallet} style={{ marginTop: 10, margin: 'auto', color: 'white', width: 180 }}>Save</Button>

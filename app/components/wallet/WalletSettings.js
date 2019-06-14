@@ -28,6 +28,7 @@ class WalletSettings extends Component {
     const { account } = this.props
     this.state = {
       accounts: this.props.accounts,
+      originalName: account.selected_wallet.wallet_name,
       name: account.selected_wallet.wallet_name,
       openDeleteModal: false,
       deleteName: '',
@@ -50,7 +51,14 @@ class WalletSettings extends Component {
   }
 
   saveWallet = () => {
-    const { name, startIndex, addressLength, addressLengthError, nameError, startIndexError } = this.state
+    const { name } = this.state
+    if (name === '' || name.length > 48) {
+      this.setState({ nameError: true })
+      toast.error('wallet name is invalid')
+      return false
+    }
+
+    const { startIndex, addressLength, addressLengthError, nameError, startIndexError } = this.state
     const { account } = this.props
     const walletIndex = account.selected_wallet.wallet_index
 
@@ -121,9 +129,29 @@ class WalletSettings extends Component {
     }
   }
 
+  renderNameError = () => {
+    const { nameError, name } = this.state
+    if (nameError) {
+      if (name === '') {
+        return (
+          <Message negative>
+            <p style={{ fontSize: 12 }}>Name cannot be empty</p>
+          </Message>
+        )
+      }
+      if (name.length > 48) {
+        return (
+          <Message negative>
+            <p style={{ fontSize: 12 }}>Name cannot be longer than 48 characters</p>
+          </Message>
+        )
+      }
+    }
+  }
+
   deleteWallet = () => {
-    const { deleteName, name } = this.state
-    if (deleteName !== name) {
+    const { deleteName, originalName } = this.state
+    if (deleteName !== originalName) {
       return this.setState({ deleteNameError: true })
     }
 
@@ -178,6 +206,7 @@ class WalletSettings extends Component {
             <Form.Field>
               <label style={{ float: 'left', color: 'white' }}>Name</label>
               <input placeholder='wallet name' value={name} onChange={this.handleNameChange} />
+              {this.renderNameError()}
             </Form.Field>
             <Form.Field>
               <label style={{ float: 'left', color: 'white' }}>Start index</label>
