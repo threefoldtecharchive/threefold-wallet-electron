@@ -1,7 +1,6 @@
 import React from 'react'
 import { Header, Modal, Button, List, Icon } from 'semantic-ui-react'
 import moment from 'moment-timezone'
-
 const closeOnEscape = true
 
 const confirmationModal = ({ open, closeModal, transaction, confirmTransaction, transactionType, selectedWallet, amount, owners, destination, signatureCount, datelock, timelock, selectedWalletRecipient, selectedRecipientAddress }) => (
@@ -33,11 +32,12 @@ function renderModalBody (transactionType, selectedWallet, amount, owners, desti
     return null
   }
   let timestamp
+  let tz
   if (datelock !== '') {
     const concatDate = datelock + ' ' + timelock
-    const dateLockDate = new Date(concatDate)
-    const dateLockTimeZone = dateLockDate.getTimezoneOffset()
-    timestamp = moment(dateLockDate).utcOffset(dateLockTimeZone).toString()
+    const dateLockDate = new Date(concatDate).valueOf()
+    timestamp = moment(dateLockDate).format('MMMM Do YYYY, HH:mm')
+    tz = moment.tz.guess()
   }
 
   // single recipient if single sig transaction
@@ -123,7 +123,7 @@ function renderModalBody (transactionType, selectedWallet, amount, owners, desti
           <List.Content>
             <List.Header>Timestamp: </List.Header>
             <List.Description>
-              {timestamp}
+              {timestamp} - {tz}
             </List.Description>
           </List.Content>
         </List.Item>
