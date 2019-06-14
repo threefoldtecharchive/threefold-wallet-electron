@@ -1042,6 +1042,7 @@ export var UnlockHash =  __class__ ('UnlockHash', [BaseDataTypeClass], {
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
+		var obj = jsstr.strip (obj);
 		if (len (obj) != UnlockHash._TOTAL_SIZE_HEX) {
 			var __except0__ = ValueError ('UnlockHash is expexcted to be of length {} when stringified, not of length {}, invalid: {} ({})'.format (UnlockHash._TOTAL_SIZE_HEX, len (obj), obj, py_typeof (obj)));
 			__except0__.__cause__ = null;

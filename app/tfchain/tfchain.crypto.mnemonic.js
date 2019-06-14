@@ -156,7 +156,12 @@ export var Mnemonic =  __class__ ('Mnemonic', [object], {
 		else {
 		}
 		if (!(isinstance (words, list))) {
-			var words = words.py_split (' ');
+			if (!(isinstance (words, str))) {
+				var __except0__ = py_TypeError ('words is expected to be a list or str, not: {} ({})'.format (words, py_typeof (words)));
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
+			var words = jsstr.py_split (jsstr.strip (words), ' ');
 		}
 		if (!__in__ (len (words), [12, 15, 18, 21, 24])) {
 			var __except0__ = ValueError (__mod__ ('Number of words must be one of the following: [12, 15, 18, 21, 24], but it is not (%d).', len (words)));
@@ -269,6 +274,7 @@ export var Mnemonic =  __class__ ('Mnemonic', [object], {
 		if (!(isinstance (mnemonic, str))) {
 			return false;
 		}
+		var mnemonic = jsstr.strip (mnemonic);
 		var mnemonic = mnemonic.py_split (' ');
 		if (!__in__ (len (mnemonic), [12, 15, 18, 21, 24])) {
 			return false;

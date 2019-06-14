@@ -351,6 +351,7 @@ class UnlockHash(BaseDataTypeClass):
     def from_str(cls, obj):
         if not isinstance(obj, str):
             raise TypeError("UnlockHash is expected to be a str, not {}".format(type(obj)))
+        obj = jsstr.strip(obj)
         if len(obj) != UnlockHash._TOTAL_SIZE_HEX:
             raise ValueError("UnlockHash is expexcted to be of length {} when stringified, not of length {}, invalid: {} ({})".format(UnlockHash._TOTAL_SIZE_HEX, len(obj), obj, type(obj)))
 

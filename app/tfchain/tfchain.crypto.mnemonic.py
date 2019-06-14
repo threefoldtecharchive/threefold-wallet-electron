@@ -73,7 +73,9 @@ class Mnemonic(object):
     # Adapted from <http://tinyurl.com/oxmn476>
     def to_entropy(self, words):
         if not isinstance(words, list):
-            words = words.split(' ')
+            if not isinstance(words, str):
+                raise TypeError("words is expected to be a list or str, not: {} ({})".format(words, type(words)))
+            words = jsstr.split(jsstr.strip(words), ' ')
         if len(words) not in [12, 15, 18, 21, 24]:
             raise ValueError('Number of words must be one of the following: [12, 15, 18, 21, 24], but it is not (%d).' % len(words))
         # Look up all the words in the list and construct the
@@ -126,6 +128,7 @@ class Mnemonic(object):
     def check(self, mnemonic):
         if not isinstance(mnemonic, str):
             return False
+        mnemonic = jsstr.strip(mnemonic)
         mnemonic = mnemonic.split(' ')
         # list of valid mnemonic lengths
         if len(mnemonic) not in [12, 15, 18, 21, 24]:

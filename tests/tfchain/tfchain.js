@@ -16,8 +16,14 @@ const _all = {
     // test constant mnemonic
     const exampleMnemonic = 'embark fatal whale file wait future bracket anger label long screen opinion giggle genius blur author warrior prevent cereal scale outdoor enhance diesel raccoon'
     assert.true(tfchain.mnemonic_is_valid(exampleMnemonic))
+    assert.true(tfchain.mnemonic_is_valid(' ' + exampleMnemonic)) // with extra spaces at front
+    assert.true(tfchain.mnemonic_is_valid(exampleMnemonic + ' ')) // with extra spaces at back
+    assert.true(tfchain.mnemonic_is_valid(' ' + exampleMnemonic + ' ')) // with extra spaces at overall
     const exampleEntropy = new Uint8Array([72, 74, 115, 230, 171, 31, 102, 189, 6, 176, 69, 124, 48, 123, 6, 77, 182, 30, 193, 198, 24, 123, 247, 85, 72, 150, 96, 9, 210, 149, 15, 101])
     assert.equal(tfchain.mnemonic_to_entropy(exampleMnemonic), exampleEntropy)
+    assert.equal(tfchain.mnemonic_to_entropy(' ' + exampleMnemonic), exampleEntropy) // with extra spaces at front
+    assert.equal(tfchain.mnemonic_to_entropy(exampleMnemonic + ' '), exampleEntropy) // with extra spaces at back
+    assert.equal(tfchain.mnemonic_to_entropy(' ' + exampleMnemonic + ' '), exampleEntropy) // with extra spaces at overall
     // test generated mnemonic
     const mnemonc = tfchain.mnemonic_new()
     assert.equal(mnemonc.split(' ').length, 24)
@@ -207,6 +213,11 @@ const _all = {
     assert.true(tfchain.wallet_address_is_valid('000000000000000000000000000000000000000000000000000000000000000000000000000000'))
     assert.true(tfchain.wallet_address_is_valid('0195de96da59de0bd59c416e96d17df1a5bbc80acb6b02a1db0cde0bcdffca55a4f7f369e955ef'))
     assert.true(tfchain.wallet_address_is_valid('0313a5abd192d1bacdd1eb518fc86987d3c3d1cfe3c5bed68ec4a86b93b2f05a89f67b89b07d71'))
+    // valid addresses with space
+    assert.true(tfchain.wallet_address_is_valid('0313a5abd192d1bacdd1eb518fc86987d3c3d1cfe3c5bed68ec4a86b93b2f05a89f67b89b07d71   '))
+    assert.true(tfchain.wallet_address_is_valid(' 0313a5abd192d1bacdd1eb518fc86987d3c3d1cfe3c5bed68ec4a86b93b2f05a89f67b89b07d71   '))
+    assert.true(tfchain.wallet_address_is_valid('   0313a5abd192d1bacdd1eb518fc86987d3c3d1cfe3c5bed68ec4a86b93b2f05a89f67b89b07d71'))
+    assert.true(tfchain.wallet_address_is_valid('   0313a5abd192d1bacdd1eb518fc86987d3c3d1cfe3c5bed68ec4a86b93b2f05a89f67b89b07d71      '))
     // multisig can be valid if multisig is not allowed (by default it is allowed)
     assert.false(tfchain.wallet_address_is_valid(
       '0313a5abd192d1bacdd1eb518fc86987d3c3d1cfe3c5bed68ec4a86b93b2f05a89f67b89b07d71', {

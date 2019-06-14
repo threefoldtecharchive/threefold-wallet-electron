@@ -116,7 +116,7 @@ class WalletSettings extends Component {
           <Form error style={{ width: '50%', margin: 'auto', marginTop: 10 }}>
             <Form.Field>
               <label style={{ float: 'left', color: 'white' }}>Name</label>
-              <input placeholder='01X.....' value={name} onChange={this.handleNameChange} />
+              <input placeholder='wallet name' value={name} onChange={this.handleNameChange} />
             </Form.Field>
             <Button className={styles.cancelButton} size='big' style={{ marginTop: 10, marginRight: 10, background: 'none', color: 'white', width: 180 }} onClick={() => this.props.history.goBack()}>Cancel</Button>
             <Button className={styles.acceptButton} size='big' type='submit' onClick={this.saveWallet} style={{ marginTop: 10, margin: 'auto', color: 'white', width: 180 }}>Save</Button>

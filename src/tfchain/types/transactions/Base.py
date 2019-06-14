@@ -453,10 +453,8 @@ class OpaqueTransaction(TransactionBaseClass):
     def _json_data_object(self):
         return self._raw_json_data
 
-    def version_set(self, version):
-        if not isinstance(version, int):
-            raise TypeError("version is of wrong type: invalid: {} ({})".format(version, type(version)))
-        self._version = TransactionVersion(version)
+    def _custom_version_getter(self):
+        return self._version
 
     def _from_json_txn_version_validator(self, tv):
         if self.version.value == -1:

@@ -1459,7 +1459,7 @@ export var OpaqueTransaction =  __class__ ('OpaqueTransaction', [TransactionBase
 		}
 		return self._raw_json_data;
 	});},
-	get version_set () {return __get__ (this, function (self, version) {
+	get _custom_version_getter () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -1467,19 +1467,13 @@ export var OpaqueTransaction =  __class__ ('OpaqueTransaction', [TransactionBase
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'version': var version = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
 		}
 		else {
 		}
-		if (!(isinstance (version, int))) {
-			var __except0__ = py_TypeError ('version is of wrong type: invalid: {} ({})'.format (version, py_typeof (version)));
-			__except0__.__cause__ = null;
-			throw __except0__;
-		}
-		self._version = TransactionVersion (version);
+		return self._version;
 	});},
 	get _from_json_txn_version_validator () {return __get__ (this, function (self, tv) {
 		if (arguments.length) {
