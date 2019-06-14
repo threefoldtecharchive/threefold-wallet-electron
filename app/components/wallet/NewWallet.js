@@ -32,7 +32,8 @@ class WalletSettings extends Component {
       nameError: false,
       showError: false,
       errorMessage: '',
-      addressLengthError: false
+      addressLengthError: false,
+      startIndexError: false
     }
   }
 
@@ -45,7 +46,7 @@ class WalletSettings extends Component {
   }
 
   handleAddressLengthChange = ({ target }) => {
-    if (target.value < 1) {
+    if (target.value < 1 || target.value > 8) {
       this.setState({ addressLengthError: true })
     } else {
       this.setState({ addressLengthError: false })
@@ -54,7 +55,22 @@ class WalletSettings extends Component {
   }
 
   handleIndexChange = ({ target }) => {
-    this.setState({ startIndex: target.value })
+    let startIndexError = false
+    if (target.value < 0) {
+      startIndexError = true
+    }
+    this.setState({ startIndex: target.value, startIndexError })
+  }
+
+  renderIndexError = () => {
+    const { startIndexError } = this.state
+    if (startIndexError) {
+      return (
+        <Message negative>
+          <p style={{ fontSize: 12 }}>Index cannot be negative</p>
+        </Message>
+      )
+    }
   }
 
   createWallet = () => {
@@ -62,18 +78,23 @@ class WalletSettings extends Component {
 
     let nameError = false
     let addressLengthError = false
+    let startIndexError = false
 
     if (name === '' || name.length > 48) {
       nameError = true
-      this.setState({ nameError })
     }
 
-    if (addressLength < 1) {
+    if (addressLength < 1 || startIndex > 8) {
       addressLengthError = true
-      this.setState({ addressLengthError: true })
     }
 
-    if (!nameError && !addressLengthError) {
+    if (startIndex < 0) {
+      startIndexError = true
+    }
+
+    this.setState({ nameError, addressLengthError, startIndexError })
+
+    if (!nameError && !addressLengthError && !startIndexError) {
       try {
         this.props.account.wallet_new(name, startIndex, addressLength)
         this.props.saveAccount(this.props.account)
@@ -83,6 +104,8 @@ class WalletSettings extends Component {
       } catch (error) {
         this.setState({ errorMessage: error.__args__[0], showError: true })
       }
+    } else {
+      toast.error('form not filled in correctly')
     }
   }
 
@@ -112,7 +135,7 @@ class WalletSettings extends Component {
     if (addressLengthError) {
       return (
         <Message negative>
-          <p style={{ fontSize: 12 }}>Address length must be greater than 0</p>
+          <p style={{ fontSize: 12 }}>Address length must be greater than 0 and smaller than 8.</p>
         </Message>
       )
     }
@@ -123,18 +146,16 @@ class WalletSettings extends Component {
     if (nameError) {
       if (name === '') {
         return (
-          <Message
-            error
-            header={'Name cannot be empty'}
-          />
+          <Message negative>
+            <p style={{ fontSize: 12 }}>Name cannot be empty</p>
+          </Message>
         )
       }
       if (name.length > 48) {
         return (
-          <Message
-            error
-            header={'Name cannot be longer than 48 characters'}
-          />
+          <Message negative>
+            <p style={{ fontSize: 12 }}>Name cannot be longer than 48 characters</p>
+          </Message>
         )
       }
     }
@@ -169,6 +190,7 @@ class WalletSettings extends Component {
               <label style={{ float: 'left', color: 'white' }}>Start index</label>
               <Popup offset={-30} size='large' position='right center' content='Start index will be used in combination with your account seed to generate the first address' trigger={<Icon style={{ fontSize: 12, float: 'left', marginLeft: 10, height: 10, width: 10 }} name='question circle' />} />
               <input type='number' placeholder='0' value={startIndex} onChange={this.handleIndexChange} />
+              {this.renderIndexError()}
             </Form.Field>
             <Form.Field>
               <label style={{ float: 'left', color: 'white' }}>Address length</label>

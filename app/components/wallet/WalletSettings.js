@@ -1,7 +1,7 @@
 // @flow
 import { connect } from 'react-redux'
 import React, { Component } from 'react'
-import { Form, Button, Icon, Header } from 'semantic-ui-react'
+import { Form, Button, Icon, Header, Message } from 'semantic-ui-react'
 import styles from '../home/Home.css'
 import { saveAccount, updateAccount } from '../../actions'
 import DeleteModal from './DeleteWalletModal'
@@ -34,28 +34,39 @@ class WalletSettings extends Component {
       startIndex: account.selected_wallet.start_index,
       addressLength: account.selected_wallet.addresses.length,
       deleteNameError: false,
-      deleteNameErrorMessage: ''
+      deleteNameErrorMessage: '',
+      startIndexError: false,
+      addressLengthError: false,
+      nameError: false
     }
   }
 
   handleNameChange = ({ target }) => {
-    this.setState({ name: target.value })
+    let nameError = false
+    if (target.value === '' || target.value.length > 48) {
+      nameError = true
+    }
+    this.setState({ name: target.value, nameError })
   }
 
   saveWallet = () => {
-    const { name, startIndex, addressLength } = this.state
+    const { name, startIndex, addressLength, addressLengthError, nameError, startIndexError } = this.state
     const { account } = this.props
     const walletIndex = account.selected_wallet.wallet_index
 
-    try {
-      this.props.account.wallet_update(walletIndex, name, startIndex, addressLength)
-    } catch (err) {
-      console.log(typeof err.__str__ === 'function' ? err.__str__() : err.toString())
-      toast.error('Saving wallet failed')
+    if (!addressLengthError && !nameError && !startIndexError) {
+      try {
+        this.props.account.wallet_update(walletIndex, name, startIndex, addressLength)
+      } catch (err) {
+        console.log(typeof err.__str__ === 'function' ? err.__str__() : err.toString())
+        toast.error('Saving wallet failed')
+      }
+      this.props.saveAccount(this.props.account)
+      toast('Wallet saved')
+      return this.props.history.push('/wallet')
+    } else {
+      toast.error('Form is not filled in correctly')
     }
-    this.props.saveAccount(this.props.account)
-    toast('Wallet saved')
-    return this.props.history.push('/wallet')
   }
 
   openDeleteModal = () => {
@@ -72,11 +83,42 @@ class WalletSettings extends Component {
   }
 
   handleAddressLengthChange = ({ target }) => {
+    if (target.value < 1 || target.value > 8) {
+      this.setState({ addressLengthError: true })
+    } else {
+      this.setState({ addressLengthError: false })
+    }
     this.setState({ addressLength: target.value })
   }
 
+  renderAddressLengthError = () => {
+    const { addressLengthError } = this.state
+    if (addressLengthError) {
+      return (
+        <Message negative>
+          <p style={{ fontSize: 12 }}>Address length must be greater than 0 and smaller than 8.</p>
+        </Message>
+      )
+    }
+  }
+
   handleIndexChange = ({ target }) => {
-    this.setState({ startIndex: target.value })
+    let startIndexError = false
+    if (target.value < 0) {
+      startIndexError = true
+    }
+    this.setState({ startIndex: target.value, startIndexError })
+  }
+
+  renderIndexError = () => {
+    const { startIndexError } = this.state
+    if (startIndexError) {
+      return (
+        <Message negative>
+          <p style={{ fontSize: 12 }}>Index cannot be negative</p>
+        </Message>
+      )
+    }
   }
 
   deleteWallet = () => {
@@ -140,10 +182,12 @@ class WalletSettings extends Component {
             <Form.Field>
               <label style={{ float: 'left', color: 'white' }}>Start index</label>
               <input type='number' placeholder='0' value={startIndex} onChange={this.handleIndexChange} />
+              {this.renderIndexError()}
             </Form.Field>
             <Form.Field>
               <label style={{ float: 'left', color: 'white' }}>Address length</label>
               <input type='number' placeholder='1' value={addressLength} onChange={this.handleAddressLengthChange} />
+              {this.renderAddressLengthError()}
             </Form.Field>
             <Button className={styles.cancelButton} size='big' style={{ marginTop: 10, marginRight: 10, background: 'none', color: 'white', width: 180 }} onClick={() => this.props.history.goBack()}>Cancel</Button>
             <Button className={styles.acceptButton} size='big' type='submit' onClick={this.saveWallet} style={{ marginTop: 10, margin: 'auto', color: 'white', width: 180 }}>Save</Button>
