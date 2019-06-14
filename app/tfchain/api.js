@@ -1112,7 +1112,7 @@ export var Account =  __class__ ('Account', [object], {
 		else {
 		}
 		var start_index = max (start_index, 0);
-		var address_count = max (address_count, 1);
+		var address_count = min (max (address_count, 1), 8);
 		var pairs = [];
 		for (var i = 0; i < address_count; i++) {
 			var pair = tfwallet.assymetric_key_pair_generate (self.seed, start_index + i);

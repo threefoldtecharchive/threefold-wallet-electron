@@ -586,7 +586,7 @@ class Account:
 
     def _wallet_new(self, wallet_index, wallet_name, start_index, address_count, update=True):
         start_index = max(start_index, 0)
-        address_count = max(address_count, 1)
+        address_count = min(max(address_count, 1), 8)
         # generate all key pairs for this wallet
         pairs = []
         for i in range(0, address_count):
