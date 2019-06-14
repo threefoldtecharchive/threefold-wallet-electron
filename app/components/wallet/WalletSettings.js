@@ -33,7 +33,8 @@ class WalletSettings extends Component {
       deleteName: '',
       startIndex: account.selected_wallet.start_index,
       addressLength: account.selected_wallet.addresses.length,
-      deleteNameError: false
+      deleteNameError: false,
+      deleteNameErrorMessage: ''
     }
   }
 
@@ -49,10 +50,8 @@ class WalletSettings extends Component {
     try {
       this.props.account.wallet_update(walletIndex, name, startIndex, addressLength)
     } catch (err) {
-      if (err) {
-        console.log(err)
-        toast.error('Saving wallet failed')
-      }
+      console.log(typeof err.__str__ === 'function' ? err.__str__() : err.toString())
+      toast.error('Saving wallet failed')
     }
     this.props.saveAccount(this.props.account)
     toast('Wallet saved')
@@ -89,19 +88,26 @@ class WalletSettings extends Component {
     try {
       this.props.account.wallet_delete(this.props.account.selected_wallet.start_index, deleteName)
     } catch (err) {
-      if (err) {
-        toast.error('Deleting wallet failed')
-      }
+      const deleteNameErrorMessage = typeof err.__str__ === 'function' ? err.__str__() : err.toString()
+      this.setState({
+        deleteNameError: true,
+        deleteNameErrorMessage: deleteNameErrorMessage
+      })
+      toast('the wallet cannot be deleted')
+      return
     }
     this.props.saveAccount(this.props.account)
     this.props.updateAccount(this.props.account)
-    this.setState({ deleteNameError: false })
+    this.setState({
+      deleteNameError: false,
+      deleteNameErrorMessage: ''
+    })
     toast('Wallet deleted')
     return this.props.history.push('/account')
   }
 
   render () {
-    const { openDeleteModal, deleteName, deleteNameError, name, startIndex, addressLength } = this.state
+    const { openDeleteModal, deleteName, deleteNameError, deleteNameErrorMessage, name, startIndex, addressLength } = this.state
     return (
       <div>
         <DeleteModal
@@ -110,6 +116,7 @@ class WalletSettings extends Component {
           deleteName={deleteName}
           handleDeleteWalletNameChange={this.handleDeleteWalletNameChange}
           deleteNameError={deleteNameError}
+          deleteWalletNameErrorMessage={deleteNameErrorMessage}
           deleteWallet={this.deleteWallet}
         />
         <div style={{ position: 'absolute', top: 40, height: 50, width: '100%' }} data-tid='backButton'>
