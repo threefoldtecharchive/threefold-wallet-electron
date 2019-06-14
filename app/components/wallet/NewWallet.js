@@ -37,7 +37,11 @@ class WalletSettings extends Component {
   }
 
   handleNameChange = ({ target }) => {
-    this.setState({ name: target.value, nameError: false })
+    let nameError = false
+    if (target.value === '' || target.value.length > 48) {
+      nameError = true
+    }
+    this.setState({ name: target.value, nameError })
   }
 
   handleAddressLengthChange = ({ target }) => {
