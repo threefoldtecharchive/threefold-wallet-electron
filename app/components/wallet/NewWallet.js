@@ -37,7 +37,7 @@ class WalletSettings extends Component {
   }
 
   handleNameChange = ({ target }) => {
-    this.setState({ name: target.value })
+    this.setState({ name: target.value, nameError: false })
   }
 
   handleAddressLengthChange = ({ target }) => {
@@ -59,7 +59,7 @@ class WalletSettings extends Component {
     let nameError = false
     let addressLengthError = false
 
-    if (name === '') {
+    if (name === '' || name.length > 48) {
       nameError = true
       this.setState({ nameError })
     }
@@ -114,6 +114,28 @@ class WalletSettings extends Component {
     }
   }
 
+  renderNameError = () => {
+    const { nameError, name } = this.state
+    if (nameError) {
+      if (name === '') {
+        return (
+          <Message
+            error
+            header={'Name cannot be empty'}
+          />
+        )
+      }
+      if (name.length > 48) {
+        return (
+          <Message
+            error
+            header={'Name cannot be longer than 48 characters'}
+          />
+        )
+      }
+    }
+  }
+
   render () {
     const { nameError, name, startIndex, addressLength } = this.state
     return (
@@ -137,6 +159,7 @@ class WalletSettings extends Component {
             <Form.Field error={nameError}>
               <label style={{ float: 'left', color: 'white' }}>Name</label>
               <input placeholder='my wallet' value={name} onChange={this.handleNameChange} />
+              {this.renderNameError()}
             </Form.Field>
             <Form.Field>
               <label style={{ float: 'left', color: 'white' }}>Start index</label>

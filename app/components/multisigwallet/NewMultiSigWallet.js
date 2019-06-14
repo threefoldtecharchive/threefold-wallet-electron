@@ -39,7 +39,7 @@ class NewMultiSigWallet extends Component {
   }
 
   handleNameChange = ({ target }) => {
-    this.setState({ name: target.value })
+    this.setState({ name: target.value, nameError: false })
   }
 
   handleSignatureCountChange = ({ target }) => {
@@ -58,7 +58,7 @@ class NewMultiSigWallet extends Component {
     let nameError = false
     let signatureCountError = false
 
-    if (name === '') {
+    if (name === '' || name.length > 48) {
       nameError = true
       this.setState({ nameError })
     }
@@ -114,6 +114,28 @@ class NewMultiSigWallet extends Component {
           <p style={{ fontSize: 12 }}>Signature count must be less than or equal to the number of owners.</p>
         </Message>
       )
+    }
+  }
+
+  renderNameError = () => {
+    const { nameError, name } = this.state
+    if (nameError) {
+      if (name === '') {
+        return (
+          <Message
+            error
+            header={'Name cannot be empty'}
+          />
+        )
+      }
+      if (name.length > 48) {
+        return (
+          <Message
+            error
+            header={'Name cannot be longer than 48 characters'}
+          />
+        )
+      }
     }
   }
 
@@ -200,6 +222,7 @@ class NewMultiSigWallet extends Component {
             <Form.Field error={nameError}>
               <label style={{ float: 'left', color: 'white' }}>Name</label>
               <input placeholder='my multisig wallet' value={name} onChange={this.handleNameChange} />
+              {this.renderNameError()}
             </Form.Field>
             <label style={{ float: 'left', color: 'white', marginBottom: 10 }}>Owners</label>
             <Form.Field >

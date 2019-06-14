@@ -9,7 +9,7 @@ import { updateAccount, setTransactionJson } from '../../actions'
 import * as tfchain from '../../tfchain/api'
 import moment from 'moment'
 import routes from '../../constants/routes'
-import { filter, concat, truncate, flatten } from 'lodash'
+import { concat, truncate, flatten } from 'lodash'
 import TransactionConfirmationModal from './TransactionConfirmationModal'
 
 const TransactionTypes = {

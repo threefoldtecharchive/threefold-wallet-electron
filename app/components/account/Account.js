@@ -77,7 +77,7 @@ class Account extends Component {
                     </Card.Description>
                     <Divider />
                     <Card.Header style={{ textAlign: 'center', color: 'white', fontSize: 18, textTransform: 'uppercase', marginTop: 20, fontFamily: 'SF UI Text Light' }}>
-                        wallet {w.wallet_name || truncate(w.address, { length: 14 })}
+                        wallet {truncate(w.wallet_name, { length: 14 }) || truncate(w.address, { length: 14 })}
                     </Card.Header>
                   </div>
                 </Card.Content>
@@ -121,7 +121,7 @@ class Account extends Component {
                     </Card.Description>
                     <Divider />
                     <Card.Header style={{ textAlign: 'center', color: 'white', fontSize: 18, textTransform: 'uppercase', marginTop: 20, fontFamily: 'SF UI Text Light' }}>
-                      wallet {w.wallet_name || truncate(w.address, { length: 14 })}
+                      wallet {truncate(w.wallet_name, { length: 14 }) || truncate(w.address, { length: 14 })}
                     </Card.Header>
                   </div>
                 </Card.Content>
