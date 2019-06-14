@@ -69,6 +69,9 @@ class Wallet extends Component {
 
   renderOwnerList = () => {
     const { owners } = this.props.account.selected_wallet
+    if (owners.length === 0 || !owners) {
+      return null
+    }
     const ownerList = owners.map((owner, index) => {
       return (
         <List.Description key={owner + ` ${index}`}>
