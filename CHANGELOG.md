@@ -12,8 +12,12 @@ Fixes:
 - Prevent accounts from being overwritten.
 - Load wallets one by one on initial account load, rather than waiting for all of them to finished loading.
 - Prevent lonely wallets from being deleted.
-- Limit account names to 48 characters.
+- Limit account and wallet names to 48 characters 
 - Display account name on top of account page.
+- Allow trailing or leading spaces in mnemonic phrases and (wallet) addresses.
+- Do not allow the same destination and source wallet for a single (coin) transfer.
+- Clamp the wallet address count between 1 and 8 addresses (per wallet).
+- Do not allow (in front-end) negative wallet indices.
 
 # v0.1.1 (2018.06.12)
 
