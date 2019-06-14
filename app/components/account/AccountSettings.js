@@ -44,6 +44,7 @@ class AccountSettings extends Component {
       deleteNameError: false,
       deleteWalletName: '',
       deleteWalletNameError: false,
+      deleteWalletNameErrorMessage: '',
       walletToDelete: undefined,
       showSeedModal: false
     }
@@ -133,9 +134,22 @@ class AccountSettings extends Component {
     if (deleteWalletName !== walletName) {
       return this.setState({ deleteWalletNameError: true })
     }
-    this.props.account.wallet_delete(walletToDelete.start_index, walletToDelete.wallet_name)
+    try {
+      this.props.account.wallet_delete(walletToDelete.start_index, walletToDelete.wallet_name)
+    } catch (err) {
+      const deleteWalletNameErrorMessage = typeof err.__str__ === 'function' ? err.__str__() : err.toString()
+      this.setState({
+        deleteWalletNameError: true,
+        deleteWalletNameErrorMessage
+      })
+      toast('the wallet cannot be deleted')
+      return
+    }
     this.props.saveAccount(this.props.account)
-    this.setState({ deleteWalletNameError: false })
+    this.setState({
+      deleteWalletNameError: false,
+      deleteWalletNameErrorMessage: ''
+    })
     toast('Wallet deleted')
     this.closeDeleteWalletModal()
   }
@@ -205,7 +219,7 @@ class AccountSettings extends Component {
   }
 
   render () {
-    const { name, openDeleteModal, deleteName, deleteNameError, openDeleteWalletModal, deleteWalletName, deleteWalletNameError, showSeedModal, nameError } = this.state
+    const { name, openDeleteModal, deleteName, deleteNameError, openDeleteWalletModal, deleteWalletName, deleteWalletNameError, deleteWalletNameErrorMessage, showSeedModal, nameError } = this.state
     return (
       <div>
         <DeleteModal
@@ -222,6 +236,7 @@ class AccountSettings extends Component {
           deleteName={deleteWalletName}
           handleDeleteWalletNameChange={this.handleDeleteWalletNameChange}
           deleteNameError={deleteWalletNameError}
+          deleteWalletNameErrorMessage={deleteWalletNameErrorMessage}
           deleteWallet={this.deleteWallet}
         />
         <ShowSeedModal

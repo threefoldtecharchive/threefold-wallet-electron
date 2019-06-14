@@ -3,7 +3,7 @@ import { Header, Modal, Button, Form, Message } from 'semantic-ui-react'
 
 const closeOnEscape = true
 
-const DeleteModal = ({ open, closeModal, name, handleDeleteWalletNameChange, deleteNameError, deleteWallet }) => (
+const DeleteModal = ({ open, closeModal, name, handleDeleteWalletNameChange, deleteNameError, deleteWalletNameErrorMessage, deleteWallet }) => (
   <Modal open={open} closeOnEscape={closeOnEscape} onClose={closeModal}>
     <Modal.Header>Delete this wallet?</Modal.Header>
     <Modal.Content image>
@@ -13,7 +13,7 @@ const DeleteModal = ({ open, closeModal, name, handleDeleteWalletNameChange, del
           <Form.Field>
             <label style={{ float: 'left' }}>Name</label>
             <input placeholder='wallet name here' value={name} onChange={handleDeleteWalletNameChange} />
-            {renderDeleteNameError(deleteNameError)}
+            {renderDeleteNameError(deleteNameError, deleteWalletNameErrorMessage)}
           </Form.Field>
         </Form>
       </Modal.Description>
@@ -33,8 +33,16 @@ const DeleteModal = ({ open, closeModal, name, handleDeleteWalletNameChange, del
   </Modal>
 )
 
-function renderDeleteNameError (err) {
+function renderDeleteNameError (err, message) {
   if (err) {
+    if (message) {
+      return (
+        <Message
+          error
+          header={message}
+        />
+      )
+    }
     return (
       <Message
         error

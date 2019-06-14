@@ -546,14 +546,16 @@ class Transfer extends Component {
         builder.output_add(destination, amount.toString(), { lock: timestamp })
       } catch (error) {
         toast('transaction failed')
-        return this.setState({ loader: false, errorMessage: error.__str__() })
+        const errorMessage = typeof error.__str__ === 'function' ? error.__str__() : error.toString()
+        return this.setState({ loader: false, errorMessage: errorMessage })
       }
     } else {
       try {
         builder.output_add(destination, amount.toString())
       } catch (error) {
         toast('transaction failed')
-        return this.setState({ loader: false, errorMessage: error.__str__() })
+        const errorMessage = typeof error.__str__ === 'function' ? error.__str__() : error.toString()
+        return this.setState({ loader: false, errorMessage: errorMessage })
       }
     }
     builder.send({ data: description }).then(result => {
@@ -566,9 +568,10 @@ class Transfer extends Component {
         this.props.setTransactionJson(JSON.stringify(result.transaction.json()))
         return this.props.history.push(routes.SIGN)
       }
-    }).catch(err => {
+    }).catch(error => {
       toast.error('transaction failed')
-      this.setState({ loader: false, errorMessage: err.__str__() })
+      const errorMessage = typeof error.__str__ === 'function' ? error.__str__() : error.toString()
+      this.setState({ loader: false, errorMessage: errorMessage })
     })
   }
 
@@ -589,14 +592,16 @@ class Transfer extends Component {
         builder.output_add([signatureCount, ownerAddresses], amount.toString(), { lock: timestamp })
       } catch (error) {
         toast('transaction failed')
-        return this.setState({ loader: false, errorMessage: error.__str__() })
+        const errorMessage = typeof error.__str__ === 'function' ? error.__str__() : error.toString()
+        return this.setState({ loader: false, errorMessage: errorMessage })
       }
     } else {
       try {
         builder.output_add([signatureCount, ownerAddresses], amount.toString())
       } catch (error) {
         toast('transaction failed')
-        return this.setState({ loader: false, errorMessage: error.__str__() })
+        const errorMessage = typeof error.__str__ === 'function' ? error.__str__() : error.toString()
+        return this.setState({ loader: false, errorMessage: errorMessage })
       }
     }
     builder.send({ data: description }).then(result => {
@@ -609,9 +614,10 @@ class Transfer extends Component {
         this.props.setTransactionJson(JSON.stringify(result.transaction.json()))
         return this.props.history.push(routes.SIGN)
       }
-    }).catch(err => {
+    }).catch(error => {
       toast('transaction failed')
-      this.setState({ loader: false, errorMessage: err.__str__() })
+      const errorMessage = typeof error.__str__ === 'function' ? error.__str__() : error.toString()
+      this.setState({ loader: false, errorMessage: errorMessage })
     })
   }
 
@@ -634,14 +640,16 @@ class Transfer extends Component {
         builder.output_add(recipient, amount.toString(), { lock: timestamp })
       } catch (error) {
         toast('transaction failed')
-        return this.setState({ loader: false, errorMessage: error.__str__() })
+        const errorMessage = typeof error.__str__ === 'function' ? error.__str__() : error.toString()
+        return this.setState({ loader: false, errorMessage: errorMessage })
       }
     } else {
       try {
         builder.output_add(recipient, amount.toString())
       } catch (error) {
         toast('transaction failed')
-        return this.setState({ loader: false, errorMessage: error.__str__() })
+        const errorMessage = typeof error.__str__ === 'function' ? error.__str__() : error.toString()
+        return this.setState({ loader: false, errorMessage: errorMessage })
       }
     }
     builder.send({ data: description }).then(result => {
@@ -654,9 +662,10 @@ class Transfer extends Component {
         this.props.setTransactionJson(JSON.stringify(result.transaction.json()))
         return this.props.history.push(routes.SIGN)
       }
-    }).catch(err => {
+    }).catch(error => {
       toast.error('transaction failed')
-      this.setState({ loader: false, errorMessage: err.__str__() })
+      const errorMessage = typeof error.__str__ === 'function' ? error.__str__() : error.toString()
+      this.setState({ loader: false, errorMessage: errorMessage })
     })
   }
 
