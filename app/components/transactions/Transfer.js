@@ -344,6 +344,7 @@ class Transfer extends Component {
   }
 
   selectWallet = (event, data) => {
+    let { selectedWalletRecipient, selectedRecipientAddress } = this.state
     let selectedWallet = this.props.account.wallet_for_name(data.value)
     if (!selectedWallet) {
       selectedWallet = this.props.account.wallet_for_address(data.value)
@@ -355,19 +356,26 @@ class Transfer extends Component {
         selectedWallet
       })
     } else {
-      let selectedWalletRecipient = this.props.account.wallet_for_name(walletsOptions[0].value)
-      if (!selectedWalletRecipient) {
-        selectedWalletRecipient = this.props.account.wallet_for_address(walletsOptions[0].value)
+      if (selectedRecipientAddress != null && selectedRecipientAddress != '' && selectedWallet && selectedWallet.is_address_owned_by_wallet(selectedRecipientAddress)) {
+        selectedWalletRecipient = this.props.account.wallet_for_name(walletsOptions[0].value)
+        if (!selectedWalletRecipient) {
+          selectedWalletRecipient = this.props.account.wallet_for_address(walletsOptions[0].value)
+        }
+        const addressOptions = this.mapRecipientAddressesToDropdownOption(selectedWalletRecipient)
+        const selectedRecipientAddress = selectedWalletRecipient.address
+        this.setState({
+          walletsOptions,
+          addressOptions,
+          selectedWalletRecipient,
+          selectedRecipientAddress,
+          selectedWallet
+        })
+      } else {
+        this.setState({
+          walletsOptions,
+          selectedWallet
+        })
       }
-      const addressOptions = this.mapRecipientAddressesToDropdownOption(selectedWalletRecipient)
-      const selectedRecipientAddress = selectedWalletRecipient.address
-      this.setState({
-        walletsOptions,
-        addressOptions,
-        selectedWalletRecipient,
-        selectedRecipientAddress,
-        selectedWallet
-      })
     }
     this.props.account.select_wallet({ name: selectedWallet.wallet_name, address: selectedWallet.address })
   }
@@ -439,7 +447,11 @@ class Transfer extends Component {
     let { amountError } = this.state
 
     let destinationError = false
+    let sendToSelfError = false
     if (destination === '') {
+      destinationError = true
+    } else if (selectedWallet && selectedWallet.is_address_owned_by_wallet(destination)) {
+      sendToSelfError = true
       destinationError = true
     }
 
@@ -455,7 +467,11 @@ class Transfer extends Component {
       }
     }
     this.setState({ destinationError, amountError: amountError })
-    toast.error('form is not filled in correctly')
+    if (sendToSelfError) {
+      toast.error('source and destination wallets need to be different')
+    } else {
+      toast.error('form is not filled in correctly')
+    }
     return false
   }
 
@@ -487,15 +503,26 @@ class Transfer extends Component {
       signatureCountErrorValidation = true
     }
 
-    if (!signatureCountErrorValidation && !amountError && selectedWallet != null && !hasOwnerAddressErrors && areAllOwnersFilledIn) {
+    let destinationError = false
+    if (selectedWallet != null && !signatureCountErrorValidation && !hasOwnerAddressErrors) {
+      const msaddress = tfchain.multisig_wallet_address_new(ownerAddresses, signatureCount)
+      destinationError = selectedWallet.is_address_owned_by_wallet(msaddress)
+    }
+
+    if (!signatureCountErrorValidation && !amountError && selectedWallet && !hasOwnerAddressErrors && areAllOwnersFilledIn && !destinationError) {
       return true
     }
     this.setState({
       signatureCountError: signatureCountErrorValidation,
       amountError: amountError,
-      ownerAddressErrors: newOwnerAddressErrors
+      ownerAddressErrors: newOwnerAddressErrors,
+      destinationError
     })
-    toast.error('form is not filled in correctly')
+    if (destinationError) {
+      toast.error('source and destination wallets need to be different')
+    } else {
+      toast.error('form is not filled in correctly')
+    }
     return false
   }
 
@@ -686,8 +713,16 @@ class Transfer extends Component {
   }
 
   renderDestinationError = () => {
-    const { destinationError } = this.state
+    const { destinationError, destination, transactionType } = this.state
     if (destinationError) {
+      if (transactionType === TransactionTypes.MULTISIG || tfchain.wallet_address_is_valid(destination)) {
+        return (
+          <Message
+            error
+            header={'Source and destination wallet has to be different'}
+          />
+        )
+      }
       return (
         <Message
           error

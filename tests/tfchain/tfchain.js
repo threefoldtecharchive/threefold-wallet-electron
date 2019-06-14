@@ -63,6 +63,7 @@ const _all = {
     // create a default wallet...
     const recoveredDefaultWallet = recoveredAccount.wallet_new('ballet', 0, 1)
     assert.equal(recoveredDefaultWallet.address, '01956471980a60ec51a2d54e4b91f4b39ba26eca677ebb3f31929086f7431b17b7f8fe84985d59')
+    assert.true(recoveredDefaultWallet.is_address_owned_by_wallet('01956471980a60ec51a2d54e4b91f4b39ba26eca677ebb3f31929086f7431b17b7f8fe84985d59'))
     assert.equal(recoveredAccount.wallets.length, 1)
     assert.equal(recoveredAccount.wallet.address, recoveredDefaultWallet.address)
     assert.equal(recoveredAccount.addresses.length, 1)
@@ -79,6 +80,7 @@ const _all = {
     // update the default wallet...
     const updatedDefaultWallet = recoveredAccount.wallet_update(0, 'default', 1, 3)
     assert.equal(updatedDefaultWallet.address, '010e0adfb04322e91dfee62ce402e17600862c82c82682e6a7b925b572689e531a24cd002c59f2')
+    assert.true(updatedDefaultWallet.is_address_owned_by_wallet('010e0adfb04322e91dfee62ce402e17600862c82c82682e6a7b925b572689e531a24cd002c59f2'))
     assert.equal(updatedDefaultWallet.wallet_index, 0)
     assert.equal(updatedDefaultWallet.addresses, ['010e0adfb04322e91dfee62ce402e17600862c82c82682e6a7b925b572689e531a24cd002c59f2', '0168341e75d73597807321629d3895eec00aafabba9fc9ef68a6c4279ecfca9708f4dbd5a969f7', '011a3ae574a1081eca8cc5e7c6eae6ed1657a82b4f741413951d8a2313ee8a60eb1f35a6028ede'])
     assert.equal(recoveredAccount.address, updatedDefaultWallet.address)
@@ -181,6 +183,7 @@ const _all = {
     assert.equal(msWalletACopy.wallet_name, 'foo')
     assert.equal(msWalletA.wallet_name, 'foo')
     assert.equal(msWalletA.address, msWalletACopy.address)
+    assert.true(msWalletA.is_address_owned_by_wallet(tfchain.multisig_wallet_address_new([defaultWallet.address, '01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0'], 1)))
 
     // deleting a wallet that is referenced by a ms wallet is not possible
     assert.throws(() => account.wallet_delete(0, 'default'))

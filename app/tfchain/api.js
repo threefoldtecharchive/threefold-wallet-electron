@@ -1951,6 +1951,33 @@ export var BaseWallet =  __class__ ('BaseWallet', [object], {
 		__except0__.__cause__ = null;
 		throw __except0__;
 	});},
+	get is_address_owned_by_wallet () {return __get__ (this, function (self, address) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'address': var address = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var uh = UnlockHash.from_str (address);
+		if (self.is_multisig) {
+			if (uh.uhtype.value != UnlockHashType.MULTI_SIG.value) {
+				return false;
+			}
+		}
+		else if (uh.uhtype.value != UnlockHashType.PUBLIC_KEY.value) {
+			return false;
+		}
+		var address = uh.__str__ ();
+		return __in__ (address, self.addresses);
+	});},
 	get _get_address_count () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;

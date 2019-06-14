@@ -883,6 +883,16 @@ class BaseWallet:
     def _addresses_getter(self):
         raise NotImplementedError("_addresses_getter is not implemented")
 
+    def is_address_owned_by_wallet(self, address):
+        uh = UnlockHash.from_str(address)
+        if self.is_multisig:
+            if uh.uhtype.value != UnlockHashType.MULTI_SIG.value:
+                return False
+        elif uh.uhtype.value != UnlockHashType.PUBLIC_KEY.value:
+            return False
+        address = uh.__str__()
+        return address in self.addresses
+
     @property
     def address_count(self):
         """
