@@ -9,7 +9,7 @@ const SeedModal = ({ open, closeModal, seedConfirmation, handleSeedWordsChange, 
     <Modal.Content image>
       <Modal.Description>
         <Header>Enter 3 random words from your generated seed</Header>
-        <Form error style={{ width: '50%', margin: 'auto', marginTop: 60 }}>
+        <Form error style={{ width: '50%', margin: 'auto', marginTop: 60 }} onKeyDown={(e) => onKeyDown(e, createAccount)}>
           <Form.Field>
             <label style={{ float: 'left' }}>Words</label>
             <input placeholder='provide 3 random words here' value={seedConfirmation} onChange={handleSeedWordsChange} />
@@ -33,6 +33,14 @@ const SeedModal = ({ open, closeModal, seedConfirmation, handleSeedWordsChange, 
     </Modal.Actions>
   </Modal>
 )
+
+function onKeyDown (e, createAccount) {
+  if (e.key === 'Enter') {
+    e.preventDefault()
+    e.stopPropagation()
+    createAccount()
+  }
+}
 
 function renderDeleteNameError (err) {
   if (err) {

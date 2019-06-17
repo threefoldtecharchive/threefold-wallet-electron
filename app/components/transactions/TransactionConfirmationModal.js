@@ -1,31 +1,52 @@
-import React from 'react'
+import React, { Component } from 'react'
 import { Header, Modal, Button, List, Icon } from 'semantic-ui-react'
 import moment from 'moment-timezone'
 const closeOnEscape = true
 
-const confirmationModal = ({ open, closeModal, transaction, confirmTransaction, transactionType, selectedWallet, amount, owners, destination, signatureCount, datelock, timelock, selectedWalletRecipient, selectedRecipientAddress }) => (
-  <Modal open={open} closeOnEscape={closeOnEscape} onClose={closeModal}>
-    <Modal.Header>Confirm transaction</Modal.Header>
-    <Modal.Content image>
-      <Modal.Description>
-        <Header>Do you wish to confirm this transaction?</Header>
-        {renderModalBody(transactionType, selectedWallet, amount, owners, destination, signatureCount, timelock, datelock, selectedWalletRecipient, selectedRecipientAddress)}
-      </Modal.Description>
-    </Modal.Content>
-    <Modal.Actions>
-      <Button onClick={closeModal} negative>
+class ConfirmationModal extends Component {
+  componentDidMount () {
+    window.addEventListener('keyup', this.handleKeyUp)
+  }
+
+  componentWillUnmount () {
+    window.removeEventListener('keyup', this.handleKeyUp)
+  }
+
+  handleKeyUp = (event) => {
+    if (event.key === 'Enter') {
+      this.props.confirmTransaction()
+    }
+  }
+
+  render () {
+    const { open, closeModal, confirmTransaction, transactionType, selectedWallet, amount, owners, destination, signatureCount, datelock, timelock, selectedWalletRecipient, selectedRecipientAddress } = this.props
+    return (
+      <Modal open={open} closeOnEscape={closeOnEscape} onClose={closeModal}>
+        <Modal.Header>Confirm transaction</Modal.Header>
+        <Modal.Content image>
+          <Modal.Description>
+            <Header>Do you wish to confirm this transaction?</Header>
+            {renderModalBody(transactionType, selectedWallet, amount, owners, destination, signatureCount, timelock, datelock, selectedWalletRecipient, selectedRecipientAddress)}
+          </Modal.Description>
+        </Modal.Content>
+        <Modal.Actions>
+          <Button onClick={closeModal} negative>
         Cancel
-      </Button>
-      <Button
-        onClick={confirmTransaction}
-        positive
-        labelPosition='right'
-        icon='checkmark'
-        content='Confirm'
-      />
-    </Modal.Actions>
-  </Modal>
-)
+          </Button>
+          <Button
+            onClick={confirmTransaction}
+            positive
+            labelPosition='right'
+            icon='checkmark'
+            content='Confirm'
+          />
+        </Modal.Actions>
+      </Modal>
+    )
+  }
+}
+
+export default ConfirmationModal
 
 function renderModalBody (transactionType, selectedWallet, amount, owners, destination, signatureCount, timelock, datelock, selectedWalletRecipient, selectedRecipientAddress) {
   if (!selectedWallet) {
@@ -131,5 +152,3 @@ function renderModalBody (transactionType, selectedWallet, amount, owners, desti
     </List>
   )
 }
-
-export default confirmationModal

@@ -131,6 +131,14 @@ class SignTransaction extends Component {
     }
   }
 
+  onKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      e.stopPropagation()
+      this.signAndSend()
+    }
+  }
+
   render () {
     const { selectedWallet } = this.state
     const walletsOptions = this.mapWalletsToDropdownOption()
@@ -154,7 +162,7 @@ class SignTransaction extends Component {
         <Icon onClick={() => this.props.history.goBack()} style={{ fontSize: 25, marginLeft: 15, marginTop: 15, cursor: 'pointer' }} name='chevron circle left' />
         <span onClick={() => this.props.history.goBack()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
         <div style={{ height: '65vh', paddingBottom: 30, overflow: 'auto' }}>
-          <Form error style={{ width: '50%', margin: 'auto', marginTop: 0 }}>
+          <Form error style={{ width: '50%', margin: 'auto', marginTop: 0 }} onKeyDown={this.onKeyDown}>
             <Form.Field>
               <label style={{ color: 'white' }}>Select wallet</label>
               <Dropdown

@@ -842,6 +842,14 @@ class Transfer extends Component {
     }
   }
 
+  onKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      e.stopPropagation()
+      this.openConfirmationModal()
+    }
+  }
+
   render () {
     const {
       amountError,
@@ -893,7 +901,7 @@ class Transfer extends Component {
         <Icon onClick={() => this.goBack()} style={{ fontSize: 25, marginLeft: 15, marginTop: 15, cursor: 'pointer' }} name='chevron circle left' />
         <span onClick={() => this.goBack()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
         <div style={{ height: '100vh' }}>
-          <Form error style={{ width: '60%', marginLeft: '10%', marginTop: 10, overflow: 'auto', height: '67vh', padding: 30 }}>
+          <Form error style={{ width: '60%', marginLeft: '10%', marginTop: 10, overflow: 'auto', height: '67vh', padding: 30 }} onKeyDown={this.onKeyDown}>
             <h2 style={{ marginBottom: 20 }}>Send funds to:</h2>
             <div style={{ display: 'flex' }}>
               <Form.Field style={{ marginRight: 25 }}>
@@ -924,10 +932,10 @@ class Transfer extends Component {
               <Input type='number' error={amountError} label='Amount TFT' style={{ background: '#0c111d !important', color: '#7784a9', width: 150 }} placeholder='amount' value={amount || ''} onChange={this.handleAmountChange} />
               {this.renderAmountError()}
             </Form.Field>
-            <Form.Field style={{ marginTop: 30 }}>
+            <Form.Field style={{ marginTop: 30 }} error={timelockError}>
               <label style={{ color: 'white' }}>Timelock (optional)</label>
-              <Input type='date' error={{ timelockError }} label='Timelock' style={{ background: '#0c111d !important', color: '#7784a9', width: 180 }} value={datelock} onChange={this.handleDateLockChange} />
-              <Input type='time' error={{ timelockError }} style={{ background: '#0c111d !important', color: '#7784a9', width: 150, marginLeft: 100, position: 'relative', top: 3 }} value={timelock} onChange={this.handleTimeLockChange} />
+              <Input type='date' label='Timelock' style={{ background: '#0c111d !important', color: '#7784a9', width: 180 }} value={datelock} onChange={this.handleDateLockChange} />
+              <Input type='time' style={{ background: '#0c111d !important', color: '#7784a9', width: 150, marginLeft: 100, position: 'relative', top: 3 }} value={timelock} onChange={this.handleTimeLockChange} />
             </Form.Field>
             {this.rendertimelockError()}
             <Form.Field style={{ marginTop: 30 }}>

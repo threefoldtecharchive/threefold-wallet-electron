@@ -9,7 +9,7 @@ const DeleteModal = ({ open, closeModal, name, handleDeleteWalletNameChange, del
     <Modal.Content image>
       <Modal.Description>
         <Header>If you want to delete this wallet enter the name of this wallet and click delete.</Header>
-        <Form error style={{ width: '50%', margin: 'auto', marginTop: 60 }}>
+        <Form error style={{ width: '50%', margin: 'auto', marginTop: 60 }} onKeyDown={(e) => onKeyDown(e, deleteWallet)}>
           <Form.Field>
             <label style={{ float: 'left' }}>Name</label>
             <input placeholder='wallet name here' value={name} onChange={handleDeleteWalletNameChange} />
@@ -32,6 +32,14 @@ const DeleteModal = ({ open, closeModal, name, handleDeleteWalletNameChange, del
     </Modal.Actions>
   </Modal>
 )
+
+function onKeyDown (e, deleteWallet) {
+  if (e.key === 'Enter') {
+    e.preventDefault()
+    e.stopPropagation()
+    deleteWallet()
+  }
+}
 
 function renderDeleteNameError (err, message) {
   if (err) {

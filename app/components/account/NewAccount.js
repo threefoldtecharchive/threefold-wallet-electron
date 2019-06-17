@@ -273,6 +273,14 @@ class NewAccount extends Component {
     this.setState({ seedConfirmation: target.value })
   }
 
+  onKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      e.stopPropagation()
+      this.openConfirmationModal()
+    }
+  }
+
   render () {
     const { name, generateSeed, seedError, nameError, seedConfirmation, seedConfirmationError, openConfirmationModal, password, confirmationPassword, passwordError, passwordConfirmationError, accountCreationError, accountCreationErrorMessage } = this.state
 
@@ -295,7 +303,7 @@ class NewAccount extends Component {
         <Icon onClick={() => this.props.history.goBack()} style={{ fontSize: 25, marginLeft: 15, marginTop: 15, cursor: 'pointer' }} name='chevron circle left' />
         <span onClick={() => this.props.history.goBack()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
         <div style={{ height: '75vh', overflowY: 'scroll', paddingBottom: 30 }}>
-          <Form error style={{ width: '50%', margin: 'auto', marginTop: 5, marginBottom: 50, fontSize: 18 }}>
+          <Form error style={{ width: '50%', margin: 'auto', marginTop: 5, marginBottom: 50, fontSize: 18 }} onKeyDown={this.onKeyDown}>
             <Form.Field>
               <label style={{ float: 'left', color: 'white', marginRight: 20 }}>What network do you want to choose? </label>
               <Popup size='large' position='right center' content='Network type is the network your account will connect to. standard is the production network, others are meant for testing' trigger={<Icon style={{ fontSize: 12 }} name='question circle' />} />

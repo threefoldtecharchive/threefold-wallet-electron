@@ -176,6 +176,14 @@ class WalletSettings extends Component {
     return this.props.history.push('/account')
   }
 
+  onKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      e.stopPropagation()
+      this.saveWallet()
+    }
+  }
+
   render () {
     const { openDeleteModal, deleteName, deleteNameError, deleteNameErrorMessage, name, startIndex, addressLength } = this.state
     return (
@@ -202,7 +210,7 @@ class WalletSettings extends Component {
                   Wallet Settings
             <Header.Subheader style={{ color: 'white' }}>Manage your wallet settings</Header.Subheader>
           </Header>
-          <Form error style={{ width: '50%', margin: 'auto', marginTop: 10 }}>
+          <Form error style={{ width: '50%', margin: 'auto', marginTop: 10 }} onKeyDown={this.onKeyDown}>
             <Form.Field>
               <label style={{ float: 'left', color: 'white' }}>Name</label>
               <input placeholder='wallet name' value={name} onChange={this.handleNameChange} />

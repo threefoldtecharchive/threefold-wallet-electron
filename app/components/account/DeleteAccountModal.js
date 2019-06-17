@@ -9,7 +9,7 @@ const DeleteModal = ({ open, closeModal, name, handleDeleteAccountNameChange, de
     <Modal.Content image>
       <Modal.Description>
         <Header>If you want to delete this account enter the name of this account and click delete.</Header>
-        <Form error style={{ width: '50%', margin: 'auto', marginTop: 60 }}>
+        <Form error style={{ width: '50%', margin: 'auto', marginTop: 60 }} onKeyDown={(e) => onKeyDown(e, deleteAccount)}>
           <Form.Field>
             <label style={{ float: 'left' }}>Name</label>
             <input placeholder='account name here' value={name} onChange={handleDeleteAccountNameChange} />
@@ -32,6 +32,14 @@ const DeleteModal = ({ open, closeModal, name, handleDeleteAccountNameChange, de
     </Modal.Actions>
   </Modal>
 )
+
+function onKeyDown (e, deleteAccount) {
+  if (e.key === 'Enter') {
+    e.preventDefault()
+    e.stopPropagation()
+    deleteAccount()
+  }
+}
 
 function renderDeleteNameError (err) {
   if (err) {

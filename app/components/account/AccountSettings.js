@@ -220,6 +220,14 @@ class AccountSettings extends Component {
     )
   }
 
+  onKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      e.stopPropagation()
+      this.saveAccount()
+    }
+  }
+
   render () {
     const { name, openDeleteModal, deleteName, deleteNameError, openDeleteWalletModal, deleteWalletName, deleteWalletNameError, deleteWalletNameErrorMessage, showSeedModal, nameError } = this.state
     return (
@@ -257,7 +265,7 @@ class AccountSettings extends Component {
             <Header.Subheader style={{ color: 'white' }}>Manage your account settings</Header.Subheader>
           </Header>
           <div style={{ height: '60vh', overflow: 'auto' }}>
-            <Form error style={{ width: '50%', margin: 'auto', marginTop: 10, marginBottom: 50 }}>
+            <Form error style={{ width: '50%', margin: 'auto', marginTop: 10, marginBottom: 50 }} onKeyDown={this.onKeyDown}>
               <Form.Field error={nameError}>
                 <label style={{ float: 'left', color: 'white' }}>Name</label>
                 <input placeholder='account name' value={name} onChange={this.handleNameChange} />
