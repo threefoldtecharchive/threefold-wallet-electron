@@ -57,95 +57,101 @@ class Account extends Component {
   }
 
   renderWallets = () => {
+    const { account } = this.props
     let wallets = this.props.account.wallets
     let multiSigWallets = this.props.account.multisig_wallets
+    let isOneOrMoreUnconfirmed = account.balance.unconfirmed_coins_total.greater_than(0)
     return (
       <div>
         <Card.Group style={{ marginTop: 20, marginLeft: 20, marginBottom: -20 }}>
           {wallets.map(w => {
-            let content = null
-            if (w.is_loaded) {
-              content = (
-                <Card.Content>
-                  <div>
-                    <Icon name='chevron right' style={{ position: 'absolute', right: 20, top: 130, fontSize: 25, opacity: '0.3', color: 'white' }} />
-                    <Card.Description style={{ color: 'white', marginTop: 10, marginBottom: 10, fontFamily: 'SF UI Text Light', display: 'flex' }}>
-                      <Icon name='unlock' style={{ fontSize: 16, marginLeft: 20 }} /> <p style={{ marginLeft: 30, marginTop: -8 }}>{w.balance.coins_unlocked.str({ precision: 3 })} TFT</p>
-                    </Card.Description>
-                    <Card.Description style={{ textAlign: 'left', color: 'white', marginTop: 20, marginBottom: 10, fontFamily: 'SF UI Text Light', display: 'flex' }}>
-                      <Icon name='lock' style={{ fontSize: 16, marginLeft: 20 }} /> <p style={{ marginLeft: 33, marginTop: -3, fontFamily: 'SF UI Text Light', fontSize: 18 }}>{w.balance.coins_locked.str({ precision: 3 })} TFT</p>
-                    </Card.Description>
-                    <Divider />
-                    <Card.Header style={{ textAlign: 'center', color: 'white', fontSize: 18, textTransform: 'uppercase', marginTop: 20, fontFamily: 'SF UI Text Light' }}>
-                        wallet {truncate(w.wallet_name, { length: 14 }) || truncate(w.address, { length: 14 })}
-                    </Card.Header>
-                  </div>
-                </Card.Content>
-              )
-            }
-            return (
-              <Card key={w.wallet_name || w.address} style={{ boxShadow: 'none', height: 180, width: 350, marginTop: 0, marginRight: 20, marginBottom: 30, background: 'linear-gradient(90deg, rgba(56,51,186,1) 0%, rgba(102,71,254,1) 100%)' }} onClick={() => this.handleWalletClick(w)}>
-                <Dimmer active={content == null}>
-                  <Loader />
-                </Dimmer>
-                {content}
-              </Card>
-            )
+            return this.renderWalletContent(w)
           })}
-          <Card style={{ boxShadow: 'none', height: 180, width: 350, marginBottom: 60, marginTop: 0, background: '#29272E' }} onClick={() => this.props.history.push(routes.WALLET_NEW)}>
-            <Card.Content style={{ textAlign: 'center' }}>
-              <Card.Header style={{ color: 'white', fontSize: 20, textTransform: 'uppercase', position: 'absolute', top: 50, left: 90 }}>
-                Create wallet
-              </Card.Header>
-              <Icon name='plus circle' style={{ position: 'absolute', left: 145, top: 100, fontSize: 40, opacity: '0.3' }} />
-            </Card.Content>
-          </Card>
+          {this.renderCreateWalletCard(false)}
         </Card.Group>
+        {isOneOrMoreUnconfirmed ? (<p style={{ fontSize: 12, marginBottom: 30, marginLeft: 25 }}>Wallet balance amounts with (*) have unconfirmed balances</p>) : null}
         <Divider style={{ marginTop: -20 }} />
         <Card.Group style={{ marginTop: 20, marginLeft: 20 }}>
           {multiSigWallets.map(w => {
-            let content = null
-            if (w.is_loaded) {
-              content = (
-                <Card.Content>
-                  <div>
-                    <Card.Description style={{ position: 'absolute', top: 10, right: 5, left: 310, color: 'white' }}>
-                      <p style={{ fontSize: 14 }}>{w.signatures_required}/{w.owners.length}</p>
-                    </Card.Description>
-                    <Icon name='chevron right' style={{ position: 'absolute', right: 20, top: 130, fontSize: 25, opacity: '0.3', color: 'white' }} />
-                    <Card.Description style={{ color: 'white', marginTop: 10, marginBottom: 10, fontFamily: 'SF UI Text Light', display: 'flex' }}>
-                      <Icon name='unlock' style={{ fontSize: 16, marginLeft: 20 }} /> <p style={{ marginLeft: 30, marginTop: -8 }}>{w.balance.coins_unlocked.str({ precision: 3 })} TFT</p>
-                    </Card.Description>
-                    <Card.Description style={{ textAlign: 'left', color: 'white', marginTop: 20, marginBottom: 10, fontFamily: 'SF UI Text Light', display: 'flex' }}>
-                      <Icon name='lock' style={{ fontSize: 16, marginLeft: 20 }} /> <p style={{ marginLeft: 33, marginTop: -3, fontFamily: 'SF UI Text Light', fontSize: 18 }}>{w.balance.coins_locked.str({ precision: 3 })} TFT</p>
-                    </Card.Description>
-                    <Divider />
-                    <Card.Header style={{ textAlign: 'center', color: 'white', fontSize: 18, textTransform: 'uppercase', marginTop: 20, fontFamily: 'SF UI Text Light' }}>
-                      wallet {truncate(w.wallet_name, { length: 14 }) || truncate(w.address, { length: 14 })}
-                    </Card.Header>
-                  </div>
-                </Card.Content>
-              )
-            }
-            return (
-              <Card key={w.wallet_name || w.address} style={{ boxShadow: 'none', height: 180, width: 350, marginTop: 0, marginRight: 20, marginBottom: 30, background: 'linear-gradient(90deg, rgba(56,51,186,1) 0%, rgba(102,71,254,1) 100%)' }} onClick={() => this.handleMultiSigWalletClick(w)}>
-                <Dimmer active={content == null}>
-                  <Loader />
-                </Dimmer>
-                {content}
-              </Card>
-            )
+            return this.renderWalletContent(w)
           })}
-          <Card style={{ boxShadow: 'none', height: 180, width: 350, marginBottom: 60, marginTop: 0, background: '#29272E' }} onClick={() => this.props.history.push(routes.WALLET_MULTI_NEW)}>
-            <Card.Content style={{ textAlign: 'center' }}>
-              <Card.Header style={{ color: 'white', fontSize: 20, textTransform: 'uppercase', position: 'absolute', top: 50, left: 45, textAlign: 'center' }}>
-                Create multisig wallet
-              </Card.Header>
-              <Icon name='plus circle' style={{ position: 'absolute', left: 145, top: 100, fontSize: 40, opacity: '0.3' }} />
-            </Card.Content>
-          </Card>
+          {this.renderCreateWalletCard(true)}
         </Card.Group >
       </div>
+    )
+  }
+
+  renderWalletContent = (w) => {
+    let content = null
+    if (w.is_loaded) {
+      let unlockedBalance = `${w.balance.coins_unlocked.str({ precision: 3 })} TFT`
+      let lockedBalance = `${w.balance.coins_locked.str({ precision: 3 })} TFT`
+
+      if (w.balance.unconfirmed_coins_unlocked.not_equal_to(0)) {
+        const totalUnlockedBalance = w.balance.unconfirmed_coins_unlocked.plus(w.balance.coins_unlocked)
+        unlockedBalance = `${totalUnlockedBalance.str({ precision: 3 })} TFT *`
+      }
+
+      if (w.balance.unconfirmed_coins_locked.not_equal_to(0)) {
+        const totalLockedBalance = w.balance.unconfirmed_coins_locked.plus(w.balance.coins_locked)
+        lockedBalance = `${totalLockedBalance.str({ precision: 3 })} TFT *`
+      }
+
+      content = (
+        <Card.Content>
+          <div>
+            {w.is_multisig ? (
+              <Card.Description style={{ position: 'absolute', top: 10, right: 5, left: 310, color: 'white' }}>
+                <p style={{ fontSize: 14 }}>{w.signatures_required}/{w.owners.length}</p>
+              </Card.Description>
+            ) : null}
+            <Icon name='chevron right' style={{ position: 'absolute', right: 20, top: 130, fontSize: 25, opacity: '0.3', color: 'white' }} />
+            <Card.Description style={{ color: 'white', marginTop: 10, marginBottom: 10, fontFamily: 'SF UI Text Light', display: 'flex' }}>
+              <Icon name='unlock' style={{ fontSize: 16, marginLeft: 20 }} />
+              <p style={{ marginLeft: 30, marginTop: -8 }}>{unlockedBalance}</p>
+            </Card.Description>
+            <Card.Description style={{ textAlign: 'left', color: 'white', marginTop: 20, marginBottom: 10, fontFamily: 'SF UI Text Light', display: 'flex' }}>
+              <Icon name='lock' style={{ fontSize: 16, marginLeft: 20 }} />
+              <p style={{ marginLeft: 30, marginTop: -8 }}>{lockedBalance}</p>
+            </Card.Description>
+            <Divider />
+            <Card.Header style={{ textAlign: 'center', color: 'white', fontSize: 18, textTransform: 'uppercase', marginTop: 20, fontFamily: 'SF UI Text Light' }}>
+              wallet {truncate(w.wallet_name, { length: 14 }) || truncate(w.address, { length: 14 })}
+            </Card.Header>
+          </div>
+        </Card.Content>
+      )
+
+      let onClick = () => this.handleWalletClick(w)
+      if (w.is_multisig) {
+        onClick = () => this.handleMultiSigWalletClick(w)
+      }
+
+      return (
+        <Card key={w.wallet_name || w.address} style={{ boxShadow: 'none', height: 180, width: 350, marginTop: 0, marginRight: 20, marginBottom: 30, background: 'linear-gradient(90deg, rgba(56,51,186,1) 0%, rgba(102,71,254,1) 100%)' }} onClick={onClick}>
+          <Dimmer active={content == null}>
+            <Loader />
+          </Dimmer>
+          {content}
+        </Card>
+      )
+    }
+  }
+
+  renderCreateWalletCard = (isMultisig) => {
+    let onClick = () => this.props.history.push(routes.WALLET_NEW)
+    if (isMultisig) {
+      onClick = () => this.props.history.push(routes.WALLET_MULTI_NEW)
+    }
+    return (
+      <Card style={{ boxShadow: 'none', height: 180, width: 350, marginBottom: 60, marginTop: 0, background: '#29272E' }} onClick={onClick}>
+        <Card.Content style={{ textAlign: 'center' }}>
+          <Card.Header style={{ color: 'white', fontSize: 20, textTransform: 'uppercase', marginTop: 30, textAlign: 'center' }}>
+            {isMultisig ? 'Create multisig wallet' : 'Create wallet'}
+          </Card.Header>
+          <Icon name='plus circle' style={{ position: 'absolute', left: 145, top: 100, fontSize: 40, opacity: '0.3' }} />
+        </Card.Content>
+      </Card>
     )
   }
 
@@ -166,13 +172,13 @@ class Account extends Component {
         <div>
           <h3 style={{ color: 'white', marginTop: 0 }}>Total Balance</h3>
           <h4 style={{ color: 'white', marginTop: 0 }}>{coinsTotal.str({ precision: 3 })} TFT</h4>
-          {unconfirmedTotalCoins.greater_than(0) ? (<span style={{ color: 'white', marginTop: 0, fontSize: 12 }}>unconfirmed: {unconfirmedTotalCoins.str({ precision: 3 })} TFT</span>) : (<p />)}
+          {unconfirmedTotalCoins.greater_than(0) ? (<span style={{ color: 'white', marginTop: 0, fontSize: 12 }}>* unconfirmed: {unconfirmedTotalCoins.str({ precision: 3 })} TFT</span>) : (<p />)}
           <h4 style={{ color: 'white' }}><Icon name='lock' />Locked Balance</h4>
           <h4 style={{ color: 'white', marginTop: 0 }}>{coinsLocked.str({ precision: 3 })}  TFT</h4>
-          {unconfirmedLockedCoins.greater_than(0) ? (<span style={{ color: 'white', marginTop: 0, fontSize: 12 }}>unconfirmed: {unconfirmedLockedCoins.str({ precision: 3 })} TFT</span>) : (<p />)}
+          {unconfirmedLockedCoins.greater_than(0) ? (<span style={{ color: 'white', marginTop: 0, fontSize: 12 }}>* unconfirmed: {unconfirmedLockedCoins.str({ precision: 3 })} TFT</span>) : (<p />)}
           <h4 style={{ color: 'white' }}><Icon name='unlock' />Unlocked Balance</h4>
           <h4 style={{ color: 'white', marginTop: 0, marginBottom: 0 }}>{coinsUnlocked.str({ precision: 3 })}  TFT</h4>
-          {unconfirmedUnlockedCoins.greater_than(0) ? (<span style={{ color: 'white', marginTop: 0, fontSize: 12 }}>unconfirmed: {unconfirmedUnlockedCoins.str({ precision: 3 })} TFT </span>) : (<p />)}
+          {unconfirmedUnlockedCoins.greater_than(0) ? (<span style={{ color: 'white', marginTop: 0, fontSize: 12 }}>* unconfirmed: {unconfirmedUnlockedCoins.str({ precision: 3 })} TFT </span>) : (<p />)}
         </div>
       )
     }
