@@ -26,7 +26,9 @@ const WalletBalanceGrid = ({ loader, walletBalance, routeToReceive, routeToTrans
       </GridColumn>
       <GridColumn style={{ width: '45%' }}>
         <div style={{ marginTop: 20, position: 'absolute', right: 60 }}>
-          <Button className={styles.acceptButton} onClick={() => routeToReceive()} style={{ float: 'left', color: 'white', marginRight: 15 }} size='big'>Receive</Button>
+          { routeToReceive ? (
+            <Button className={styles.acceptButton} onClick={() => routeToReceive()} style={{ float: 'left', color: 'white', marginRight: 15 }} size='big'>Receive</Button>
+          ) : null }
           <Button className={styles.cancelButton} onClick={() => routeToTransfer()} style={{ marginRight: 10, float: 'left', color: 'white', background: 'none' }} size='big'>Transfer</Button>
         </div>
         <div style={{ position: 'absolute', top: 100, right: 60 }}>

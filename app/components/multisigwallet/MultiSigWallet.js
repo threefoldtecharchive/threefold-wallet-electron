@@ -41,7 +41,8 @@ class Wallet extends Component {
   }
 
   renderWalletBalanceGrid = () => {
-    const routeToReceive = () => this.props.history.push(routes.WALLET_MULTI_RECEIVE)
+    // TODO: activate again once a decent MultiSig wallet receive page is made.
+    // const routeToReceive = () => this.props.history.push(routes.WALLET_MULTI_RECEIVE)
     const routeToTransfer = () => this.props.history.push(routes.TRANSFER)
     const routeToSign = () => this.props.history.push(routes.SIGN_TRANSACTIONS)
     const walletBalance = this.props.account.selected_wallet
@@ -50,7 +51,7 @@ class Wallet extends Component {
         <BalanceUnconfirmedGrid
           loader={this.state.loader}
           walletBalance={walletBalance.balance}
-          routeToReceive={routeToReceive}
+          routeToReceive={null} // routeToReceive}
           routeToTransfer={routeToTransfer}
           routeToSign={routeToSign}
         />
@@ -60,7 +61,7 @@ class Wallet extends Component {
       <BalanceGrid
         loader={this.state.loader}
         walletBalance={walletBalance.balance}
-        routeToReceive={routeToReceive}
+        routeToReceive={null} // routeToReceive}
         routeToTransfer={routeToTransfer}
         routeToSign={routeToSign}
       />
