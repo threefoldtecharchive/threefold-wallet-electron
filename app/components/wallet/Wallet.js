@@ -96,10 +96,12 @@ class Wallet extends Component {
         <div>
           <Icon onClick={() => this.goBack()} style={{ fontSize: 25, marginLeft: 15, marginTop: 15, cursor: 'pointer', zIndex: 5 }} name='chevron circle left' />
           <span onClick={() => this.goBack()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
-          {this.renderWalletBalanceGrid()}
-          <Segment style={{ width: '90%', height: '37vh', overflow: 'auto', overflowY: 'scroll', margin: 'auto', background: '#29272E', marginTop: 150 }}>
-            <TransactionsList account={this.props.account} loader={this.state.loader} transactions={wallet.balance.transactions} chainInfo={chainConstants} />
-          </Segment>
+          <div style={{ height: '69vh', overflow: 'auto', paddingBottom: 30 }}>
+            {this.renderWalletBalanceGrid()}
+            <Segment style={{ width: '90%', height: '40vh', overflow: 'auto', overflowY: 'scroll', margin: 'auto', background: '#29272E', marginTop: 150 }}>
+              <TransactionsList account={this.props.account} loader={this.state.loader} transactions={wallet.balance.transactions} chainInfo={chainConstants} />
+            </Segment>
+          </div>
         </div>
         <Footer />
       </div>

@@ -280,7 +280,7 @@ class Transfer extends Component {
             <Form.Field>
               <label style={{ color: 'white' }}>Destination Address</label>
               <Dropdown
-                style={{ width: 690, marginLeft: 'auto', marginRight: 'auto', marginBottom: 20, marginTop: 10 }}
+                style={{ width: 690, marginBottom: 20, marginTop: 10 }}
                 placeholder='Select Address'
                 fluid
                 selection
@@ -356,7 +356,7 @@ class Transfer extends Component {
         selectedWallet
       })
     } else {
-      if (selectedRecipientAddress != null && selectedRecipientAddress != '' && selectedWallet && selectedWallet.is_address_owned_by_wallet(selectedRecipientAddress)) {
+      if (selectedRecipientAddress != null && selectedRecipientAddress !== '' && selectedWallet && selectedWallet.is_address_owned_by_wallet(selectedRecipientAddress)) {
         selectedWalletRecipient = this.props.account.wallet_for_name(walletsOptions[0].value)
         if (!selectedWalletRecipient) {
           selectedWalletRecipient = this.props.account.wallet_for_address(walletsOptions[0].value)
@@ -833,58 +833,60 @@ class Transfer extends Component {
         <Divider style={{ background: '#1A253F' }} />
         <Icon onClick={() => this.goBack()} style={{ fontSize: 25, marginLeft: 15, marginTop: 15, cursor: 'pointer' }} name='chevron circle left' />
         <span onClick={() => this.goBack()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
-        <Form error style={{ width: '60%', marginLeft: '10%', marginTop: 10, overflowY: 'auto', height: 550, padding: 30 }}>
-          <h2 style={{ marginBottom: 20 }}>Send funds to:</h2>
-          <div style={{ display: 'flex' }}>
-            <Form.Field style={{ marginRight: 25 }}>
-              <Radio
-                label={<label style={{ color: 'white' }}>Wallet</label>}
-                checked={transactionType === TransactionTypes.SINGLE}
-                onChange={() => this.handleMultiSigTransactionCheck(TransactionTypes.SINGLE)}
-              />
-            </Form.Field>
-            <Form.Field style={{ marginRight: 25 }}>
-              <Radio
-                label={<label style={{ color: 'white' }}>Multisignature Wallet</label>}
-                checked={transactionType === TransactionTypes.MULTISIG}
-                onChange={() => this.handleMultiSigTransactionCheck(TransactionTypes.MULTISIG)}
-              />
-            </Form.Field>
-            { selectedWalletRecipient ? (
+        <div style={{ height: '100vh' }}>
+          <Form error style={{ width: '60%', marginLeft: '10%', marginTop: 10, overflow: 'auto', height: '67vh', padding: 30 }}>
+            <h2 style={{ marginBottom: 20 }}>Send funds to:</h2>
+            <div style={{ display: 'flex' }}>
               <Form.Field style={{ marginRight: 25 }}>
                 <Radio
-                  label={<label style={{ color: 'white' }}>One of your Wallets</label>}
-                  checked={transactionType === TransactionTypes.INTERNAL}
-                  onChange={() => this.handleMultiSigTransactionCheck(TransactionTypes.INTERNAL)}
+                  label={<label style={{ color: 'white' }}>Wallet</label>}
+                  checked={transactionType === TransactionTypes.SINGLE}
+                  onChange={() => this.handleMultiSigTransactionCheck(TransactionTypes.SINGLE)}
                 />
-              </Form.Field>) : null }
+              </Form.Field>
+              <Form.Field style={{ marginRight: 25 }}>
+                <Radio
+                  label={<label style={{ color: 'white' }}>Multisignature Wallet</label>}
+                  checked={transactionType === TransactionTypes.MULTISIG}
+                  onChange={() => this.handleMultiSigTransactionCheck(TransactionTypes.MULTISIG)}
+                />
+              </Form.Field>
+              { selectedWalletRecipient ? (
+                <Form.Field style={{ marginRight: 25 }}>
+                  <Radio
+                    label={<label style={{ color: 'white' }}>One of your Wallets</label>}
+                    checked={transactionType === TransactionTypes.INTERNAL}
+                    onChange={() => this.handleMultiSigTransactionCheck(TransactionTypes.INTERNAL)}
+                  />
+                </Form.Field>) : null }
+            </div>
+            {this.renderDestinationForm()}
+            <Form.Field style={{ marginTop: 30 }}>
+              <Input type='number' error={amountError} label='Amount TFT' style={{ background: '#0c111d !important', color: '#7784a9', width: 150 }} placeholder='amount' value={amount} onChange={this.handleAmountChange} />
+              {this.renderAmountError()}
+            </Form.Field>
+            <Form.Field style={{ marginTop: 30 }}>
+              <label style={{ color: 'white' }}>Timelock (optional)</label>
+              <Input type='date' label='Timelock' style={{ background: '#0c111d !important', color: '#7784a9', width: 180 }} value={datelock} onChange={this.handleDateLockChange} />
+              <Input type='time' style={{ background: '#0c111d !important', color: '#7784a9', width: 150, marginLeft: 100, position: 'relative', top: 3 }} value={timelock} onChange={this.handleTimeLockChange} />
+            </Form.Field>
+            <Form.Field style={{ marginTop: 30 }}>
+              <label style={{ color: 'white' }}>Select wallet</label>
+              <Dropdown
+                placeholder='Select Wallet'
+                fluid
+                selection
+                options={walletsOptions}
+                onChange={this.selectWallet}
+                value={selectedWallet.wallet_name === '' ? selectedWallet.address : selectedWallet.wallet_name}
+              />
+            </Form.Field>
+            {this.renderErrorMessage()}
+          </Form>
+          <div style={{ position: 'relative', bottom: 110, left: '73%' }}>
+            <Button className={styles.cancelButton} onClick={() => this.props.history.goBack()} style={{ marginTop: 20, float: 'left', background: '#2B3C72', color: 'white', marginRight: 15 }} size='big'>Cancel</Button>
+            <Button className={styles.acceptButton} onClick={() => this.openConfirmationModal()} style={{ marginTop: 20, marginRight: 10, float: 'left', background: '#015DE1', color: 'white' }} size='big'>Send</Button>
           </div>
-          {this.renderDestinationForm()}
-          <Form.Field style={{ marginTop: 30 }}>
-            <Input type='number' error={amountError} label='Amount TFT' style={{ background: '#0c111d !important', color: '#7784a9', width: 150 }} placeholder='amount' value={amount} onChange={this.handleAmountChange} />
-            {this.renderAmountError()}
-          </Form.Field>
-          <Form.Field style={{ marginTop: 30 }}>
-            <label style={{ color: 'white' }}>Timelock (optional)</label>
-            <Input type='date' label='Timelock' style={{ background: '#0c111d !important', color: '#7784a9', width: 180 }} value={datelock} onChange={this.handleDateLockChange} />
-            <Input type='time' style={{ background: '#0c111d !important', color: '#7784a9', width: 150, marginLeft: 100, position: 'relative', top: 3 }} value={timelock} onChange={this.handleTimeLockChange} />
-          </Form.Field>
-          <Form.Field style={{ marginTop: 30 }}>
-            <label style={{ color: 'white' }}>Select wallet</label>
-            <Dropdown
-              placeholder='Select Wallet'
-              fluid
-              selection
-              options={walletsOptions}
-              onChange={this.selectWallet}
-              value={selectedWallet.wallet_name === '' ? selectedWallet.address : selectedWallet.wallet_name}
-            />
-          </Form.Field>
-          {this.renderErrorMessage()}
-        </Form>
-        <div style={{ position: 'absolute', bottom: 110, right: 50 }}>
-          <Button className={styles.cancelButton} onClick={() => this.props.history.goBack()} style={{ marginTop: 20, float: 'left', background: '#2B3C72', color: 'white', marginRight: 15 }} size='big'>Cancel</Button>
-          <Button className={styles.acceptButton} onClick={() => this.openConfirmationModal()} style={{ marginTop: 20, marginRight: 10, float: 'left', background: '#015DE1', color: 'white' }} size='big'>Send</Button>
         </div>
         <Footer />
       </div>

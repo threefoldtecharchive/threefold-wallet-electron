@@ -209,10 +209,10 @@ class Account extends Component {
         </div>
         <Divider style={{ background: '#1A253F' }} />
         <div style={{ display: 'flex' }}>
-          <div style={{ width: '65%', overflowY: 'auto', height: '80vh', paddingBottom: 100 }}>
+          <div style={{ width: '65%', overflowY: 'auto', height: '85vh', paddingBottom: 100 }}>
             {this.renderWallets()}
           </div>
-          <div style={{ width: '35%', height: '100vh', marginTop: 20, overflowY: 'auto' }}>
+          <div style={{ width: '35%', height: '70vh', marginTop: 20, overflow: 'auto' }}>
             {this.renderAccountBalances()}
             <div style={{ margin: 'auto', width: '90%', height: 100 }}>
               <Button className={styles.acceptButton} onClick={() => this.props.history.push(routes.WALLET_RECEIVE)} style={{ marginTop: 20, float: 'left', marginRight: 15, color: 'white' }} size='big'>Receive</Button>

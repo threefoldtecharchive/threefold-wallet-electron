@@ -277,7 +277,7 @@ class NewAccount extends Component {
     const { name, generateSeed, seedError, nameError, seedConfirmation, seedConfirmationError, openConfirmationModal, password, confirmationPassword, passwordError, passwordConfirmationError, accountCreationError, accountCreationErrorMessage } = this.state
 
     return (
-      <div style={{ height: '100vh', overflowY: 'scroll', paddingBottom: 30 }}>
+      <div style={{ paddingBottom: 30 }}>
         <SeedConfirmationModal
           open={openConfirmationModal}
           closeModal={this.closeConfirmationModal}
@@ -294,68 +294,70 @@ class NewAccount extends Component {
         <Divider style={{ background: '#1A253F' }} />
         <Icon onClick={() => this.props.history.goBack()} style={{ fontSize: 25, marginLeft: 15, marginTop: 15, cursor: 'pointer' }} name='chevron circle left' />
         <span onClick={() => this.props.history.goBack()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
-        <Form error style={{ width: '50%', margin: 'auto', marginTop: 5, marginBottom: 50, fontSize: 18 }}>
-          <Form.Field>
-            <label style={{ float: 'left', color: 'white', marginRight: 20 }}>What network do you want to choose? </label>
-            <Popup size='large' position='right center' content='Network type is the network your account will connect to. standard is the production network, others are meant for testing' trigger={<Icon style={{ fontSize: 12 }} name='question circle' />} />
-          </Form.Field>
-          <Form.Field style={{ marginBottom: 20 }}>
-            <div>
-              <Radio style={{ marginRight: 30, color: 'white' }}
-                label={<label style={{ color: 'white' }}>standard</label>}
-                name='radioGroup'
-                value='standard'
-                checked={this.state.network === 'standard'}
-                onChange={this.handleNetworkChange}
-              />
-              <Radio style={{ marginRight: 30, color: 'white' }}
-                label={<label style={{ color: 'white' }}>testnet</label>}
-                name='radioGroup'
-                value='testnet'
-                checked={this.state.network === 'testnet'}
-                onChange={this.handleNetworkChange}
-              />
-              <Radio style={{ marginRight: 30, color: 'white' }}
-                label={<label style={{ color: 'white' }}>devnet</label>}
-                name='radioGroup'
-                value='devnet'
-                checked={this.state.network === 'devnet'}
-                onChange={this.handleNetworkChange}
-              />
-            </div>
-          </Form.Field>
-          <Form.Field error={nameError}>
-            <label style={{ float: 'left', color: 'white' }}>* Account name</label>
-            <Input value={name} onChange={this.handleNameChange} />
-            {this.renderNameError()}
-          </Form.Field>
-          <Form.Field error={passwordError}>
-            <label style={{ float: 'left', color: 'white' }}>* Password</label>
-            <Input type='password' value={password} onChange={this.handlePasswordChange} />
-          </Form.Field>
-          <Form.Field error={passwordConfirmationError}>
-            <label style={{ float: 'left', color: 'white' }}>* Confirm password</label>
-            <Input type='password' value={confirmationPassword} onChange={this.handlePasswordConfirmationChange} />
-          </Form.Field>
-          <Form.Field error={seedError}>
-            <label style={{ float: 'left', color: 'white', marginRight: 20 }}>* Seed</label>
-            <Popup size='large' style={{ width: 600 }} position='right center' content='Seed phrase or recovery phrase is a list of 24 words which stores all the information needed to recover your wallet. If you provide this phrase we will recover your account. If you wish to create a new account without recovery then click generate seed.' trigger={<Icon style={{ fontSize: 12 }} name='question circle' />} />
-            {this.renderTextArea()}
-          </Form.Field>
-          <Form.Field>
-            <Checkbox style={{ left: 0, position: 'absolute' }} label={<label style={{ color: 'white' }}>Generate seed</label>} onClick={this.renderSeed} defaultChecked={generateSeed} />
-            <span style={{ position: 'absolute', right: 0, fontSize: 14 }}>Fields with * are required</span>
-          </Form.Field>
-        </Form>
-        {this.renderSeedWarning()}
-        {this.state.seed ? (
-          <CopyToClipboard text={this.state.seed} onCopy={() => console.log('copied')}>
-            <Label onClick={() => toast('Seed copied to clipboard')} style={{ display: 'block', margin: 'auto', width: 200, cursor: 'pointer', marginTop: 20 }}><Icon name='clipboard' /> copy seed to clipboard</Label>
-          </CopyToClipboard>
-        ) : (null)}
-        <div className={styles.container} >
-          <Button className={styles.cancelButton} size='big' type='submit' style={{ marginTop: 10, marginRight: 10, background: 'none', color: 'white', width: 180 }} onClick={() => this.props.history.push(routes.HOME)}>Cancel</Button>
-          <Button className={styles.acceptButton} size='big' type='submit' onClick={this.openConfirmationModal} style={{ marginTop: 10, margin: 'auto', color: 'white', width: 220 }}>Create account</Button>
+        <div style={{ height: '75vh', overflowY: 'scroll', paddingBottom: 30 }}>
+          <Form error style={{ width: '50%', margin: 'auto', marginTop: 5, marginBottom: 50, fontSize: 18 }}>
+            <Form.Field>
+              <label style={{ float: 'left', color: 'white', marginRight: 20 }}>What network do you want to choose? </label>
+              <Popup size='large' position='right center' content='Network type is the network your account will connect to. standard is the production network, others are meant for testing' trigger={<Icon style={{ fontSize: 12 }} name='question circle' />} />
+            </Form.Field>
+            <Form.Field style={{ marginBottom: 20 }}>
+              <div>
+                <Radio style={{ marginRight: 30, color: 'white' }}
+                  label={<label style={{ color: 'white' }}>standard</label>}
+                  name='radioGroup'
+                  value='standard'
+                  checked={this.state.network === 'standard'}
+                  onChange={this.handleNetworkChange}
+                />
+                <Radio style={{ marginRight: 30, color: 'white' }}
+                  label={<label style={{ color: 'white' }}>testnet</label>}
+                  name='radioGroup'
+                  value='testnet'
+                  checked={this.state.network === 'testnet'}
+                  onChange={this.handleNetworkChange}
+                />
+                <Radio style={{ marginRight: 30, color: 'white' }}
+                  label={<label style={{ color: 'white' }}>devnet</label>}
+                  name='radioGroup'
+                  value='devnet'
+                  checked={this.state.network === 'devnet'}
+                  onChange={this.handleNetworkChange}
+                />
+              </div>
+            </Form.Field>
+            <Form.Field error={nameError}>
+              <label style={{ float: 'left', color: 'white' }}>* Account name</label>
+              <Input value={name} onChange={this.handleNameChange} />
+              {this.renderNameError()}
+            </Form.Field>
+            <Form.Field error={passwordError}>
+              <label style={{ float: 'left', color: 'white' }}>* Password</label>
+              <Input type='password' value={password} onChange={this.handlePasswordChange} />
+            </Form.Field>
+            <Form.Field error={passwordConfirmationError}>
+              <label style={{ float: 'left', color: 'white' }}>* Confirm password</label>
+              <Input type='password' value={confirmationPassword} onChange={this.handlePasswordConfirmationChange} />
+            </Form.Field>
+            <Form.Field error={seedError}>
+              <label style={{ float: 'left', color: 'white', marginRight: 20 }}>* Seed</label>
+              <Popup size='large' style={{ width: 600 }} position='right center' content='Seed phrase or recovery phrase is a list of 24 words which stores all the information needed to recover your wallet. If you provide this phrase we will recover your account. If you wish to create a new account without recovery then click generate seed.' trigger={<Icon style={{ fontSize: 12 }} name='question circle' />} />
+              {this.renderTextArea()}
+            </Form.Field>
+            <Form.Field>
+              <Checkbox style={{ left: 0, position: 'absolute' }} label={<label style={{ color: 'white' }}>Generate seed</label>} onClick={this.renderSeed} defaultChecked={generateSeed} />
+              <span style={{ position: 'absolute', right: 0, fontSize: 14 }}>Fields with * are required</span>
+            </Form.Field>
+          </Form>
+          {this.renderSeedWarning()}
+          {this.state.seed ? (
+            <CopyToClipboard text={this.state.seed} onCopy={() => console.log('copied')}>
+              <Label onClick={() => toast('Seed copied to clipboard')} style={{ display: 'block', margin: 'auto', width: 200, cursor: 'pointer', marginTop: 20 }}><Icon name='clipboard' /> copy seed to clipboard</Label>
+            </CopyToClipboard>
+          ) : (null)}
+          <div className={styles.container} >
+            <Button className={styles.cancelButton} size='big' type='submit' style={{ marginTop: 10, marginRight: 10, background: 'none', color: 'white', width: 180 }} onClick={() => this.props.history.push(routes.HOME)}>Cancel</Button>
+            <Button className={styles.acceptButton} size='big' type='submit' onClick={this.openConfirmationModal} style={{ marginTop: 10, margin: 'auto', color: 'white', width: 220 }}>Create account</Button>
+          </div>
         </div>
       </div>
     )

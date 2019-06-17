@@ -166,9 +166,6 @@ class WalletSettings extends Component {
     return (
       <div>
         <div className={styles.backButton} data-tid='backButton'>
-          <Link to={routes.WALLET_SETTINGS}>
-            <Icon style={{ fontSize: 25, position: 'absolute', right: 20, cursor: 'pointer', top: 40 }} name='setting' />
-          </Link>
           <Link to={routes.HOME}>
             <Icon style={{ fontSize: 25, position: 'absolute', right: 70, cursor: 'pointer', top: 40 }} name='sign-out' />
           </Link>

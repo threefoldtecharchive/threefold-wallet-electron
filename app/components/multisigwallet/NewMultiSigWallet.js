@@ -175,7 +175,7 @@ class NewMultiSigWallet extends Component {
               onChange={(e) => this.handleAddressOwnerChange(e, index)}
             />
             {ownerAddresses.length > 2
-              ? (<Icon name='trash' onClick={() => this.removeOwnerAddress(index)} style={{ fontSize: 20, position: 'relative', top: 10, marginLeft: 20 }} />)
+              ? (<Icon name='trash' onClick={() => this.removeOwnerAddress(index)} style={{ fontSize: 20, position: 'relative', top: 10, marginLeft: 20, cursor: 'pointer' }} />)
               : (null)}
           </div>
           {ownerAddressErrors[index]
@@ -208,9 +208,6 @@ class NewMultiSigWallet extends Component {
     return (
       <div>
         <div className={styles.backButton} data-tid='backButton'>
-          <Link to={routes.WALLET_SETTINGS}>
-            <Icon style={{ fontSize: 25, position: 'absolute', right: 20, cursor: 'pointer', top: 40 }} name='setting' />
-          </Link>
           <Link to={routes.HOME}>
             <Icon style={{ fontSize: 25, position: 'absolute', right: 70, cursor: 'pointer', top: 40 }} name='sign-out' />
           </Link>
@@ -221,7 +218,7 @@ class NewMultiSigWallet extends Component {
         <Divider style={{ background: '#1A253F' }} />
         <Icon onClick={() => this.props.history.goBack()} style={{ fontSize: 25, marginLeft: 15, marginTop: 15, cursor: 'pointer' }} name='chevron circle left' />
         <span onClick={() => this.props.history.goBack()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
-        <div className={styles.container} >
+        <div className={styles.container} style={{ height: '60vh', overflow: 'auto', paddingBottom: 30 }}>
           <Form error style={{ width: '50%', margin: 'auto', marginTop: 10 }}>
             <Form.Field error={nameError}>
               <label style={{ float: 'left', color: 'white' }}>Name</label>

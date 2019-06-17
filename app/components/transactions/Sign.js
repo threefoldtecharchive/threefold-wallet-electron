@@ -45,25 +45,25 @@ class Sign extends Component {
         <Divider style={{ background: '#1A253F' }} />
         <Icon onClick={() => this.goBackToWallet()} style={{ fontSize: 25, marginLeft: 15, marginTop: 15, cursor: 'pointer' }} name='chevron circle left' />
         <span onClick={() => this.goBackToWallet()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
-        <Form error style={{ width: '50%', margin: 'auto', marginTop: 0 }}>
-          <Form.Field style={{ marginTop: 30 }}>
-            <p style={{ fontSize: 14 }}>Before completing this transaction, one or more signatures are required. Copy this transaction JSON and send it to the persons that must sign this.</p>
-          </Form.Field>
-          <Form.Field style={{ marginTop: 10 }}>
-            <TextArea
-              style={{ background: '#0c111d !important', color: '#7784a9', height: 250 }}
-              icon={<Icon name='send' style={{ color: '#0e72f5' }} />}
-              placeholder='raw json'
-              value={json}
-              onChange={this.handleDestinationChange}
-            />
-          </Form.Field>
-          <CopyToClipboard text={json} onCopy={() => console.log('copied')}>
-            <Label onClick={() => toast('Seed copied to clipboard')} style={{ display: 'block', margin: 'auto', width: 200, cursor: 'pointer' }}><Icon name='clipboard' /> copy json to clipboard</Label>
-          </CopyToClipboard>
-        </Form>
-        <div style={{ position: 'absolute', bottom: 150, right: 80 }}>
-          <Button className={styles.cancelButton} onClick={() => this.goBackToAccount()} style={{ marginTop: 20, float: 'left', background: '#2B3C72', color: 'white', marginRight: 15 }} size='big'>Go to account</Button>
+        <div style={{ height: '65vh', paddingBottom: 30, overflow: 'auto' }}>
+          <Form error style={{ width: '50%', margin: 'auto', marginTop: 0 }}>
+            <Form.Field style={{ marginTop: 30 }}>
+              <p style={{ fontSize: 14 }}>Before completing this transaction, one or more signatures are required. Copy this transaction JSON and send it to the persons that must sign this.</p>
+            </Form.Field>
+            <Form.Field style={{ marginTop: 10 }}>
+              <TextArea
+                style={{ background: '#0c111d !important', color: '#7784a9', height: 250 }}
+                icon={<Icon name='send' style={{ color: '#0e72f5' }} />}
+                placeholder='raw json'
+                value={json}
+                onChange={this.handleDestinationChange}
+              />
+            </Form.Field>
+            <CopyToClipboard text={json} onCopy={() => console.log('copied')}>
+              <Label onClick={() => toast('Seed copied to clipboard')} style={{ display: 'block', margin: 'auto', width: 200, cursor: 'pointer' }}><Icon name='clipboard' /> copy json to clipboard</Label>
+            </CopyToClipboard>
+          </Form>
+          <Button className={styles.cancelButton} onClick={() => this.goBackToAccount()} style={{ marginTop: 20, float: 'left', background: '#2B3C72', color: 'white', marginRight: 15, position: 'relative', left: '80%' }} size='big'>Go to account</Button>
         </div>
         <Footer />
       </div>

@@ -153,38 +153,38 @@ class SignTransaction extends Component {
         <Divider style={{ background: '#1A253F' }} />
         <Icon onClick={() => this.props.history.goBack()} style={{ fontSize: 25, marginLeft: 15, marginTop: 15, cursor: 'pointer' }} name='chevron circle left' />
         <span onClick={() => this.props.history.goBack()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
-        <Form error style={{ width: '50%', margin: 'auto', marginTop: 0 }}>
-          <Form.Field>
-            <label style={{ color: 'white' }}>Select wallet</label>
-            <Dropdown
-              placeholder='Select Wallet'
-              fluid
-              selection
-              options={walletsOptions}
-              onChange={this.selectWallet}
-              value={selectedWallet.wallet_name || selectedWallet.address}
-            />
-          </Form.Field>
-          <Form.Field style={{ marginTop: 30 }}>
-            <p style={{ fontSize: 14 }}>Paste the JSON transaction below to validate and sign.</p>
-          </Form.Field>
-          <Form.Field style={{ marginTop: 10 }} error={this.state.jsonError}>
-            <TextArea
-              style={{ background: '#0c111d !important', color: '#7784a9', height: 250 }}
-              icon={<Icon name='send' style={{ color: '#0e72f5' }} />}
-              iconposition='left'
-              placeholder='raw json'
-              value={json}
-              onChange={this.handleJsonChange}
-            />
-          </Form.Field>
-          {this.renderErrorMessage()}
-          <CopyToClipboard text={json} onCopy={() => console.log('copied')}>
-            <Label onClick={() => toast('Seed copied to clipboard')} style={{ display: 'block', margin: 'auto', width: 200, cursor: 'pointer' }}><Icon name='clipboard' /> copy json to clipboard</Label>
-          </CopyToClipboard>
-        </Form>
-        <div style={{ position: 'absolute', bottom: 150, right: 80 }}>
-          <Button className={styles.acceptButton} onClick={() => this.signAndSend()} style={{ marginTop: 20, float: 'left', background: '#2B3C72', color: 'white', marginRight: 15 }} size='big'>Sign and send</Button>
+        <div style={{ height: '65vh', paddingBottom: 30, overflow: 'auto' }}>
+          <Form error style={{ width: '50%', margin: 'auto', marginTop: 0 }}>
+            <Form.Field>
+              <label style={{ color: 'white' }}>Select wallet</label>
+              <Dropdown
+                placeholder='Select Wallet'
+                fluid
+                selection
+                options={walletsOptions}
+                onChange={this.selectWallet}
+                value={selectedWallet.wallet_name || selectedWallet.address}
+              />
+            </Form.Field>
+            <Form.Field style={{ marginTop: 30 }}>
+              <p style={{ fontSize: 14 }}>Paste the JSON transaction below to validate and sign.</p>
+            </Form.Field>
+            <Form.Field style={{ marginTop: 10 }} error={this.state.jsonError}>
+              <TextArea
+                style={{ background: '#0c111d !important', color: '#7784a9', height: 250 }}
+                icon={<Icon name='send' style={{ color: '#0e72f5' }} />}
+                iconposition='left'
+                placeholder='raw json'
+                value={json}
+                onChange={this.handleJsonChange}
+              />
+            </Form.Field>
+            {this.renderErrorMessage()}
+            <CopyToClipboard text={json} onCopy={() => console.log('copied')}>
+              <Label onClick={() => toast('Seed copied to clipboard')} style={{ display: 'block', margin: 'auto', width: 200, cursor: 'pointer' }}><Icon name='clipboard' /> copy json to clipboard</Label>
+            </CopyToClipboard>
+          </Form>
+          <Button className={styles.acceptButton} onClick={() => this.signAndSend()} style={{ marginTop: 20, background: '#2B3C72', color: 'white', marginRight: 15, position: 'relative', left: '80%' }} size='big'>Sign and send</Button>
         </div>
         <Footer />
       </div>

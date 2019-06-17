@@ -253,21 +253,22 @@ class AccountSettings extends Component {
         </div>
         <div className={styles.container} >
           <Header as='h2' icon style={{ color: 'white', marginTop: 50 }}>
-            <Icon name='settings' />
               Account Settings
             <Header.Subheader style={{ color: 'white' }}>Manage your account settings</Header.Subheader>
           </Header>
-          <Form error style={{ width: '50%', margin: 'auto', marginTop: 10, marginBottom: 50 }}>
-            <Form.Field error={nameError}>
-              <label style={{ float: 'left', color: 'white' }}>Name</label>
-              <input placeholder='account name' value={name} onChange={this.handleNameChange} />
-              {this.renderNameError()}
-            </Form.Field>
-            <Button className={styles.cancelButton} size='big' style={{ marginTop: 10, marginRight: 10, background: 'none', color: 'white', width: 180 }} onClick={() => this.props.history.push(routes.ACCOUNT)}>Cancel</Button>
-            <Button className={styles.acceptButton} size='big' type='submit' onClick={this.saveAccount} style={{ marginTop: 10, margin: 'auto', background: '#015DE1', color: 'white', width: 180 }}>Save</Button>
-          </Form>
-          {this.renderWallets()}
-          <Button style={{ marginTop: 30 }} className={styles.cancelButton} size='small' onClick={() => this.openShowSeedModal()} >Show seed</Button>
+          <div style={{ height: '60vh', overflow: 'auto' }}>
+            <Form error style={{ width: '50%', margin: 'auto', marginTop: 10, marginBottom: 50 }}>
+              <Form.Field error={nameError}>
+                <label style={{ float: 'left', color: 'white' }}>Name</label>
+                <input placeholder='account name' value={name} onChange={this.handleNameChange} />
+                {this.renderNameError()}
+              </Form.Field>
+              <Button className={styles.cancelButton} size='big' style={{ marginTop: 10, marginRight: 10, background: 'none', color: 'white', width: 180 }} onClick={() => this.props.history.push(routes.ACCOUNT)}>Cancel</Button>
+              <Button className={styles.acceptButton} size='big' type='submit' onClick={this.saveAccount} style={{ marginTop: 10, margin: 'auto', background: '#015DE1', color: 'white', width: 180 }}>Save</Button>
+            </Form>
+            {this.renderWallets()}
+            <Button style={{ marginTop: 30 }} className={styles.cancelButton} size='small' onClick={() => this.openShowSeedModal()} >Show seed</Button>
+          </div>
         </div>
         <Footer />
       </div>
