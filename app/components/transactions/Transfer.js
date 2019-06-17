@@ -58,6 +58,7 @@ class Transfer extends Component {
       signatureCount: 2,
       ownerAddressErrors: [false, false],
       ownerAddresses: ['', ''],
+      timelockError: false,
       signatureCountError: false,
       openConfirmationModal: false
     }
@@ -102,10 +103,35 @@ class Transfer extends Component {
 
   handleDateLockChange = ({ target }) => {
     this.setState({ datelock: target.value })
+    this.validateTimeLockChange({ datelock: target.value })
   }
 
   handleTimeLockChange = ({ target }) => {
     this.setState({ timelock: target.value })
+    this.validateTimeLockChange({ timelock: target.value })
+  }
+
+  validateTimeLockChange = ({ timestamp, datelock, timelock }) => {
+    if (!timestamp) {
+      if (!datelock) {
+        datelock = this.state.datelock
+      }
+      if (!timelock) {
+        timelock = this.state.timelock
+      }
+      if (datelock === '') {
+        timestamp = 0
+      } else {
+        const concatDate = datelock + ' ' + timelock
+        const dateLockDate = new Date(concatDate)
+        const dateLockTimeZone = dateLockDate.getTimezoneOffset()
+        timestamp = moment(dateLockDate).utcOffset(dateLockTimeZone).unix()
+      }
+    }
+    const { chain_info: chainInfo } = this.props.account
+    this.setState({
+      timelockError: timestamp <= chainInfo.chain_timestamp
+    })
   }
 
   handleAmountChange = ({ target }) => {
@@ -138,6 +164,7 @@ class Transfer extends Component {
       datelock: '',
       timelock: '',
       signatureCount: 2,
+      timelockError: false,
       ownerAddressErrors: [false, false],
       ownerAddresses: ['', ''],
       signatureCountError: false,
@@ -441,7 +468,8 @@ class Transfer extends Component {
     const {
       destination,
       selectedWallet,
-      amount
+      amount,
+      timelockError
     } = this.state
     let { amountError } = this.state
 
@@ -458,7 +486,7 @@ class Transfer extends Component {
       amountError = true
     }
 
-    if (!destinationError && !amountError && selectedWallet) {
+    if (!destinationError && !amountError && !timelockError && selectedWallet) {
       if (selectedWallet.can_spent) {
         return true
       } else {
@@ -476,6 +504,7 @@ class Transfer extends Component {
 
   checkMultisigTransactionFormValues = () => {
     const {
+      timelockError,
       selectedWallet,
       ownerAddressErrors,
       ownerAddresses,
@@ -508,7 +537,7 @@ class Transfer extends Component {
       destinationError = selectedWallet.is_address_owned_by_wallet(msaddress)
     }
 
-    if (!signatureCountErrorValidation && !amountError && selectedWallet && !hasOwnerAddressErrors && areAllOwnersFilledIn && !destinationError) {
+    if (!signatureCountErrorValidation && !amountError && !timelockError && selectedWallet && !hasOwnerAddressErrors && areAllOwnersFilledIn && !destinationError) {
       return true
     }
     this.setState({
@@ -527,6 +556,7 @@ class Transfer extends Component {
 
   checkInternalTransactionFormValues = () => {
     const {
+      timelockError,
       selectedWalletRecipient,
       selectedWallet,
       amount
@@ -542,7 +572,7 @@ class Transfer extends Component {
       selectedWalletReciepentError = true
     }
 
-    if (!selectedWalletReciepentError && !amountError && selectedWallet) {
+    if (!selectedWalletReciepentError && !amountError && !timelockError && selectedWallet) {
       if (selectedWallet.can_spent) {
         return true
       } else {
@@ -733,18 +763,47 @@ class Transfer extends Component {
 
   renderAmountError = () => {
     const { amountError, amount } = this.state
-    if (amountError && (!amount || amount <= 0)) {
+    if (amountError) {
+      if (!amount) {
+        return (
+          <Message
+            error
+            header={'Amount is not defined'}
+          />
+        )
+      } else if (amount <= 0) {
+        return (
+          <Message
+            error
+            header={'Amount cannot be negative or 0'}
+          />
+        )
+      } else if (amount > 0) {
+        return (
+          <Message
+            error
+            header={'Not enough balance'}
+          />
+        )
+      }
+    }
+  }
+
+  rendertimelockError = () => {
+    const { datelock, timelockError } = this.state
+    if (timelockError) {
+      if (!datelock) {
+        return (
+          <Message
+            error
+            header={'Date of timelock is not specified.'}
+          />
+        )
+      }
       return (
         <Message
           error
-          header={'Amount cannot be negative or 0'}
-        />
-      )
-    } else if (amountError && amount > 0) {
-      return (
-        <Message
-          error
-          header={'Not enough balance'}
+          header={'Timelock cannot be in the past.'}
         />
       )
     }
@@ -788,6 +847,7 @@ class Transfer extends Component {
       amountError,
       amount,
       timelock,
+      timelockError,
       datelock,
       selectedWallet,
       openConfirmationModal,
@@ -861,14 +921,15 @@ class Transfer extends Component {
             </div>
             {this.renderDestinationForm()}
             <Form.Field style={{ marginTop: 30 }}>
-              <Input type='number' error={amountError} label='Amount TFT' style={{ background: '#0c111d !important', color: '#7784a9', width: 150 }} placeholder='amount' value={amount} onChange={this.handleAmountChange} />
+              <Input type='number' error={amountError} label='Amount TFT' style={{ background: '#0c111d !important', color: '#7784a9', width: 150 }} placeholder='amount' value={amount || ''} onChange={this.handleAmountChange} />
               {this.renderAmountError()}
             </Form.Field>
             <Form.Field style={{ marginTop: 30 }}>
               <label style={{ color: 'white' }}>Timelock (optional)</label>
-              <Input type='date' label='Timelock' style={{ background: '#0c111d !important', color: '#7784a9', width: 180 }} value={datelock} onChange={this.handleDateLockChange} />
-              <Input type='time' style={{ background: '#0c111d !important', color: '#7784a9', width: 150, marginLeft: 100, position: 'relative', top: 3 }} value={timelock} onChange={this.handleTimeLockChange} />
+              <Input type='date' error={{ timelockError }} label='Timelock' style={{ background: '#0c111d !important', color: '#7784a9', width: 180 }} value={datelock} onChange={this.handleDateLockChange} />
+              <Input type='time' error={{ timelockError }} style={{ background: '#0c111d !important', color: '#7784a9', width: 150, marginLeft: 100, position: 'relative', top: 3 }} value={timelock} onChange={this.handleTimeLockChange} />
             </Form.Field>
+            {this.rendertimelockError()}
             <Form.Field style={{ marginTop: 30 }}>
               <label style={{ color: 'white' }}>Select wallet</label>
               <Dropdown
