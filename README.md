@@ -1,6 +1,6 @@
 # TFChain Electron Wallet
 
-> :info: [More information about this desktop application and its positioning as a product.](about.md)
+> :information_source: [More information about this desktop application and its positioning as a product.](about.md)
 
 A desktop application that allows you to manage all your TFChain wallets. Each wallet is linked to an account, and an account is identified by a seed (mnemonic phrase). An account can have multiple wallets.
 
