@@ -1,4 +1,7 @@
 ## Tfchain Electron Wallet
+ 
+ [More information about Tfchain Electron Wallet and product positioning](about.md)
+
 
 ## Run
 
