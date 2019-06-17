@@ -127,7 +127,7 @@ Index:
 >
 > Optionally you can attach a timelock to your transfer, meaning the transfered funds are locked in the destination wallet until the specified date (and time). If no time is specified `00:00` is used. Note that the funds will immediately be taken from your wallet and sent to the destination wallet.
 
-#### Recieve
+#### Receive
 
 ![screenshot of wallet receive page](/docs/images/scrshot_wallet_receive.png)
 
