@@ -1291,19 +1291,10 @@ class MultiSignatureCoinTransactionBuilder:
 def _normalize_recipient(recipient):
     if jsobj.is_js_arr(recipient) and len(recipient) == 2:
         if jsobj.is_js_arr(recipient[0]):
-            recipient[1] = _normalize_value_as_int(recipient[1])
+            recipient[1] = jsobj.as_py_int(recipient[1])
         elif jsobj.is_js_arr(recipient[1]):
-            recipient[0] = _normalize_value_as_int(recipient[0])
+            recipient[0] = jsobj.as_py_int(recipient[0])
     return recipient
-
-def _normalize_value_as_int(value):
-    if isinstance(value, str):
-        return jsstr.to_int(value)
-    if isinstance(value, float):
-        return int(value)
-    if not isinstance(value, int):
-        raise TypeError("invalid int value: {} ({})".format(value, type(value)))
-    return value
 
 def _create_signer_cb_for_wallet(wallet, balance=None):
     def cb(result):

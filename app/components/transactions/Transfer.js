@@ -147,12 +147,11 @@ class Transfer extends Component {
 
   handleSignatureCountChange = ({ target }) => {
     const { ownerAddresses } = this.state
-    if (target.value > ownerAddresses.length) {
-      this.setState({ signatureCountError: true })
-    } else {
-      this.setState({ signatureCountError: false })
-    }
-    this.setState({ signatureCount: target.value })
+    const signatureCountError = !(!isNaN(target.value) && target.value >= 1 && target.value <= ownerAddresses.length)
+    this.setState({
+      signatureCount: target.value,
+      signatureCountError
+    })
   }
 
   renderSignatureCountError = () => {
@@ -499,7 +498,7 @@ class Transfer extends Component {
     }
 
     let signatureCountErrorValidation = false
-    if (signatureCount < 1 || signatureCount > ownerAddresses.length) {
+    if (!(!isNaN(signatureCount) && signatureCount >= 1 && signatureCount <= ownerAddresses.length)) {
       signatureCountErrorValidation = true
     }
 
@@ -706,7 +705,7 @@ class Transfer extends Component {
       return (
         <Message
           error
-          header={errorMessage}voor
+          header={errorMessage}
         />
       )
     }

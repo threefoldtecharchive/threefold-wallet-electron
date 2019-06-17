@@ -48,28 +48,27 @@ class NewMultiSigWallet extends Component {
 
   handleSignatureCountChange = ({ target }) => {
     const { ownerAddresses } = this.state
-    if (target.value > ownerAddresses.length) {
-      this.setState({ signatureCountError: true })
-    } else {
-      this.setState({ signatureCountError: false })
-    }
-    this.setState({ signatureCount: target.value })
+    const signatureCountError = !(!isNaN(target.value) && target.value >= 1 && target.value <= ownerAddresses.length)
+    this.setState({
+      signatureCount: target.value,
+      signatureCountError
+    })
   }
 
   createWallet = () => {
     const { name, ownerAddresses, signatureCount, ownerAddressErrors } = this.state
+    let { signatureCountError } = this.state
 
     let nameError = false
-    let signatureCountError = false
 
     if (name === '' || name.length > 48) {
       nameError = true
       this.setState({ nameError })
     }
 
-    if (signatureCount < 0 || signatureCount > ownerAddresses.length) {
+    if (!signatureCountError && !(!isNaN(signatureCount) && signatureCount >= 1 && signatureCount <= ownerAddresses.length)) {
       signatureCountError = true
-      this.setState({ signatureCountError: true })
+      this.setState({ signatureCountError })
     }
 
     const hasOwnerAddressErrors = ownerAddressErrors.filter(e => e === true).length > 0
@@ -82,7 +81,10 @@ class NewMultiSigWallet extends Component {
         toast('Multisig Wallet created')
         return this.props.history.push('/account')
       } catch (error) {
-        this.setState({ errorMessage: error.__args__[0], showError: true })
+        this.setState({
+          errorMessage: typeof error.__str__ === 'function' ? error.__str__() : error.toString(),
+          showError: true
+        })
       }
     } else {
       this.setState({ showError: true, errorMessage: 'Form is not filled in correctly, try again with different values.' })

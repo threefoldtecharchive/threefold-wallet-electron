@@ -102,7 +102,10 @@ class WalletSettings extends Component {
         toast('Wallet created')
         return this.props.history.push('/account')
       } catch (error) {
-        this.setState({ errorMessage: error.__args__[0], showError: true })
+        this.setState({
+          errorMessage: typeof error.__str__ === 'function' ? error.__str__() : error.toString(),
+          showError: true
+        })
       }
     } else {
       toast.error('form not filled in correctly')

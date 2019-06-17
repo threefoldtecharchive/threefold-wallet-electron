@@ -33,6 +33,23 @@ def as_py_obj(obj):
     # return anything else as-is
     return obj
 
+def as_py_int(obj, default=None):
+    if isinstance(obj, (float, int)):
+        return int(obj)
+    out = None
+    __pragma__("js" , "{}", """
+    if (!isNaN(obj)) {
+        out = parseInt(obj);
+    }
+    """)
+    if out == None:
+        if default == None:
+            raise TypeError("not a valid number: {} ({})".format(obj, type(obj)))
+        if not isinstance(default, int):
+            raise TypeError("not a valid default number: {} ({})".format(default, type(default)))
+        return default
+    return int(out)
+
 def new_dict():
     return as_dict({})
 

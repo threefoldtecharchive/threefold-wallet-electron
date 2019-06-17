@@ -59,6 +59,48 @@ export var as_py_obj = function (obj) {
 	}
 	return obj;
 };
+export var as_py_int = function (obj, py_default) {
+	if (typeof py_default == 'undefined' || (py_default != null && py_default.hasOwnProperty ("__kwargtrans__"))) {;
+		var py_default = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'obj': var obj = __allkwargs0__ [__attrib0__]; break;
+					case 'py_default': var py_default = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	if (isinstance (obj, tuple ([float, int]))) {
+		return int (obj);
+	}
+	var out = null;
+	
+	    if (!isNaN(obj)) {
+	        out = parseInt(obj);
+	    }
+	    
+	if (out == null) {
+		if (py_default == null) {
+			var __except0__ = py_TypeError ('not a valid number: {} ({})'.format (obj, py_typeof (obj)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		if (!(isinstance (py_default, int))) {
+			var __except0__ = py_TypeError ('not a valid default number: {} ({})'.format (py_default, py_typeof (py_default)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		return py_default;
+	}
+	return int (out);
+};
 export var new_dict = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
