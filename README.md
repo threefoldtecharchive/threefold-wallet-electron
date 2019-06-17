@@ -110,6 +110,8 @@ Index:
 ![screenshot of wallet overview page](/docs/images/scrshot_wallet_overview.png)
 
 > Similar to the [account overview page](#account-overview) but with a focus on a specific (regular/personal) wallet.
+>
+> Additionally you'll also find a transaction history on this page, sorted from newest to oldest.
 
 ### MultiSignature Wallet Overview
 
