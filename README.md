@@ -4,11 +4,13 @@
 
 A desktop application that allows you to manage all your TFChain wallets. Each wallet is linked to an account, and an account is identified by a seed (mnemonic phrase). An account can have multiple wallets.
 
-The mnemonic phrase (used as seed for an account) is compatible with [the TFChain mobile application](https://github.com/threefoldfoundation/tf_app), JumpscaleX light client and official TFChain binary tools.
+The mnemonic phrase (used as seed for an account) is compatible with [the TFChain mobile application](https://github.com/threefoldfoundation/tf_app), JumpscaleX light client and official TFChain binary tools. This allows you to recover your wallets created in these clients as an account of this client. Accounts created with this client can also recovered with the other clients. Do note that the [the TFChain mobile application](https://github.com/threefoldfoundation/tf_app) and JumpscaleX light client will only recover the default wallet of your account. In these other clients there is also no concept of account, but just a single wallet. The JumpscaleX light client does allow you to load as many addresses as you want in a single wallet, the [the TFChain mobile application](https://github.com/threefoldfoundation/tf_app) is limited to just one address of just one wallet.
 
 > :warning: This project is currently still in alpha-mode. No direct support is offered at this point.
-Do feel free to report issues if you encounter a problem or have suggestions.
-Pull requests are also welcome.
+> Do feel free to report issues if you encounter a problem or have suggestions.
+> Pull requests are also welcome. As this is also not an official TFChain product, it is not expected
+> that direct support will ever be offered. It might also mean that while some features could be useful for this App,
+> it won't be added due to time constraints.
 
 ## Index
 
@@ -154,7 +156,7 @@ Index:
 > Allows you to change the wallet's name and delete the wallet.
 > 
 > For regular (personal) wallets you can also update the start index and address length. You can have no more than `8` addresses per wallet, and at least `1` is required. This allows you to provide aliases for different purposes to the same wallet. The start index defines what addresses are generated. In short, each address is generated using the seed of your account plus an index as the input for the private/public cryptographic key pair that is used to sign with a wallet and from which an address is generated. As an example if you have start index `1`, and address length `3`, than the wallet will use the indices `2, 3, 4 and 5`.
->> For multi-signature wallets this is not used, and thus it is not available in the settings page of a multi-signature wallet.
+>> :bulb: For multi-signature wallets this is not used, and thus it is not available in the settings page of a multi-signature wallet.
 
 ## Developer Docs
 
