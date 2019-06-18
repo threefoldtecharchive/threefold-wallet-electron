@@ -827,19 +827,21 @@ class Transfer extends Component {
 
   openConfirmationModal = () => {
     const { transactionType } = this.state
+    let open = false
     if (transactionType === TransactionTypes.MULTISIG) {
       if (this.checkMultisigTransactionFormValues()) {
-        this.setState({ openConfirmationModal: true })
+        open = true
       }
     } else if (transactionType === TransactionTypes.SINGLE) {
       if (this.checkSingleTransactionFormValues()) {
-        this.setState({ openConfirmationModal: true })
+        open = true
       }
     } else if (transactionType === TransactionTypes.INTERNAL) {
       if (this.checkInternalTransactionFormValues()) {
-        this.setState({ openConfirmationModal: true })
+        open = true
       }
     }
+    this.setState({ openConfirmationModal: open })
   }
 
   onKeyDown = (e) => {

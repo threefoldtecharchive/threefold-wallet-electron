@@ -4,20 +4,6 @@ import moment from 'moment-timezone'
 const closeOnEscape = true
 
 class ConfirmationModal extends Component {
-  componentDidMount () {
-    window.addEventListener('keyup', this.handleKeyUp)
-  }
-
-  componentWillUnmount () {
-    window.removeEventListener('keyup', this.handleKeyUp)
-  }
-
-  handleKeyUp = (event) => {
-    if (event.key === 'Enter') {
-      this.props.confirmTransaction()
-    }
-  }
-
   render () {
     const { open, closeModal, confirmTransaction, transactionType, selectedWallet, amount, owners, destination, signatureCount, datelock, timelock, selectedWalletRecipient, selectedRecipientAddress } = this.props
     return (
