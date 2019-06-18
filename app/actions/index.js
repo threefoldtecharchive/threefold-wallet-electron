@@ -89,11 +89,6 @@ export const updateAccount = function (account) {
         })
       })
     }
-  } else {
-    return {
-      type: 'UPDATE_ACCOUNT',
-      account: null
-    }
   }
 }
 
