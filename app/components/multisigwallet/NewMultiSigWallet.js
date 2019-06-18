@@ -10,6 +10,7 @@ import Footer from '../footer'
 import { toast } from 'react-toastify'
 import * as tfchain from '../../tfchain/api'
 import { filter } from 'lodash'
+import SearchableAddress from '../common/SearchableAddress'
 
 const mapStateToProps = state => ({
   account: state.account.state
@@ -145,10 +146,9 @@ class NewMultiSigWallet extends Component {
     }
   }
 
-  handleAddressOwnerChange = (e, index) => {
+  handleAddressOwnerChange = (value, index) => {
     const { ownerAddresses, ownerAddressErrors } = this.state
-    const { target } = e
-    if (!tfchain.wallet_address_is_valid(target.value, { multisig: false }) && target.value !== '') {
+    if (!tfchain.wallet_address_is_valid(value, { multisig: false }) && value !== '') {
       ownerAddressErrors.splice(index, 1)
       ownerAddressErrors.insert(index, true)
       this.setState({ ownerAddressErrors })
@@ -157,37 +157,24 @@ class NewMultiSigWallet extends Component {
       ownerAddressErrors.insert(index, false)
       this.setState({ ownerAddressErrors })
     }
-    const newOwnerAddresses = ownerAddresses[index] = target.value
+    const newOwnerAddresses = ownerAddresses[index] = value
     this.setState({ ownerAddress: newOwnerAddresses })
   }
 
   renderOwnerInputFields = () => {
-    const { ownerAddresses, ownerAddressErrors } = this.state
+    const { ownerAddresses } = this.state
     return ownerAddresses.map((owner, index) => {
       return (
         <div key={index} >
-          <div style={{ display: 'flex', marginTop: 10 }}>
-            <Input
-              error={ownerAddressErrors[index]}
-              style={{ background: '#0c111d !important', color: '#7784a9' }}
-              icon={<Icon name='user' style={{ color: '#0e72f5' }} />}
-              iconPosition='left'
-              placeholder='owner address'
-              value={owner}
-              onChange={(e) => this.handleAddressOwnerChange(e, index)}
+          <Form.Field style={{ marginTop: 20 }}>
+            <SearchableAddress
+              setSearchValue={(v) => this.handleAddressOwnerChange(v, index)}
+              icon='user'
             />
             {ownerAddresses.length > 2
-              ? (<Icon name='trash' onClick={() => this.removeOwnerAddress(index)} style={{ fontSize: 20, position: 'relative', top: 10, marginLeft: 20, cursor: 'pointer' }} />)
+              ? (<Icon name='trash' onClick={() => this.removeOwnerAddress(index)} style={{ fontSize: 20, position: 'relative', float: 'right', top: -30, right: -50, marginLeft: 20, cursor: 'pointer' }} />)
               : (null)}
-          </div>
-          {ownerAddressErrors[index]
-            ? (
-              <Message negative>
-                <Message.Header style={{ fontSize: 16, height: '50%' }}>Invalid address</Message.Header>
-              </Message>
-            )
-            : (null)
-          }
+          </Form.Field>
         </div>
       )
     })
@@ -229,10 +216,10 @@ class NewMultiSigWallet extends Component {
         <Icon onClick={() => this.props.history.goBack()} style={{ fontSize: 25, marginLeft: 15, marginTop: 15, cursor: 'pointer' }} name='chevron circle left' />
         <span onClick={() => this.props.history.goBack()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
         <div className={styles.container} style={{ height: '60vh', overflow: 'auto', paddingBottom: 30 }}>
-          <Form error style={{ width: '50%', margin: 'auto', marginTop: 10 }} onKeyDown={this.onKeyDown}>
+          <Form error style={{ width: '55%', margin: 'auto', marginTop: 10 }} onKeyDown={this.onKeyDown}>
             <Form.Field error={nameError}>
               <label style={{ float: 'left', color: 'white' }}>Name</label>
-              <input placeholder='my multisig wallet' value={name} onChange={this.handleNameChange} />
+              <Input placeholder='my multisig wallet' value={name} onChange={this.handleNameChange} />
               {this.renderNameError()}
             </Form.Field>
             <label style={{ float: 'left', color: 'white', marginBottom: 10 }}>Owners</label>
@@ -243,7 +230,7 @@ class NewMultiSigWallet extends Component {
             <Form.Field>
               <label style={{ float: 'left', color: 'white' }}>Signature count</label>
               <Popup offset={-30} size='large' position='right center' content='Signature count is the count of signatures that this multisig wallet requires to send transactions.' trigger={<Icon style={{ fontSize: 12, float: 'left', marginLeft: 10 }} name='question circle' />} />
-              <input type='number' placeholder='1' min='0' value={signatureCount} onChange={this.handleSignatureCountChange} />
+              <Input type='number' placeholder='1' min='0' value={signatureCount} onChange={this.handleSignatureCountChange} />
               {this.renderSignatureCountError()}
             </Form.Field>
             {this.renderError()}

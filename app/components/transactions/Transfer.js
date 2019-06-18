@@ -11,6 +11,7 @@ import moment from 'moment'
 import routes from '../../constants/routes'
 import { concat, truncate, flatten } from 'lodash'
 import TransactionConfirmationModal from './TransactionConfirmationModal'
+import SearchableAddress from '../common/SearchableAddress'
 
 const TransactionTypes = {
   SINGLE: 'SINGLE',
@@ -204,69 +205,44 @@ class Transfer extends Component {
     this.setState({ ownerAddresses, signatureCount: ownerAddresses.length })
   }
 
-  handleAddressOwnerChange = (e, index) => {
-    const { ownerAddresses, ownerAddressErrors } = this.state
-    const { target } = e
-    if (!tfchain.wallet_address_is_valid(target.value, { multisig: false }) && target.value !== '') {
-      ownerAddressErrors.splice(index, 1)
-      ownerAddressErrors.insert(index, true)
-      this.setState({ ownerAddressErrors })
-    } else {
-      ownerAddressErrors.splice(index, 1)
-      ownerAddressErrors.insert(index, false)
-      this.setState({ ownerAddressErrors })
-    }
-    const newOwnerAddresses = ownerAddresses[index] = target.value
+  handleAddressOwnerChange = (value, index) => {
+    const { ownerAddresses } = this.state
+    const newOwnerAddresses = ownerAddresses[index] = value
     this.setState({ ownerAddress: newOwnerAddresses })
   }
 
   renderOwnerInputFields = () => {
-    const { ownerAddresses, ownerAddressErrors } = this.state
+    const { ownerAddresses } = this.state
     return ownerAddresses.map((owner, index) => {
       return (
         <div key={index} >
-          <div style={{ display: 'flex', marginTop: 10 }}>
-            <Input
-              error={ownerAddressErrors[index]}
-              style={{ background: '#0c111d !important', color: '#7784a9' }}
-              icon={<Icon name='user' style={{ color: '#0e72f5' }} />}
-              iconPosition='left'
-              placeholder='owner address'
-              value={owner}
-              onChange={(e) => this.handleAddressOwnerChange(e, index)}
+          <Form.Field style={{ marginTop: 20 }}>
+            <SearchableAddress
+              setSearchValue={(e) => this.handleAddressOwnerChange(e, index)}
+              icon='user'
             />
             {ownerAddresses.length > 2
-              ? (<Icon name='trash' onClick={() => this.removeOwnerAddress(owner, index)} style={{ fontSize: 20, position: 'relative', top: 10, marginLeft: 20 }} />)
+              ? (<Icon name='trash' onClick={() => this.removeOwnerAddress(owner, index)} style={{ fontSize: 20, position: 'relative', float: 'right', top: -30, right: -50, marginLeft: 20 }} />)
               : (null)}
-          </div>
-          {ownerAddressErrors[index]
-            ? (
-              <Message negative>
-                <Message.Header style={{ fontSize: 16, height: '50%' }}>Invalid address</Message.Header>
-              </Message>
-            )
-            : (null)
-          }
+          </Form.Field>
         </div>
       )
     })
   }
 
+  setSearchValue = (value) => {
+    this.setState({ destination: value })
+  }
+
   renderDestinationForm = () => {
-    const { transactionType, destinationError, destination, signatureCount } = this.state
+    const { transactionType, signatureCount } = this.state
     if (transactionType === TransactionTypes.SINGLE) {
       return (
         <Form.Field style={{ marginTop: 10 }}>
-          <Input
-            error={destinationError}
-            style={{ background: '#0c111d !important', color: '#7784a9', width: 700 }}
-            icon={<Icon name='send' style={{ color: '#0e72f5' }} />}
-            iconPosition='left'
-            placeholder='destination address'
-            value={destination}
-            onChange={this.handleDestinationChange}
+          <SearchableAddress
+            setSearchValue={this.setSearchValue}
+            icon='send'
           />
-          {this.renderDestinationError()}
         </Form.Field>
       )
     } else if (transactionType === TransactionTypes.MULTISIG) {
