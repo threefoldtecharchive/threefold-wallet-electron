@@ -3,12 +3,27 @@ import { Icon } from 'semantic-ui-react'
 import { connect } from 'react-redux'
 import moment from 'moment'
 import momentTz from 'moment-timezone'
+const { shell } = require('electron')
 const pjson = require('../../package.json')
 
-const mapStateToProps = state => ({
-  account: state.account.state,
-  is_loaded: state.account.state && state.account.state.is_loaded
-})
+const mapStateToProps = state => {
+  if (!state.account.state) {
+    return {
+      account: null,
+      is_loaded: false,
+      walletLoadedCount: 0,
+      walletCount: 0,
+      intermezzoUpdateCount: 0
+    }
+  }
+  return {
+    account: state.account.state,
+    is_loaded: state.account.state.is_loaded,
+    walletLoadedCount: state.account.walletLoadedCount,
+    walletCount: state.account.walletCount,
+    intermezzoUpdateCount: state.account.intermezzoUpdateCount
+  }
+}
 
 class Footer extends Component {
   render () {
@@ -36,8 +51,8 @@ class Footer extends Component {
           </div>
           : <div>
             <Icon name='circle' style={{ color: 'green', marginLeft: 10 }} />
-            <label>connected to {chainConstants.chain_network}</label>
-            <label style={{ position: 'absolute', right: 450 }}><Icon name='h square' /> {chainConstants.chain_height} @ {date} {tz}</label>
+            <label><a onClick={() => shell.openExternal(`${chainConstants.explorer_address}`)}>connected to {chainConstants.chain_network}</a></label>
+            <label style={{ position: 'absolute', right: 450 }}><a onClick={() => shell.openExternal(`${chainConstants.explorer_address}/block.html?height=${chainConstants.chain_height}`)}><Icon name='h square' /> {chainConstants.chain_height} @ {date} {tz}</a></label>
             <label style={{ position: 'absolute', right: 50 }}>version {pjson.version}</label>
           </div>
         }
