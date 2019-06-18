@@ -616,9 +616,9 @@ class Transfer extends Component {
     }
     builder.send({ data: description }).then(result => {
       this.setState({ destinationError: false, amountError: false, loader: false })
-      this.props.updateAccount(this.props.account)
       if (result.submitted) {
         toast('Transaction ' + result.transaction.id + ' submitted')
+        this.props.updateAccount(this.props.account)
         return this.goBack()
       } else {
         this.props.setTransactionJson(JSON.stringify(result.transaction.json()))
@@ -662,9 +662,9 @@ class Transfer extends Component {
     }
     builder.send({ data: description }).then(result => {
       this.setState({ ownerAddressErrors: [false, false], amountError: false, loader: false })
-      this.props.updateAccount(this.props.account)
       if (result.submitted) {
         toast('Multisign Transaction ' + result.transaction.id + ' submitted')
+        this.props.updateAccount(this.props.account)
         return this.goBack()
       } else {
         this.props.setTransactionJson(JSON.stringify(result.transaction.json()))
@@ -710,9 +710,9 @@ class Transfer extends Component {
     }
     builder.send({ data: description }).then(result => {
       this.setState({ destinationError: false, amountError: false, loader: false })
-      this.props.updateAccount(this.props.account)
       if (result.submitted) {
         toast('Transaction ' + result.transaction.id + ' submitted')
+        this.props.updateAccount(this.props.account)
         return this.goBack()
       } else {
         this.props.setTransactionJson(JSON.stringify(result.transaction.json()))

@@ -592,7 +592,7 @@ class Account:
         for i in range(0, address_count):
             pair = tfwallet.assymetric_key_pair_generate(self.seed, start_index+i)
             pairs.append(pair)
-        wallet = SingleSignatureWallet(self._network_type, self._explorer_client, wallet_index, wallet_name, start_index, pairs)
+        wallet = SingleSignatureWallet(self, wallet_index, wallet_name, start_index, pairs)
         self._validate_wallet_state(wallet)
         # add the wallet to any multisig wallet it is part of (and is not added to yet)
         for mswallet in self._multisig_wallets:
@@ -648,7 +648,7 @@ class Account:
         if len(owner_wallets) == 0:
             raise ValueError("at least one owner of the multisig wallet has to be owned by this account")
         # create the wallet info (also validates the parameters)
-        wallet = MultiSignatureWallet(self._network_type, name, owners, signatures_required, owner_wallets, balance=balance)
+        wallet = MultiSignatureWallet(self, name, owners, signatures_required, owner_wallets, balance=balance)
         # ensure at least one owner is part of our balances
         if len(set(owners).intersection(set(self.addresses))) == 0:
             raise ValueError("at least one owner of the multisig wallet has to be owned by this account")
@@ -836,6 +836,18 @@ class Account:
             )
         return body
 
+    def _update_unconfirmed_account_balance_from_transactions(self, transactions):
+        for transaction in transactions:
+            self._update_unconfirmed_account_balance_from_transaction(transaction)
+    def _update_unconfirmed_account_balance_from_transaction(self, transaction):
+        jslog.info("_update_unconfirmed_account_balance_from_transaction", transaction)
+        # update all wallets
+        for wallet in self._wallets:
+            wallet._update_unconfirmed_balance_from_transaction(transaction)
+        # update all multisig wallets
+        for wallet in self._multisig_wallets:
+            wallet._update_unconfirmed_balance_from_transaction(transaction)
+
 
 class BaseWallet:
     def __init__(self, wallet_name):
@@ -953,6 +965,13 @@ class BaseWallet:
         """
         raise NotImplementedError("transaction_sign is not implemented")
 
+    def _update_unconfirmed_balance_from_transaction(self, transaction):
+        """
+        Internal function used by account to update balance of
+        all the wallets from an account.
+        """
+        raise NotImplementedError("_update_unconfirmed_balance_from_transaction is not implemented")
+
 
 class SingleSignatureWallet(BaseWallet):
     """
@@ -962,7 +981,7 @@ class SingleSignatureWallet(BaseWallet):
     the seed (entropy/mnemonic) that identifies the account owning this wallet.
     """
 
-    def __init__(self, network_type, explorer_client, wallet_index, wallet_name, start_index, pairs):
+    def __init__(self, account, wallet_index, wallet_name, start_index, pairs):
         """
         Create a new wallet.
 
@@ -981,6 +1000,7 @@ class SingleSignatureWallet(BaseWallet):
         # init base class
         super().__init__(wallet_name)
         # init the rest
+        self._account = account
         if not isinstance(start_index, int):
             raise TypeError("start_index is expected to be an int, invalid: {} ({})".format(start_index, type(start_index)))
         self._start_index = start_index
@@ -988,7 +1008,7 @@ class SingleSignatureWallet(BaseWallet):
             raise TypeError("wallet_index is expected to be an int, invalid: {} ({})".format(wallet_index, type(wallet_index)))
         self._wallet_index = wallet_index
         self.wallet_name = wallet_name
-        self._tfwallet = tfwallet.TFChainWallet(network_type, pairs, client=explorer_client)
+        self._tfwallet = tfwallet.TFChainWallet(account._network_type, pairs, client=account.explorer)
         self._balance = None
         self.balance = None
 
@@ -1070,15 +1090,27 @@ class SingleSignatureWallet(BaseWallet):
             self._loaded = True
         return jsasync.chain(self._tfwallet.balance_get(account.chain_info._tf_chain_info), cb)
 
+    def _update_unconfirmed_balance_from_transaction(self, transaction):
+        addresses = self.addresses
+        jslog.info("_update_unconfirmed_balance_from_transaction", transaction, addresses)
+        for index, ci in enumerate(transaction.coin_inputs):
+            if ci.parent_output == None:
+                continue
+            uhstr = ci.parent_output.condition.unlockhash.__str__()
+            if uhstr in addresses:
+                self._balance._tfbalance.output_add(transaction, index, confirmed=(not transaction.unconfirmed), spent=True)
+        for index, co in enumerate(transaction.coin_outputs):
+            uhstr = co.condition.unlockhash.__str__()
+            if uhstr in addresses:
+                self._balance._tfbalance.output_add(transaction, index, confirmed=(not transaction.unconfirmed), spent=False)
+
 
 class MultiSignatureWallet(BaseWallet):
-    def __init__(self, network_type, wallet_name, owners, signatures_required, owner_wallets, balance=None):
+    def __init__(self, account, wallet_name, owners, signatures_required, owner_wallets, balance=None):
         # init base class
         super().__init__(wallet_name)
         # init this class
-        if not isinstance(network_type, tfnetwork.Type):
-            raise TypeError("network_type is expected to be a tfchain.network.Type, invalid: {} ({})".format(network_type, type(network_type)))
-        self._network_type = network_type
+        self._account = account
         self._address = multisig_wallet_address_new(owners, signatures_required)
         owners = [owner for owner in owners]
         def sort_by_uh(a, b):
@@ -1140,7 +1172,7 @@ class MultiSignatureWallet(BaseWallet):
         self._balance = MultiSignatureBalance(
             self.owners,
             self.signatures_required,
-            self._network_type,
+            self._account._network_type,
             tfbalance=value, 
             addresses_all=self.addresses,
         )
@@ -1189,6 +1221,20 @@ class MultiSignatureWallet(BaseWallet):
             self._loaded = True
         return jsasync.chain(account._explorer_client.unlockhash_get(self.address), cb)
 
+    def _update_unconfirmed_balance_from_transaction(self, transaction):
+        address = self.address
+        jslog.info("_update_unconfirmed_balance_from_transaction", transaction, address)
+        for index, ci in enumerate(transaction.coin_inputs):
+            if ci.parent_output == None:
+                continue
+            uhstr = ci.parent_output.condition.unlockhash.__str__()
+            if uhstr == address:
+                self._balance._tfbalance.output_add(transaction, index, confirmed=(not transaction.unconfirmed), spent=True)
+        for index, co in enumerate(transaction.coin_outputs):
+            uhstr = co.condition.unlockhash.__str__()
+            if uhstr == address:
+                self._balance._tfbalance.output_add(transaction, index, confirmed=(not transaction.unconfirmed), spent=False)
+
 
 class CoinTransactionBuilder:
     """
@@ -1235,7 +1281,13 @@ class CoinTransactionBuilder:
         :returns: a promise that resolves with a transaction ID or rejects with an Exception
         """
         data = jsfunc.opts_get(opts, 'data')
-        return self._builder.send(data=data, balance=self._wallet.balance._tfbalance)
+        def cb(result):
+            if result.submitted:
+                self._wallet._account._update_unconfirmed_account_balance_from_transaction(result.transaction)
+            return result
+        return jsasync.chain(
+            self._builder.send(data=data, balance=self._wallet.balance._tfbalance),
+            cb)
 
 
 class MultiSignatureCoinTransactionBuilder:
@@ -1270,8 +1322,14 @@ class MultiSignatureCoinTransactionBuilder:
             refund=self._wallet.address,
             data=data,
             balance=tfbalance)
+
+        def submitted_cb(result):
+            if result.submitted:
+                self._wallet._account._update_unconfirmed_account_balance_from_transaction(result.transaction)
+            return result
+
         if len(self._co_signers) == 0:
-            return p
+            return jsasync.chain(p, submitted_cb)
 
         signers = self._co_signers
         def result_cb(result):
@@ -1286,7 +1344,7 @@ class MultiSignatureCoinTransactionBuilder:
                 cp = jsasync.chain(cp, _create_signer_cb_for_wallet(signer, balance=tfbalance))
             return cp
 
-        return jsasync.chain(p, result_cb)
+        return jsasync.chain(p, result_cb, submitted_cb)
 
 def _normalize_recipient(recipient):
     if jsobj.is_js_arr(recipient) and len(recipient) == 2:

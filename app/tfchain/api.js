@@ -1118,7 +1118,7 @@ export var Account =  __class__ ('Account', [object], {
 			var pair = tfwallet.assymetric_key_pair_generate (self.seed, start_index + i);
 			pairs.append (pair);
 		}
-		var wallet = SingleSignatureWallet (self._network_type, self._explorer_client, wallet_index, wallet_name, start_index, pairs);
+		var wallet = SingleSignatureWallet (self, wallet_index, wallet_name, start_index, pairs);
 		self._validate_wallet_state (wallet);
 		for (var mswallet of self._multisig_wallets) {
 			var owners_intersection = set (mswallet.owners).intersection (set (wallet.addresses));
@@ -1254,7 +1254,7 @@ export var Account =  __class__ ('Account', [object], {
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		var wallet = MultiSignatureWallet (self._network_type, py_name, owners, signatures_required, owner_wallets, __kwargtrans__ ({balance: balance}));
+		var wallet = MultiSignatureWallet (self, py_name, owners, signatures_required, owner_wallets, __kwargtrans__ ({balance: balance}));
 		if (len (set (owners).intersection (set (self.addresses))) == 0) {
 			var __except0__ = ValueError ('at least one owner of the multisig wallet has to be owned by this account');
 			__except0__.__cause__ = null;
@@ -1781,6 +1781,48 @@ export var Account =  __class__ ('Account', [object], {
 			return jsasync.chain (jsasync.promise_pool_new (generator, __kwargtrans__ ({cb: cb})), sort_multisig_wallets);
 		};
 		return body;
+	});},
+	get _update_unconfirmed_account_balance_from_transactions () {return __get__ (this, function (self, transactions) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'transactions': var transactions = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		for (var transaction of transactions) {
+			self._update_unconfirmed_account_balance_from_transaction (transaction);
+		}
+	});},
+	get _update_unconfirmed_account_balance_from_transaction () {return __get__ (this, function (self, transaction) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'transaction': var transaction = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		jslog.info ('_update_unconfirmed_account_balance_from_transaction', transaction);
+		for (var wallet of self._wallets) {
+			wallet._update_unconfirmed_balance_from_transaction (transaction);
+		}
+		for (var wallet of self._multisig_wallets) {
+			wallet._update_unconfirmed_balance_from_transaction (transaction);
+		}
 	});}
 });
 Object.defineProperty (Account, 'addresses', property.call (Account, Account._get_addresses));
@@ -2194,6 +2236,25 @@ export var BaseWallet =  __class__ ('BaseWallet', [object], {
 		var __except0__ = NotImplementedError ('transaction_sign is not implemented');
 		__except0__.__cause__ = null;
 		throw __except0__;
+	});},
+	get _update_unconfirmed_balance_from_transaction () {return __get__ (this, function (self, transaction) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'transaction': var transaction = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var __except0__ = NotImplementedError ('_update_unconfirmed_balance_from_transaction is not implemented');
+		__except0__.__cause__ = null;
+		throw __except0__;
 	});}
 });
 Object.defineProperty (BaseWallet, 'balance', property.call (BaseWallet, BaseWallet._get_balance, BaseWallet._set_balance));
@@ -2206,7 +2267,7 @@ Object.defineProperty (BaseWallet, 'wallet_name', property.call (BaseWallet, Bas
 Object.defineProperty (BaseWallet, 'is_loaded', property.call (BaseWallet, BaseWallet._get_is_loaded));;
 export var SingleSignatureWallet =  __class__ ('SingleSignatureWallet', [BaseWallet], {
 	__module__: __name__,
-	get __init__ () {return __get__ (this, function (self, network_type, explorer_client, wallet_index, wallet_name, start_index, pairs) {
+	get __init__ () {return __get__ (this, function (self, account, wallet_index, wallet_name, start_index, pairs) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -2214,8 +2275,7 @@ export var SingleSignatureWallet =  __class__ ('SingleSignatureWallet', [BaseWal
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'network_type': var network_type = __allkwargs0__ [__attrib0__]; break;
-						case 'explorer_client': var explorer_client = __allkwargs0__ [__attrib0__]; break;
+						case 'account': var account = __allkwargs0__ [__attrib0__]; break;
 						case 'wallet_index': var wallet_index = __allkwargs0__ [__attrib0__]; break;
 						case 'wallet_name': var wallet_name = __allkwargs0__ [__attrib0__]; break;
 						case 'start_index': var start_index = __allkwargs0__ [__attrib0__]; break;
@@ -2227,6 +2287,7 @@ export var SingleSignatureWallet =  __class__ ('SingleSignatureWallet', [BaseWal
 		else {
 		}
 		__super__ (SingleSignatureWallet, '__init__') (self, wallet_name);
+		self._account = account;
 		if (!(isinstance (start_index, int))) {
 			var __except0__ = py_TypeError ('start_index is expected to be an int, invalid: {} ({})'.format (start_index, py_typeof (start_index)));
 			__except0__.__cause__ = null;
@@ -2240,7 +2301,7 @@ export var SingleSignatureWallet =  __class__ ('SingleSignatureWallet', [BaseWal
 		}
 		self._wallet_index = wallet_index;
 		self.wallet_name = wallet_name;
-		self._tfwallet = tfwallet.TFChainWallet (network_type, pairs, __kwargtrans__ ({client: explorer_client}));
+		self._tfwallet = tfwallet.TFChainWallet (account._network_type, pairs, __kwargtrans__ ({client: account.explorer}));
 		self._balance = null;
 		self.balance = null;
 	});},
@@ -2507,6 +2568,39 @@ export var SingleSignatureWallet =  __class__ ('SingleSignatureWallet', [BaseWal
 			self._loaded = true;
 		};
 		return jsasync.chain (self._tfwallet.balance_get (account.chain_info._tf_chain_info), cb);
+	});},
+	get _update_unconfirmed_balance_from_transaction () {return __get__ (this, function (self, transaction) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'transaction': var transaction = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var addresses = self.addresses;
+		jslog.info ('_update_unconfirmed_balance_from_transaction', transaction, addresses);
+		for (var [index, ci] of enumerate (transaction.coin_inputs)) {
+			if (ci.parent_output == null) {
+				continue;
+			}
+			var uhstr = ci.parent_output.condition.unlockhash.__str__ ();
+			if (__in__ (uhstr, addresses)) {
+				self._balance._tfbalance.output_add (transaction, index, __kwargtrans__ ({confirmed: !(transaction.unconfirmed), spent: true}));
+			}
+		}
+		for (var [index, co] of enumerate (transaction.coin_outputs)) {
+			var uhstr = co.condition.unlockhash.__str__ ();
+			if (__in__ (uhstr, addresses)) {
+				self._balance._tfbalance.output_add (transaction, index, __kwargtrans__ ({confirmed: !(transaction.unconfirmed), spent: false}));
+			}
+		}
 	});}
 });
 Object.defineProperty (SingleSignatureWallet, 'linked_multisig_wallet_addresses', property.call (SingleSignatureWallet, SingleSignatureWallet._get_linked_multisig_wallet_addresses));
@@ -2514,7 +2608,7 @@ Object.defineProperty (SingleSignatureWallet, 'start_index', property.call (Sing
 Object.defineProperty (SingleSignatureWallet, 'wallet_index', property.call (SingleSignatureWallet, SingleSignatureWallet._get_wallet_index));;
 export var MultiSignatureWallet =  __class__ ('MultiSignatureWallet', [BaseWallet], {
 	__module__: __name__,
-	get __init__ () {return __get__ (this, function (self, network_type, wallet_name, owners, signatures_required, owner_wallets, balance) {
+	get __init__ () {return __get__ (this, function (self, account, wallet_name, owners, signatures_required, owner_wallets, balance) {
 		if (typeof balance == 'undefined' || (balance != null && balance.hasOwnProperty ("__kwargtrans__"))) {;
 			var balance = null;
 		};
@@ -2525,7 +2619,7 @@ export var MultiSignatureWallet =  __class__ ('MultiSignatureWallet', [BaseWalle
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'network_type': var network_type = __allkwargs0__ [__attrib0__]; break;
+						case 'account': var account = __allkwargs0__ [__attrib0__]; break;
 						case 'wallet_name': var wallet_name = __allkwargs0__ [__attrib0__]; break;
 						case 'owners': var owners = __allkwargs0__ [__attrib0__]; break;
 						case 'signatures_required': var signatures_required = __allkwargs0__ [__attrib0__]; break;
@@ -2538,12 +2632,7 @@ export var MultiSignatureWallet =  __class__ ('MultiSignatureWallet', [BaseWalle
 		else {
 		}
 		__super__ (MultiSignatureWallet, '__init__') (self, wallet_name);
-		if (!(isinstance (network_type, tfnetwork.Type))) {
-			var __except0__ = py_TypeError ('network_type is expected to be a tfchain.network.Type, invalid: {} ({})'.format (network_type, py_typeof (network_type)));
-			__except0__.__cause__ = null;
-			throw __except0__;
-		}
-		self._network_type = network_type;
+		self._account = account;
 		self._address = multisig_wallet_address_new (owners, signatures_required);
 		var owners = (function () {
 			var __accu0__ = [];
@@ -2760,7 +2849,7 @@ export var MultiSignatureWallet =  __class__ ('MultiSignatureWallet', [BaseWalle
 		if (value == null) {
 			var value = wbalance.MultiSigWalletBalance ();
 		}
-		self._balance = MultiSignatureBalance (self.owners, self.signatures_required, self._network_type, __kwargtrans__ ({tfbalance: value, addresses_all: self.addresses}));
+		self._balance = MultiSignatureBalance (self.owners, self.signatures_required, self._account._network_type, __kwargtrans__ ({tfbalance: value, addresses_all: self.addresses}));
 	});},
 	get transaction_new () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -2924,6 +3013,39 @@ export var MultiSignatureWallet =  __class__ ('MultiSignatureWallet', [BaseWalle
 			self._loaded = true;
 		};
 		return jsasync.chain (account._explorer_client.unlockhash_get (self.address), cb);
+	});},
+	get _update_unconfirmed_balance_from_transaction () {return __get__ (this, function (self, transaction) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'transaction': var transaction = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var address = self.address;
+		jslog.info ('_update_unconfirmed_balance_from_transaction', transaction, address);
+		for (var [index, ci] of enumerate (transaction.coin_inputs)) {
+			if (ci.parent_output == null) {
+				continue;
+			}
+			var uhstr = ci.parent_output.condition.unlockhash.__str__ ();
+			if (uhstr == address) {
+				self._balance._tfbalance.output_add (transaction, index, __kwargtrans__ ({confirmed: !(transaction.unconfirmed), spent: true}));
+			}
+		}
+		for (var [index, co] of enumerate (transaction.coin_outputs)) {
+			var uhstr = co.condition.unlockhash.__str__ ();
+			if (uhstr == address) {
+				self._balance._tfbalance.output_add (transaction, index, __kwargtrans__ ({confirmed: !(transaction.unconfirmed), spent: false}));
+			}
+		}
 	});}
 });
 Object.defineProperty (MultiSignatureWallet, 'signatures_required', property.call (MultiSignatureWallet, MultiSignatureWallet._get_signatures_required));
@@ -2997,7 +3119,26 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 		else {
 		}
 		var data = jsfunc.opts_get (opts, 'data');
-		return self._builder.send (__kwargtrans__ ({data: data, balance: self._wallet.balance._tfbalance}));
+		var cb = function (result) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'result': var result = __allkwargs0__ [__attrib0__]; break;
+						}
+					}
+				}
+			}
+			else {
+			}
+			if (result.submitted) {
+				self._wallet._account._update_unconfirmed_account_balance_from_transaction (result.transaction);
+			}
+			return result;
+		};
+		return jsasync.chain (self._builder.send (__kwargtrans__ ({data: data, balance: self._wallet.balance._tfbalance})), cb);
 	});}
 });
 export var MultiSignatureCoinTransactionBuilder =  __class__ ('MultiSignatureCoinTransactionBuilder', [object], {
@@ -3086,8 +3227,27 @@ export var MultiSignatureCoinTransactionBuilder =  __class__ ('MultiSignatureCoi
 		var balance = self._wallet.balance;
 		var tfbalance = balance._tfbalance;
 		var p = self._builder.send (__kwargtrans__ ({source: self._wallet.address, refund: self._wallet.address, data: data, balance: tfbalance}));
+		var submitted_cb = function (result) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'result': var result = __allkwargs0__ [__attrib0__]; break;
+						}
+					}
+				}
+			}
+			else {
+			}
+			if (result.submitted) {
+				self._wallet._account._update_unconfirmed_account_balance_from_transaction (result.transaction);
+			}
+			return result;
+		};
 		if (len (self._co_signers) == 0) {
-			return p;
+			return jsasync.chain (p, submitted_cb);
 		}
 		var signers = self._co_signers;
 		var result_cb = function (result) {
@@ -3115,7 +3275,7 @@ export var MultiSignatureCoinTransactionBuilder =  __class__ ('MultiSignatureCoi
 			}
 			return cp;
 		};
-		return jsasync.chain (p, result_cb);
+		return jsasync.chain (p, result_cb, submitted_cb);
 	});}
 });
 export var _normalize_recipient = function (recipient) {

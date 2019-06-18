@@ -1649,7 +1649,7 @@ class SingleSigWalletBalanceAggregator:
 
     def __init__(self, wallet, chain_info=None):
         if not isinstance(wallet, TFChainWallet):
-            raise TypeError("expected wallet to be of type TFChainWallet, not: {} ({})".format(wallet, type(wallet0)))
+            raise TypeError("expected wallet to be of type TFChainWallet, not: {} ({})".format(wallet, type(wallet)))
         self._wallet = wallet
         self._balance = SingleSigWalletBalance()
         self._info = chain_info

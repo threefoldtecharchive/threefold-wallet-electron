@@ -800,7 +800,7 @@ export var SingleSigWalletBalanceAggregator =  __class__ ('SingleSigWalletBalanc
 		else {
 		}
 		if (!(isinstance (wallet, TFChainWallet))) {
-			var __except0__ = py_TypeError ('expected wallet to be of type TFChainWallet, not: {} ({})'.format (wallet, py_typeof (wallet0)));
+			var __except0__ = py_TypeError ('expected wallet to be of type TFChainWallet, not: {} ({})'.format (wallet, py_typeof (wallet)));
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
