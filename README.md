@@ -14,7 +14,7 @@ The mnemonic phrase (used as seed for an account) is compatible with [the TFChai
 
 ## Index
 
-- [Download docs](#download) (including macOS and Windows installatio instructions)
+- [Download docs](#download) (including macOS and Windows installation instructions)
 - [Usage docs](#usage)
 - [Developer docs](#developer-docs)
 
