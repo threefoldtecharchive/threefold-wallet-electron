@@ -23,7 +23,8 @@ export const account = (state = [], action) => {
         state: null,
         currentBlockId: '',
         walletCount: 0,
-        walletLoadedCount: 0
+        walletLoadedCount: 0,
+        intermezzoUpdateCount: 0
       }
     case 'SAVE_ACCOUNT':
       // first delete account
@@ -45,7 +46,8 @@ export const account = (state = [], action) => {
           state: null,
           currentBlockId: '',
           walletCount: 0,
-          walletLoadedCount: 0
+          walletLoadedCount: 0,
+          intermezzoUpdateCount: 0
         }
       }
       const chainInfo = action.account.chain_info
@@ -53,7 +55,8 @@ export const account = (state = [], action) => {
         state: action.account,
         currentBlockId: chainInfo ? chainInfo.last_block_get().identifier : '',
         walletCount: action.account.wallet_count,
-        walletLoadedCount: action.account.wallet_loaded_count
+        walletLoadedCount: action.account.wallet_loaded_count,
+        intermezzoUpdateCount: action.account.intermezzo_update_count
       }
     case 'RESET_APP':
       return []

@@ -228,7 +228,7 @@ class WalletBalance(object):
                 self._outputs[strid] = output
                 # delete from other output lists if prior registered
                 self._outputs_unconfirmed.pop(strid, None)
-        elif strid not in self._outputs_spent: # unconfirmed outputs
+        elif strid not in self._outputs and strid not in self._outputs_spent: # unconfirmed outputs
             if spent:
                 self._outputs_unconfirmed_spent[strid] = output
                 # delete from other output lists if prior registered

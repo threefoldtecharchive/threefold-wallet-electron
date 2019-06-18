@@ -160,6 +160,7 @@ export var Account =  __class__ ('Account', [object], {
 		self._chain_info = ChainInfo ();
 		self._selected_wallet = null;
 		self._loaded = false;
+		self._intermezzo_update_count = 0;
 	});},
 	get _get_is_loaded () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -176,6 +177,22 @@ export var Account =  __class__ ('Account', [object], {
 		else {
 		}
 		return self._loaded;
+	});},
+	get _get_intermezzo_update_count () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._intermezzo_update_count;
 	});},
 	get _get_previous_account_name () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -1497,6 +1514,7 @@ export var Account =  __class__ ('Account', [object], {
 			else {
 			}
 			self._loaded = true;
+			self._intermezzo_update_count = 0;
 			return self;
 		};
 		if (itcb == null) {
@@ -1816,7 +1834,7 @@ export var Account =  __class__ ('Account', [object], {
 		}
 		else {
 		}
-		jslog.info ('_update_unconfirmed_account_balance_from_transaction', transaction);
+		self._intermezzo_update_count++;
 		for (var wallet of self._wallets) {
 			wallet._update_unconfirmed_balance_from_transaction (transaction);
 		}
@@ -1845,6 +1863,7 @@ Object.defineProperty (Account, 'mnemonic', property.call (Account, Account._get
 Object.defineProperty (Account, 'default_explorer_addresses_used', property.call (Account, Account._get_default_explorer_addresses_used));
 Object.defineProperty (Account, 'account_name', property.call (Account, Account._get_account_name, Account._set_account_name));
 Object.defineProperty (Account, 'previous_account_name', property.call (Account, Account._get_previous_account_name));
+Object.defineProperty (Account, 'intermezzo_update_count', property.call (Account, Account._get_intermezzo_update_count));
 Object.defineProperty (Account, 'is_loaded', property.call (Account, Account._get_is_loaded));;
 export var BaseWallet =  __class__ ('BaseWallet', [object], {
 	__module__: __name__,
@@ -2585,7 +2604,6 @@ export var SingleSignatureWallet =  __class__ ('SingleSignatureWallet', [BaseWal
 		else {
 		}
 		var addresses = self.addresses;
-		jslog.info ('_update_unconfirmed_balance_from_transaction', transaction, addresses);
 		for (var [index, ci] of enumerate (transaction.coin_inputs)) {
 			if (ci.parent_output == null) {
 				continue;
@@ -3030,7 +3048,6 @@ export var MultiSignatureWallet =  __class__ ('MultiSignatureWallet', [BaseWalle
 		else {
 		}
 		var address = self.address;
-		jslog.info ('_update_unconfirmed_balance_from_transaction', transaction, address);
 		for (var [index, ci] of enumerate (transaction.coin_inputs)) {
 			if (ci.parent_output == null) {
 				continue;

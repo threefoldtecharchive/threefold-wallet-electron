@@ -161,6 +161,9 @@ class Account:
         # loaded state
         self._loaded = False
 
+        # update counter, used to re-render inbetween state
+        self._intermezzo_update_count = 0
+
     @property
     def is_loaded(self):
         """
@@ -168,6 +171,14 @@ class Account:
         :rtype: bool
         """
         return self._loaded
+
+    @property
+    def intermezzo_update_count(self):
+        """
+        :returns: The current update count (since last global account update)
+        :rtype: bool
+        """
+        return self._intermezzo_update_count
 
     @property
     def previous_account_name(self):
@@ -767,6 +778,7 @@ class Account:
     def update_account(self, itcb=None):
         def cb_return_self():
             self._loaded = True
+            self._intermezzo_update_count = 0
             return self
         if itcb == None:
             def stub_cb(_, w):
@@ -840,7 +852,7 @@ class Account:
         for transaction in transactions:
             self._update_unconfirmed_account_balance_from_transaction(transaction)
     def _update_unconfirmed_account_balance_from_transaction(self, transaction):
-        jslog.info("_update_unconfirmed_account_balance_from_transaction", transaction)
+        self._intermezzo_update_count += 1
         # update all wallets
         for wallet in self._wallets:
             wallet._update_unconfirmed_balance_from_transaction(transaction)
@@ -1092,7 +1104,6 @@ class SingleSignatureWallet(BaseWallet):
 
     def _update_unconfirmed_balance_from_transaction(self, transaction):
         addresses = self.addresses
-        jslog.info("_update_unconfirmed_balance_from_transaction", transaction, addresses)
         for index, ci in enumerate(transaction.coin_inputs):
             if ci.parent_output == None:
                 continue
@@ -1223,7 +1234,6 @@ class MultiSignatureWallet(BaseWallet):
 
     def _update_unconfirmed_balance_from_transaction(self, transaction):
         address = self.address
-        jslog.info("_update_unconfirmed_balance_from_transaction", transaction, address)
         for index, ci in enumerate(transaction.coin_inputs):
             if ci.parent_output == None:
                 continue

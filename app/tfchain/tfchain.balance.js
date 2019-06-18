@@ -535,7 +535,7 @@ export var WalletBalance =  __class__ ('WalletBalance', [object], {
 				self._outputs_unconfirmed.py_pop (strid, null);
 			}
 		}
-		else if (!__in__ (strid, self._outputs_spent)) {
+		else if (!__in__ (strid, self._outputs) && !__in__ (strid, self._outputs_spent)) {
 			if (spent) {
 				self._outputs_unconfirmed_spent [strid] = output;
 				self._outputs_unconfirmed.py_pop (strid, null);

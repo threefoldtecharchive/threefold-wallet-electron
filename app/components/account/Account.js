@@ -15,14 +15,16 @@ const mapStateToProps = state => {
       account: null,
       is_loaded: false,
       walletLoadedCount: 0,
-      walletCount: 0
+      walletCount: 0,
+      intermezzoUpdateCount: 0
     }
   }
   return {
     account: state.account.state,
     is_loaded: state.account.state.is_loaded,
     walletLoadedCount: state.account.walletLoadedCount,
-    walletCount: state.account.walletCount
+    walletCount: state.account.walletCount,
+    intermezzoUpdateCount: state.account.intermezzoUpdateCount
   }
 }
 
