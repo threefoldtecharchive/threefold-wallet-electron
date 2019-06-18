@@ -14,11 +14,11 @@ const confirmedStyle = {
   right: 10,
   textAlign: 'right',
   float: 'right',
-  color: '#5E49F0'
+  color: 'white'
 }
 
 const listDescriptionStyle = {
-  color: 'white'
+  color: '#d3d3d3'
 }
 
 const hashFont = {
@@ -74,7 +74,7 @@ function renderTransactionBody (tx, explorerAddress, chainTimestamp, account) {
     return tx.inputs.map(input => {
       return (
         <div key={uuid.v4()} style={{ marginTop: 5, marginBottom: 5 }}>
-          <List.Description style={listDescriptionStyle} as='a'>
+          <List.Description style={listDescriptionStyle}>
             Amount: <span style={{ color: '#77dd77' }}>+ {input.amount.str({
               unit: true
             })}</span>
@@ -107,7 +107,7 @@ function renderTransactionBody (tx, explorerAddress, chainTimestamp, account) {
     return tx.outputs.map(out => {
       return (
         <div key={uuid.v4()} style={{ marginTop: 5, marginBottom: 5 }}>
-          <List.Description style={listDescriptionStyle} as='a'>
+          <List.Description style={listDescriptionStyle}>
             Amount: <span style={{ color: '#ff6961' }}>- {out.amount.str({
               unit: true
             })}</span>
@@ -157,7 +157,7 @@ function renderTransactionHeader (tx, explorerAddress, accountAddresses) {
   const outputSenders = flatten(tx.outputs.map(output => output.senders))
   const outputReceivers = flatten(tx.outputs.map(output => output.recipient))
 
-  let listHeaderColor = { color: '#4B38BE' }
+  let listHeaderColor = { color: '#d3d3d3' }
   let listItemDesc = (<span>Internal transaction</span>)
   if (inputSenders.length > 0) {
     const receivedFromOwnWallet = differenceWith(accountAddresses, inputSenders, isEqual).length === accountAddresses.length
