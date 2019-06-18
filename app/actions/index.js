@@ -80,20 +80,18 @@ export const resetApp = function () {
 }
 
 export const updateAccount = function (account) {
-  if (account && !(account instanceof Array)) {
-    return dispatch => {
-      account.update_account((acc, _) => {
-        dispatch({
-          type: 'UPDATE_ACCOUNT',
-          account: acc
-        })
-      }).then(acc => {
-        dispatch({
-          type: 'UPDATE_ACCOUNT',
-          account: acc
-        })
+  return dispatch => {
+    account.update_account((acc, _) => {
+      dispatch({
+        type: 'UPDATE_ACCOUNT',
+        account: acc
       })
-    }
+    }).then(acc => {
+      dispatch({
+        type: 'UPDATE_ACCOUNT',
+        account: acc
+      })
+    })
   }
 }
 

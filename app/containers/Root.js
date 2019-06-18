@@ -68,8 +68,10 @@ class Root extends Component {
     // Refresh account balance every 1 minutes
     this.intervalID = setInterval(() => {
       const { account } = this.props
-      this.props.updateAccount(account)
-      this.props.getTransactionsNotifications(account)
+      if (account && !(account instanceof Array)) {
+        this.props.updateAccount(account)
+        this.props.getTransactionsNotifications(account)
+      }
     }, 60000)
   }
 
