@@ -161,6 +161,22 @@ export var CoinInput =  __class__ ('CoinInput', [BaseDataTypeClass], {
 		}
 		self._fulfillment = value;
 	});},
+	get _get_has_parent_output () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._parent_output != null;
+	});},
 	get _get_parent_output () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -294,6 +310,7 @@ export var CoinInput =  __class__ ('CoinInput', [BaseDataTypeClass], {
 	});}
 });
 Object.defineProperty (CoinInput, 'parent_output', property.call (CoinInput, CoinInput._get_parent_output, CoinInput._set_parent_output));
+Object.defineProperty (CoinInput, 'has_parent_output', property.call (CoinInput, CoinInput._get_has_parent_output));
 Object.defineProperty (CoinInput, 'fulfillment', property.call (CoinInput, CoinInput._get_fulfillment, CoinInput._set_fulfillment));
 Object.defineProperty (CoinInput, 'parentid', property.call (CoinInput, CoinInput._get_parentid, CoinInput._set_parentid));;
 export var CoinOutput =  __class__ ('CoinOutput', [BaseDataTypeClass], {

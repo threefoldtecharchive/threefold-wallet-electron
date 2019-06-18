@@ -848,6 +848,16 @@ class Account:
             )
         return body
 
+    def update_account_unconfirmed(self):
+        def cb_return_self():
+            self._intermezzo_update_count += 1
+            return self
+        return jsasync.chain(
+            self._explorer_client.unconfirmed_transactions_get(),
+            self._update_unconfirmed_account_balance_from_transactions,
+            cb_return_self,
+        )
+
     def _update_unconfirmed_account_balance_from_transactions(self, transactions):
         for transaction in transactions:
             self._update_unconfirmed_account_balance_from_transaction(transaction)
@@ -1639,10 +1649,15 @@ class TransactionView:
                     address=co.condition.unlockhash.__str__(),
                     amount=co.value)
         for ci in transaction.coin_inputs:
-            co = ci.parent_output
-            aggregator.add_coin_input(
-                address=co.condition.unlockhash.__str__(),
-                amount=co.value)
+            if ci.has_parent_output:
+                co = ci.parent_output
+                aggregator.add_coin_input(
+                    address=co.condition.unlockhash.__str__(),
+                    amount=co.value)
+            else:
+                aggregator.add_coin_input(
+                    address=None,
+                    amount=co.value)
 
         # get all inputs and outputs
         inputs, outputs = aggregator.inputs_outputs_collect()
@@ -1761,13 +1776,14 @@ class WalletOutputAggregator:
             self._fee_balances[address] = self._fee_balances[address].plus(amount)
 
     def add_coin_input(self, address, amount):
-        if address in self._our_addresses:
-            self._our_input = self._our_input.plus(amount)
-            self._our_send_addresses.add(address)
-        else:
-            self._other_input = self._other_input.plus(amount)
-            self._other_send_addresses.add(address)
-        self._modify_balance(address, 0, amount, negate=True)
+        if address != None:
+            if address in self._our_addresses:
+                self._our_input = self._our_input.plus(amount)
+                self._our_send_addresses.add(address)
+            else:
+                self._other_input = self._other_input.plus(amount)
+                self._other_send_addresses.add(address)
+            self._modify_balance(address, 0, amount, negate=True)
 
     def add_coin_output(self, address, lock, amount):
         self._modify_balance(address, lock, amount, negate=False)

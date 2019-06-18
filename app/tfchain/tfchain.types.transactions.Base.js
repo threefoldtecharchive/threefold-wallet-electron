@@ -1185,6 +1185,22 @@ export var TransactionBaseClass =  __class__ ('TransactionBaseClass', [object], 
 		}
 		return bytes ('blstake output  ');
 	});},
+	get transaction_id_new () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._id_new ();
+	});},
 	get coin_outputid_new () {return __get__ (this, function (self, index) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -1205,7 +1221,7 @@ export var TransactionBaseClass =  __class__ ('TransactionBaseClass', [object], 
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		return self._outputid_new (__kwargtrans__ ({specifier: self._coin_outputid_specifier, index: index}));
+		return self._id_new (__kwargtrans__ ({specifier: self._coin_outputid_specifier, index: index}));
 	});},
 	get blockstake_outputid_new () {return __get__ (this, function (self, index) {
 		if (arguments.length) {
@@ -1227,9 +1243,15 @@ export var TransactionBaseClass =  __class__ ('TransactionBaseClass', [object], 
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		return self._outputid_new (__kwargtrans__ ({specifier: self._blockstake_outputid_specifier, index: index}));
+		return self._id_new (__kwargtrans__ ({specifier: self._blockstake_outputid_specifier, index: index}));
 	});},
-	get _outputid_new () {return __get__ (this, function (self, specifier, index) {
+	get _id_new () {return __get__ (this, function (self, specifier, index) {
+		if (typeof specifier == 'undefined' || (specifier != null && specifier.hasOwnProperty ("__kwargtrans__"))) {;
+			var specifier = null;
+		};
+		if (typeof index == 'undefined' || (index != null && index.hasOwnProperty ("__kwargtrans__"))) {;
+			var index = null;
+		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -1246,9 +1268,13 @@ export var TransactionBaseClass =  __class__ ('TransactionBaseClass', [object], 
 		else {
 		}
 		var encoder = SiaBinaryEncoder ();
-		encoder.add_array (specifier);
+		if (specifier != null) {
+			encoder.add_array (specifier);
+		}
 		encoder.add_array (self._id_input_compute ());
-		encoder.add_int (index);
+		if (index != null) {
+			encoder.add_int (index);
+		}
 		var hash = blake2b (encoder.data);
 		return Hash (__kwargtrans__ ({value: hash}));
 	});},

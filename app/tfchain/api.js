@@ -1800,6 +1800,36 @@ export var Account =  __class__ ('Account', [object], {
 		};
 		return body;
 	});},
+	get update_account_unconfirmed () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var cb_return_self = function () {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+					}
+				}
+			}
+			else {
+			}
+			self._intermezzo_update_count++;
+			return self;
+		};
+		return jsasync.chain (self._explorer_client.unconfirmed_transactions_get (), self._update_unconfirmed_account_balance_from_transactions, cb_return_self);
+	});},
 	get _update_unconfirmed_account_balance_from_transactions () {return __get__ (this, function (self, transactions) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -4141,8 +4171,13 @@ export var TransactionView =  __class__ ('TransactionView', [object], {
 			}
 		}
 		for (var ci of transaction.coin_inputs) {
-			var co = ci.parent_output;
-			aggregator.add_coin_input (__kwargtrans__ ({address: co.condition.unlockhash.__str__ (), amount: co.value}));
+			if (ci.has_parent_output) {
+				var co = ci.parent_output;
+				aggregator.add_coin_input (__kwargtrans__ ({address: co.condition.unlockhash.__str__ (), amount: co.value}));
+			}
+			else {
+				aggregator.add_coin_input (__kwargtrans__ ({address: null, amount: co.value}));
+			}
 		}
 		var __left0__ = aggregator.inputs_outputs_collect ();
 		var inputs = __left0__ [0];
@@ -4442,15 +4477,17 @@ export var WalletOutputAggregator =  __class__ ('WalletOutputAggregator', [objec
 		}
 		else {
 		}
-		if (__in__ (address, self._our_addresses)) {
-			self._our_input = self._our_input.plus (amount);
-			self._our_send_addresses.add (address);
+		if (address != null) {
+			if (__in__ (address, self._our_addresses)) {
+				self._our_input = self._our_input.plus (amount);
+				self._our_send_addresses.add (address);
+			}
+			else {
+				self._other_input = self._other_input.plus (amount);
+				self._other_send_addresses.add (address);
+			}
+			self._modify_balance (address, 0, amount, __kwargtrans__ ({negate: true}));
 		}
-		else {
-			self._other_input = self._other_input.plus (amount);
-			self._other_send_addresses.add (address);
-		}
-		self._modify_balance (address, 0, amount, __kwargtrans__ ({negate: true}));
 	});},
 	get add_coin_output () {return __get__ (this, function (self, address, lock, amount) {
 		if (arguments.length) {

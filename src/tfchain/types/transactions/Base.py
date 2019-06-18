@@ -342,13 +342,19 @@ class TransactionBaseClass():
     def _custom_blockstake_outputid_specifier_getter(self):
         return b'blstake output\0\0'
 
+    def transaction_id_new(self):
+        """
+        Compute the ID of the transaction
+        """
+        return self._id_new()
+
     def coin_outputid_new(self, index):
         """
         Compute the ID of a Coin Output within this transaction.
         """
         if index < 0 or index >= len(self.coin_outputs):
             raise ValueError("coin output index is out of range")
-        return self._outputid_new(specifier=self._coin_outputid_specifier, index=index)
+        return self._id_new(specifier=self._coin_outputid_specifier, index=index)
 
     def blockstake_outputid_new(self, index):
         """
@@ -356,13 +362,15 @@ class TransactionBaseClass():
         """
         if index < 0 or index >= len(self.coin_outputs):
             raise ValueError("coin output index is out of range")
-        return self._outputid_new(specifier=self._blockstake_outputid_specifier, index=index)
+        return self._id_new(specifier=self._blockstake_outputid_specifier, index=index)
 
-    def _outputid_new(self, specifier, index):
+    def _id_new(self, specifier=None, index=None):
         encoder = SiaBinaryEncoder()
-        encoder.add_array(specifier)
+        if specifier != None:
+            encoder.add_array(specifier)
         encoder.add_array(self._id_input_compute())
-        encoder.add_int(index)
+        if index != None:
+            encoder.add_int(index)
         hash = blake2b(encoder.data)
         return Hash(value=hash)
 

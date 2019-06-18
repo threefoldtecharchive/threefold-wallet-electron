@@ -61,6 +61,10 @@ class CoinInput(BaseDataTypeClass):
         self._fulfillment = value
 
     @property
+    def has_parent_output(self):
+        return self._parent_output != None
+
+    @property
     def parent_output(self):
         return self._parent_output or CoinOutput()
 

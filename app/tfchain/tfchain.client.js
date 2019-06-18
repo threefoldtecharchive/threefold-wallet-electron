@@ -521,6 +521,65 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 		};
 		return jsasync.chain (self.explorer_post (__kwargtrans__ ({endpoint: endpoint, data: transaction})), cb);
 	});},
+	get unconfirmed_transactions_get () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var endpoint = '/transactionpool/transactions';
+		var cb = function (result) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'result': var result = __allkwargs0__ [__attrib0__]; break;
+						}
+					}
+				}
+			}
+			else {
+			}
+			var __left0__ = result;
+			var _ = __left0__ [0];
+			var resp = __left0__ [1];
+			try {
+				var unconfirmed_transactions = [];
+				var resp_transactions = resp ['transactions'];
+				if (resp_transactions != null && jsobj.is_js_arr (resp_transactions)) {
+					for (var etxn of resp_transactions) {
+						var transaction = transactions.from_json (__kwargtrans__ ({obj: etxn}));
+						transaction.id = transaction.transaction_id_new ();
+						transaction.unconfirmed = true;
+						unconfirmed_transactions.append (transaction);
+					}
+				}
+				return unconfirmed_transactions;
+			}
+			catch (__except0__) {
+				if (isinstance (__except0__, tuple ([KeyError, ValueError, py_TypeError]))) {
+					var exc = __except0__;
+					var __except1__ = tferrors.ExplorerInvalidResponse (str (exc), endpoint, transaction);
+					__except1__.__cause__ = exc;
+					throw __except1__;
+				}
+				else {
+					throw __except0__;
+				}
+			}
+		};
+		return jsasync.chain (self.explorer_get (__kwargtrans__ ({endpoint: endpoint})), cb);
+	});},
 	get unlockhash_get () {return __get__ (this, function (self, target) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;

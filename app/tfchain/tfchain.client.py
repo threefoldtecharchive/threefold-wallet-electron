@@ -234,6 +234,34 @@ class TFChainClient:
 
         return jsasync.chain(self.explorer_post(endpoint=endpoint, data=transaction), cb)
 
+    def unconfirmed_transactions_get(self):
+        """
+        Get all unconfirmed transactions from an available Explorer node.
+        """
+        endpoint = "/transactionpool/transactions"
+
+        def cb(result):
+            _, resp = result
+            try:
+                # parse the unconfirmed transactions
+                unconfirmed_transactions = []
+                resp_transactions = resp['transactions']
+                if resp_transactions != None and jsobj.is_js_arr(resp_transactions):
+                    for etxn in resp_transactions:
+                        # parse the (raw) transaction
+                        transaction = transactions.from_json(obj=etxn)
+                        # compute the transactionID manually
+                        transaction.id = transaction.transaction_id_new()
+                        # force it to be unconfirmed
+                        transaction.unconfirmed = True
+                        # append the transaction to the list of transactions
+                        unconfirmed_transactions.append(transaction)
+                return unconfirmed_transactions
+            except (KeyError, ValueError, TypeError) as exc:
+                # return a KeyError as an invalid Explorer Response
+                raise tferrors.ExplorerInvalidResponse(str(exc), endpoint, transaction) from exc
+        return jsasync.chain(self.explorer_get(endpoint=endpoint), cb)
+
     def unlockhash_get(self, target):
         """
         Get all transactions linked to the given unlockhash (target),
