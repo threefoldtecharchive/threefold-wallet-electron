@@ -73,6 +73,7 @@ export const getTransactionsNotifications = function (account) {
 }
 
 export const resetApp = function () {
+  blockId = undefined
   return {
     type: 'RESET_APP'
   }
