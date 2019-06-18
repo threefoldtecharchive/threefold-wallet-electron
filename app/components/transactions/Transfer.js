@@ -848,7 +848,12 @@ class Transfer extends Component {
     if (e.key === 'Enter') {
       e.preventDefault()
       e.stopPropagation()
-      this.openConfirmationModal()
+      const { openConfirmationModal } = this.state
+      if (openConfirmationModal) {
+        this.confirmTransaction()
+      } else {
+        this.openConfirmationModal()
+      }
     }
   }
 
