@@ -3909,6 +3909,14 @@ export var TransactionView =  __class__ ('TransactionView', [object], {
 		if (height_a > height_b) {
 			return 1;
 		}
+		var tx_order_a = (a.transaction_order < 0 ? pow (2, 64) : a.transaction_order);
+		var tx_order_b = (b.transaction_order < 0 ? pow (2, 64) : b.transaction_order);
+		if (tx_order_a < tx_order_b) {
+			return -(1);
+		}
+		if (tx_order_a > tx_order_b) {
+			return 1;
+		}
 		return 0;
 	};},
 	get from_transaction () {return __getcm__ (this, function (cls, transaction, addresses) {
@@ -3935,14 +3943,16 @@ export var TransactionView =  __class__ ('TransactionView', [object], {
 			var height = -(1);
 			var timestamp = -(1);
 			var blockid = null;
+			var transaction_order = -(1);
 		}
 		else {
 			var height = transaction.height;
+			var transaction_order = transaction.transaction_order;
 			var timestamp = transaction.timestamp;
 			var blockid = (transaction.blockid == null ? null : transaction.blockid.str ());
 		}
 		if (addresses == null) {
-			return cls (identifier, height, timestamp, blockid, [], []);
+			return cls (identifier, height, transaction_order, timestamp, blockid, [], []);
 		}
 		var aggregator = WalletOutputAggregator (addresses);
 		for (var co of transaction.coin_outputs) {
@@ -3960,9 +3970,9 @@ export var TransactionView =  __class__ ('TransactionView', [object], {
 		var __left0__ = aggregator.inputs_outputs_collect ();
 		var inputs = __left0__ [0];
 		var outputs = __left0__ [1];
-		return cls (identifier, height, timestamp, blockid, inputs, outputs);
+		return cls (identifier, height, transaction_order, timestamp, blockid, inputs, outputs);
 	});},
-	get __init__ () {return __get__ (this, function (self, identifier, height, timestamp, blockid, inputs, outputs) {
+	get __init__ () {return __get__ (this, function (self, identifier, height, transaction_order, timestamp, blockid, inputs, outputs) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -3972,6 +3982,7 @@ export var TransactionView =  __class__ ('TransactionView', [object], {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
 						case 'identifier': var identifier = __allkwargs0__ [__attrib0__]; break;
 						case 'height': var height = __allkwargs0__ [__attrib0__]; break;
+						case 'transaction_order': var transaction_order = __allkwargs0__ [__attrib0__]; break;
 						case 'timestamp': var timestamp = __allkwargs0__ [__attrib0__]; break;
 						case 'blockid': var blockid = __allkwargs0__ [__attrib0__]; break;
 						case 'inputs': var inputs = __allkwargs0__ [__attrib0__]; break;
@@ -3992,6 +4003,11 @@ export var TransactionView =  __class__ ('TransactionView', [object], {
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
+		if (!(isinstance (transaction_order, int))) {
+			var __except0__ = py_TypeError ('transaction order is expected to be of type int, not be of type {}'.format (py_typeof (transaction_order)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
 		if (!(isinstance (timestamp, int))) {
 			var __except0__ = py_TypeError ('timestamp is expected to be of type int, not be of type {}'.format (py_typeof (timestamp)));
 			__except0__.__cause__ = null;
@@ -4004,6 +4020,7 @@ export var TransactionView =  __class__ ('TransactionView', [object], {
 		}
 		self._identifier = identifier;
 		self._height = height;
+		self._transaction_order = transaction_order;
 		self._timestamp = timestamp;
 		self._blockid = blockid;
 		self._inputs = inputs;
@@ -4056,6 +4073,22 @@ export var TransactionView =  __class__ ('TransactionView', [object], {
 		else {
 		}
 		return self._height;
+	});},
+	get _get_transaction_order () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._transaction_order;
 	});},
 	get _get_timestamp () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -4126,6 +4159,7 @@ Object.defineProperty (TransactionView, 'outputs', property.call (TransactionVie
 Object.defineProperty (TransactionView, 'inputs', property.call (TransactionView, TransactionView._get_inputs));
 Object.defineProperty (TransactionView, 'blockid', property.call (TransactionView, TransactionView._get_blockid));
 Object.defineProperty (TransactionView, 'timestamp', property.call (TransactionView, TransactionView._get_timestamp));
+Object.defineProperty (TransactionView, 'transaction_order', property.call (TransactionView, TransactionView._get_transaction_order));
 Object.defineProperty (TransactionView, 'height', property.call (TransactionView, TransactionView._get_height));
 Object.defineProperty (TransactionView, 'confirmed', property.call (TransactionView, TransactionView._get_confirmed));
 Object.defineProperty (TransactionView, 'identifier', property.call (TransactionView, TransactionView._get_identifier));;

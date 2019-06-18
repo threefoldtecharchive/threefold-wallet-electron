@@ -365,6 +365,14 @@ export var TFChainWallet =  __class__ ('TFChainWallet', [object], {
 				if (height_a > height_b) {
 					return 1;
 				}
+				var tx_order_a = (a.transaction_order < 0 ? pow (2, 64) : a.transaction_order);
+				var tx_order_b = (b.transaction_order < 0 ? pow (2, 64) : b.transaction_order);
+				if (tx_order_a < tx_order_b) {
+					return -(1);
+				}
+				if (tx_order_a > tx_order_b) {
+					return 1;
+				}
 				return 0;
 			};
 			return jsarr.py_sort (transactions, txn_arr_sort, __kwargtrans__ ({reverse: true}));

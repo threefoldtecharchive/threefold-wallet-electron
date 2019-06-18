@@ -297,6 +297,12 @@ class TFChainClient:
                         return -1
                     if height_a > height_b:
                         return 1
+                    tx_order_a = pow(2, 64) if a.transaction_order < 0 else a.transaction_order
+                    tx_order_b = pow(2, 64) if b.transaction_order < 0 else b.transaction_order
+                    if tx_order_a < tx_order_b:
+                        return -1
+                    if tx_order_a > tx_order_b:
+                        return 1
                     return 0
                 transactions = jsarr.sort(transactions, txn_arr_sort, reverse=True)
 
@@ -500,11 +506,18 @@ class TFChainClient:
 
 def _assign_block_properties_to_transacton(txn, block):
     raw_block = block.get_or('rawblock', jsobj.new_dict())
+    # assign txn timestamp
     txn.timestamp = raw_block.get_or('timestamp', 0)
+    # assign fee payout info
     miner_payout_ids = block.get_or('minerpayoutids', [])
     if len(miner_payout_ids) >= 2:
         txn.fee_payout_id = miner_payout_ids[1]
         txn.fee_payout_address = raw_block['minerpayouts'][1]["unlockhash"]
+    # assign transaction order (index within block)
+    for idx, transaction in enumerate(block.get_or('transactions', [])):
+        if transaction.get_or('id', 'id') == txn.id:
+            txn.transaction_order = idx
+            break
 
 
 class ExplorerOutputResult():

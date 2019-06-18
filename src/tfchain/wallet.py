@@ -197,6 +197,12 @@ class TFChainWallet:
                     return -1
                 if height_a > height_b:
                     return 1
+                tx_order_a = pow(2, 64) if a.transaction_order < 0 else a.transaction_order
+                tx_order_b = pow(2, 64) if b.transaction_order < 0 else b.transaction_order
+                if tx_order_a < tx_order_b:
+                    return -1
+                if tx_order_a > tx_order_b:
+                    return 1
                 return 0
             return jsarr.sort(transactions, txn_arr_sort, reverse=True)
 

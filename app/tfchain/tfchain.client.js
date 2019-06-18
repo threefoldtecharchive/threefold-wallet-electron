@@ -632,6 +632,14 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 					if (height_a > height_b) {
 						return 1;
 					}
+					var tx_order_a = (a.transaction_order < 0 ? pow (2, 64) : a.transaction_order);
+					var tx_order_b = (b.transaction_order < 0 ? pow (2, 64) : b.transaction_order);
+					if (tx_order_a < tx_order_b) {
+						return -(1);
+					}
+					if (tx_order_a > tx_order_b) {
+						return 1;
+					}
 					return 0;
 				};
 				var transactions = jsarr.py_sort (transactions, txn_arr_sort, __kwargtrans__ ({reverse: true}));
@@ -1070,6 +1078,12 @@ export var _assign_block_properties_to_transacton = function (txn, block) {
 	if (len (miner_payout_ids) >= 2) {
 		txn.fee_payout_id = miner_payout_ids [1];
 		txn.fee_payout_address = raw_block ['minerpayouts'] [1] ['unlockhash'];
+	}
+	for (var [idx, transaction] of enumerate (block.get_or ('transactions', []))) {
+		if (transaction.get_or ('id', 'id') == txn.id) {
+			txn.transaction_order = idx;
+			break;
+		}
 	}
 };
 export var ExplorerOutputResult =  __class__ ('ExplorerOutputResult', [object], {

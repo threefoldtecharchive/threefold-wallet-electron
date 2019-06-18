@@ -1531,6 +1531,12 @@ class TransactionView:
             return -1
         if height_a > height_b:
             return 1
+        tx_order_a = pow(2, 64) if a.transaction_order < 0 else a.transaction_order
+        tx_order_b = pow(2, 64) if b.transaction_order < 0 else b.transaction_order
+        if tx_order_a < tx_order_b:
+            return -1
+        if tx_order_a > tx_order_b:
+            return 1
         return 0
 
     @classmethod
@@ -1541,14 +1547,16 @@ class TransactionView:
             height = -1
             timestamp = -1
             blockid = None
+            transaction_order = -1
         else:
             height = transaction.height
+            transaction_order = transaction.transaction_order
             timestamp = transaction.timestamp
             blockid = None if transaction.blockid == None else transaction.blockid.str()
 
         if addresses == None:
             # return early
-            return cls(identifier, height, timestamp, blockid, [], [])
+            return cls(identifier, height, transaction_order, timestamp, blockid, [], [])
 
         # go through all outputs and inputs and keep track of the addresses, locks and amounts
         aggregator = WalletOutputAggregator(addresses)
@@ -1572,19 +1580,22 @@ class TransactionView:
         inputs, outputs = aggregator.inputs_outputs_collect()
 
         # return it all as a single view
-        return cls(identifier, height, timestamp, blockid, inputs, outputs)
+        return cls(identifier, height, transaction_order, timestamp, blockid, inputs, outputs)
 
-    def __init__(self, identifier, height, timestamp, blockid, inputs, outputs):
+    def __init__(self, identifier, height, transaction_order, timestamp, blockid, inputs, outputs):
         if not isinstance(identifier, str):
             raise TypeError("identifier is expected to be of type str, not be of type {}".format(type(identifier)))
         if not isinstance(height, int):
             raise TypeError("height is expected to be of type int, not be of type {}".format(type(height)))
+        if not isinstance(transaction_order, int):
+            raise TypeError("transaction order is expected to be of type int, not be of type {}".format(type(transaction_order)))
         if not isinstance(timestamp, int):
             raise TypeError("timestamp is expected to be of type int, not be of type {}".format(type(timestamp)))
         if blockid != None and not isinstance(blockid, str):
             raise TypeError("blockid is expected to be None or of type str, not be of type {}".format(type(blockid)))
         self._identifier = identifier
         self._height = height
+        self._transaction_order = transaction_order
         self._timestamp = timestamp
         self._blockid = blockid
         self._inputs = inputs
@@ -1608,6 +1619,12 @@ class TransactionView:
         :returns: the parent block's height
         """
         return self._height
+    @property
+    def transaction_order(self):
+        """
+        :returns: the order of the transaction within the parent's block
+        """
+        return self._transaction_order
     @property
     def timestamp(self):
         """
