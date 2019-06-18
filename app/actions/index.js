@@ -1,4 +1,5 @@
 import { toast } from 'react-toastify'
+let blockId
 
 export const addAccount = function (account) {
   return {
@@ -44,16 +45,19 @@ export const getTransactionsNotifications = function (account) {
         const block = chaininfo.last_block_get({
           addresses: w.addresses
         })
-        if (block.transactions.length > 0) {
-          block.transactions.forEach(tx => {
-            if (tx.inputs.length > 0) {
-              toast('Incomming transaction received')
-            }
-            if (tx.outputs.length > 0) {
-              toast('Outgoing transaction received')
-            }
-          })
+        if (blockId !== block.identifier) {
+          if (block.transactions.length > 0) {
+            block.transactions.forEach(tx => {
+              if (tx.inputs.length > 0) {
+                toast('Incomming transaction received')
+              }
+              if (tx.outputs.length > 0) {
+                toast('Outgoing transaction received')
+              }
+            })
+          }
         }
+        blockId = block.identifier
       })
       dispatch({
         type: 'GET_TX_FOR_WALLET',
