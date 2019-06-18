@@ -10,11 +10,26 @@ import BalanceGrid from './BalanceGrid'
 import BalanceUnconfirmedGrid from './BalanceUnconfirmedGrid'
 import TransactionsList from './TransactionList'
 
-const mapStateToProps = state => ({
-  routerLocations: state.routerLocations,
-  chainInfo: state.chainConstants,
-  account: state.account.state
-})
+const mapStateToProps = state => {
+  if (!state.account.state) {
+    return {
+      routerLocations: state.routerLocations,
+      account: null,
+      is_loaded: false,
+      walletLoadedCount: 0,
+      walletCount: 0,
+      intermezzoUpdateCount: 0
+    }
+  }
+  return {
+    routerLocations: state.routerLocations,
+    account: state.account.state,
+    is_loaded: state.account.state.is_loaded,
+    walletLoadedCount: state.account.walletLoadedCount,
+    walletCount: state.account.walletCount,
+    intermezzoUpdateCount: state.account.intermezzoUpdateCount
+  }
+}
 
 class Wallet extends Component {
   constructor (props) {
