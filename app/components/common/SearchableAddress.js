@@ -33,8 +33,6 @@ class SearchableAddress extends Component {
       }))
     }
 
-    console.log(wallets)
-
     const source = wallets
     this.setState({ source })
   }
