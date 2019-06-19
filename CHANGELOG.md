@@ -1,5 +1,9 @@
 # v0.1.3 (2018.06.19)
 
+Features:
+
+- make address fields searchable for easy input of known addresses.
+
 Improvements:
 
 - add README introduction.
