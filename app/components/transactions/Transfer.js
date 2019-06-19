@@ -366,7 +366,9 @@ class Transfer extends Component {
     if (walletsOptions.length === 0) {
       this.setState({
         selectedWalletRecipient: null,
-        selectedWallet
+        selectedWallet,
+        amount: 0,
+        amountError: false
       })
     } else {
       if (selectedRecipientAddress != null && selectedRecipientAddress !== '' && selectedWallet && selectedWallet.is_address_owned_by_wallet(selectedRecipientAddress)) {
@@ -381,12 +383,16 @@ class Transfer extends Component {
           addressOptions,
           selectedWalletRecipient,
           selectedRecipientAddress,
-          selectedWallet
+          selectedWallet,
+          amount: 0,
+          amountError: false
         })
       } else {
         this.setState({
           walletsOptions,
-          selectedWallet
+          selectedWallet,
+          amount: 0,
+          amountError: false
         })
       }
     }
