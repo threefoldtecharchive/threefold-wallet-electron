@@ -1694,6 +1694,10 @@ class CoinTransactionBuilder():
         self._txn = transactions.new()
         self._wallet = wallet
 
+    @property
+    def transaction(self):
+        return self._txn
+
     def output_add(self, recipient, amount, lock=None):
         """
         Add an output to the transaction, returning the transaction

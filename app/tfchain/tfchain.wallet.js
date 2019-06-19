@@ -938,6 +938,22 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 		self._txn = transactions.py_new ();
 		self._wallet = wallet;
 	});},
+	get _get_transaction () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._txn;
+	});},
 	get output_add () {return __get__ (this, function (self, recipient, amount, lock) {
 		if (typeof lock == 'undefined' || (lock != null && lock.hasOwnProperty ("__kwargtrans__"))) {;
 			var lock = null;
@@ -1139,5 +1155,6 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 		return jsasync.chain (self._wallet.balance, balance_cb);
 	});}
 });
+Object.defineProperty (CoinTransactionBuilder, 'transaction', property.call (CoinTransactionBuilder, CoinTransactionBuilder._get_transaction));;
 
 //# sourceMappingURL=tfchain.wallet.map

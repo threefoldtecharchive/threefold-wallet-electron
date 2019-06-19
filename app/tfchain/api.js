@@ -3092,6 +3092,22 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 		self._wallet = wallet;
 		self._builder = wallet._tfwallet.coin_transaction_builder_new ();
 	});},
+	get _get_transaction () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._builder.transaction;
+	});},
 	get output_add () {return __get__ (this, function (self, recipient, amount, opts) {
 		if (typeof opts == 'undefined' || (opts != null && opts.hasOwnProperty ("__kwargtrans__"))) {;
 			var opts = null;
@@ -3158,6 +3174,7 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 		return jsasync.chain (self._builder.send (__kwargtrans__ ({data: data, balance: self._wallet.balance._tfbalance})), cb);
 	});}
 });
+Object.defineProperty (CoinTransactionBuilder, 'transaction', property.call (CoinTransactionBuilder, CoinTransactionBuilder._get_transaction));;
 export var MultiSignatureCoinTransactionBuilder =  __class__ ('MultiSignatureCoinTransactionBuilder', [object], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, wallet, wallets) {
@@ -3196,6 +3213,22 @@ export var MultiSignatureCoinTransactionBuilder =  __class__ ('MultiSignatureCoi
 		}
 		self._builder = wallets [0]._tfwallet.coin_transaction_builder_new ();
 		self._co_signers = wallets.__getslice__ (1, null, 1);
+	});},
+	get _get_transaction () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._builder.transaction;
 	});},
 	get output_add () {return __get__ (this, function (self, recipient, amount, opts) {
 		if (typeof opts == 'undefined' || (opts != null && opts.hasOwnProperty ("__kwargtrans__"))) {;
@@ -3295,6 +3328,7 @@ export var MultiSignatureCoinTransactionBuilder =  __class__ ('MultiSignatureCoi
 		return jsasync.chain (p, result_cb, submitted_cb);
 	});}
 });
+Object.defineProperty (MultiSignatureCoinTransactionBuilder, 'transaction', property.call (MultiSignatureCoinTransactionBuilder, MultiSignatureCoinTransactionBuilder._get_transaction));;
 export var _normalize_recipient = function (recipient) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;

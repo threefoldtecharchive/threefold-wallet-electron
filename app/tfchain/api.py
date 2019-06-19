@@ -1257,6 +1257,10 @@ class CoinTransactionBuilder:
         self._wallet = wallet
         self._builder = wallet._tfwallet.coin_transaction_builder_new()
 
+    @property
+    def transaction(self):
+        return self._builder.transaction
+
     def output_add(self, recipient, amount, opts=None):
         """
         Add an output to the transaction, returning the transaction
@@ -1316,6 +1320,10 @@ class MultiSignatureCoinTransactionBuilder:
                 raise TypeError("expected wallet to be a SingleSignatureWallet object, not: {} ({})".format(ow, type(ow)))
         self._builder = wallets[0]._tfwallet.coin_transaction_builder_new()
         self._co_signers = wallets[1:]
+
+    @property
+    def transaction(self):
+        return self._builder.transaction
 
     def output_add(self, recipient, amount, opts=None):
         lock = jsfunc.opts_get(opts, 'lock')
