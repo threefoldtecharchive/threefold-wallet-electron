@@ -3,9 +3,11 @@ import {AssertionError, AttributeError, BaseException, DeprecationWarning, Excep
 import * as jsasync from './tfchain.polyfill.asynchronous.js';
 import * as jslog from './tfchain.polyfill.log.js';
 import * as jshttp from './tfchain.polyfill.http.js';
+import * as jsarr from './tfchain.polyfill.array.js';
 import * as jsobj from './tfchain.polyfill.encoding.object.js';
 import * as jsjson from './tfchain.polyfill.encoding.json.js';
 import * as tferrors from './tfchain.errors.js';
+import {datetime} from './datetime.js';
 import * as __module_random__ from './random.js';
 __nest__ (random, '', __module_random__);
 var __name__ = 'tfchain.explorer';
@@ -32,6 +34,144 @@ export var Client =  __class__ ('Client', [object], {
 			throw __except0__;
 		}
 		self._addresses = addresses;
+		self._consensus_addresses = (function () {
+			var __accu0__ = [];
+			for (var addr of addresses) {
+				__accu0__.append (addr);
+			}
+			return __accu0__;
+		}) ();
+		self._last_consensus_update_time = 0;
+	});},
+	get _update_consensus_if_needed () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var now = int (datetime.now ().timestamp ());
+		if (now - self._last_consensus_update_time < 60 * 5) {
+			return null;
+		}
+		self._last_consensus_update_time = now;
+		var generator = function* () {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+					}
+				}
+			}
+			else {
+			}
+			for (var addr of self._addresses) {
+				yield jsasync.catch_promise (jsasync.chain (jshttp.http_get (addr, '/explorer'), self._height_result_cb), self._height_error_cb_new (addr));
+			}
+			};
+		var result_cb = function (results) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'results': var results = __allkwargs0__ [__attrib0__]; break;
+						}
+					}
+				}
+			}
+			else {
+			}
+			var d = jsobj.new_dict ();
+			var a = dict ({});
+			for (var [addr, height] of results) {
+				if (!__in__ (height, a)) {
+					a [height] = [];
+				}
+				a [height].append (addr);
+				d [height] = d.get_or (height, 0) + 1;
+			}
+			var c_height = -(1);
+			var c_height_votes = -(1);
+			for (var [height, votes] of jsobj.get_items (d)) {
+				if (votes > c_height_votes || votes == c_height_votes && height > c_height) {
+					var c_height = height;
+					var c_height_votes = votes;
+				}
+			}
+			if (c_height == -(1)) {
+				jslog.error ('update_consensus of explorer (HTTP): no explorer addresses are available');
+				var all_addresses = [];
+				for (var [_, addresses] of jsobj.get_items (a)) {
+					var all_addresses = jsarr.concat (all_addresses, addresses);
+				}
+				self._consensus_addresses = addresses;
+			}
+			else {
+				self._consensus_addresses = a [c_height];
+			}
+		};
+		return jsasync.chain (jsasync.promise_pool_new (generator), result_cb);
+	});},
+	get _height_result_cb () {return __get__ (this, function (self, result) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'result': var result = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return tuple ([result ['address'], int (result ['data'] ['height'])]);
+	});},
+	get _height_error_cb_new () {return __get__ (this, function (self, address) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'address': var address = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var cb = function (error) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'error': var error = __allkwargs0__ [__attrib0__]; break;
+						}
+					}
+				}
+			}
+			else {
+			}
+			jslog.warning ('error occured while probing explorer {} for height:'.format (address), error);
+			return tuple ([address, 0]);
+		};
+		return cb;
 	});},
 	get _get_addresses () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -49,28 +189,6 @@ export var Client =  __class__ ('Client', [object], {
 		}
 		return self._addresses;
 	});},
-	get clone () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		return Client ((function () {
-			var __accu0__ = [];
-			for (var addr of self.addresses) {
-				__accu0__.append (addr);
-			}
-			return __accu0__;
-		}) ());
-	});},
 	get data_get () {return __get__ (this, function (self, endpoint) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -86,7 +204,43 @@ export var Client =  __class__ ('Client', [object], {
 		}
 		else {
 		}
-		var indices = list (range (len (self._addresses)));
+		var cp = self._update_consensus_if_needed ();
+		if (cp == null) {
+			return self._data_get_body (endpoint);
+		}
+		return jsasync.chain (cp, (function __lambda__ (_) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case '_': var _ = __allkwargs0__ [__attrib0__]; break;
+						}
+					}
+				}
+			}
+			else {
+			}
+			return self._data_get_body (endpoint);
+		}));
+	});},
+	get _data_get_body () {return __get__ (this, function (self, endpoint) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'endpoint': var endpoint = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var indices = list (range (len (self._consensus_addresses)));
 		random.shuffle (indices);
 		var resolve = function (result) {
 			if (arguments.length) {
@@ -119,7 +273,7 @@ export var Client =  __class__ ('Client', [object], {
 			__except0__.__cause__ = null;
 			throw __except0__;
 		};
-		var address = self._addresses [indices [0]];
+		var address = self._consensus_addresses [indices [0]];
 		if (!(isinstance (address, str))) {
 			var __except0__ = py_TypeError ('explorer address expected to be a string, not {}'.format (py_typeof (address)));
 			__except0__.__cause__ = null;
@@ -165,7 +319,7 @@ export var Client =  __class__ ('Client', [object], {
 			return f;
 		};
 		for (var idx of indices.__getslice__ (1, null, 1)) {
-			var address = self._addresses [idx];
+			var address = self._consensus_addresses [idx];
 			if (!(isinstance (address, str))) {
 				var __except0__ = py_TypeError ('explorer address expected to be a string, not {}'.format (py_typeof (address)));
 				__except0__.__cause__ = null;
@@ -194,7 +348,7 @@ export var Client =  __class__ ('Client', [object], {
 				throw __except0__;
 			}
 			jslog.debug ('servers exhausted, previous GET call failed as well: {}'.format (reason));
-			var __except0__ = tferrors.ExplorerNotAvailable ('no explorer was available', endpoint, self._addresses);
+			var __except0__ = tferrors.ExplorerNotAvailable ('no explorer was available', endpoint, self._consensus_addresses);
 			__except0__.__cause__ = null;
 			throw __except0__;
 		};
@@ -216,7 +370,44 @@ export var Client =  __class__ ('Client', [object], {
 		}
 		else {
 		}
-		var indices = list (range (len (self._addresses)));
+		var cp = self._update_consensus_if_needed ();
+		if (cp == null) {
+			return self._data_post_body (endpoint, data);
+		}
+		return jsasync.chain (cp, (function __lambda__ (_) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case '_': var _ = __allkwargs0__ [__attrib0__]; break;
+						}
+					}
+				}
+			}
+			else {
+			}
+			return self._data_post_body (endpoint, data);
+		}));
+	});},
+	get _data_post_body () {return __get__ (this, function (self, endpoint, data) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'endpoint': var endpoint = __allkwargs0__ [__attrib0__]; break;
+						case 'data': var data = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var indices = list (range (len (self._consensus_addresses)));
 		random.shuffle (indices);
 		var headers = dict ({'Content-Type': 'Application/json;charset=UTF-8'});
 		var s = data;
@@ -250,7 +441,7 @@ export var Client =  __class__ ('Client', [object], {
 			__except0__.__cause__ = null;
 			throw __except0__;
 		};
-		var address = self._addresses [indices [0]];
+		var address = self._consensus_addresses [indices [0]];
 		if (!(isinstance (address, str))) {
 			var __except0__ = py_TypeError ('explorer address expected to be a string, not {}'.format (py_typeof (address)));
 			__except0__.__cause__ = null;
@@ -296,7 +487,7 @@ export var Client =  __class__ ('Client', [object], {
 			return f;
 		};
 		for (var idx of indices.__getslice__ (1, null, 1)) {
-			var address = self._addresses [idx];
+			var address = self._consensus_addresses [idx];
 			if (!(isinstance (address, str))) {
 				var __except0__ = py_TypeError ('explorer address expected to be a string, not {}'.format (py_typeof (address)));
 				__except0__.__cause__ = null;
@@ -325,7 +516,7 @@ export var Client =  __class__ ('Client', [object], {
 				throw __except0__;
 			}
 			jslog.debug ('servers exhausted, previous POST call failed as well: {}'.format (reason));
-			var __except0__ = tferrors.ExplorerNotAvailable ('no explorer was available', endpoint, self._addresses);
+			var __except0__ = tferrors.ExplorerNotAvailable ('no explorer was available', endpoint, self._consensus_addresses);
 			__except0__.__cause__ = null;
 			throw __except0__;
 		};

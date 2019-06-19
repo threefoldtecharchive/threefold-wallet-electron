@@ -177,7 +177,7 @@ Object.defineProperty (ExplorerError, 'endpoint', property.call (ExplorerError, 
 export var ExplorerUserError =  __class__ ('ExplorerUserError', [ExplorerError], {
 	__module__: __name__,
 });
-export var ExplorerNoContent =  __class__ ('ExplorerNoContent', [ExplorerUserError], {
+export var ExplorerNoContent =  __class__ ('ExplorerNoContent', [ExplorerError], {
 	__module__: __name__,
 });
 export var ExplorerBadRequest =  __class__ ('ExplorerBadRequest', [ExplorerUserError], {

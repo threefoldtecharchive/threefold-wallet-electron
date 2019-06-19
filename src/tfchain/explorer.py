@@ -1,7 +1,9 @@
 import random
+from datetime import datetime
 import tfchain.errors as tferrors
 import tfchain.polyfill.encoding.json as jsjson
 import tfchain.polyfill.encoding.object as jsobj
+import tfchain.polyfill.array as jsarr
 import tfchain.polyfill.http as jshttp
 import tfchain.polyfill.log as jslog
 import tfchain.polyfill.asynchronous as jsasync
@@ -15,6 +17,54 @@ class Client:
         if not isinstance(addresses, list) or len(addresses) == 0:
             raise TypeError("addresses expected to be a non-empty list of string-formatted explorer addresses, not {}".format(type(addresses)))
         self._addresses = addresses
+        self._consensus_addresses = [addr for addr in addresses]
+        self._last_consensus_update_time = 0
+
+    def _update_consensus_if_needed(self):
+        now = int(datetime.now().timestamp())
+        if now-self._last_consensus_update_time < 60*5:
+            return None # nothing to do
+        self._last_consensus_update_time = now
+        # probe all explorer nodes for consensus
+        def generator():
+            for addr in self._addresses:
+                yield jsasync.catch_promise(jsasync.chain(
+                    jshttp.http_get(addr, "/explorer"),
+                    self._height_result_cb), self._height_error_cb_new(addr))
+        def result_cb(results):
+            d = jsobj.new_dict()
+            a = {}
+            for addr, height in results:
+                if height not in a:
+                    a[height] = []
+                a[height].append(addr)
+                d[height] = d.get_or(height, 0) + 1
+            c_height = -1
+            c_height_votes = -1
+            for height, votes in jsobj.get_items(d):
+                if votes > c_height_votes or (votes == c_height_votes and height > c_height):
+                    c_height = height
+                    c_height_votes = votes
+            if c_height == -1:
+                jslog.error("update_consensus of explorer (HTTP): no explorer addresses are available")
+                # assign all addresses and hope for the best
+                all_addresses = []
+                for _, addresses in jsobj.get_items(a):
+                    all_addresses = jsarr.concat(all_addresses, addresses)
+                self._consensus_addresses = addresses
+            else:
+                # select the explorer addresses with the desired height
+                self._consensus_addresses = a[c_height]
+        return jsasync.chain(jsasync.promise_pool_new(generator), result_cb)
+
+    def _height_result_cb(self, result):
+        return (result["address"], int(result["data"]["height"]))
+
+    def _height_error_cb_new(self, address):
+        def cb(error):
+            jslog.warning("error occured while probing explorer {} for height:".format(address), error)
+            return (address, 0)
+        return cb
 
     @property
     def addresses(self):
@@ -22,13 +72,6 @@ class Client:
         Addresses of the explorers to use
         """
         return self._addresses
-
-    def clone(self):
-        """
-        Clone this Client and return the cloned client,
-        a requirement for async usage.
-        """
-        return Client([addr for addr in self.addresses])
 
     def data_get(self, endpoint):
         """
@@ -38,7 +81,14 @@ class Client:
 
         @param endpoint: the endpoint to get the data from
         """
-        indices = list(range(len(self._addresses)))
+        # if we need to update our consensus about the explorers, do this first
+        cp = self._update_consensus_if_needed()
+        if cp == None:
+            return self._data_get_body(endpoint)
+        return jsasync.chain(cp, lambda _: self._data_get_body(endpoint))
+
+    def _data_get_body(self, endpoint):
+        indices = list(range(len(self._consensus_addresses)))
         random.shuffle(indices)
 
         def resolve(result):
@@ -50,7 +100,7 @@ class Client:
                 raise tferrors.ExplorerBadRequest("error (code: {}): {}".format(result.code, result.data), endpoint)
             raise tferrors.ExplorerServerError("error (code: {}): {}".format(result.code, result.data), endpoint)
 
-        address = self._addresses[indices[0]]
+        address = self._consensus_addresses[indices[0]]
         if not isinstance(address, str):
             raise TypeError("explorer address expected to be a string, not {}".format(type(address)))
         # do the request and check the response
@@ -70,7 +120,7 @@ class Client:
 
         # for any remaining index, do the same logic, but as a chained catch
         for idx in indices[1:]:
-            address = self._addresses[idx]
+            address = self._consensus_addresses[idx]
             if not isinstance(address, str):
                 raise TypeError("explorer address expected to be a string, not {}".format(type(address)))
             cb = create_fallback_catch_cb(address)
@@ -82,10 +132,11 @@ class Client:
             if isinstance(reason, tferrors.ExplorerUserError):
                 raise reason # no need to retry user errors
             jslog.debug("servers exhausted, previous GET call failed as well: {}".format(reason))
-            raise tferrors.ExplorerNotAvailable("no explorer was available", endpoint, self._addresses)
+            raise tferrors.ExplorerNotAvailable("no explorer was available", endpoint, self._consensus_addresses)
 
         # return the final promise chain
         return jsasync.catch_promise(p, final_catch)
+        
 
     def data_post(self, endpoint, data):
         """
@@ -95,7 +146,14 @@ class Client:
 
         @param endpoint: the endpoint to post the data to
         """
-        indices = list(range(len(self._addresses)))
+        # if we need to update our consensus about the explorers, do this first
+        cp = self._update_consensus_if_needed()
+        if cp == None:
+            return self._data_post_body(endpoint, data)
+        return jsasync.chain(cp, lambda _: self._data_post_body(endpoint, data))
+
+    def _data_post_body(self, endpoint, data):
+        indices = list(range(len(self._consensus_addresses)))
         random.shuffle(indices)
 
         headers = {
@@ -113,7 +171,7 @@ class Client:
                 raise tferrors.ExplorerBadRequest("error (code: {}): {}".format(result.code, result.data), endpoint)
             raise tferrors.ExplorerServerPostError("POST: unexpected error (code: {}): {}".format(result.code, result.data), endpoint, data=data)
         
-        address = self._addresses[indices[0]]
+        address = self._consensus_addresses[indices[0]]
         if not isinstance(address, str):
             raise TypeError("explorer address expected to be a string, not {}".format(type(address)))
          # do the request and check the response
@@ -133,7 +191,7 @@ class Client:
 
         # for any remaining index, do the same logic, but as a chained catch
         for idx in indices[1:]:
-            address = self._addresses[idx]
+            address = self._consensus_addresses[idx]
             if not isinstance(address, str):
                 raise TypeError("explorer address expected to be a string, not {}".format(type(address)))
             cb = create_fallback_catch_cb(address)
@@ -145,7 +203,7 @@ class Client:
             if isinstance(reason, tferrors.ExplorerUserError):
                 raise reason # no need to retry user errors
             jslog.debug("servers exhausted, previous POST call failed as well: {}".format(reason))
-            raise tferrors.ExplorerNotAvailable("no explorer was available", endpoint, self._addresses)
+            raise tferrors.ExplorerNotAvailable("no explorer was available", endpoint, self._consensus_addresses)
 
         # return the final promise chain
         return jsasync.catch_promise(p, final_catch)
