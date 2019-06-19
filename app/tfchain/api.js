@@ -3299,7 +3299,6 @@ export var MultiSignatureCoinTransactionBuilder =  __class__ ('MultiSignatureCoi
 		if (len (self._co_signers) == 0) {
 			return jsasync.chain (p, submitted_cb);
 		}
-		var signers = self._co_signers;
 		var result_cb = function (result) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
@@ -3317,6 +3316,7 @@ export var MultiSignatureCoinTransactionBuilder =  __class__ ('MultiSignatureCoi
 			if (result.submitted) {
 				return result;
 			}
+			var signers = self._co_signers;
 			var first_signer = signers [0];
 			var signers = signers.__getslice__ (1, null, 1);
 			var cp = first_signer.transaction_sign (result.transaction, __kwargtrans__ ({balance: tfbalance}));

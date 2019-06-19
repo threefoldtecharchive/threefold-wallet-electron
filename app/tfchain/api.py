@@ -1349,11 +1349,11 @@ class MultiSignatureCoinTransactionBuilder:
         if len(self._co_signers) == 0:
             return jsasync.chain(p, submitted_cb)
 
-        signers = self._co_signers
         def result_cb(result):
             if result.submitted:
                 return result
 
+            signers = self._co_signers
             first_signer = signers[0]
             signers = signers[1:]
 
