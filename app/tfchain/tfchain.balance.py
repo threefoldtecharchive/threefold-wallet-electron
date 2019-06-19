@@ -6,7 +6,7 @@ import tfchain.errors as tferrors
 
 from tfchain.types import ConditionTypes, transactions
 from tfchain.types.PrimitiveTypes import Hash, Currency
-from tfchain.types.ConditionTypes import UnlockHash, UnlockHashType, ConditionMultiSignature, ConditionNil
+from tfchain.types.ConditionTypes import UnlockHash, UnlockHashType, ConditionBaseClass, ConditionMultiSignature, ConditionNil
 from tfchain.types.IO import CoinInput
 
 
@@ -508,8 +508,11 @@ class MultiSigWalletBalance(WalletBalance):
 
     @condition.setter
     def condition(self, value):
+        if not isinstance(value, ConditionBaseClass):
+            raise TypeError("expected value to be ConditionBaseClass, not: {} ({})".format(value, type(value)))
+        value = value.unwrap()
         if not isinstance(value, ConditionMultiSignature):
-            raise TypeError("expected value to be ConditionMultiSignature, not: {} ({})".format(value, type(value)))
+            raise TypeError("expected (unwrapped) value to be ConditionMultiSignature, not: {} ({})".format(value, type(value)))
         if self._owners == None:
             self._owners = [owner for owner in value.unlockhashes]
             self._signature_count = value.required_signatures
