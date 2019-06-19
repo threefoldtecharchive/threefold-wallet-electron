@@ -67,25 +67,26 @@ class TFChainClient:
         Get the current blockchain info, using the last known block, as reported by an explorer.
         """
         def get_block(result):
-            _, raw_block = result
+            used_addr, raw_block = result
+            address = used_addr
+            def get_block_with_tag(result):
+                return ('b', (address, result))
             blockid = Hash.from_json(obj=raw_block['blockid'])
-            return self.block_get(blockid)
-        def get_block_with_tag(result):
-            return ('b', result)
+            return jsasync.chain(self.block_get(blockid), get_block_with_tag)
         def get_constants_with_tag(result):
             return ('c', result)
         def get_info(results):
             if len(results) != 2:
                 raise RuntimeError("expected 2 values as result, but received: {}".format(results))
             d = dict(results)
-            address, raw_constants = d['c']
+            _, raw_constants = d['c']
             info = raw_constants['chaininfo']
             constants = BlockchainConstants(
                 info['Name'],
                 info['ChainVersion'],
                 info['NetworkName'],
             )
-            last_block = d['b']
+            address, last_block = d['b']
             return ExplorerBlockchainInfo(
                 constants=constants,
                 last_block=last_block,
@@ -93,7 +94,7 @@ class TFChainClient:
             )
         return jsasync.chain(
             jsasync.wait(
-                jsasync.chain(self.explorer_get(endpoint="/explorer"), get_block, get_block_with_tag),
+                jsasync.chain(self.explorer_get(endpoint="/explorer"), get_block),
                 jsasync.chain(self.explorer_get(endpoint="/explorer/constants"), get_constants_with_tag),
             ), get_info)
 

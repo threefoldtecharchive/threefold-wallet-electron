@@ -103,26 +103,27 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 			else {
 			}
 			var __left0__ = result;
-			var _ = __left0__ [0];
+			var used_addr = __left0__ [0];
 			var raw_block = __left0__ [1];
-			var blockid = Hash.from_json (__kwargtrans__ ({obj: raw_block ['blockid']}));
-			return self.block_get (blockid);
-		};
-		var get_block_with_tag = function (result) {
-			if (arguments.length) {
-				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-					var __allkwargs0__ = arguments [__ilastarg0__--];
-					for (var __attrib0__ in __allkwargs0__) {
-						switch (__attrib0__) {
-							case 'result': var result = __allkwargs0__ [__attrib0__]; break;
+			var address = used_addr;
+			var get_block_with_tag = function (result) {
+				if (arguments.length) {
+					var __ilastarg0__ = arguments.length - 1;
+					if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+						var __allkwargs0__ = arguments [__ilastarg0__--];
+						for (var __attrib0__ in __allkwargs0__) {
+							switch (__attrib0__) {
+								case 'result': var result = __allkwargs0__ [__attrib0__]; break;
+							}
 						}
 					}
 				}
-			}
-			else {
-			}
-			return tuple (['b', result]);
+				else {
+				}
+				return tuple (['b', tuple ([address, result])]);
+			};
+			var blockid = Hash.from_json (__kwargtrans__ ({obj: raw_block ['blockid']}));
+			return jsasync.chain (self.block_get (blockid), get_block_with_tag);
 		};
 		var get_constants_with_tag = function (result) {
 			if (arguments.length) {
@@ -161,14 +162,16 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 			}
 			var d = dict (results);
 			var __left0__ = d ['c'];
-			var address = __left0__ [0];
+			var _ = __left0__ [0];
 			var raw_constants = __left0__ [1];
 			var info = raw_constants ['chaininfo'];
 			var constants = BlockchainConstants (info ['Name'], info ['ChainVersion'], info ['NetworkName']);
-			var last_block = d ['b'];
+			var __left0__ = d ['b'];
+			var address = __left0__ [0];
+			var last_block = __left0__ [1];
 			return ExplorerBlockchainInfo (__kwargtrans__ ({constants: constants, last_block: last_block, explorer_address: address}));
 		};
-		return jsasync.chain (jsasync.wait (jsasync.chain (self.explorer_get (__kwargtrans__ ({endpoint: '/explorer'})), get_block, get_block_with_tag), jsasync.chain (self.explorer_get (__kwargtrans__ ({endpoint: '/explorer/constants'})), get_constants_with_tag)), get_info);
+		return jsasync.chain (jsasync.wait (jsasync.chain (self.explorer_get (__kwargtrans__ ({endpoint: '/explorer'})), get_block), jsasync.chain (self.explorer_get (__kwargtrans__ ({endpoint: '/explorer/constants'})), get_constants_with_tag)), get_info);
 	});},
 	get block_get () {return __get__ (this, function (self, value) {
 		if (arguments.length) {
