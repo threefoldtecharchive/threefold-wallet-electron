@@ -185,7 +185,7 @@ class Account extends Component {
       )
     }
     return (
-      <Segment style={{ background: '#29272E', width: '90%', margin: 'auto', marginTop: 0, height: 300 }}>
+      <Segment style={{ background: '#29272E', width: '90%', margin: 'auto', marginTop: 0, height: 330 }}>
         <Dimmer active={content == null}>
           <Loader />
         </Dimmer>
