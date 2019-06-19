@@ -92,7 +92,7 @@ class Wallet extends Component {
     const ownerList = owners.map((owner, index) => {
       return (
         <List.Description key={owner + ` ${index}`}>
-          <p style={{ color: 'white', fontSize: 14 }}><span style={{ color: 'white', fontSize: 12, fontFamily: 'Menlo-Regular' }}>{index + 1}</span>: {_addressDisplayElement(owner, this.props.account, this.props.chainInfo)}</p>
+          <p style={{ color: 'white', fontSize: 14 }}><span style={{ color: 'white', fontSize: 12, fontFamily: 'Menlo-Regular' }}>{index + 1}</span>: {_addressDisplayElement(owner, this.props.account)}</p>
         </List.Description>
       )
     })
@@ -161,12 +161,14 @@ class Wallet extends Component {
 }
 
 // NOTE: should we also link to wallet (when we have wallet name)??!?!
-function _addressDisplayElement (address, account, chainInfo) {
+function _addressDisplayElement (address, account) {
+  const chainInfo = account.chain_info
   const wallet = account.wallet_for_address(address)
+
   if (wallet && wallet.wallet_name) {
-    return <span><a style={{ color: 'white', fontSize: 12, fontFamily: 'Menlo-Regular' }} onClick={() => shell.openExternal(`${chainInfo.explorerAddress}/hash.html?hash=${address}`)}>{address}</a> (wallet {`${wallet.wallet_name}`})</span>
+    return <span><a style={{ color: 'white', fontSize: 12, fontFamily: 'Menlo-Regular' }} onClick={() => shell.openExternal(`${chainInfo.explorer_address}/hash.html?hash=${address}`)}>{address}</a> (wallet {`${wallet.wallet_name}`})</span>
   }
-  return <span><a style={{ color: 'white', fontSize: 12, fontFamily: 'Menlo-Regular' }} onClick={() => shell.openExternal(`${chainInfo.explorerAddress}/hash.html?hash=${address}`)}>{address}</a></span>
+  return <span><a style={{ color: 'white', fontSize: 12, fontFamily: 'Menlo-Regular' }} onClick={() => shell.openExternal(`${chainInfo.explorer_address}/hash.html?hash=${address}`)}>{address}</a></span>
 }
 
 export default connect(
