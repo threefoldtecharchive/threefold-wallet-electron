@@ -264,7 +264,7 @@ class AccountSettings extends Component {
               Account Settings
             <Header.Subheader style={{ color: 'white' }}>Manage your account settings</Header.Subheader>
           </Header>
-          <div style={{ height: '60vh', overflow: 'auto' }}>
+          <div style={{ height: '68vh', overflow: 'auto', padding: 30 }}>
             <Form error style={{ width: '50%', margin: 'auto', marginTop: 10, marginBottom: 50 }} onKeyDown={this.onKeyDown}>
               <Form.Field error={nameError}>
                 <label style={{ float: 'left', color: 'white' }}>Name</label>
