@@ -1,3 +1,21 @@
+# v0.1.3 (2018.06.19)
+
+Improvements:
+
+- add README introduction.
+- add information to the README about the product's positioning.
+- add download-, installation-, and usage instructions to README.
+
+Fixes:
+
+- ensure the screens of the App can be used on a screen with low resolution.
+- ensure the screens of the App can be used in magnified environments.
+- improved error handling of the different forms found in the App.
+- ensure transaction order (of a transaction within a block) is taken
+  into account for transaction ordering as a secondary filter, following the block height filter.
+- fix several critical errors caused by both valid and invalid actions, that caused the app to stop working.
+- ensure the different (form) pages can be concluded and cancelled with respectively the enter and escape buttons.
+
 # v0.1.2 (2018.06.14)
 
 Features:
