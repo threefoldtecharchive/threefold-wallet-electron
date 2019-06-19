@@ -250,6 +250,7 @@ class Transfer extends Component {
       return (
         <Form.Field style={{ marginTop: 10 }}>
           <SearchableAddress
+            sources={{ multisig_wallets: false }}
             setSearchValue={this.setSearchValue}
             icon='send'
           />
