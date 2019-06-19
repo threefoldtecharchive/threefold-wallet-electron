@@ -115,7 +115,7 @@ class WalletSettings extends Component {
       this.props.account.multisig_wallet_delete(account.selected_wallet.address, deleteName)
     } catch (err) {
       if (err) {
-        toast.error('Deleting wallet failed')
+        return toast.error('Deleting wallet failed')
       }
     }
     this.props.saveAccount(this.props.account)

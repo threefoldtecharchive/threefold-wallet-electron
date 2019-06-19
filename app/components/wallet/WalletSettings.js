@@ -38,7 +38,8 @@ class WalletSettings extends Component {
       deleteNameErrorMessage: '',
       startIndexError: false,
       addressLengthError: false,
-      nameError: false
+      nameError: false,
+      updateError: false
     }
   }
 
@@ -66,8 +67,10 @@ class WalletSettings extends Component {
       try {
         this.props.account.wallet_update(walletIndex, name, startIndex, addressLength)
       } catch (err) {
-        console.log(typeof err.__str__ === 'function' ? err.__str__() : err.toString())
-        toast.error('Saving wallet failed')
+        const error = typeof err.__str__ === 'function' ? err.__str__() : err.toString()
+        console.log(error)
+        this.setState({ updateError: error })
+        return toast.error('Saving wallet failed')
       }
       this.props.saveAccount(this.props.account)
       toast('Wallet saved')
@@ -105,6 +108,17 @@ class WalletSettings extends Component {
       return (
         <Message negative>
           <p style={{ fontSize: 12 }}>Address length must be greater than 0 and smaller than 8.</p>
+        </Message>
+      )
+    }
+  }
+
+  renderUpdateError = () => {
+    const { updateError } = this.state
+    if (updateError) {
+      return (
+        <Message negative>
+          <p style={{ fontSize: 12 }}>{updateError}</p>
         </Message>
       )
     }
@@ -163,8 +177,7 @@ class WalletSettings extends Component {
         deleteNameError: true,
         deleteNameErrorMessage: deleteNameErrorMessage
       })
-      toast('the wallet cannot be deleted')
-      return
+      return toast.error('the wallet cannot be deleted')
     }
     this.props.saveAccount(this.props.account)
     this.props.updateAccount(this.props.account)
@@ -228,6 +241,7 @@ class WalletSettings extends Component {
             </Form.Field>
             <Button className={styles.cancelButton} size='big' style={{ marginTop: 10, marginRight: 10, background: 'none', color: 'white', width: 180 }} onClick={() => this.props.history.goBack()}>Cancel</Button>
             <Button className={styles.acceptButton} size='big' type='submit' onClick={this.saveWallet} style={{ marginTop: 10, margin: 'auto', color: 'white', width: 180 }}>Save</Button>
+            {this.renderUpdateError()}
           </Form>
         </div>
         <Footer />

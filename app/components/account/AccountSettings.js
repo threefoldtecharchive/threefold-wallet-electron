@@ -96,7 +96,7 @@ class AccountSettings extends Component {
 
   deleteAccount = () => {
     const { deleteName, originalName } = this.state
-    if (deleteName.localeCompare(originalName, { sensitivity: 'babe' }) !== 0) {
+    if (deleteName.localeCompare(originalName, { sensitivity: 'base' }) !== 0) {
       return this.setState({ deleteNameError: true })
     }
     this.props.deleteAccount(this.props.account)
