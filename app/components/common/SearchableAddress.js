@@ -19,21 +19,28 @@ class SearchableAddress extends Component {
   }
 
   componentWillMount () {
-    let wallets = this.props.account.wallets.map(w => {
-      return {
-        wallet_name: w.wallet_name,
-        title: `wallet: ${w.wallet_name} - ${w.address}`,
-        value: w.address
-      }
-    })
+    const sources = this.props.sources || {}
+    let wallets = []
+    if (sources.wallets !== false) {
+      wallets = this.props.account.wallets.map(w => {
+        return {
+          wallet_name: w.wallet_name,
+          title: `wallet: ${w.wallet_name} - ${w.address}`,
+          value: w.address
+        }
+      })
+    }
 
-    let msWallets = this.props.account.multisig_wallets.map(w => {
-      return {
-        wallet_name: w.wallet_name,
-        title: `multisig wallet: ${w.wallet_name} - ${w.address}`,
-        value: w.address
-      }
-    })
+    let msWallets = []
+    if (sources.multisig_wallets !== false) {
+      msWallets = this.props.account.multisig_wallets.map(w => {
+        return {
+          wallet_name: w.wallet_name,
+          title: `multisig wallet: ${w.wallet_name} - ${w.address}`,
+          value: w.address
+        }
+      })
+    }
 
     const source = wallets.concat(msWallets)
     this.setState({ source })

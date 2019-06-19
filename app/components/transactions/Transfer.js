@@ -227,6 +227,7 @@ class Transfer extends Component {
         <div key={index} >
           <Form.Field style={{ marginTop: 20 }}>
             <SearchableAddress
+              sources={{ multisig_wallets: false }}
               setSearchValue={(e) => this.handleAddressOwnerChange(e, index)}
               icon='user'
             />
