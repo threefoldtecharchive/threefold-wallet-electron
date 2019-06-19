@@ -4,7 +4,7 @@ import { debounce, escapeRegExp, filter } from 'lodash'
 import { Search, Message, Icon } from 'semantic-ui-react'
 import * as tfchain from '../../tfchain/api'
 
-const initialState = { isLoading: false, results: [], value: '', addressError: false, showNoResults: true }
+const initialState = { results: [], value: '', addressError: false, showNoResults: true }
 
 const mapStateToProps = state => ({
   account: state.account.state
@@ -45,7 +45,7 @@ class SearchableAddress extends Component {
   }
 
   handleSearchChange = (e, { value }) => {
-    this.setState({ isLoading: true, value })
+    this.setState({ value })
 
     setTimeout(() => {
       if (this.state.value.length < 1) return this.setState(initialState)
@@ -65,25 +65,23 @@ class SearchableAddress extends Component {
       // Pass this address
       if (results.length === 0) {
         this.props.setSearchValue(value)
-        return this.setState({ value, isLoading: false, results, showNoResults: false })
+        return this.setState({ value, results, showNoResults: false })
       }
 
       // If results are found, show a dropdown list with possible selection
       this.setState({
-        isLoading: false,
         results: filter(this.state.source, isMatch)
       })
-    }, 300)
+    }, 50)
   }
 
   render () {
-    const { isLoading, value, results, addressError, showNoResults } = this.state
+    const { value, results, addressError, showNoResults } = this.state
 
     return (
       <div>
         <Search
           style={this.props.style}
-          loading={isLoading}
           onResultSelect={this.handleResultSelect}
           onSearchChange={debounce(this.handleSearchChange, 500, {
             leading: true
