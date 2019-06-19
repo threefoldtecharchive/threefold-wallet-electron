@@ -206,7 +206,16 @@ class Transfer extends Component {
   }
 
   handleAddressOwnerChange = (value, index) => {
-    const { ownerAddresses } = this.state
+    const { ownerAddresses, ownerAddressErrors } = this.state
+    if (!tfchain.wallet_address_is_valid(value, { multisig: false }) && value !== '') {
+      ownerAddressErrors.splice(index, 1)
+      ownerAddressErrors.insert(index, true)
+      this.setState({ ownerAddressErrors })
+    } else {
+      ownerAddressErrors.splice(index, 1)
+      ownerAddressErrors.insert(index, false)
+      this.setState({ ownerAddressErrors })
+    }
     const newOwnerAddresses = ownerAddresses[index] = value
     this.setState({ ownerAddress: newOwnerAddresses })
   }
@@ -451,7 +460,8 @@ class Transfer extends Component {
 
     let destinationError = false
     let sendToSelfError = false
-    if (destination === '') {
+
+    if (!tfchain.wallet_address_is_valid(destination) || destination === '') {
       destinationError = true
     } else if (selectedWallet && selectedWallet.is_address_owned_by_wallet(destination)) {
       sendToSelfError = true
@@ -490,6 +500,7 @@ class Transfer extends Component {
     let { amountError } = this.state
 
     const hasOwnerAddressErrors = ownerAddressErrors.filter(e => e === true).length > 0
+
     let areAllOwnersFilledIn = false
     let newOwnerAddressErrors = []
     ownerAddressErrors.forEach((e, index) => {

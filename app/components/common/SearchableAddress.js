@@ -61,10 +61,10 @@ class SearchableAddress extends Component {
       const isMatch = result => (re.test(result.wallet_name) || re.test(result.value) || re.test(result.title))
       const results = filter(this.state.source, isMatch)
 
+      this.props.setSearchValue(value)
       // If no results, this means the user copied or typed an address that he does not know yet.
       // Pass this address
       if (results.length === 0) {
-        this.props.setSearchValue(value)
         return this.setState({ value, results, showNoResults: false })
       }
 
