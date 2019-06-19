@@ -1,6 +1,6 @@
 import { connect } from 'react-redux'
 import React, { Component } from 'react'
-import { debounce, escapeRegExp, filter } from 'lodash'
+import { debounce, escapeRegExp, filter, flatten } from 'lodash'
 import { Search, Message, Icon } from 'semantic-ui-react'
 import * as tfchain from '../../tfchain/api'
 
@@ -22,27 +22,20 @@ class SearchableAddress extends Component {
     const sources = this.props.sources || {}
     let wallets = []
     if (sources.wallets !== false) {
-      wallets = this.props.account.wallets.map(w => {
-        return {
-          wallet_name: w.wallet_name,
-          title: `wallet: ${w.wallet_name} - ${w.address}`,
-          value: w.address
-        }
-      })
+      wallets = flatten(this.props.account.wallets.map(wallet => {
+        return wallet.addresses.map(a => {
+          return {
+            wallet_name: wallet.wallet_name,
+            title: `wallet: ${wallet.wallet_name} - ${a}`,
+            value: a
+          }
+        })
+      }))
     }
 
-    let msWallets = []
-    if (sources.multisig_wallets !== false) {
-      msWallets = this.props.account.multisig_wallets.map(w => {
-        return {
-          wallet_name: w.wallet_name,
-          title: `multisig wallet: ${w.wallet_name} - ${w.address}`,
-          value: w.address
-        }
-      })
-    }
+    console.log(wallets)
 
-    const source = wallets.concat(msWallets)
+    const source = wallets
     this.setState({ source })
   }
 
