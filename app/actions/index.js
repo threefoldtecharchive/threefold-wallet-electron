@@ -95,17 +95,6 @@ export const updateAccount = function (account) {
   }
 }
 
-export const updateAccountUnconfirmed = function (account) {
-  return dispatch => {
-    account.update_account_unconfirmed().then(acc => {
-      dispatch({
-        type: 'UPDATE_ACCOUNT',
-        account: acc
-      })
-    })
-  }
-}
-
 export const setTransactionJson = function (json) {
   return {
     type: 'SET_TRANSACTION_JSON',

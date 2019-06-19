@@ -3,7 +3,7 @@ import { connect, Provider } from 'react-redux'
 import React, { Component } from 'react'
 import { ConnectedRouter } from 'connected-react-router'
 import Routes from '../Routes'
-import { loadAccounts, updateAccount, updateAccountUnconfirmed, getTransactionsNotifications, setError } from '../actions'
+import { loadAccounts, updateAccount, getTransactionsNotifications, setError } from '../actions'
 
 const os = require('os')
 const storage = require('electron-json-storage')
@@ -21,9 +21,6 @@ const mapDispatchToProps = (dispatch) => ({
   },
   updateAccount: (account) => {
     dispatch(updateAccount(account))
-  },
-  updateAccountUnconfirmed: (account) => {
-    dispatch(updateAccountUnconfirmed(account))
   },
   getTransactionsNotifications: (account) => {
     dispatch(getTransactionsNotifications(account))
@@ -76,18 +73,10 @@ class Root extends Component {
         this.props.getTransactionsNotifications(account)
       }
     }, 60000)
-    // Refresh unconfirmed account balance every 15 seconds
-    this.unconfirmedIntervalID = setInterval(() => {
-      const { account } = this.props
-      if (account && !(account instanceof Array)) {
-        this.props.updateAccountUnconfirmed(account)
-      }
-    }, 15000)
   }
 
   componentWillUnmount () {
     clearInterval(this.intervalID)
-    clearInterval(this.unconfirmedIntervalID)
   }
 
   render () {
