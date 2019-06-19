@@ -22,13 +22,13 @@ The mnemonic phrase (used as seed for an account) is compatible with [the TFChai
 
 ![GitHub release](https://img.shields.io/github/release-pre/threefoldfoundation/tfchain-wallet-electron.svg)
 
-- [Windows Installer](https://github.com/threefoldfoundation/tfchain-wallet-electron/releases/download/v0.1.2/TFT-Wallet.Setup.0.1.2.exe)
+- [Windows Installer](https://github.com/threefoldfoundation/tfchain-wallet-electron/releases/download/v0.1.3/TFT-Wallet.Setup.0.1.3.exe)
   - Windows 7 or later
   - ia32 (x86) and x64 (amd64)
-- [macOS Installer](https://github.com/threefoldfoundation/tfchain-wallet-electron/releases/download/v0.1.2/TFT-Wallet-0.1.2.dmg)
+- [macOS Installer](https://github.com/threefoldfoundation/tfchain-wallet-electron/releases/download/v0.1.3/TFT-Wallet-0.1.3.dmg)
   - 10.10 (Yosemite) or later
   - 64-bit only
-- [Linux Installer](https://github.com/threefoldfoundation/tfchain-wallet-electron/releases/download/v0.1.2/TFT-Wallet.0.1.2.AppImage)
+- [Linux Installer](https://github.com/threefoldfoundation/tfchain-wallet-electron/releases/download/v0.1.3/TFT-Wallet.0.1.3.AppImage)
   - Fedora 21, Debina 8 or Ubuntu 12.04 and newer
   - ia32 (i686), x64 (amd64), armv7l (ARM v7)
 
