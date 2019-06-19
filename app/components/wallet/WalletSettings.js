@@ -156,7 +156,7 @@ class WalletSettings extends Component {
     }
 
     try {
-      this.props.account.wallet_delete(this.props.account.selected_wallet.start_index, deleteName)
+      this.props.account.wallet_delete(this.props.account.selected_wallet.wallet_index, deleteName)
     } catch (err) {
       const deleteNameErrorMessage = typeof err.__str__ === 'function' ? err.__str__() : err.toString()
       this.setState({
