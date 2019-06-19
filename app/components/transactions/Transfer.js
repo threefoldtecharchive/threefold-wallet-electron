@@ -588,7 +588,7 @@ class Transfer extends Component {
       try {
         builder.output_add(destination, amount.toString(), { lock: timestamp })
       } catch (error) {
-        toast('transaction failed')
+        toast('adding output failed')
         const errorMessage = typeof error.__str__ === 'function' ? error.__str__() : error.toString()
         return this.setState({ loader: false, errorMessage: errorMessage })
       }
@@ -596,7 +596,7 @@ class Transfer extends Component {
       try {
         builder.output_add(destination, amount.toString())
       } catch (error) {
-        toast('transaction failed')
+        toast('adding output failed')
         const errorMessage = typeof error.__str__ === 'function' ? error.__str__() : error.toString()
         return this.setState({ loader: false, errorMessage: errorMessage })
       }
@@ -612,7 +612,8 @@ class Transfer extends Component {
         return this.props.history.push(routes.SIGN)
       }
     }).catch(error => {
-      toast.error('transaction failed')
+      toast.error('sending transaction failed')
+      console.warn('failed to send single-signature transaction', JSON.stringify(builder.transaction.json()))
       const errorMessage = typeof error.__str__ === 'function' ? error.__str__() : error.toString()
       this.setState({ loader: false, errorMessage: errorMessage })
     })
@@ -634,7 +635,7 @@ class Transfer extends Component {
       try {
         builder.output_add([signatureCount, ownerAddresses], amount.toString(), { lock: timestamp })
       } catch (error) {
-        toast('transaction failed')
+        toast('adding output failed')
         const errorMessage = typeof error.__str__ === 'function' ? error.__str__() : error.toString()
         return this.setState({ loader: false, errorMessage: errorMessage })
       }
@@ -642,7 +643,7 @@ class Transfer extends Component {
       try {
         builder.output_add([signatureCount, ownerAddresses], amount.toString())
       } catch (error) {
-        toast('transaction failed')
+        toast('adding output failed')
         const errorMessage = typeof error.__str__ === 'function' ? error.__str__() : error.toString()
         return this.setState({ loader: false, errorMessage: errorMessage })
       }
@@ -658,7 +659,8 @@ class Transfer extends Component {
         return this.props.history.push(routes.SIGN)
       }
     }).catch(error => {
-      toast('transaction failed')
+      toast('sending transaction failed')
+      console.warn('failed to send multi-signature transaction', JSON.stringify(builder.transaction.json()))
       const errorMessage = typeof error.__str__ === 'function' ? error.__str__() : error.toString()
       this.setState({ loader: false, errorMessage: errorMessage })
     })
@@ -682,7 +684,7 @@ class Transfer extends Component {
       try {
         builder.output_add(recipient, amount.toString(), { lock: timestamp })
       } catch (error) {
-        toast('transaction failed')
+        toast('adding output failed')
         const errorMessage = typeof error.__str__ === 'function' ? error.__str__() : error.toString()
         return this.setState({ loader: false, errorMessage: errorMessage })
       }
@@ -690,7 +692,7 @@ class Transfer extends Component {
       try {
         builder.output_add(recipient, amount.toString())
       } catch (error) {
-        toast('transaction failed')
+        toast('adding output failed')
         const errorMessage = typeof error.__str__ === 'function' ? error.__str__() : error.toString()
         return this.setState({ loader: false, errorMessage: errorMessage })
       }
@@ -706,7 +708,8 @@ class Transfer extends Component {
         return this.props.history.push(routes.SIGN)
       }
     }).catch(error => {
-      toast.error('transaction failed')
+      toast.error('sending transaction failed')
+      console.warn('failed to send internal transaction', JSON.stringify(builder.transaction.json()))
       const errorMessage = typeof error.__str__ === 'function' ? error.__str__() : error.toString()
       this.setState({ loader: false, errorMessage: errorMessage })
     })
