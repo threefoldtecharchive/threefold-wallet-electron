@@ -934,7 +934,7 @@ class Transfer extends Component {
             </div>
             {this.renderDestinationForm()}
             <Form.Field style={{ marginTop: 30 }}>
-              <Input type='number' error={amountError} label='Amount TFT' style={{ background: '#0c111d !important', color: '#7784a9', width: 150 }} placeholder='amount' value={amount || ''} onChange={this.handleAmountChange} />
+              <Input type='number' error={amountError} label='Amount TFT' style={{ background: '#0c111d !important', color: '#7784a9', width: 350 }} placeholder='amount' value={amount || ''} onChange={this.handleAmountChange} />
               {this.renderAmountError()}
             </Form.Field>
             <Form.Field style={{ marginTop: 30 }} error={timelockError}>
