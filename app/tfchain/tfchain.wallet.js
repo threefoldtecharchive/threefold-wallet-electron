@@ -936,6 +936,7 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 		else {
 		}
 		self._txn = transactions.py_new ();
+		self._txn_send = false;
 		self._wallet = wallet;
 	});},
 	get _get_transaction () {return __get__ (this, function (self) {
@@ -974,7 +975,7 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 		}
 		else {
 		}
-		if (self._txn == null) {
+		if (self._txn_send) {
 			var __except0__ = RuntimeError ('coin transaction builder is already consumed');
 			__except0__.__cause__ = null;
 			throw __except0__;
@@ -1019,8 +1020,13 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 		}
 		else {
 		}
+		if (self._txn_send) {
+			var __except0__ = RuntimeError ('coin transaction builder is already consumed');
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
 		var txn = self._txn;
-		self._txn = null;
+		self._txn_send = true;
 		var balance_is_cached = balance != null;
 		var balance_cb = function (balance) {
 			if (arguments.length) {

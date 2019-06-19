@@ -1692,6 +1692,7 @@ class SingleSigWalletBalanceAggregator:
 class CoinTransactionBuilder():
     def __init__(self, wallet):
         self._txn = transactions.new()
+        self._txn_send = False
         self._wallet = wallet
 
     @property
@@ -1722,7 +1723,7 @@ class CoinTransactionBuilder():
         @param amount: int or str that defines the amount of TFT to set, see explanation above
         @param lock: optional lock that can be used to lock the sent amount to a specific time or block height, see explation above
         """
-        if self._txn == None:
+        if self._txn_send:
             raise RuntimeError("coin transaction builder is already consumed")
 
         amount = Currency(value=amount)
@@ -1733,8 +1734,11 @@ class CoinTransactionBuilder():
         return self
 
     def send(self, source=None, refund=None, data=None, balance=None):
+        if self._txn_send:
+            raise RuntimeError("coin transaction builder is already consumed")
+
         txn = self._txn
-        self._txn = None
+        self._txn_send = True
 
         balance_is_cached = (balance != None)
         def balance_cb(balance):
