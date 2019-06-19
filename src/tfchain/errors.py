@@ -97,12 +97,9 @@ class ExplorerUserError(ExplorerError):
     ExplorerUserError error
     """
 
-class ExplorerNoContent(ExplorerError):
+class ExplorerNoContent(ExplorerUserError):
     """
     ExplorerNoContent error
-
-    NOTE: normally it should be a User error, but due to forks it could also
-          be caused by an explorer node not up to date with the actual fork
     """
 
 class ExplorerBadRequest(ExplorerUserError):

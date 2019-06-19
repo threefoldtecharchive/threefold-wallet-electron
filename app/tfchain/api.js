@@ -1800,36 +1800,6 @@ export var Account =  __class__ ('Account', [object], {
 		};
 		return body;
 	});},
-	get update_account_unconfirmed () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		var cb_return_self = function () {
-			if (arguments.length) {
-				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-					var __allkwargs0__ = arguments [__ilastarg0__--];
-					for (var __attrib0__ in __allkwargs0__) {
-					}
-				}
-			}
-			else {
-			}
-			self._intermezzo_update_count++;
-			return self;
-		};
-		return jsasync.chain (self._explorer_client.unconfirmed_transactions_get (), self._update_unconfirmed_account_balance_from_transactions, cb_return_self);
-	});},
 	get _update_unconfirmed_account_balance_from_transactions () {return __get__ (this, function (self, transactions) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;

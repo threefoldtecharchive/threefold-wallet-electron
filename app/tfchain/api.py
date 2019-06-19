@@ -848,16 +848,6 @@ class Account:
             )
         return body
 
-    def update_account_unconfirmed(self):
-        def cb_return_self():
-            self._intermezzo_update_count += 1
-            return self
-        return jsasync.chain(
-            self._explorer_client.unconfirmed_transactions_get(),
-            self._update_unconfirmed_account_balance_from_transactions,
-            cb_return_self,
-        )
-
     def _update_unconfirmed_account_balance_from_transactions(self, transactions):
         for transaction in transactions:
             self._update_unconfirmed_account_balance_from_transaction(transaction)
