@@ -29,7 +29,7 @@ The mnemonic phrase (used as seed for an account) is compatible with [the TFChai
   - 10.10 (Yosemite) or later
   - 64-bit only
 - [Linux Installer](https://github.com/threefoldfoundation/tfchain-wallet-electron/releases/download/v0.1.3/TFT-Wallet.0.1.3.AppImage)
-  - Fedora 21, Debina 8 or Ubuntu 12.04 and newer
+  - Fedora 21, Debian 8 or Ubuntu 12.04 and newer
   - ia32 (i686), x64 (amd64), armv7l (ARM v7)
 
 > :exclamation: macOS and Windows users will have to do some extra steps to be able to use our application, given it will be marked as an untrusted application (or at least an application from an untrusted developer).
