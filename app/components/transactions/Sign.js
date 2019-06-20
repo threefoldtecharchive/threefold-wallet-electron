@@ -39,12 +39,14 @@ class Sign extends Component {
     const { json } = this.props
     return (
       <div>
-        <div className={styles.container} >
-          <h2 >Sign Transaction</h2>
+        <div className={styles.pageHeader}>
+          <p className={styles.pageHeaderTitle}>Sign Transaction </p>
         </div>
-        <Divider style={{ background: '#1A253F' }} />
-        <Icon onClick={() => this.goBackToWallet()} style={{ fontSize: 25, marginLeft: 15, marginTop: 15, cursor: 'pointer' }} name='chevron circle left' />
-        <span onClick={() => this.goBackToWallet()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
+        <Divider className={styles.pageDivider} />
+        <div className={styles.pageGoBack}>
+          <Icon onClick={() => this.goBackToWallet()} style={{ fontSize: 25, marginLeft: 15, marginTop: 5, cursor: 'pointer', zIndex: 5 }} name='chevron circle left' />
+          <span onClick={() => this.goBackToWallet()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
+        </div>
         <div style={{ height: '65vh', paddingBottom: 30, overflow: 'auto' }}>
           <Form error style={{ width: '50%', margin: 'auto', marginTop: 0 }}>
             <Form.Field style={{ marginTop: 30 }}>

@@ -22,7 +22,7 @@ class WalletReceive extends Component {
       selectedWallet = this.props.account.selected_wallet
       selectedAddress = this.props.account.selected_wallet.addresses[0]
     }
-    if (!selectedWallet) {
+    if (!selectedWallet || selectedWallet.is_multisig) {
       selectedWallet = this.props.account.wallets[0]
       selectedAddress = this.props.account.wallets[0].addresses[0]
     }
@@ -94,18 +94,16 @@ class WalletReceive extends Component {
 
     return (
       <div style={{ height: 1000, overflowY: 'scroll' }}>
-        <div className={styles.container} >
-          <h2>Receive</h2>
+        <div className={styles.pageHeader}>
+          <p className={styles.pageHeaderTitle}>Receive </p>
+          <p className={styles.pageHeaderSubtitle}>Receive tokens by scanning the QR code</p>
         </div>
-        <Divider style={{ background: '#1A253F' }} />
-        <Icon onClick={() => this.props.history.goBack()} style={{ fontSize: 25, marginLeft: 15, marginTop: 15, cursor: 'pointer' }} name='chevron circle left' />
-        <span onClick={() => this.props.history.goBack()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
-        <div style={{ margin: 'auto', height: '68vh', overflow: 'auto', padding: 20 }}>
-          <Form style={{ margin: 'auto' }}>
+        <Divider className={styles.pageDivider} />
+        <div style={{ margin: 'auto', height: '68vh', overflow: 'auto', paddingBottom: 30 }}>
+          <Form style={{ margin: 'auto', width: '90%' }}>
             <Form.Field style={{ textAlign: 'center' }}>
-              <label style={{ color: 'white' }}>Wallet</label>
+              <label style={{ color: 'white', fontFamily: 'SF UI Text Light', fontSize: 18 }}>Wallet</label>
               <Dropdown
-                style={{ width: 690, marginRight: 'auto', marginBottom: 20, marginTop: 10 }}
                 placeholder='Select Wallet'
                 selection
                 options={walletsOptions}
@@ -114,9 +112,8 @@ class WalletReceive extends Component {
               />
             </Form.Field>
             <Form.Field style={{ textAlign: 'center' }}>
-              <label style={{ color: 'white' }}>Address</label>
+              <label style={{ color: 'white', fontFamily: 'SF UI Text Light', fontSize: 16 }}>Address</label>
               <Dropdown
-                style={{ width: 690, marginBottom: 20, marginTop: 10, margin: 'auto' }}
                 placeholder='Select Address'
                 fluid
                 selection

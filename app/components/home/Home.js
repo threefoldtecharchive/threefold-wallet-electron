@@ -105,7 +105,7 @@ class Home extends Component {
       )
     }
     return (
-      <div>
+      <div style={{ textAlign: 'center' }}>
         <h3>Sign in to one of your accounts</h3>
         {accounts.map(account => {
           return (

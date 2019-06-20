@@ -1,7 +1,7 @@
 // @flow
 import { connect } from 'react-redux'
 import React, { Component } from 'react'
-import { Form, Button, Message, Icon, Header, List, Segment, Divider } from 'semantic-ui-react'
+import { Form, Button, Message, Icon, List, Segment, Divider } from 'semantic-ui-react'
 import routes from '../../constants/routes'
 import styles from '../home/Home.css'
 import { saveAccount, deleteAccount, updateAccount } from '../../actions'
@@ -11,6 +11,7 @@ import ShowSeedModal from './ShowSeedModal'
 import Footer from '../footer'
 import { toast } from 'react-toastify'
 import uuid from 'uuid'
+import { truncate } from 'lodash'
 
 const mapStateToProps = state => ({
   account: state.account.state,
@@ -108,7 +109,7 @@ class AccountSettings extends Component {
   renderWallets = () => {
     if (this.props.account.wallets.length > 0) {
       return (
-        <Segment style={{ width: 630, overflowY: 'scroll', margin: 'auto', background: '#29272E' }}>
+        <Segment style={{ width: '90%', overflowY: 'scroll', margin: 'auto', background: '#29272E' }}>
           <h3 style={{ float: 'left' }}>Wallets</h3>
           <List divided verticalAlign='middle' style={{ marginTop: 40 }}>
             {this.props.account.wallets.map(w => {
@@ -121,7 +122,21 @@ class AccountSettings extends Component {
                       <Icon name='trash' style={{ color: 'white', marginRight: 30, cursor: 'pointer' }} onClick={() => this.openDeleteWalletModal(w)} />
                     ) : null }
                   </List.Content>
-                  <List.Content style={{ float: 'left' }}>{w.wallet_name}</List.Content>
+                  <List.Content style={{ float: 'left' }}>Wallet: {w.wallet_name}</List.Content>
+                </List.Item>
+              )
+            })}
+            {this.props.account.multisig_wallets.map(w => {
+              return (
+                <List.Item key={uuid.v4()}>
+                  <Divider />
+                  <List.Content floated='right'>
+                    <Icon name='settings'style={{ color: 'white', marginRight: 30, cursor: 'pointer' }} onClick={() => this.goToWalletSettings(w)} />
+                    { this.props.account.wallets.length > 1 ? (
+                      <Icon name='trash' style={{ color: 'white', marginRight: 30, cursor: 'pointer' }} onClick={() => this.openDeleteWalletModal(w)} />
+                    ) : null }
+                  </List.Content>
+                  <List.Content style={{ float: 'left' }}>Multisig Wallet: {w.wallet_name || truncate(w.address, { length: 40 })}</List.Content>
                 </List.Item>
               )
             })}
@@ -136,29 +151,45 @@ class AccountSettings extends Component {
     if (deleteWalletName !== walletName) {
       return this.setState({ deleteWalletNameError: true })
     }
-    try {
-      this.props.account.wallet_delete(walletToDelete.start_index, walletToDelete.wallet_name)
-    } catch (err) {
-      const deleteWalletNameErrorMessage = typeof err.__str__ === 'function' ? err.__str__() : err.toString()
-      this.setState({
-        deleteWalletNameError: true,
-        deleteWalletNameErrorMessage
-      })
-      toast('the wallet cannot be deleted')
-      return
+    if (walletToDelete.is_multisig) {
+      try {
+        this.props.account.multisig_wallet_delete(walletToDelete.address, deleteWalletName)
+      } catch (err) {
+        if (err) {
+          const deleteWalletNameErrorMessage = typeof err.__str__ === 'function' ? err.__str__() : err.toString()
+          this.setState({
+            deleteWalletNameError: true,
+            deleteWalletNameErrorMessage
+          })
+          return toast.error('Deleting wallet failed')
+        }
+      }
+      toast('Multisig Wallet deleted')
+    } else {
+      try {
+        this.props.account.wallet_delete(walletToDelete.wallet_index, walletToDelete.wallet_name)
+      } catch (err) {
+        const deleteWalletNameErrorMessage = typeof err.__str__ === 'function' ? err.__str__() : err.toString()
+        this.setState({
+          deleteWalletNameError: true,
+          deleteWalletNameErrorMessage
+        })
+        return toast('the wallet cannot be deleted')
+      }
+      toast('Wallet deleted')
     }
     this.props.saveAccount(this.props.account)
+    this.props.updateAccount(this.props.account)
     this.setState({
-      deleteWalletNameError: false,
+      deleteNameError: false,
       deleteWalletNameErrorMessage: ''
     })
-    toast('Wallet deleted')
     this.closeDeleteWalletModal()
   }
 
   openDeleteWalletModal = (w) => {
     const open = !this.state.openDeleteWalletModal
-    this.setState({ openDeleteWalletModal: open, walletName: w.wallet_name, walletToDelete: w })
+    this.setState({ openDeleteWalletModal: open, walletName: w.wallet_name, walletToDelete: w, deleteWalletNameError: false, deleteWalletNameErrorMessage: undefined })
   }
 
   closeDeleteWalletModal = () => {
@@ -179,7 +210,10 @@ class AccountSettings extends Component {
   }
 
   goToWalletSettings = (w) => {
-    this.props.account.select_wallet({ name: w.wallet_name })
+    this.props.account.select_wallet({ name: w.wallet_name, address: w.address })
+    if (w.is_multisig) {
+      return this.props.history.push(routes.WALLET_MULTI_SETTINGS)
+    }
     return this.props.history.push(routes.WALLET_SETTINGS)
   }
 
@@ -254,28 +288,28 @@ class AccountSettings extends Component {
           closeModal={this.closeShowSeedModal}
           seed={this.props.account.mnemonic}
         />
-        <div style={{ position: 'absolute', top: 40, height: 50, width: '100%' }} data-tid='backButton'>
-          <Icon onClick={() => this.props.history.goBack()} style={{ fontSize: 25, position: 'absolute', left: 15, top: 41, cursor: 'pointer' }} name='chevron circle left' />
-          <span onClick={() => this.props.history.goBack()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'absolute', top: 42, left: 48 }}>Go Back</span>
-          <Icon onClick={this.openDeleteModal} style={{ fontSize: 25, position: 'absolute', right: 70, top: 41, cursor: 'pointer' }} name='trash' />
+        <div className={styles.pageHeader}>
+          <p className={styles.pageHeaderTitle}>Account settings</p>
+          <p className={styles.pageHeaderSubtitle}>Manage your account and wallet settings</p>
         </div>
-        <div className={styles.container} >
-          <Header as='h2' icon style={{ color: 'white', marginTop: 50 }}>
-              Account Settings
-            <Header.Subheader style={{ color: 'white' }}>Manage your account settings</Header.Subheader>
-          </Header>
-          <div style={{ height: '68vh', overflow: 'auto', padding: 30 }}>
-            <Form error style={{ width: '50%', margin: 'auto', marginTop: 10, marginBottom: 50 }} onKeyDown={this.onKeyDown}>
-              <Form.Field error={nameError}>
-                <label style={{ float: 'left', color: 'white' }}>Name</label>
-                <input placeholder='account name' value={name} onChange={this.handleNameChange} />
-                {this.renderNameError()}
-              </Form.Field>
-              <Button className={styles.cancelButton} size='big' style={{ marginTop: 10, marginRight: 10, background: 'none', color: 'white', width: 180 }} onClick={() => this.props.history.push(routes.ACCOUNT)}>Cancel</Button>
-              <Button className={styles.acceptButton} size='big' type='submit' onClick={this.saveAccount} style={{ marginTop: 10, margin: 'auto', background: '#015DE1', color: 'white', width: 180 }}>Save</Button>
-            </Form>
-            {this.renderWallets()}
-            <Button style={{ marginTop: 30 }} className={styles.cancelButton} size='small' onClick={() => this.openShowSeedModal()} >Show seed</Button>
+        <Divider className={styles.pageDivider} />
+        <div style={{ height: '68vh', overflow: 'auto', paddingBottom: 30, textAlign: 'center' }}>
+          <Form error style={{ width: '90%', margin: 'auto', marginTop: 10, marginBottom: 50, height: '17vh' }} onKeyDown={this.onKeyDown}>
+            <Form.Field error={nameError}>
+              <label style={{ float: 'left', color: 'white' }}>Name</label>
+              <input placeholder='account name' value={name} onChange={this.handleNameChange} />
+              {this.renderNameError()}
+            </Form.Field>
+            <div style={{ marginBottom: 20 }}>
+              <Button style={{ marginTop: 30, marginRight: 10 }} className={styles.cancelButton} size='small' onClick={() => this.openShowSeedModal()} >Show seed</Button>
+              <Button style={{ marginTop: 30 }} className={styles.dangerButton} size='small' onClick={this.openDeleteModal} >Delete Account</Button>
+            </div>
+          </Form>
+          <Divider className={styles.pageDivider} />
+          {this.renderWallets()}
+          <div style={{ textAlign: 'center' }}>
+            <Button className={styles.cancelButton} size='big' style={{ marginTop: 10, marginRight: 10, background: 'none', color: 'white', width: 180 }} onClick={() => this.props.history.push(routes.ACCOUNT)}>Cancel</Button>
+            <Button className={styles.acceptButton} size='big' type='submit' onClick={this.saveAccount} style={{ marginTop: 10, margin: 'auto', background: '#015DE1', color: 'white', width: 180 }}>Save</Button>
           </div>
         </div>
         <Footer />

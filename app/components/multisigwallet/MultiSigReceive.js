@@ -37,12 +37,15 @@ class WalletSettings extends Component {
   render () {
     return (
       <div style={{ height: '100vh', overflowY: 'scroll' }}>
-        <div className={styles.container} >
-          <h2>Receive</h2>
+        <div className={styles.pageHeader}>
+          <p className={styles.pageHeaderTitle}>Receive</p>
+          <p className={styles.pageHeaderSubtitle}>Receive tokens by scanning the QR code</p>
         </div>
-        <Divider style={{ background: '#1A253F' }} />
-        <Icon onClick={() => this.props.history.goBack()} style={{ fontSize: 25, marginLeft: 15, marginTop: 15, cursor: 'pointer' }} name='chevron circle left' />
-        <span onClick={() => this.props.history.goBack()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
+        <Divider className={styles.pageDivider} />
+        <div className={styles.pageGoBack}>
+          <Icon onClick={() => this.props.history.goBack()} style={{ fontSize: 25, marginLeft: 15, marginTop: 5, cursor: 'pointer', zIndex: 5 }} name='chevron circle left' />
+          <span onClick={() => this.props.history.goBack()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
+        </div>
         <div style={{ width: '50%', margin: 'auto' }}>
           <Segment style={{ width: '110%', padding: 30, height: 100, margin: 'auto', background: '#29272E', marginTop: 50, marginBottom: 50 }}>
             <span style={{ textAlign: 'center', margin: 'auto' }}>{this.state.selectedAddress}</span>

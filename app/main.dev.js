@@ -74,7 +74,6 @@ app.on('ready', async () => {
     show: false,
     width: 1250,
     height: 800,
-    titleBarStyle: 'hidden',
     resizable: true
   })
 

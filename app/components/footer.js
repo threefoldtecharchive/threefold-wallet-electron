@@ -29,7 +29,7 @@ class Footer extends Component {
   render () {
     if (!this.props.is_loaded) {
       return (
-        <div style={{ position: 'absolute', height: 70, bottom: 0, width: '100%', background: '#131216', borderTopStyle: 'solid', borderTopWidth: 2, borderTopColor: '#1A253F', padding: 25 }} />
+        <div style={{ position: 'absolute', height: 70, bottom: 0, width: '100%', background: '#26242d', borderTopStyle: 'solid', borderTopWidth: 2, borderTopColor: '#1A253F', padding: 25 }} />
       )
     }
 
@@ -43,7 +43,7 @@ class Footer extends Component {
     const tz = momentTz.tz.guess()
 
     return (
-      <div style={{ zIndex: 999, position: 'absolute', height: 70, bottom: 0, width: '100%', background: '#131216', borderTopStyle: 'solid', borderTopWidth: 2, borderTopColor: '#1A253F', padding: 25 }}>
+      <div style={{ zIndex: 999, position: 'absolute', height: 70, bottom: 0, width: '100%', background: '#26242d', padding: 25 }}>
         {error || !chainConstants.chain_network
           ? <div>
             <Icon name='circle' style={{ color: 'red', marginLeft: 10 }} />

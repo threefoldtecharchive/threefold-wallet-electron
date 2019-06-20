@@ -1,7 +1,7 @@
 // @flow
 import { connect } from 'react-redux'
 import React, { Component } from 'react'
-import { Message, Form, Button, Icon, Header } from 'semantic-ui-react'
+import { Message, Form, Button, Icon, Divider } from 'semantic-ui-react'
 import styles from '../home/Home.css'
 import { saveAccount, updateAccount } from '../../actions'
 import DeleteModal from '../wallet/DeleteWalletModal'
@@ -146,24 +146,28 @@ class WalletSettings extends Component {
           deleteWallet={this.deleteWallet}
         />
         <div style={{ position: 'absolute', top: 40, height: 50, width: '100%' }} data-tid='backButton'>
-          <Icon onClick={() => this.props.history.goBack()} style={{ fontSize: 25, position: 'absolute', left: 15, top: 41, cursor: 'pointer' }} name='chevron circle left' />
-          <span onClick={() => this.props.history.goBack()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'absolute', top: 42, left: 48 }}>Go Back</span>
           <Icon onClick={this.openDeleteModal} style={{ fontSize: 25, position: 'absolute', right: 70, top: 41, cursor: 'pointer' }} name='trash' />
         </div>
-        <div className={styles.container} >
-          <Header as='h2' icon style={{ color: 'white', marginTop: 50 }}>
-            <Icon name='settings' />
-                  Wallet Settings
-            <Header.Subheader style={{ color: 'white' }}>Manage your multisignature wallet settings</Header.Subheader>
-          </Header>
-          <Form error style={{ width: '50%', margin: 'auto', marginTop: 10 }} onKeyDown={this.onKeyDown}>
+        <div className={styles.pageHeader}>
+          <p className={styles.pageHeaderTitle}>Wallet settings</p>
+          <p className={styles.pageHeaderSubtitle}>Manage your multisig wallet settings</p>
+        </div>
+        <Divider className={styles.pageDivider} />
+        <div className={styles.pageGoBack}>
+          <Icon onClick={() => this.props.history.goBack()} style={{ fontSize: 25, marginLeft: 15, marginTop: 5, cursor: 'pointer', zIndex: 5 }} name='chevron circle left' />
+          <span onClick={() => this.props.history.goBack()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
+        </div>
+        <div>
+          <Form error style={{ width: '80%', margin: 'auto', marginTop: 10 }} onKeyDown={this.onKeyDown}>
             <Form.Field>
               <label style={{ float: 'left', color: 'white' }}>Name</label>
               <input placeholder='wallet name' value={name} onChange={this.handleNameChange} />
               {this.renderNameError()}
             </Form.Field>
-            <Button className={styles.cancelButton} size='big' style={{ marginTop: 10, marginRight: 10, background: 'none', color: 'white', width: 180 }} onClick={() => this.props.history.goBack()}>Cancel</Button>
-            <Button className={styles.acceptButton} size='big' type='submit' onClick={this.saveWallet} style={{ marginTop: 10, margin: 'auto', color: 'white', width: 180 }}>Save</Button>
+            <div style={{ float: 'right' }}>
+              <Button className={styles.cancelButton} size='big' style={{ marginTop: 10, marginRight: 10, background: 'none', color: 'white', width: 180 }} onClick={() => this.props.history.goBack()}>Cancel</Button>
+              <Button className={styles.acceptButton} size='big' type='submit' onClick={this.saveWallet} style={{ marginTop: 10, margin: 'auto', color: 'white', width: 180 }}>Save</Button>
+            </div>
           </Form>
         </div>
         <Footer />

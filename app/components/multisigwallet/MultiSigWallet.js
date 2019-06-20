@@ -1,13 +1,11 @@
 // @flow
 import { connect } from 'react-redux'
 import React, { Component } from 'react'
-import { Link } from 'react-router-dom'
 import { Segment, Icon, Divider, List, Dimmer, Loader } from 'semantic-ui-react'
 import routes from '../../constants/routes'
 import styles from '../home/Home.css'
 import Footer from '../footer'
 import BalanceGrid from '../wallet/BalanceGrid'
-import BalanceUnconfirmedGrid from '../wallet/BalanceUnconfirmedGrid'
 import TransactionsList from '../wallet/TransactionList'
 import { truncate } from 'lodash'
 const { shell } = require('electron')
@@ -62,17 +60,7 @@ class Wallet extends Component {
     const routeToTransfer = () => this.props.history.push(routes.TRANSFER)
     const routeToSign = () => this.props.history.push(routes.SIGN_TRANSACTIONS)
     const walletBalance = this.props.account.selected_wallet
-    if (walletBalance.balance.unconfirmed_coins_total.greater_than(0)) {
-      return (
-        <BalanceUnconfirmedGrid
-          loader={this.state.loader}
-          walletBalance={walletBalance.balance}
-          routeToReceive={null} // routeToReceive}
-          routeToTransfer={routeToTransfer}
-          routeToSign={routeToSign}
-        />
-      )
-    }
+
     return (
       <BalanceGrid
         loader={this.state.loader}
@@ -127,27 +115,22 @@ class Wallet extends Component {
         )
           : (
             <div>
-              <div className={styles.backButton} data-tid='backButton'>
-                <Link to={routes.WALLET_MULTI_SETTINGS}>
-                  <Icon style={{ fontSize: 25, position: 'absolute', right: 20, cursor: 'pointer', top: 40 }} name='setting' />
-                </Link>
-                <Link to={routes.HOME}>
-                  <Icon style={{ fontSize: 25, position: 'absolute', right: 70, cursor: 'pointer', top: 40 }} name='sign-out' />
-                </Link>
+              <div className={styles.pageHeader}>
+                <p className={styles.pageHeaderTitle}>Wallet {wallet.wallet_name || truncate(wallet.address, { length: 14 })}</p>
+                <p className={styles.pageHeaderSubtitle}>Multisig balance and transactions</p>
               </div>
-              <div className={styles.container} >
-                <h2>Wallet {wallet.wallet_name || truncate(wallet.address, { length: 14 })}</h2>
-              </div>
-              <Divider style={{ background: '#1A253F' }} />
+              <Divider className={styles.pageDivider} />
               <div>
-                <Icon onClick={() => this.goBack()} style={{ fontSize: 25, marginLeft: 15, marginTop: 15, cursor: 'pointer', zIndex: 5 }} name='chevron circle left' />
-                <span onClick={() => this.goBack()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
-                <div style={{ height: '69vh', overflow: 'auto', paddingBottom: 30 }}>
+                <div className={styles.pageGoBack}>
+                  <Icon onClick={() => this.goBack()} style={{ fontSize: 25, marginLeft: 15, marginTop: 5, cursor: 'pointer', zIndex: 5 }} name='chevron circle left' />
+                  <span onClick={() => this.goBack()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
+                </div>
+                <div style={{ height: '100vh', overflow: 'auto', paddingBottom: 250, marginTop: 10 }}>
                   {this.renderWalletBalanceGrid()}
-                  <Segment style={{ width: '90%', height: 100, overflow: 'auto', overflowY: 'scroll', margin: 'auto', background: '#29272E', marginTop: 150 }}>
+                  <Segment style={{ width: '90%', height: 100, overflow: 'auto', overflowY: 'scroll', margin: 'auto', background: '#29272E', marginTop: 20 }}>
                     {this.renderOwnerList()}
                   </Segment>
-                  <Segment style={{ width: '90%', height: '23vh', overflow: 'auto', overflowY: 'scroll', margin: 'auto', background: '#29272E', marginTop: 20 }}>
+                  <Segment style={{ width: '90%', height: '40vh', overflow: 'auto', overflowY: 'scroll', margin: 'auto', background: '#29272E', marginTop: 20 }}>
                     <TransactionsList account={this.props.account} loader={this.state.loader} transactions={wallet.balance.transactions} chainInfo={chainConstants} />
                   </Segment>
                 </div>

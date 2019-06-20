@@ -1,7 +1,6 @@
 // @flow
 import { connect } from 'react-redux'
 import React, { Component } from 'react'
-import { Link } from 'react-router-dom'
 import { Form, Button, Icon, Divider, Message, Popup, Input } from 'semantic-ui-react'
 import routes from '../../constants/routes'
 import styles from '../home/Home.css'
@@ -172,7 +171,7 @@ class NewMultiSigWallet extends Component {
               icon='user'
             />
             {ownerAddresses.length > 2
-              ? (<Icon name='trash' onClick={() => this.removeOwnerAddress(index)} style={{ fontSize: 20, position: 'relative', float: 'right', top: -30, right: -50, marginLeft: 20, cursor: 'pointer' }} />)
+              ? (<Icon name='trash' onClick={() => this.removeOwnerAddress(index)} style={{ fontSize: 20, position: 'relative', float: 'right', top: -30, right: -30, marginLeft: 20, cursor: 'pointer' }} />)
               : (null)}
           </Form.Field>
         </div>
@@ -204,26 +203,23 @@ class NewMultiSigWallet extends Component {
     const { nameError, name, signatureCount } = this.state
     return (
       <div>
-        <div className={styles.backButton} data-tid='backButton'>
-          <Link to={routes.HOME}>
-            <Icon style={{ fontSize: 25, position: 'absolute', right: 70, cursor: 'pointer', top: 40 }} name='sign-out' />
-          </Link>
+        <div className={styles.pageHeader}>
+          <p className={styles.pageHeaderTitle}>Create a new multisig wallet</p>
         </div>
-        <div className={styles.container} >
-          <h2>Create a new multisig wallet</h2>
+        <Divider className={styles.pageDivider} />
+        <div className={styles.pageGoBack}>
+          <Icon onClick={() => this.props.history.goBack()} style={{ fontSize: 25, marginLeft: 15, marginTop: 5, cursor: 'pointer', zIndex: 5 }} name='chevron circle left' />
+          <span onClick={() => this.props.history.goBack()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
         </div>
-        <Divider style={{ background: '#1A253F' }} />
-        <Icon onClick={() => this.props.history.goBack()} style={{ fontSize: 25, marginLeft: 15, marginTop: 15, cursor: 'pointer' }} name='chevron circle left' />
-        <span onClick={() => this.props.history.goBack()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
-        <div className={styles.container} style={{ height: '60vh', overflow: 'auto', paddingBottom: 30 }}>
-          <Form error style={{ width: '55%', margin: 'auto', marginTop: 10 }} onKeyDown={this.onKeyDown}>
+        <div style={{ height: '60vh', overflow: 'auto', paddingBottom: 30 }}>
+          <Form error style={{ width: '90%', margin: 'auto', marginTop: 10 }} onKeyDown={this.onKeyDown}>
             <Form.Field error={nameError}>
               <label style={{ float: 'left', color: 'white' }}>Name</label>
               <Input placeholder='my multisig wallet' value={name} onChange={this.handleNameChange} />
               {this.renderNameError()}
             </Form.Field>
             <label style={{ float: 'left', color: 'white', marginBottom: 10 }}>Owners</label>
-            <Form.Field >
+            <Form.Field style={{ textAlign: 'center' }}>
               {this.renderOwnerInputFields()}
               <Icon name='plus circle' style={{ fontSize: 30, marginTop: 20, cursor: 'pointer' }} onClick={() => this.addOwnerAddress()} />
             </Form.Field>
@@ -234,8 +230,10 @@ class NewMultiSigWallet extends Component {
               {this.renderSignatureCountError()}
             </Form.Field>
             {this.renderError()}
-            <Button className={styles.cancelButton} size='big' style={{ marginTop: 10, marginRight: 10, color: 'white', width: 180 }} onClick={() => this.props.history.push(routes.ACCOUNT)}>Cancel</Button>
-            <Button className={styles.acceptButton} size='big' type='submit' onClick={this.createWallet} style={{ marginTop: 10, margin: 'auto', background: '#015DE1', color: 'white', width: 200 }}>Create wallet</Button>
+            <div style={{ float: 'right' }}>
+              <Button className={styles.cancelButton} size='big' style={{ marginTop: 10, marginRight: 10, color: 'white', width: 180 }} onClick={() => this.props.history.push(routes.ACCOUNT)}>Cancel</Button>
+              <Button className={styles.acceptButton} size='big' type='submit' onClick={this.createWallet} style={{ marginTop: 10, margin: 'auto', background: '#015DE1', color: 'white', width: 200 }}>Create wallet</Button>
+            </div>
           </Form>
         </div>
         <Footer />

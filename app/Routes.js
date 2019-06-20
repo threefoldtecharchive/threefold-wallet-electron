@@ -18,11 +18,33 @@ import WalletMultisigNew from './components/multisigwallet/NewMultiSigWallet'
 import WalletMultisig from './components/multisigwallet/MultiSigWallet'
 import WalletMultisigReceive from './components/multisigwallet/MultiSigReceive'
 import WalletMultisigSettings from './components/multisigwallet/MultiSigSettings'
+import HomeAndLogin from './containers/HomeAndLogin'
 
 export default () => (
+  <Switch>
+    <Route exact path='/(login)' component={LoginContainer} />
+    <Route exact path='/' component={HomeContainer} />
+    <Route path={routes.NEW} component={LoginContainer} />
+    <Route component={DefaultContainer} />
+  </Switch>
+)
+
+const LoginContainer = () => (
+  <HomeAndLogin >
+    <Route path={routes.LOGIN} component={Login} />
+    <Route path={routes.NEW} component={NewAccount} />
+  </HomeAndLogin>
+)
+
+const HomeContainer = () => (
+  <HomeAndLogin >
+    <Route path={routes.HOME} component={HomePage} />
+  </HomeAndLogin>
+)
+
+const DefaultContainer = () => (
   <App>
     <Switch>
-      <Route path={routes.NEW} component={NewAccount} />
       <Route path={routes.ACCOUNT} component={Account} />
       <Route path={routes.ACCOUNT_SETTINGS} component={AccountSettings} />
       <Route path={routes.WALLET} component={Wallet} />
@@ -35,9 +57,7 @@ export default () => (
       <Route path={routes.TRANSFER} component={Transfer} />
       <Route path={routes.SIGN} component={Sign} />
       <Route path={routes.SIGN_TRANSACTIONS} component={SignTransaction} />
-      <Route path={routes.LOGIN} component={Login} />
       <Route path={routes.WALLET_NEW} component={NewWallet} />
-      <Route path={routes.HOME} component={HomePage} />
     </Switch>
   </App>
 )

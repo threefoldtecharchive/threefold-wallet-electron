@@ -1,7 +1,6 @@
 // @flow
 import { connect } from 'react-redux'
 import React, { Component } from 'react'
-import { Link } from 'react-router-dom'
 import { Form, Button, Icon, Divider, Message, Popup } from 'semantic-ui-react'
 import routes from '../../constants/routes'
 import styles from '../home/Home.css'
@@ -176,41 +175,38 @@ class WalletSettings extends Component {
     const { nameError, name, startIndex, addressLength } = this.state
     return (
       <div>
-        <div className={styles.backButton} data-tid='backButton'>
-          <Link to={routes.HOME}>
-            <Icon style={{ fontSize: 25, position: 'absolute', right: 70, cursor: 'pointer', top: 40 }} name='sign-out' />
-          </Link>
+        <div className={styles.pageHeader}>
+          <p className={styles.pageHeaderTitle}>Create a new wallet </p>
         </div>
-        <div className={styles.container} >
-          <h2>Create a new wallet</h2>
+        <Divider className={styles.pageDivider} />
+        <div className={styles.pageGoBack}>
+          <Icon onClick={() => this.props.history.goBack()} style={{ fontSize: 25, marginLeft: 15, marginTop: 5, cursor: 'pointer', zIndex: 5 }} name='chevron circle left' />
+          <span onClick={() => this.props.history.goBack()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
         </div>
-        <Divider style={{ background: '#1A253F' }} />
-        <Icon onClick={() => this.props.history.goBack()} style={{ fontSize: 25, marginLeft: 15, marginTop: 15, cursor: 'pointer' }} name='chevron circle left' />
-        <span onClick={() => this.props.history.goBack()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
-        <div className={styles.container} >
-          <Form error style={{ width: '50%', margin: 'auto', marginTop: 10 }} onKeyDown={this.onKeyDown}>
-            <Form.Field error={nameError}>
-              <label style={{ float: 'left', color: 'white' }}>Name</label>
-              <input placeholder='my wallet' value={name} onChange={this.handleNameChange} />
-              {this.renderNameError()}
-            </Form.Field>
-            <Form.Field>
-              <label style={{ float: 'left', color: 'white' }}>Start index</label>
-              <Popup offset={-30} size='large' position='right center' content='Start index will be used in combination with your account seed to generate the first address' trigger={<Icon style={{ fontSize: 12, float: 'left', marginLeft: 10, height: 10, width: 10 }} name='question circle' />} />
-              <input type='number' placeholder='0' value={startIndex} onChange={this.handleIndexChange} />
-              {this.renderIndexError()}
-            </Form.Field>
-            <Form.Field>
-              <label style={{ float: 'left', color: 'white' }}>Address length</label>
-              <Popup offset={-30} size='large' position='right center' content='Address length is the amount of addresses that will be generated' trigger={<Icon style={{ fontSize: 12, float: 'left', marginLeft: 10 }} name='question circle' />} />
-              <input type='number' placeholder='1' value={addressLength} onChange={this.handleAddressLengthChange} />
-              {this.renderAddressLengthError()}
-            </Form.Field>
-            {this.renderError()}
+        <Form error style={{ width: '90%', margin: 'auto', marginTop: 10 }} onKeyDown={this.onKeyDown}>
+          <Form.Field error={nameError}>
+            <label style={{ float: 'left', color: 'white' }}>Name</label>
+            <input placeholder='my wallet' value={name} onChange={this.handleNameChange} />
+            {this.renderNameError()}
+          </Form.Field>
+          <Form.Field>
+            <label style={{ float: 'left', color: 'white' }}>Start index</label>
+            <Popup offset={-30} size='large' position='right center' content='Start index will be used in combination with your account seed to generate the first address' trigger={<Icon style={{ fontSize: 12, float: 'left', marginLeft: 10, height: 10, width: 10 }} name='question circle' />} />
+            <input type='number' placeholder='0' value={startIndex} onChange={this.handleIndexChange} />
+            {this.renderIndexError()}
+          </Form.Field>
+          <Form.Field>
+            <label style={{ float: 'left', color: 'white' }}>Address length</label>
+            <Popup offset={-30} size='large' position='right center' content='Address length is the amount of addresses that will be generated' trigger={<Icon style={{ fontSize: 12, float: 'left', marginLeft: 10 }} name='question circle' />} />
+            <input type='number' placeholder='1' value={addressLength} onChange={this.handleAddressLengthChange} />
+            {this.renderAddressLengthError()}
+          </Form.Field>
+          {this.renderError()}
+          <div style={{ float: 'right' }}>
             <Button className={styles.cancelButton} size='big' style={{ marginTop: 10, marginRight: 10, color: 'white', width: 180 }} onClick={() => this.props.history.push(routes.ACCOUNT)}>Cancel</Button>
             <Button className={styles.acceptButton} size='big' type='submit' onClick={this.createWallet} style={{ marginTop: 10, margin: 'auto', background: '#015DE1', color: 'white', width: 200 }}>Create wallet</Button>
-          </Form>
-        </div>
+          </div>
+        </Form>
         <Footer />
       </div>
     )

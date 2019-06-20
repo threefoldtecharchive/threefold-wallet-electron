@@ -1,8 +1,7 @@
 // @flow
 import { connect } from 'react-redux'
 import React, { Component } from 'react'
-import { Link } from 'react-router-dom'
-import { Segment, Button, Icon, Divider, Card, Loader, Dimmer } from 'semantic-ui-react'
+import { Segment, Icon, Divider, Card, Loader, Dimmer } from 'semantic-ui-react'
 import routes from '../../constants/routes'
 import { updateAccount } from '../../actions'
 import styles from '../home/Home.css'
@@ -64,8 +63,12 @@ class Account extends Component {
     let multiSigWallets = this.props.account.multisig_wallets
     let isOneOrMoreUnconfirmed = account.balance.unconfirmed_coins_total.greater_than(0)
     return (
-      <div>
-        <Card.Group style={{ marginTop: 20, marginLeft: 20, marginBottom: -20 }}>
+      <div style={{ margin: 'auto' }}>
+        <div style={{ display: 'flex', marginBottom: 10 }}>
+          <p style={{ fontFamily: 'Arial, Bold', fontSize: 12, textTransform: 'uppercase' }}>Wallets</p>
+          <Icon name='credit card outline' style={{ marginLeft: 10, marginTop: -2 }} />
+        </div>
+        <Card.Group>
           {wallets.map(w => {
             return this.renderWalletContent(w)
           })}
@@ -73,7 +76,11 @@ class Account extends Component {
         </Card.Group>
         {isOneOrMoreUnconfirmed ? (<p style={{ fontSize: 12, marginBottom: 30, marginLeft: 25 }}>Wallet balance amounts with (*) have unconfirmed balances</p>) : null}
         <Divider style={{ marginTop: -20 }} />
-        <Card.Group style={{ marginTop: 20, marginLeft: 20 }}>
+        <div style={{ display: 'flex', marginBottom: 10 }}>
+          <p style={{ fontFamily: 'Arial, Bold', fontSize: 12, textTransform: 'uppercase' }}>Multisig Wallets</p>
+          <Icon name='credit card outline' style={{ marginLeft: 10, marginTop: -2 }} />
+        </div>
+        <Card.Group >
           {multiSigWallets.map(w => {
             return this.renderWalletContent(w)
           })}
@@ -107,7 +114,7 @@ class Account extends Component {
                 <p style={{ fontSize: 14 }}>{w.signatures_required}/{w.owners.length}</p>
               </Card.Description>
             ) : null}
-            <Icon name='chevron right' style={{ position: 'absolute', right: 20, top: 130, fontSize: 25, opacity: '0.3', color: 'white' }} />
+            <Icon name='chevron right' style={{ position: 'absolute', right: 20, top: 135, fontSize: 25, opacity: '0.3', color: 'white' }} />
             <Card.Description style={{ color: 'white', marginTop: 10, marginBottom: 10, fontFamily: 'SF UI Text Light', display: 'flex' }}>
               <Icon name='unlock' style={{ fontSize: 16, marginLeft: 20 }} />
               <p style={{ marginLeft: 30, marginTop: -8 }}>{unlockedBalance}</p>
@@ -130,7 +137,7 @@ class Account extends Component {
       }
 
       return (
-        <Card key={w.wallet_name || w.address} style={{ boxShadow: 'none', height: 180, width: 350, marginTop: 0, marginRight: 20, marginBottom: 30, background: 'linear-gradient(90deg, rgba(56,51,186,1) 0%, rgba(102,71,254,1) 100%)' }} onClick={onClick}>
+        <Card key={w.wallet_name || w.address} style={{ boxShadow: 'none', height: 180, width: 350, marginTop: 0, marginRight: 20, marginBottom: 30, background: '#29272D' }} onClick={onClick}>
           <Dimmer active={content == null}>
             <Loader />
           </Dimmer>
@@ -146,12 +153,12 @@ class Account extends Component {
       onClick = () => this.props.history.push(routes.WALLET_MULTI_NEW)
     }
     return (
-      <Card style={{ boxShadow: 'none', height: 180, width: 350, marginBottom: 60, marginTop: 0, background: '#29272E' }} onClick={onClick}>
+      <Card style={{ boxShadow: 'none', height: 180, width: 350, marginBottom: 60, marginTop: 0, background: 'linear-gradient(90deg, rgba(56,51,186,1) 0%, rgba(102,71,254,1) 100%)' }} onClick={onClick}>
         <Card.Content style={{ textAlign: 'center' }}>
           <Card.Header style={{ color: 'white', fontSize: 20, textTransform: 'uppercase', marginTop: 30, textAlign: 'center' }}>
             {isMultisig ? 'Create multisig wallet' : 'Create wallet'}
           </Card.Header>
-          <Icon name='plus circle' style={{ position: 'absolute', left: 145, top: 100, fontSize: 40, opacity: '0.3' }} />
+          <Icon name='plus circle' style={{ position: 'absolute', left: 145, top: 110, fontSize: 40, opacity: '0.3' }} />
         </Card.Content>
       </Card>
     )
@@ -172,20 +179,26 @@ class Account extends Component {
     if (this.props.is_loaded) {
       content = (
         <div>
-          <h3 style={{ color: 'white', marginTop: 0 }}>Total Balance</h3>
-          <h4 style={{ color: 'white', marginTop: 0 }}>{coinsTotal.str({ precision: 3 })} TFT</h4>
-          {unconfirmedTotalCoins.greater_than(0) ? (<span style={{ color: 'white', marginTop: 0, fontSize: 12 }}>* unconfirmed: {unconfirmedTotalCoins.str({ precision: 3 })} TFT</span>) : (<p />)}
-          <h4 style={{ color: 'white' }}><Icon name='lock' />Locked Balance</h4>
-          <h4 style={{ color: 'white', marginTop: 0 }}>{coinsLocked.str({ precision: 3 })}  TFT</h4>
-          {unconfirmedLockedCoins.greater_than(0) ? (<span style={{ color: 'white', marginTop: 0, fontSize: 12 }}>* unconfirmed: {unconfirmedLockedCoins.str({ precision: 3 })} TFT</span>) : (<p />)}
-          <h4 style={{ color: 'white' }}><Icon name='unlock' />Unlocked Balance</h4>
-          <h4 style={{ color: 'white', marginTop: 0, marginBottom: 0 }}>{coinsUnlocked.str({ precision: 3 })}  TFT</h4>
-          {unconfirmedUnlockedCoins.greater_than(0) ? (<span style={{ color: 'white', marginTop: 0, fontSize: 12 }}>* unconfirmed: {unconfirmedUnlockedCoins.str({ precision: 3 })} TFT </span>) : (<p />)}
+          <div style={{ display: 'flex' }}>
+            <div style={{ width: '50%' }}>
+              <h3 style={{ color: 'white', marginTop: 0 }}>Total Balance</h3>
+              <h4 style={{ color: 'white', marginTop: 0 }}>{coinsTotal.str({ precision: 3 })} TFT</h4>
+              {unconfirmedTotalCoins.greater_than(0) ? (<span style={{ color: 'white', marginTop: 0, fontSize: 12 }}>* unconfirmed: {unconfirmedTotalCoins.str({ precision: 3 })} TFT</span>) : (<p />)}
+            </div>
+            <div style={{ width: '50%' }}>
+              <h4 style={{ color: 'white' }}><Icon name='lock' />Locked Balance</h4>
+              <h4 style={{ color: 'white', marginTop: 0 }}>{coinsLocked.str({ precision: 3 })}  TFT</h4>
+              {unconfirmedLockedCoins.greater_than(0) ? (<span style={{ color: 'white', marginTop: 0, fontSize: 12 }}>* unconfirmed: {unconfirmedLockedCoins.str({ precision: 3 })} TFT</span>) : (<p />)}
+              <h4 style={{ color: 'white' }}><Icon name='unlock' />Unlocked Balance</h4>
+              <h4 style={{ color: 'white', marginTop: 0, marginBottom: 0 }}>{coinsUnlocked.str({ precision: 3 })}  TFT</h4>
+              {unconfirmedUnlockedCoins.greater_than(0) ? (<span style={{ color: 'white', marginTop: 0, fontSize: 12 }}>* unconfirmed: {unconfirmedUnlockedCoins.str({ precision: 3 })} TFT </span>) : (<p />)}
+            </div>
+          </div>
         </div>
       )
     }
     return (
-      <Segment style={{ background: '#29272E', width: '90%', margin: 'auto', marginTop: 0, height: 330 }}>
+      <Segment style={{ background: 'linear-gradient(90deg, rgba(51,55,186,1) 0%, rgba(71,122,254,1) 100%)', border: 'none' }}>
         <Dimmer active={content == null}>
           <Loader />
         </Dimmer>
@@ -203,32 +216,17 @@ class Account extends Component {
 
     return (
       <div>
-        <div data-tid='backButton'>
-          <Link to={routes.ACCOUNT_SETTINGS}>
-            <Icon style={{ fontSize: 25, position: 'absolute', right: 20, cursor: 'pointer', top: 40 }} name='setting' />
-          </Link>
-          <Link to={routes.HOME}>
-            <Icon style={{ fontSize: 25, position: 'absolute', right: 70, cursor: 'pointer', top: 40 }} name='sign-out' />
-          </Link>
+        <div className={styles.pageHeader}>
+          <p className={styles.pageHeaderTitle}>Account {this.props.account.account_name}</p>
+          <p className={styles.pageHeaderSubtitle}>Your account overview and wallets</p>
         </div>
-        <div className={styles.container} >
-          {/* <h2 >{this.props.account.account_name}</h2> */}
-          <h2>Account {this.props.account.account_name}</h2>
-        </div>
-        <Divider style={{ background: '#1A253F' }} />
-        <div style={{ display: 'flex' }}>
-          <div style={{ width: '65%', overflowY: 'auto', height: '85vh', paddingBottom: 100 }}>
-            {this.renderWallets()}
-          </div>
-          <div style={{ width: '35%', height: '70vh', marginTop: 20, overflow: 'auto' }}>
+        <Divider className={styles.pageDivider} />
+        <div style={{ height: '100vh', overflow: 'auto', paddingBottom: 250 }}>
+          <div style={{ margin: 'auto', width: '90%' }}>
             {this.renderAccountBalances()}
-            <div style={{ margin: 'auto', width: '90%', height: 100 }}>
-              <Button className={styles.acceptButton} onClick={() => this.props.history.push(routes.WALLET_RECEIVE)} style={{ marginTop: 20, float: 'left', marginRight: 15, color: 'white' }} size='big'>Receive</Button>
-              <Button className={styles.cancelButton} onClick={() => this.props.history.push(routes.TRANSFER)} style={{ marginTop: 20, marginRight: 10, float: 'left', background: 'none', color: 'white' }} size='big'>Transfer</Button>
-            </div>
-            <div style={{ margin: 'auto', width: '90%', height: 100 }}>
-              <Button className={styles.acceptButton} onClick={() => this.props.history.push(routes.SIGN_TRANSACTIONS)} style={{ marginTop: 20, marginRight: 10, float: 'left', background: 'none', color: 'white' }} size='big'>Sign Transaction</Button>
-            </div>
+          </div>
+          <div style={{ margin: 'auto', width: '90%', marginTop: 20, paddingLeft: 50, paddingRight: 50, paddingTop: 20, background: '#1B1A1E' }}>
+            {this.renderWallets()}
           </div>
         </div>
         <Footer />

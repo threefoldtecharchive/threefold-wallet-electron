@@ -897,15 +897,14 @@ class Transfer extends Component {
           timelock={timelock}
           datelock={datelock}
         />
-        <div className={styles.container} >
-          <h2 >Transfer</h2>
+        <div className={styles.pageHeader}>
+          <p className={styles.pageHeaderTitle}>Transfer </p>
+          <p className={styles.pageHeaderSubtitle}>Transfer tokens to other wallets</p>
         </div>
-        <Divider style={{ background: '#1A253F' }} />
-        <Icon onClick={() => this.goBack()} style={{ fontSize: 25, marginLeft: 15, marginTop: 15, cursor: 'pointer' }} name='chevron circle left' />
-        <span onClick={() => this.goBack()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
-        <div style={{ height: '100vh' }}>
-          <Form error style={{ width: '60%', marginLeft: '10%', marginTop: 10, overflow: 'auto', height: '67vh', padding: 30 }} onKeyDown={this.onKeyDown}>
-            <h2 style={{ marginBottom: 20 }}>Send funds to:</h2>
+        <Divider className={styles.pageDivider} />
+        <div style={{ height: '100vh', overflow: 'auto', paddingBottom: 250 }}>
+          <Form error style={{ width: '90%', margin: 'auto', marginTop: 10 }} onKeyDown={this.onKeyDown}>
+            <p style={{ marginBottom: 20, fontSize: 18 }}>Send funds to:</p>
             <div style={{ display: 'flex' }}>
               <Form.Field style={{ marginRight: 25 }}>
                 <Radio
@@ -932,7 +931,7 @@ class Transfer extends Component {
             </div>
             {this.renderDestinationForm()}
             <Form.Field style={{ marginTop: 30 }}>
-              <Input type='number' error={amountError} label='Amount TFT' style={{ background: '#0c111d !important', color: '#7784a9', width: 350 }} placeholder='amount' value={amount || ''} onChange={this.handleAmountChange} />
+              <Input type='number' error={amountError} label='Amount TFT' style={{ background: '#0c111d !important', color: '#7784a9' }} placeholder='amount' value={amount || ''} onChange={this.handleAmountChange} />
               {this.renderAmountError()}
             </Form.Field>
             <Form.Field style={{ marginTop: 30 }} error={timelockError}>
@@ -953,11 +952,11 @@ class Transfer extends Component {
               />
             </Form.Field>
             {this.renderErrorMessage()}
+            <div style={{ float: 'right' }}>
+              <Button className={styles.cancelButton} onClick={() => this.props.history.goBack()} style={{ marginTop: 20, float: 'left', background: '#2B3C72', color: 'white', marginRight: 15 }} size='big'>Cancel</Button>
+              <Button className={styles.acceptButton} onClick={() => this.openConfirmationModal()} style={{ marginTop: 20, marginRight: 10, float: 'left', background: '#015DE1', color: 'white' }} size='big'>Send</Button>
+            </div>
           </Form>
-          <div style={{ position: 'relative', bottom: 110, left: '73%' }}>
-            <Button className={styles.cancelButton} onClick={() => this.props.history.goBack()} style={{ marginTop: 20, float: 'left', background: '#2B3C72', color: 'white', marginRight: 15 }} size='big'>Cancel</Button>
-            <Button className={styles.acceptButton} onClick={() => this.openConfirmationModal()} style={{ marginTop: 20, marginRight: 10, float: 'left', background: '#015DE1', color: 'white' }} size='big'>Send</Button>
-          </div>
         </div>
         <Footer />
       </div>

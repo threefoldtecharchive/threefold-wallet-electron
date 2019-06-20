@@ -40,7 +40,7 @@ class Root extends Component {
     console.log(error)
     if (error) {
       this.props.setError(error)
-      this.props.history.push('/home')
+      this.props.history.push('/')
     }
     this.setState({ errorOccurred: true })
   }

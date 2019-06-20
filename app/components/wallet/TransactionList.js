@@ -46,7 +46,7 @@ const TransactionList = ({ loader, transactions, chainInfo, account }) => {
         <h3 style={{ color: 'white', marginTop: 0 }}>Transactions</h3>
         {// TODO: added paddingBottom of 120, there must be a better way than this hack (needed it for multisig wallet transaction lists)
         }
-        <List style={{ marginLeft: 50, overflow: 'auto', color: 'white', paddingBottom: 120 }} divided relaxed>
+        <List style={{ overflow: 'auto', color: 'white', paddingBottom: 20 }} divided relaxed>
           {transactions.map(tx => {
             return (
               <List.Item key={uuid.v4()} style={{ borderBottom: '1px solid grey' }}>

@@ -296,12 +296,10 @@ class NewAccount extends Component {
           accountCreationError={accountCreationError}
           accountCreationErrorMessage={accountCreationErrorMessage}
         />
-        <div className={styles.container} >
-          <h2 >New Account</h2>
+        <div className={styles.pageHeader}>
+          <p style={{ fontFamily: 'SF UI Text Bold', fontSize: 25, marginBottom: 0 }}>New Account</p>
         </div>
-        <Divider style={{ background: '#1A253F' }} />
-        <Icon onClick={() => this.props.history.goBack()} style={{ fontSize: 25, marginLeft: 15, marginTop: 15, cursor: 'pointer' }} name='chevron circle left' />
-        <span onClick={() => this.props.history.goBack()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
+        <Divider className={styles.pageDivider} />
         <div style={{ height: '75vh', overflowY: 'scroll', paddingBottom: 30 }}>
           <Form error style={{ width: '50%', margin: 'auto', marginTop: 5, marginBottom: 50, fontSize: 18 }} onKeyDown={this.onKeyDown}>
             <Form.Field>

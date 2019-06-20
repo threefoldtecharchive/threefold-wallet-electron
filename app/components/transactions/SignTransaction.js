@@ -155,14 +155,13 @@ class SignTransaction extends Component {
 
     return (
       <div>
-        <div className={styles.container} >
-          <h2 >Sign Transaction</h2>
+        <div className={styles.pageHeader}>
+          <p className={styles.pageHeaderTitle}>Sign Transaction</p>
+          <p className={styles.pageHeaderSubtitle}>Paste a JSON Transaction to sign a multisign transaction</p>
         </div>
-        <Divider style={{ background: '#1A253F' }} />
-        <Icon onClick={() => this.props.history.goBack()} style={{ fontSize: 25, marginLeft: 15, marginTop: 15, cursor: 'pointer' }} name='chevron circle left' />
-        <span onClick={() => this.props.history.goBack()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
-        <div style={{ height: '65vh', paddingBottom: 30, overflow: 'auto' }}>
-          <Form error style={{ width: '50%', margin: 'auto', marginTop: 0 }} onKeyDown={this.onKeyDown}>
+        <Divider className={styles.pageDivider} />
+        <div style={{ height: '100vh', paddingBottom: 250, overflow: 'auto' }}>
+          <Form error style={{ width: '90%', margin: 'auto', marginTop: 0 }} onKeyDown={this.onKeyDown}>
             <Form.Field>
               <label style={{ color: 'white' }}>Select wallet</label>
               <Dropdown
@@ -191,8 +190,8 @@ class SignTransaction extends Component {
             <CopyToClipboard text={json} onCopy={() => console.log('copied')}>
               <Label onClick={() => toast('Seed copied to clipboard')} style={{ display: 'block', margin: 'auto', width: 200, cursor: 'pointer' }}><Icon name='clipboard' /> copy json to clipboard</Label>
             </CopyToClipboard>
+            <Button className={styles.acceptButton} onClick={() => this.signAndSend()} style={{ marginTop: 20, background: '#2B3C72', color: 'white', float: 'right' }} size='big'>Sign and send</Button>
           </Form>
-          <Button className={styles.acceptButton} onClick={() => this.signAndSend()} style={{ marginTop: 20, background: '#2B3C72', color: 'white', marginRight: 15, position: 'relative', left: '80%' }} size='big'>Sign and send</Button>
         </div>
         <Footer />
       </div>
