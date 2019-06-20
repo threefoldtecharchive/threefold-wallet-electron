@@ -2,11 +2,16 @@
     <head>
         <script type="module">
             import * as tftests from './tfchain/tests.js'
-            console.log("Running TrythonScript unit tests...")
-            const t0 = performance.now()
-            tftests.tests()
-            const t1 = performance.now()
-            console.log("All TrythonScript unit tests ran in " + (t1-t0).toFixed(3) + "ms and passed :)")
+            const urlParams = new URLSearchParams(window.location.search)
+            if (!urlParams.keys().next().done) {
+                console.log("Skipping TrythonScript unit tests...")
+            } else {
+                console.log("Running TrythonScript unit tests...")
+                const t0 = performance.now()
+                tftests.tests()
+                const t1 = performance.now()
+                console.log("All TrythonScript unit tests ran in " + (t1-t0).toFixed(3) + "ms and passed :)")
+            }
         </script>
         <script type="module">
             import * as tfjstests from '../tests/tfchain/tfchain.js'

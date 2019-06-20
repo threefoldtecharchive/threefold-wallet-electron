@@ -407,13 +407,45 @@ const _all = {
     assert.equal(account.wallet.wallet_name, 'default')
     assert.equal(account.wallet.start_index, 1)
     assert.equal(account.wallet.address_count, 3)
-    const mswallets = account.multisig_wallets
+    let mswallets = account.multisig_wallets
     assert.equal(mswallets.length, 1)
-    const mswallet = mswallets[0]
+    let mswallet = mswallets[0]
     assert.equal(mswallet.wallet_name, 'our_wallet')
     assert.equal(mswallet.address, '038c830e947d48e7ccb4b6e5e718c564cb08459706bb505456fc166537edcd8da57cec5947ca1b')
     assert.equal(mswallet.owners, [account.address, '01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0'])
     assert.equal(mswallet.signatures_required, 1)
+
+    // recover testnet account with wallets, multisig wallets and address book stored
+    account = tfchain.Account.deserialize('ufoo', 'pfoo', JSON.parse('{"version":1,"data":{"payload":"X0fLteswSrMR1LY61IhtCZRpyEfrdDK8jVrLd8fQOopKjoDboUGyb163pL3NDnYqvttDsPg5WSBabSQSYLhCrJFZKju/8PwDDje0YHVy34QxdfGGvOG0xuzYLuUSgpspEdLJ+LV8jrVz5u0Rlrrszf4/WfYnUg1Sh2dFLu6mGHUMpn+zUZkpAvzM1WhH/8dKbt8pyJwqcfO7yfAWbvdUi6Tp0mrjL+MZKsWIduBuyGkm9MdwVdQ3b9Qm0QsJMs2+3/iLz5/daqjGZQ+T8s1DpP6v0XzJhcEqU2aCHjnVbM15yc8dFgYdgqF7vw2VBvEUoGmJ08DDFrpbU9XJCcIR/YbxmWXd5fJSMS7o34jPGPm/CBxJG4cWZKD37yPHrCTzPtHOkntVzf5MieEy1cE673C900/7Te7n6aidWCI2xeYeHjJ0WGSP0CV2FP/25L816BbThDwmel3pyFG8oV9DcyCarBsDll3zimemk43pJaLjenx9kYp8Hekq5Q68IKFkgJjvFaXhgAZYmLo4TUPfvtmX9khajN+ZcbTAMc1LNR/1nDxyc55mnFj6Ji8cJcT9RNezCEPMNM5AVBUdDqvXtgmP0pHo+r1sEqHKvyonXlzRAODjeTdGRdx3qyteoR1xRL4COJiiug/dGl86iY8ptDyvAvrSg5ELDiwbfPO+gD+7AcaUMLl7+VMkvO9ClOp0zAtiWzi4TIl43LqEEpAz4heHwL3u1HICbUf6tO7D+cHPlVM0WLO3fPdfDxwUFsoCBhnxyX5lzcOjgSVeZF3Q5LEwAm6HhA34EJkPSz19DOLCU3NaLXz0be9vXd+AjezhGN5HNxnLgUORitprr30kTqn5YPBsIMfcZnK/2mlfZ1kP8tKXy028vC+WitZoyixflm1HvNIKD9SUQzvwXytjye/YqPrO3T0myLQw0sRP1m8yHTSUVwi9g9g4D6gaa1hHT0YhpcmNe3Kc5Pf6Hc1XV8u7/WLFRbKrzlmi9pJZGNqTNWL2z2LdEfvtQPofilwi4otvDo23lwIleCJnzBfOE18L+QcoUrjxacUkU5eelR5yM9C92WZi+UY6SU9Z9WYsFXboUxmG5lfYKlIt1TQwOci3D3FFNYQ8YsibgCg8XQnTfgYXkcXyRShVhKVIU1KpDeAt9lUz4nQA8Uf61XP7CE+7Dz7M5VQ/HnfzeFpkMP7BL/HQmIQxpcbritKRw1IFewC/Xc1NT/zlbv2H2sGizlr/kSB1R8aj/A353PN7ycVo/RwYHmj8sMf5Pe7EfelD4Xx6u37WwtpcS7uVXPH12zwj9Y94bl6JepuTGfsKKG1v7w==","salt":"YHqLtq22yvY=","iv":"jzJ+VjkkEp7cgRqImKdXSw=="}}'))
+    assert.equal(account.account_name, 'ufoo')
+    assert.equal(account.password, 'pfoo')
+    assert.equal(account.network_type, 'standard')
+    assert.true(account.default_explorer_addresses_used)
+    assert.equal(account.explorer.explorer_addresses, _defs.network.standard.addresses)
+    assert.equal(account.mnemonic, exampleMnemonic)
+    assert.equal(account.wallets.length, 1)
+    assert.equal(account.wallet.wallet_name, 'default')
+    assert.equal(account.wallet.start_index, 1)
+    assert.equal(account.wallet.address_count, 3)
+    mswallets = account.multisig_wallets
+    assert.equal(mswallets.length, 1)
+    mswallet = mswallets[0]
+    assert.equal(mswallet.wallet_name, 'our_wallet')
+    assert.equal(mswallet.address, '038c830e947d48e7ccb4b6e5e718c564cb08459706bb505456fc166537edcd8da57cec5947ca1b')
+    assert.equal(mswallet.owners, [account.address, '01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0'])
+    assert.equal(mswallet.signatures_required, 1)
+    // ... test address book
+    const contacts = [
+      { name: 'foo_ms', address: '032e619b0dab8386bed3dbd6c4ae670ee7ef878f72602567dfc2621b5caa7e5178d43689aa7aa9' },
+      { name: 'foo_ss', address: '01370af706b547dd4e562a047e6265d7e7750771f9bff633b1a12dbd59b11712c6ef65edb1690d' },
+      { name: 'unknown', address: '000000000000000000000000000000000000000000000000000000000000000000000000000000' }
+    ]
+    assert.equal(account.address_book.contacts.length, contacts.length)
+    account.address_book.contacts.forEach((contact, index) => {
+      const expectedContact = contacts[index]
+      assert.equal(contact.contact_name, expectedContact.name)
+      assert.equal(tfchain.wallet_address_from_recipient(contact.recipient), expectedContact.address)
+    })
   },
 
   jscurrencyStr: (assert) => {
@@ -556,6 +588,144 @@ const _all = {
       '03a2fee279ebb7bceee06d9cb1777789c977d33805b028ca09b7d4a01d3695475132fe83a27cbf',
       tfchain.multisig_wallet_address_new(['01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0', '01370af706b547dd4e562a047e6265d7e7750771f9bff633b1a12dbd59b11712c6ef65edb1690d', '01956471980a60ec51a2d54e4b91f4b39ba26eca677ebb3f31929086f7431b17b7f8fe84985d59'], 3)
     )
+  },
+
+  addressBookContactManagement: (assert) => {
+    const account = new tfchain.Account('foo', 'bar')
+    const addressBooks = [
+      new tfchain.AddressBook(), // an address book can be created, but should never be used stand alone
+      account.address_book // as an account has an address book atttached to it, which it stores encrypted
+    ]
+    addressBooks.forEach((addressBook) => {
+      // clean address book
+      assert.true(addressBook.is_empty)
+      assert.equal(addressBook.contact_names.length, 0)
+      assert.equal(addressBook.contacts.length, 0)
+      // a clean address book has no contacts
+      assert.throws(() => addressBook.contact_get('foo'))
+      // deleting an unknown contact is fine
+      addressBook.contact_delete('foo')
+      // you can serialize the address book, even if it is empty
+      assert.equal(JSON.stringify(addressBook.serialize()), '{"contacts":null}')
+
+      // we can add a new contact only if it does not exist yet
+      assert.equal(addressBook.contact_new('foo_nil').contact_name, 'foo_nil') // nil recipient == SingleSig
+      assert.throws(() => addressBook.contact_new('foo_nil'))
+      assert.equal(JSON.stringify(addressBook.serialize()), '{"contacts":[{"type":0,"name":"foo_nil","data":{"address":"000000000000000000000000000000000000000000000000000000000000000000000000000000"}}]}')
+      assert.equal(addressBook.contact_names, ['foo_nil'])
+      assert.equal(addressBook.contact_new('foo_ss', '01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0').contact_name, 'foo_ss') // address recipient == SingleSig
+      assert.throws(() => addressBook.contact_new('foo_ss', '01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0'))
+      assert.equal(JSON.stringify(addressBook.serialize()), '{"contacts":[{"type":0,"name":"foo_nil","data":{"address":"000000000000000000000000000000000000000000000000000000000000000000000000000000"}},{"type":0,"name":"foo_ss","data":{"address":"01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0"}}]}')
+      assert.equal(addressBook.contact_names, ['foo_nil', 'foo_ss'])
+      assert.equal(addressBook.contact_new('foo_ms', [['01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0', '01370af706b547dd4e562a047e6265d7e7750771f9bff633b1a12dbd59b11712c6ef65edb1690d', '01956471980a60ec51a2d54e4b91f4b39ba26eca677ebb3f31929086f7431b17b7f8fe84985d59'], 2]).contact_name, 'foo_ms') // address recipient == SingleSig
+      assert.throws(() => addressBook.contact_new('foo_ms', [['01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0', '01370af706b547dd4e562a047e6265d7e7750771f9bff633b1a12dbd59b11712c6ef65edb1690d', '01956471980a60ec51a2d54e4b91f4b39ba26eca677ebb3f31929086f7431b17b7f8fe84985d59'], 2]))
+      assert.equal(addressBook.contact_names, ['foo_ms', 'foo_nil', 'foo_ss'])
+      assert.equal(JSON.stringify(addressBook.serialize()), '{"contacts":[{"type":1,"name":"foo_ms","data":{"owners":["01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0","01370af706b547dd4e562a047e6265d7e7750771f9bff633b1a12dbd59b11712c6ef65edb1690d","01956471980a60ec51a2d54e4b91f4b39ba26eca677ebb3f31929086f7431b17b7f8fe84985d59"],"signatures_required":2}},{"type":0,"name":"foo_nil","data":{"address":"000000000000000000000000000000000000000000000000000000000000000000000000000000"}},{"type":0,"name":"foo_ss","data":{"address":"01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0"}}]}')
+
+      // existing contacts we can get
+      let contact = addressBook.contact_get('foo_nil')
+      assert.equal(contact.contact_name, 'foo_nil')
+      assert.equal(contact.recipient, '000000000000000000000000000000000000000000000000000000000000000000000000000000')
+      contact = addressBook.contact_get('foo_ss')
+      assert.equal(contact.contact_name, 'foo_ss')
+      assert.equal(contact.recipient, '01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0')
+      contact = addressBook.contact_get('foo_ms')
+      assert.equal(contact.contact_name, 'foo_ms')
+      assert.equal(tfchain.wallet_address_from_recipient(contact.recipient), '0340a9cabe56df382c41a74f9824d9951b60b05dd2281402f8c1d3fd52c5110348548bc3820984')
+
+      // we can also get the contacts as a sorted list
+      const contacts = [
+        { name: 'foo_ms', address: '0340a9cabe56df382c41a74f9824d9951b60b05dd2281402f8c1d3fd52c5110348548bc3820984' },
+        { name: 'foo_nil', address: '000000000000000000000000000000000000000000000000000000000000000000000000000000' },
+        { name: 'foo_ss', address: '01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0' }
+      ]
+      const addressBookTest = (addressBook) => {
+        assert.equal(addressBook.contacts.length, contacts.length)
+        addressBook.contacts.forEach((contact, index) => {
+          const expectedContact = contacts[index]
+          assert.equal(contact.contact_name, expectedContact.name)
+          assert.equal(tfchain.wallet_address_from_recipient(contact.recipient), expectedContact.address)
+        })
+      }
+      addressBookTest(addressBook)
+
+      // serialize-deserialize test of the contacts individually
+      addressBook.contacts.forEach((contact, index) => {
+        const expectedContact = contacts[index]
+        const serializedContact = contact.serialize()
+        // deserialize it directly
+        const contactA = tfchain.AddressBookContact.deserialize(serializedContact)
+        assert.equal(contactA.contact_name, expectedContact.name)
+        assert.equal(tfchain.wallet_address_from_recipient(contactA.recipient), expectedContact.address)
+        // serialize it from a string
+        const contactB = tfchain.AddressBookContact.deserialize(JSON.stringify(serializedContact))
+        assert.equal(contactB.contact_name, expectedContact.name)
+        assert.equal(tfchain.wallet_address_from_recipient(contactB.recipient), expectedContact.address)
+      })
+
+      // serialize-deserialize test of the address book
+      const serializedAddressBook = addressBook.serialize()
+      // deserialize directly from dict
+      const addressBookA = tfchain.AddressBook.deserialize(serializedAddressBook)
+      addressBookTest(addressBookA)
+      // deserialize from stringified data
+      const addressBookB = tfchain.AddressBook.deserialize(JSON.stringify(serializedAddressBook))
+      addressBookTest(addressBookB)
+
+      // update an address contact...
+      // ... also possible for new contacts...
+      // ... unless no recipient is given...
+      assert.throws(() => addressBook.contact_update('unknown'))
+      assert.equal(addressBook.contacts.length, 3)
+      assert.equal(addressBook.contact_names, ['foo_ms', 'foo_nil', 'foo_ss'])
+      // ... else it is possible ...
+      contact = addressBook.contact_update('unknown', { recipient: '01370af706b547dd4e562a047e6265d7e7750771f9bff633b1a12dbd59b11712c6ef65edb1690d' })
+      assert.equal(contact.contact_name, 'unknown')
+      assert.equal(contact.recipient, '01370af706b547dd4e562a047e6265d7e7750771f9bff633b1a12dbd59b11712c6ef65edb1690d')
+      assert.equal(addressBook.contacts.length, 4)
+      assert.equal(addressBook.contact_names, ['foo_ms', 'foo_nil', 'foo_ss', 'unknown'])
+      // usually you would update an existing contact however
+      // ... update name
+      contact = addressBook.contact_update('unknown', { name: 'known' })
+      assert.equal(contact.contact_name, 'known')
+      assert.equal(contact.recipient, '01370af706b547dd4e562a047e6265d7e7750771f9bff633b1a12dbd59b11712c6ef65edb1690d')
+      assert.equal(addressBook.contacts.length, 4)
+      assert.equal(addressBook.contact_names, ['foo_ms', 'foo_nil', 'foo_ss', 'known'])
+      // ... update recipient
+      contact = addressBook.contact_update('foo_ss', { recipient: '01956471980a60ec51a2d54e4b91f4b39ba26eca677ebb3f31929086f7431b17b7f8fe84985d59' })
+      assert.equal(contact.contact_name, 'foo_ss')
+      assert.equal(contact.recipient, '01956471980a60ec51a2d54e4b91f4b39ba26eca677ebb3f31929086f7431b17b7f8fe84985d59')
+      assert.equal(addressBook.contacts.length, 4)
+      assert.equal(addressBook.contact_names, ['foo_ms', 'foo_nil', 'foo_ss', 'known'])
+      // ... update recipient switching type
+      contact = addressBook.contact_update('known', { recipient: [['01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0', '01370af706b547dd4e562a047e6265d7e7750771f9bff633b1a12dbd59b11712c6ef65edb1690d'], 1] })
+      assert.equal(contact.contact_name, 'known')
+      assert.equal(tfchain.wallet_address_from_recipient(contact.recipient), '032e619b0dab8386bed3dbd6c4ae670ee7ef878f72602567dfc2621b5caa7e5178d43689aa7aa9')
+      assert.equal(addressBook.contacts.length, 4)
+      assert.equal(addressBook.contact_names, ['foo_ms', 'foo_nil', 'foo_ss', 'known'])
+      // ... update recipient name and recipient
+      contact = addressBook.contact_update('known', { name: 'Ms. Known', recipient: [['01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0', '01370af706b547dd4e562a047e6265d7e7750771f9bff633b1a12dbd59b11712c6ef65edb1690d', '01956471980a60ec51a2d54e4b91f4b39ba26eca677ebb3f31929086f7431b17b7f8fe84985d59'], 1] })
+      assert.equal(contact.contact_name, 'Ms. Known')
+      assert.equal(tfchain.wallet_address_from_recipient(contact.recipient), '03033eb72ebd94ca33544cadc1c6eb547a45bff7cc41e83d5168355eb5ec30f9d1db9311645c4a')
+      assert.equal(addressBook.contacts.length, 4)
+      assert.equal(addressBook.contact_names, ['foo_ms', 'foo_nil', 'foo_ss', 'Ms. Known'])
+      // nop updates are possible for existing contacts
+      contact = addressBook.contact_update('foo_nil')
+      assert.equal(contact.contact_name, 'foo_nil')
+      assert.equal(contact.recipient, '000000000000000000000000000000000000000000000000000000000000000000000000000000')
+      assert.equal(addressBook.contacts.length, 4)
+      assert.equal(addressBook.contact_names, ['foo_ms', 'foo_nil', 'foo_ss', 'Ms. Known'])
+
+      // deleting contacts is possible as well
+      addressBook.contact_delete('foo_nil')
+      assert.equal(addressBook.contacts.length, 3)
+      assert.equal(addressBook.contact_names, ['foo_ms', 'foo_ss', 'Ms. Known'])
+      addressBook.contact_delete('Ms. Known')
+      assert.equal(addressBook.contacts.length, 2)
+      assert.equal(addressBook.contact_names, ['foo_ms', 'foo_ss'])
+      // ... again, even if they do not exist
+      addressBook.contact_delete('nope')
+    })
   }
 }
 
@@ -627,6 +797,8 @@ const asserter = {
 }
 
 export const tests = () => {
+  const urlParams = new URLSearchParams(window.location.search)
+  const doNotFilterTests = urlParams.keys().next().done
   console.log('Running ES6 TFChain api.py init tests...')
   const testCount = Object.keys(_all).length
   let testNumber = 1
@@ -634,6 +806,12 @@ export const tests = () => {
   let tt = 0
   for (let fn in _all) {
     if (_all.hasOwnProperty(fn)) {
+      if (!doNotFilterTests && !urlParams.has(fn)) {
+        console.log('[' + testNumber + '/' + testCount + '] skipping ' + fn + '...')
+        testsPassed++
+        testNumber++
+        continue
+      }
       console.log('[' + testNumber + '/' + testCount + '] running ' + fn + '...')
       const t0 = performance.now()
       if (asserter.runSuite(_all[fn])) {

@@ -24,7 +24,7 @@ import tfchain.client as tfclient
 import tfchain.wallet as tfwallet
 
 from tfchain.types import ConditionTypes
-from tfchain.types.ConditionTypes import UnlockHash, UnlockHashType, OutputLock
+from tfchain.types.ConditionTypes import UnlockHash, UnlockHashType, OutputLock, ConditionNil, ConditionUnlockHash, ConditionMultiSignature
 from tfchain.types.PrimitiveTypes import Currency as TFCurrency
 
 # BIP39 state object used for all Mnemonic purposes of this API
@@ -103,7 +103,9 @@ class Account:
                     signatures_required=data.signatures_required,
                     update=False,
                 )
-
+        # restore the address book if it is defined
+        if 'address_book' in payload:
+            account._address_book = AddressBook.deserialize(payload['address_book'] or jsobj.new_dict())
         # return the fully restored account
         return account
 
@@ -157,6 +159,7 @@ class Account:
         self._multisig_wallets = []
         self._chain_info = ChainInfo()
         self._selected_wallet = None
+        self._address_book = AddressBook()
 
         # loaded state
         self._loaded = False
@@ -257,6 +260,10 @@ class Account:
         :rtype: str
         """
         return self._symmetric_key.password
+
+    @property
+    def address_book(self):
+        return self._address_book
 
     @property
     def chain_info(self):
@@ -763,6 +770,7 @@ class Account:
             'seed': jshex.bytes_to_hex(self.seed),
             'wallets': None if len(wallets) == 0 else wallets,
             'multisig_wallets': None if len(multisig_wallets) == 0 else multisig_wallets,
+            'address_book': None if self._address_book.is_empty else self._address_book.serialize(),
         }
         # encrypt it using the internal symmetric key
         ct, rsei = self._symmetric_key.encrypt(payload)
@@ -938,7 +946,7 @@ class BaseWallet:
         raise NotImplementedError("_address_count_getter is not implemented")
 
     def recipient_get(self, opts=None):
-        raise NotImplementedError("_recipient_getter is not implemented")
+        raise NotImplementedError("recipient_get is not implemented")
 
     @property
     def can_spent(self):
@@ -2158,6 +2166,301 @@ class Currency:
         return Currency(self._value.negate())
 
 
+class AddressBook:
+    @staticmethod
+    def _sort_contact_list_by_name_cb(a, b):
+        nameA = jsstr.lower(a.contact_name)
+        nameB = jsstr.lower(b.contact_name)
+        if nameA < nameB:
+            return -1
+        if nameA > nameB:
+            return 1
+        jslog.warning("two contacts with the same name {}".format(nameA), a, b)
+        return 0
+
+    @staticmethod
+    def _sort_contact_name_list_cb(a, b):
+        nameA = jsstr.lower(a)
+        nameB = jsstr.lower(b)
+        if nameA < nameB:
+            return -1
+        if nameA > nameB:
+            return 1
+        jslog.warning("two contacts with the same name {}".format(nameA))
+        return 0
+
+    @classmethod
+    def deserialize(cls, obj):
+        if isinstance(obj, str):
+            obj = jsjson.json_loads(obj)
+        elif not isinstance(obj, dict) and not jsobj.is_js_obj(obj):
+            raise TypeError(
+                "only a dictionary or JSON-encoded dictionary is supported as input: type {} is not supported", type(obj))
+        else:
+            obj = jsobj.as_dict(obj)
+        raw_contacts = obj.get_or("contacts", [])
+        ab = cls()
+        for raw_contact in raw_contacts:
+            contact = AddressBookContact.deserialize(raw_contact)
+            ab._contact_add(contact)
+        return ab
+
+    def __init__(self):
+        self._contacts = {}
+
+    @property
+    def is_empty(self):
+        return self.contact_count == 0
+
+    @property
+    def contact_count(self):
+        return len(self._contacts)
+
+    @property
+    def contacts(self):
+        contacts = [contact for contact in jsobj.dict_values(self._contacts)]
+        return jsarr.sort(contacts, AddressBook._sort_contact_list_by_name_cb)
+
+    @property
+    def contact_names(self):
+        contact_names = [contact_name for contact_name in jsobj.get_keys(self._contacts)]
+        return jsarr.sort(contact_names, AddressBook._sort_contact_name_list_cb)
+
+    def contact_get(self, name, opts=None):
+        if not isinstance(name, str):
+            raise TypeError("contact_get: contact name has to be of type str, invalid: {} ({})".format(name, type(name)))
+        if name == "":
+            raise ValueError("contact_get: contact name cannot be empty")
+        singlesig, multisig = jsfunc.opts_get_with_defaults(opts, [
+            ('singlesig', True),
+            ('multisig', True),
+        ])
+        if name not in self._contacts:
+            raise ValueError("no contact available in address book with name {}".format(name))
+        contact = self._contacts[name]
+        if contact._ctype.value == AddressBookContactType.SINGLE_SIGNATURE.value:
+            if not singlesig:
+                raise ValueError("contact {} is available in address book, but user filter does not allow single sig contacts".format(name))
+            return contact
+        if contact._ctype.value == AddressBookContactType.MULTI_SIGNATURE.value:
+            if not multisig:
+                raise ValueError("contact {} is available in address book, but user filter does not allow multi sig contacts".format(name))
+            return contact
+        jslog.warning("contact found for name {} which type {} has no filter yet:".format(name, contact._ctype.value), contact)
+        return contact
+
+    def contact_new(self, name, recipient):
+        contact = self._contact_new(name, recipient)
+        self._contact_add(contact)
+        return contact
+
+    def _contact_add(self, contact):
+        # ensure contact doesn't exist yet with this name
+        if contact.contact_name in self._contacts:
+            raise ValueError("a contact with name {} already exists".format(contact.contact_name))
+        # add contact
+        self._contacts[contact.contact_name] = contact
+
+    def _contact_new(self, name, recipient):
+        condition = unlock_condition_from_recipient(recipient)
+        if isinstance(condition, (ConditionUnlockHash, ConditionNil)):
+            return AddressBookSingleSignatureContact(name, condition.unlockhash.__str__())
+        if isinstance(condition, ConditionMultiSignature):
+            owners = [uh.__str__() for uh in condition.unlockhashes]
+            signatures_required = condition.required_signatures
+            return AddressBookMultiSignatureContact(name, owners, signatures_required)
+        jslog.error("[BUG] invalid recipient-to-condition mapping:", condition, recipient)
+        raise ValueError("unexpected condition: {} ({})".format(condition, type(condition)))
+
+    def contact_update(self, name, opts=None):
+        if not isinstance(name, str):
+            raise TypeError("contact_update: contact name has to be of type str, invalid: {} ({})".format(name, type(name)))
+        if name == "":
+            raise ValueError("contact_update: contact name cannot be empty")
+        new_name, recipient = jsfunc.opts_get(opts, 'name', 'recipient')
+        if new_name == None and recipient == None:
+            if name not in self._contacts:
+                raise ValueError("no contact available in address book with name {} and no info given to create it".format(name))
+            jslog.warning("nop contact update for contact {}".format(name))
+            return self._contacts[name]
+        new_name = new_name or name
+        # find contact
+        if name not in self._contacts:
+            # create contact from scratch
+            if recipient == None:
+                raise ValueError("no contact with name {} could be found and no recipient is given to create a new one".format(name))
+            return self.contact_new(new_name, recipient)
+        # overwrite contact if recipient is given
+        if recipient != None:
+            new_contact = self._contact_new(new_name, recipient)
+            self._contacts[new_name] = new_contact
+        else: # or else update existing contact
+            new_contact = self._contacts[name]
+            new_contact.contact_name = new_name
+            self._contacts[new_name] = new_contact
+        if new_name != name:
+            # delete old contact if it used to exist under another name
+            del self._contacts[name]
+        return self._contacts[new_name]
+
+    def contact_delete(self, name):
+        if not isinstance(name, str):
+            raise TypeError("contact_delete: contact name has to be of type str, invalid: {} ({})".format(name, type(name)))
+        if name == "":
+            raise ValueError("contact_delete: contact name cannot be empty")
+        if name in self._contacts:
+            del self._contacts[name]
+
+    def serialize(self):
+        return {
+            "contacts": None if self.is_empty else [contact.serialize() for contact in self.contacts],
+        }
+
+
+class AddressBookContactType:
+    def __init__(self, value):
+        if isinstance(value, AddressBookContactType):
+            value = value.value
+        if not isinstance(value, int):
+            raise TypeError("address book contact type value was expected to be an int, not be of type {}".format(type(value)))
+        if value < 0 or value > 2:
+            raise ValueError("address book contact type out of range: {}".format(value))
+        self._value = value
+
+    @property
+    def value(self):
+        return self._value
+
+    def __eq__(self, other):
+        if isinstance(other, AddressBookContactType):
+            return self.value == other.value
+        return self.value == other
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __int__(self):
+        return self.value
+
+AddressBookContactType.SINGLE_SIGNATURE = AddressBookContactType(0)
+AddressBookContactType.MULTI_SIGNATURE = AddressBookContactType(1)
+
+
+class AddressBookContact:
+    @classmethod
+    def deserialize(cls, obj):
+        if isinstance(obj, str):
+            obj = jsjson.json_loads(obj)
+        elif not isinstance(obj, dict) and not jsobj.is_js_obj(obj):
+            raise TypeError(
+                "only a dictionary or JSON-encoded dictionary is supported as input: type {} is not supported", type(obj))
+        else:
+            obj = jsobj.as_dict(obj)
+        ctype = obj.get_or('type', -1)
+        data = obj.get_or('data', jsobj.new_dict())
+        name = obj.get_or('name', None)
+        if ctype == AddressBookContactType.SINGLE_SIGNATURE.value:
+            return AddressBookSingleSignatureContact.deserialize(ctype, name, data)
+        if ctype == AddressBookContactType.MULTI_SIGNATURE.value:
+            return AddressBookMultiSignatureContact.deserialize(ctype, name, data)
+        raise ValueError("cannot deserialize invalid address book contact: {} {} {}".format(ctype, name, data))
+
+    def __init__(self, ctype, name):
+        if not isinstance(ctype, AddressBookContactType):
+            raise TypeError("invalid address book contact type: {} ({})".format(ctype, type(ctype)))
+        self._ctype = ctype
+        self.contact_name = name
+
+    @property
+    def contact_name(self):
+        return self._name
+    @contact_name.setter
+    def contact_name(self, value):
+        if not isinstance(value, str):
+            raise TypeError("contact name has to be of type str, invalid: {} ({})".format(value, type(value)))
+        if value == "":
+            raise ValueError("contact name cannot be empty")
+        self._name = value
+
+    @property
+    def recipient(self):
+        return self._recipient_getter()
+    def _recipient_getter(self):
+        raise NotImplementedError("_recipient_getter is not yet implemented")
+
+    def serialize(self):
+        return {
+            "type": self._ctype.value,
+            "name": self._name,
+            "data": self._serialize_data_getter(),
+        }
+    def _serialize_data_getter(self):
+        raise NotImplementedError("_serialize_data_getter is not yet implemented")
+
+
+class AddressBookSingleSignatureContact(AddressBookContact):
+    @classmethod
+    def deserialize(cls, version, name, data):
+        if version != AddressBookContactType.SINGLE_SIGNATURE.value:
+            raise ValueError("invalid version {} for AddressBookSingleSignatureContact".format(version))
+        return cls(name, data["address"])
+
+    def __init__(self, name, address):
+        super().__init__(AddressBookContactType.SINGLE_SIGNATURE, name)
+        if not wallet_address_is_valid(address, {'multisig': False}):
+            raise ValueError("invalid single signature address book contact address: {} ({})".format(address, type(address)))
+        self._address = address
+
+    def _recipient_getter(self):
+        return self._address
+
+    def _serialize_data_getter(self):
+        return {
+            "address": self._address,
+        }
+
+
+class AddressBookMultiSignatureContact(AddressBookContact):
+    @classmethod
+    def deserialize(cls, version, name, data):
+        if version != AddressBookContactType.MULTI_SIGNATURE.value:
+            raise ValueError("invalid version {} for AddressBookSingleSignatureContact".format(version))
+        return cls(name, data["owners"], data["signatures_required"])
+
+    def __init__(self, name, owners, signatures_required):
+        super().__init__(AddressBookContactType.MULTI_SIGNATURE, name)
+        # validate parameters
+        if not isinstance(owners, list) and not jsobj.is_js_arr(owners):
+            raise TypeError("owners is expected to be an array, not {} ({})".format(owners, type(owners)))
+        if len(owners) <= 1:
+            raise ValueError("expected at least two owners, less is not allowed")
+        for owner in owners:
+            if not wallet_address_is_valid(owner, {'multisig': False}):
+                raise ValueError("invalid multisig address book contact owner address: {} ({})".format(owner, type(owner)))
+        if signatures_required == None:
+            signatures_required = len(owners)
+        else:
+            if isinstance(signatures_required, str):
+                signatures_required = jsstr.to_int(signatures_required)
+            elif isinstance(signatures_required, float):
+                signatures_required = int(signatures_required)
+            elif not isinstance(signatures_required, int):
+                raise TypeError("signatures_required is supposed to be an int, invalid {} ({})".format(signatures_required, type(signatures_required)))
+            if signatures_required < 1 or signatures_required > len(owners):
+                raise ValueError("sgnatures_required has to be within the range [1, len(owners)]")
+        # assign recipient properties
+        self._owners = owners
+        self._signatures_required = signatures_required
+
+    def _recipient_getter(self):
+        return [self._signatures_required, self._owners]
+
+    def _serialize_data_getter(self):
+        return {
+            "owners": self._owners,
+            "signatures_required": self._signatures_required,
+        }
+
+
 def mnemonic_new():
     """
     Generate a new BIP39 mnemonic (sentence) of 24 words,
@@ -2256,3 +2559,10 @@ def multisig_wallet_address_new(owners, signatures_required):
     # create address
     condition = ConditionTypes.multi_signature_new(min_nr_sig=signatures_required, unlockhashes=[owner for owner in owners])
     return condition.unlockhash.__str__()
+
+def unlock_condition_from_recipient(recipient):
+    recipient = _normalize_recipient(recipient)
+    return ConditionTypes.from_recipient(recipient)
+
+def wallet_address_from_recipient(recipient):
+    return unlock_condition_from_recipient(recipient).unlockhash.__str__()

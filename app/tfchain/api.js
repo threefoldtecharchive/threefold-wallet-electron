@@ -1,6 +1,6 @@
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __proxy__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, abs, all, any, assert, bool, bytearray, bytes, callable, chr, copy, deepcopy, delattr, dict, dir, divmod, enumerate, filter, float, getattr, hasattr, input, int, isinstance, issubclass, len, list, map, max, min, object, ord, pow, print, property, py_TypeError, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
 import {Currency as TFCurrency} from './tfchain.types.PrimitiveTypes.js';
-import {OutputLock, UnlockHash, UnlockHashType} from './tfchain.types.ConditionTypes.js';
+import {ConditionMultiSignature, ConditionNil, ConditionUnlockHash, OutputLock, UnlockHash, UnlockHashType} from './tfchain.types.ConditionTypes.js';
 import * as ConditionTypes from './tfchain.types.ConditionTypes.js';
 import * as tfwallet from './tfchain.wallet.js';
 import * as tfclient from './tfchain.client.js';
@@ -96,6 +96,9 @@ export var Account =  __class__ ('Account', [object], {
 				account.multisig_wallet_new (__kwargtrans__ ({py_name: data.wallet_name, owners: data.owners, signatures_required: data.signatures_required, py_update: false}));
 			}
 		}
+		if (__in__ ('address_book', payload)) {
+			account._address_book = AddressBook.deserialize (payload ['address_book'] || jsobj.new_dict ());
+		}
 		return account;
 	});},
 	get __init__ () {return __get__ (this, function (self, account_name, password, opts) {
@@ -159,6 +162,7 @@ export var Account =  __class__ ('Account', [object], {
 		self._multisig_wallets = [];
 		self._chain_info = ChainInfo ();
 		self._selected_wallet = null;
+		self._address_book = AddressBook ();
 		self._loaded = false;
 		self._intermezzo_update_count = 0;
 	});},
@@ -354,6 +358,22 @@ export var Account =  __class__ ('Account', [object], {
 		else {
 		}
 		return self._symmetric_key.password;
+	});},
+	get _get_address_book () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._address_book;
 	});},
 	get _get_chain_info () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -1478,7 +1498,7 @@ export var Account =  __class__ ('Account', [object], {
 		for (var wallet of self._multisig_wallets) {
 			multisig_wallets.append (dict ({'wallet_name': wallet.wallet_name, 'owners': wallet.owners, 'signatures_required': wallet.signatures_required}));
 		}
-		var payload = dict ({'account_name': self.account_name, 'network_type': self.network_type, 'explorer_addresses': (self.default_explorer_addresses_used ? null : self.explorer.explorer_addresses), 'seed': jshex.bytes_to_hex (self.seed), 'wallets': (len (wallets) == 0 ? null : wallets), 'multisig_wallets': (len (multisig_wallets) == 0 ? null : multisig_wallets)});
+		var payload = dict ({'account_name': self.account_name, 'network_type': self.network_type, 'explorer_addresses': (self.default_explorer_addresses_used ? null : self.explorer.explorer_addresses), 'seed': jshex.bytes_to_hex (self.seed), 'wallets': (len (wallets) == 0 ? null : wallets), 'multisig_wallets': (len (multisig_wallets) == 0 ? null : multisig_wallets), 'address_book': (self._address_book.is_empty ? null : self._address_book.serialize ())});
 		var __left0__ = self._symmetric_key.encrypt (payload);
 		var ct = __left0__ [0];
 		var rsei = __left0__ [1];
@@ -1857,6 +1877,7 @@ Object.defineProperty (Account, 'selected_wallet', property.call (Account, Accou
 Object.defineProperty (Account, 'selected_wallet_name', property.call (Account, Account._get_selected_wallet_name));
 Object.defineProperty (Account, 'balance', property.call (Account, Account._get_balance));
 Object.defineProperty (Account, 'chain_info', property.call (Account, Account._get_chain_info));
+Object.defineProperty (Account, 'address_book', property.call (Account, Account._get_address_book));
 Object.defineProperty (Account, 'password', property.call (Account, Account._get_password));
 Object.defineProperty (Account, 'seed', property.call (Account, Account._get_seed));
 Object.defineProperty (Account, 'mnemonic', property.call (Account, Account._get_mnemonic));
@@ -2125,7 +2146,7 @@ export var BaseWallet =  __class__ ('BaseWallet', [object], {
 		}
 		else {
 		}
-		var __except0__ = NotImplementedError ('_recipient_getter is not implemented');
+		var __except0__ = NotImplementedError ('recipient_get is not implemented');
 		__except0__.__cause__ = null;
 		throw __except0__;
 	});},
@@ -5330,6 +5351,928 @@ export var Currency =  __class__ ('Currency', [object], {
 		return Currency (self._value.negate ());
 	});}
 });
+export var AddressBook =  __class__ ('AddressBook', [object], {
+	__module__: __name__,
+	get _sort_contact_list_by_name_cb () {return function (a, b) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'a': var a = __allkwargs0__ [__attrib0__]; break;
+						case 'b': var b = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var nameA = jsstr.lower (a.contact_name);
+		var nameB = jsstr.lower (b.contact_name);
+		if (nameA < nameB) {
+			return -(1);
+		}
+		if (nameA > nameB) {
+			return 1;
+		}
+		jslog.warning ('two contacts with the same name {}'.format (nameA), a, b);
+		return 0;
+	};},
+	get _sort_contact_name_list_cb () {return function (a, b) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'a': var a = __allkwargs0__ [__attrib0__]; break;
+						case 'b': var b = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var nameA = jsstr.lower (a);
+		var nameB = jsstr.lower (b);
+		if (nameA < nameB) {
+			return -(1);
+		}
+		if (nameA > nameB) {
+			return 1;
+		}
+		jslog.warning ('two contacts with the same name {}'.format (nameA));
+		return 0;
+	};},
+	get deserialize () {return __getcm__ (this, function (cls, obj) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+						case 'obj': var obj = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (isinstance (obj, str)) {
+			var obj = jsjson.json_loads (obj);
+		}
+		else if (!(isinstance (obj, dict)) && !(jsobj.is_js_obj (obj))) {
+			var __except0__ = py_TypeError ('only a dictionary or JSON-encoded dictionary is supported as input: type {} is not supported', py_typeof (obj));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		else {
+			var obj = jsobj.as_dict (obj);
+		}
+		var raw_contacts = obj.get_or ('contacts', []);
+		var ab = cls ();
+		for (var raw_contact of raw_contacts) {
+			var contact = AddressBookContact.deserialize (raw_contact);
+			ab._contact_add (contact);
+		}
+		return ab;
+	});},
+	get __init__ () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		self._contacts = dict ({});
+	});},
+	get _get_is_empty () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self.contact_count == 0;
+	});},
+	get _get_contact_count () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return len (self._contacts);
+	});},
+	get _get_contacts () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var contacts = (function () {
+			var __accu0__ = [];
+			for (var contact of jsobj.dict_values (self._contacts)) {
+				__accu0__.append (contact);
+			}
+			return __accu0__;
+		}) ();
+		return jsarr.py_sort (contacts, AddressBook._sort_contact_list_by_name_cb);
+	});},
+	get _get_contact_names () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var contact_names = (function () {
+			var __accu0__ = [];
+			for (var contact_name of jsobj.get_keys (self._contacts)) {
+				__accu0__.append (contact_name);
+			}
+			return __accu0__;
+		}) ();
+		return jsarr.py_sort (contact_names, AddressBook._sort_contact_name_list_cb);
+	});},
+	get contact_get () {return __get__ (this, function (self, py_name, opts) {
+		if (typeof opts == 'undefined' || (opts != null && opts.hasOwnProperty ("__kwargtrans__"))) {;
+			var opts = null;
+		};
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+						case 'opts': var opts = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (!(isinstance (py_name, str))) {
+			var __except0__ = py_TypeError ('contact_get: contact name has to be of type str, invalid: {} ({})'.format (py_name, py_typeof (py_name)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		if (py_name == '') {
+			var __except0__ = ValueError ('contact_get: contact name cannot be empty');
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		var __left0__ = jsfunc.opts_get_with_defaults (opts, [tuple (['singlesig', true]), tuple (['multisig', true])]);
+		var singlesig = __left0__ [0];
+		var multisig = __left0__ [1];
+		if (!__in__ (py_name, self._contacts)) {
+			var __except0__ = ValueError ('no contact available in address book with name {}'.format (py_name));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		var contact = self._contacts [py_name];
+		if (contact._ctype.value == AddressBookContactType.SINGLE_SIGNATURE.value) {
+			if (!(singlesig)) {
+				var __except0__ = ValueError ('contact {} is available in address book, but user filter does not allow single sig contacts'.format (py_name));
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
+			return contact;
+		}
+		if (contact._ctype.value == AddressBookContactType.MULTI_SIGNATURE.value) {
+			if (!(multisig)) {
+				var __except0__ = ValueError ('contact {} is available in address book, but user filter does not allow multi sig contacts'.format (py_name));
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
+			return contact;
+		}
+		jslog.warning ('contact found for name {} which type {} has no filter yet:'.format (py_name, contact._ctype.value), contact);
+		return contact;
+	});},
+	get contact_new () {return __get__ (this, function (self, py_name, recipient) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+						case 'recipient': var recipient = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var contact = self._contact_new (py_name, recipient);
+		self._contact_add (contact);
+		return contact;
+	});},
+	get _contact_add () {return __get__ (this, function (self, contact) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'contact': var contact = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (__in__ (contact.contact_name, self._contacts)) {
+			var __except0__ = ValueError ('a contact with name {} already exists'.format (contact.contact_name));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		self._contacts [contact.contact_name] = contact;
+	});},
+	get _contact_new () {return __get__ (this, function (self, py_name, recipient) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+						case 'recipient': var recipient = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var condition = unlock_condition_from_recipient (recipient);
+		if (isinstance (condition, tuple ([ConditionUnlockHash, ConditionNil]))) {
+			return AddressBookSingleSignatureContact (py_name, condition.unlockhash.__str__ ());
+		}
+		if (isinstance (condition, ConditionMultiSignature)) {
+			var owners = (function () {
+				var __accu0__ = [];
+				for (var uh of condition.unlockhashes) {
+					__accu0__.append (uh.__str__ ());
+				}
+				return __accu0__;
+			}) ();
+			var signatures_required = condition.required_signatures;
+			return AddressBookMultiSignatureContact (py_name, owners, signatures_required);
+		}
+		jslog.error ('[BUG] invalid recipient-to-condition mapping:', condition, recipient);
+		var __except0__ = ValueError ('unexpected condition: {} ({})'.format (condition, py_typeof (condition)));
+		__except0__.__cause__ = null;
+		throw __except0__;
+	});},
+	get contact_update () {return __get__ (this, function (self, py_name, opts) {
+		if (typeof opts == 'undefined' || (opts != null && opts.hasOwnProperty ("__kwargtrans__"))) {;
+			var opts = null;
+		};
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+						case 'opts': var opts = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (!(isinstance (py_name, str))) {
+			var __except0__ = py_TypeError ('contact_update: contact name has to be of type str, invalid: {} ({})'.format (py_name, py_typeof (py_name)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		if (py_name == '') {
+			var __except0__ = ValueError ('contact_update: contact name cannot be empty');
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		var __left0__ = jsfunc.opts_get (opts, 'name', 'recipient');
+		var new_name = __left0__ [0];
+		var recipient = __left0__ [1];
+		if (new_name == null && recipient == null) {
+			if (!__in__ (py_name, self._contacts)) {
+				var __except0__ = ValueError ('no contact available in address book with name {} and no info given to create it'.format (py_name));
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
+			jslog.warning ('nop contact update for contact {}'.format (py_name));
+			return self._contacts [py_name];
+		}
+		var new_name = new_name || py_name;
+		if (!__in__ (py_name, self._contacts)) {
+			if (recipient == null) {
+				var __except0__ = ValueError ('no contact with name {} could be found and no recipient is given to create a new one'.format (py_name));
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
+			return self.contact_new (new_name, recipient);
+		}
+		if (recipient != null) {
+			var new_contact = self._contact_new (new_name, recipient);
+			self._contacts [new_name] = new_contact;
+		}
+		else {
+			var new_contact = self._contacts [py_name];
+			new_contact.contact_name = new_name;
+			self._contacts [new_name] = new_contact;
+		}
+		if (new_name != py_name) {
+			delete self._contacts [py_name];
+		}
+		return self._contacts [new_name];
+	});},
+	get contact_delete () {return __get__ (this, function (self, py_name) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (!(isinstance (py_name, str))) {
+			var __except0__ = py_TypeError ('contact_delete: contact name has to be of type str, invalid: {} ({})'.format (py_name, py_typeof (py_name)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		if (py_name == '') {
+			var __except0__ = ValueError ('contact_delete: contact name cannot be empty');
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		if (__in__ (py_name, self._contacts)) {
+			delete self._contacts [py_name];
+		}
+	});},
+	get serialize () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return dict ({'contacts': (self.is_empty ? null : (function () {
+			var __accu0__ = [];
+			for (var contact of self.contacts) {
+				__accu0__.append (contact.serialize ());
+			}
+			return __accu0__;
+		}) ())});
+	});}
+});
+Object.defineProperty (AddressBook, 'contact_names', property.call (AddressBook, AddressBook._get_contact_names));
+Object.defineProperty (AddressBook, 'contacts', property.call (AddressBook, AddressBook._get_contacts));
+Object.defineProperty (AddressBook, 'contact_count', property.call (AddressBook, AddressBook._get_contact_count));
+Object.defineProperty (AddressBook, 'is_empty', property.call (AddressBook, AddressBook._get_is_empty));;
+export var AddressBookContactType =  __class__ ('AddressBookContactType', [object], {
+	__module__: __name__,
+	get __init__ () {return __get__ (this, function (self, value) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (isinstance (value, AddressBookContactType)) {
+			var value = value.value;
+		}
+		if (!(isinstance (value, int))) {
+			var __except0__ = py_TypeError ('address book contact type value was expected to be an int, not be of type {}'.format (py_typeof (value)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		if (value < 0 || value > 2) {
+			var __except0__ = ValueError ('address book contact type out of range: {}'.format (value));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		self._value = value;
+	});},
+	get _get_value () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._value;
+	});},
+	get __eq__ () {return __get__ (this, function (self, other) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (isinstance (other, AddressBookContactType)) {
+			return self.value == other.value;
+		}
+		return self.value == other;
+	});},
+	get __ne__ () {return __get__ (this, function (self, other) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return !(self.__eq__ (other));
+	});},
+	get __int__ () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self.value;
+	});}
+});
+Object.defineProperty (AddressBookContactType, 'value', property.call (AddressBookContactType, AddressBookContactType._get_value));;
+AddressBookContactType.SINGLE_SIGNATURE = AddressBookContactType (0);
+AddressBookContactType.MULTI_SIGNATURE = AddressBookContactType (1);
+export var AddressBookContact =  __class__ ('AddressBookContact', [object], {
+	__module__: __name__,
+	get deserialize () {return __getcm__ (this, function (cls, obj) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+						case 'obj': var obj = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (isinstance (obj, str)) {
+			var obj = jsjson.json_loads (obj);
+		}
+		else if (!(isinstance (obj, dict)) && !(jsobj.is_js_obj (obj))) {
+			var __except0__ = py_TypeError ('only a dictionary or JSON-encoded dictionary is supported as input: type {} is not supported', py_typeof (obj));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		else {
+			var obj = jsobj.as_dict (obj);
+		}
+		var ctype = obj.get_or ('type', -(1));
+		var data = obj.get_or ('data', jsobj.new_dict ());
+		var py_name = obj.get_or ('name', null);
+		if (ctype == AddressBookContactType.SINGLE_SIGNATURE.value) {
+			return AddressBookSingleSignatureContact.deserialize (ctype, py_name, data);
+		}
+		if (ctype == AddressBookContactType.MULTI_SIGNATURE.value) {
+			return AddressBookMultiSignatureContact.deserialize (ctype, py_name, data);
+		}
+		var __except0__ = ValueError ('cannot deserialize invalid address book contact: {} {} {}'.format (ctype, py_name, data));
+		__except0__.__cause__ = null;
+		throw __except0__;
+	});},
+	get __init__ () {return __get__ (this, function (self, ctype, py_name) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'ctype': var ctype = __allkwargs0__ [__attrib0__]; break;
+						case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (!(isinstance (ctype, AddressBookContactType))) {
+			var __except0__ = py_TypeError ('invalid address book contact type: {} ({})'.format (ctype, py_typeof (ctype)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		self._ctype = ctype;
+		self.contact_name = py_name;
+	});},
+	get _get_contact_name () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._name;
+	});},
+	get _set_contact_name () {return __get__ (this, function (self, value) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (!(isinstance (value, str))) {
+			var __except0__ = py_TypeError ('contact name has to be of type str, invalid: {} ({})'.format (value, py_typeof (value)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		if (value == '') {
+			var __except0__ = ValueError ('contact name cannot be empty');
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		self._name = value;
+	});},
+	get _get_recipient () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._recipient_getter ();
+	});},
+	get _recipient_getter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var __except0__ = NotImplementedError ('_recipient_getter is not yet implemented');
+		__except0__.__cause__ = null;
+		throw __except0__;
+	});},
+	get serialize () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return dict ({'type': self._ctype.value, 'name': self._name, 'data': self._serialize_data_getter ()});
+	});},
+	get _serialize_data_getter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var __except0__ = NotImplementedError ('_serialize_data_getter is not yet implemented');
+		__except0__.__cause__ = null;
+		throw __except0__;
+	});}
+});
+Object.defineProperty (AddressBookContact, 'recipient', property.call (AddressBookContact, AddressBookContact._get_recipient));
+Object.defineProperty (AddressBookContact, 'contact_name', property.call (AddressBookContact, AddressBookContact._get_contact_name, AddressBookContact._set_contact_name));;
+export var AddressBookSingleSignatureContact =  __class__ ('AddressBookSingleSignatureContact', [AddressBookContact], {
+	__module__: __name__,
+	get deserialize () {return __getcm__ (this, function (cls, version, py_name, data) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+						case 'version': var version = __allkwargs0__ [__attrib0__]; break;
+						case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+						case 'data': var data = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (version != AddressBookContactType.SINGLE_SIGNATURE.value) {
+			var __except0__ = ValueError ('invalid version {} for AddressBookSingleSignatureContact'.format (version));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		return cls (py_name, data ['address']);
+	});},
+	get __init__ () {return __get__ (this, function (self, py_name, address) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+						case 'address': var address = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		__super__ (AddressBookSingleSignatureContact, '__init__') (self, AddressBookContactType.SINGLE_SIGNATURE, py_name);
+		if (!(wallet_address_is_valid (address, dict ({'multisig': false})))) {
+			var __except0__ = ValueError ('invalid single signature address book contact address: {} ({})'.format (address, py_typeof (address)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		self._address = address;
+	});},
+	get _recipient_getter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._address;
+	});},
+	get _serialize_data_getter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return dict ({'address': self._address});
+	});}
+});
+export var AddressBookMultiSignatureContact =  __class__ ('AddressBookMultiSignatureContact', [AddressBookContact], {
+	__module__: __name__,
+	get deserialize () {return __getcm__ (this, function (cls, version, py_name, data) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+						case 'version': var version = __allkwargs0__ [__attrib0__]; break;
+						case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+						case 'data': var data = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (version != AddressBookContactType.MULTI_SIGNATURE.value) {
+			var __except0__ = ValueError ('invalid version {} for AddressBookSingleSignatureContact'.format (version));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		return cls (py_name, data ['owners'], data ['signatures_required']);
+	});},
+	get __init__ () {return __get__ (this, function (self, py_name, owners, signatures_required) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'py_name': var py_name = __allkwargs0__ [__attrib0__]; break;
+						case 'owners': var owners = __allkwargs0__ [__attrib0__]; break;
+						case 'signatures_required': var signatures_required = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		__super__ (AddressBookMultiSignatureContact, '__init__') (self, AddressBookContactType.MULTI_SIGNATURE, py_name);
+		if (!(isinstance (owners, list)) && !(jsobj.is_js_arr (owners))) {
+			var __except0__ = py_TypeError ('owners is expected to be an array, not {} ({})'.format (owners, py_typeof (owners)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		if (len (owners) <= 1) {
+			var __except0__ = ValueError ('expected at least two owners, less is not allowed');
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		for (var owner of owners) {
+			if (!(wallet_address_is_valid (owner, dict ({'multisig': false})))) {
+				var __except0__ = ValueError ('invalid multisig address book contact owner address: {} ({})'.format (owner, py_typeof (owner)));
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
+		}
+		if (signatures_required == null) {
+			var signatures_required = len (owners);
+		}
+		else {
+			if (isinstance (signatures_required, str)) {
+				var signatures_required = jsstr.to_int (signatures_required);
+			}
+			else if (isinstance (signatures_required, float)) {
+				var signatures_required = int (signatures_required);
+			}
+			else if (!(isinstance (signatures_required, int))) {
+				var __except0__ = py_TypeError ('signatures_required is supposed to be an int, invalid {} ({})'.format (signatures_required, py_typeof (signatures_required)));
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
+			if (signatures_required < 1 || signatures_required > len (owners)) {
+				var __except0__ = ValueError ('sgnatures_required has to be within the range [1, len(owners)]');
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
+		}
+		self._owners = owners;
+		self._signatures_required = signatures_required;
+	});},
+	get _recipient_getter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return [self._signatures_required, self._owners];
+	});},
+	get _serialize_data_getter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return dict ({'owners': self._owners, 'signatures_required': self._signatures_required});
+	});}
+});
 export var mnemonic_new = function () {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -5519,6 +6462,39 @@ export var multisig_wallet_address_new = function (owners, signatures_required) 
 		return __accu0__;
 	}) ()}));
 	return condition.unlockhash.__str__ ();
+};
+export var unlock_condition_from_recipient = function (recipient) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'recipient': var recipient = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	var recipient = _normalize_recipient (recipient);
+	return ConditionTypes.from_recipient (recipient);
+};
+export var wallet_address_from_recipient = function (recipient) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'recipient': var recipient = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return unlock_condition_from_recipient (recipient).unlockhash.__str__ ();
 };
 
 //# sourceMappingURL=api.map

@@ -5,7 +5,7 @@ from tfchain.types.transactions.Minting import TransactionV128, TransactionV129
 # from tfchain.types.transactions.ERC20 import TransactionV208, TransactionV209, TransactionV210
 
 from tfchain.polyfill.encoding.json import json_loads
-import tfchain.polyfill.encoding.object as jsjson
+import tfchain.polyfill.encoding.object as jsobj
 from tfchain.errors import UnknownTransansactionVersion
 
 import tfchain.polyfill.log as jslog
@@ -72,7 +72,7 @@ def from_json(obj, id=None):
     """
     if isinstance(obj, str):
         obj = json_loads(obj)
-    if not isinstance(obj, dict) and not jsjson.is_js_obj(obj):
+    if not isinstance(obj, dict) and not jsobj.is_js_obj(obj):
         raise TypeError(
             "only a dictionary or JSON-encoded dictionary is supported as input: type {} is not supported", type(obj))
     tt = obj.get_or('version', -1)
