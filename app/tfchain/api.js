@@ -1016,6 +1016,7 @@ export var Account =  __class__ ('Account', [object], {
 		}
 		var wallet = self._wallet_new (len (self._wallets), wallet_name, start_index, address_count, __kwargtrans__ ({py_update: py_update}));
 		self._wallets.append (wallet);
+		self._add_addresses_as_owners_to_all_possible_multisig_wallets (wallet.addresses);
 		return wallet;
 	});},
 	get wallet_update () {return __get__ (this, function (self, wallet_index, wallet_name, start_index, address_count, py_update) {
@@ -1056,24 +1057,41 @@ export var Account =  __class__ ('Account', [object], {
 			throw __except0__;
 		}
 		var wallet = self._wallets [wallet_index];
+		var old_wallet_name = wallet.wallet_name;
 		if (wallet.start_index != start_index || wallet.address_count != address_count) {
+			var new_wallet = self._wallet_new (wallet_index, wallet_name, start_index, address_count, __kwargtrans__ ({py_update: py_update}));
+			var old_wallet_addresses = set (new_wallet.addresses);
+			var new_wallet_addresses = set (new_wallet.addresses);
+			var mswallets = [];
 			for (var mswallet of self._multisig_wallets) {
-				var owners_intersection = set (mswallet.owners).intersection (set (wallet.addresses));
-				if (len (owners_intersection) == 0) {
+				var owners = set (mswallet.owners);
+				if (len (old_wallet_addresses.intersection (owners)) == 0) {
 					continue;
 				}
-				mswallet.remove_owner_wallet (wallet);
+				if (!(mswallet.has_other_authorized_addresses (old_wallet_addresses)) && len (new_wallet_addresses.intersection (owners)) == 0) {
+					var __except0__ = ValueError ('cannot update address set of wallet {} as it is still owner of MultiSig Wallet {}'.format (wallet.wallet_name, mswallet.wallet_name || mswallet.address));
+					__except0__.__cause__ = null;
+					throw __except0__;
+				}
+				mswallets.append (mswallet);
 			}
-			self._wallets [wallet_index] = self._wallet_new (wallet_index, wallet_name, start_index, address_count, __kwargtrans__ ({py_update: py_update}));
-			var swname = self.selected_wallet_name;
-			if (swname != null && swname == wallet.wallet_name) {
-				self._selected_wallet = self._wallets [wallet_index];
+			for (var mswallet of mswallets) {
+				for (var address of old_wallet_addresses.difference (new_wallet_addresses)) {
+					mswallet.remove_authorized_owner (address);
+				}
 			}
+			var wallet = new_wallet;
+			self._wallets [wallet_index] = wallet;
 		}
 		else {
-			self._wallets [wallet_index].wallet_name = wallet_name;
+			wallet.wallet_name = wallet_name;
 		}
-		return self._wallets [wallet_index];
+		var swname = self.selected_wallet_name;
+		if (swname != null && swname == old_wallet_name) {
+			self._selected_wallet = wallet;
+		}
+		self._add_addresses_as_owners_to_all_possible_multisig_wallets (wallet.addresses);
+		return wallet;
 	});},
 	get wallet_delete () {return __get__ (this, function (self, wallet_index, wallet_name) {
 		if (arguments.length) {
@@ -1112,17 +1130,54 @@ export var Account =  __class__ ('Account', [object], {
 			throw __except0__;
 		}
 		var wallet_to_delete = self._wallets [wallet_index];
+		var wallet_addresses = set (wallet_to_delete.addresses);
+		var mswallets = [];
 		for (var mswallet of self._multisig_wallets) {
-			var owners_intersection = set (mswallet.owners).intersection (set (wallet_to_delete.addresses));
-			if (len (owners_intersection) == 0) {
+			var owners = set (mswallet.owners);
+			if (len (wallet_addresses.intersection (owners)) == 0) {
 				continue;
 			}
-			mswallet.remove_owner_wallet (wallet_to_delete);
+			if (!(mswallet.has_other_authorized_addresses (wallet_addresses))) {
+				var __except0__ = ValueError ('cannot update address set of wallet {} as it is still owner of MultiSig Wallet {}'.format (wallet_to_delete.wallet_name, mswallet.wallet_name || mswallet.address));
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
+			mswallets.append (mswallet);
+		}
+		for (var mswallet of mswallets) {
+			for (var address of wallet_addresses) {
+				mswallet.remove_authorized_owner (address);
+			}
 		}
 		jsarr.py_pop (self._wallets, wallet_index);
+		var swname = self.selected_wallet_name;
+		if (swname != null && swname == wallet_to_delete.wallet_name) {
+			self._selected_wallet = null;
+		}
 		if (wallet_index != self.wallet_count) {
 			for (var wallet of self._wallets.__getslice__ (wallet_index, null, 1)) {
 				wallet._wallet_index--;
+			}
+		}
+	});},
+	get _add_addresses_as_owners_to_all_possible_multisig_wallets () {return __get__ (this, function (self, addresses) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'addresses': var addresses = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		for (var mswallet of self._multisig_wallets) {
+			for (var address of addresses) {
+				mswallet.add_owner_if_authorized (address);
 			}
 		}
 	});},
@@ -1157,13 +1212,6 @@ export var Account =  __class__ ('Account', [object], {
 		}
 		var wallet = SingleSignatureWallet (self, wallet_index, wallet_name, start_index, pairs);
 		self._validate_wallet_state (wallet);
-		for (var mswallet of self._multisig_wallets) {
-			var owners_intersection = set (mswallet.owners).intersection (set (wallet.addresses));
-			if (len (owners_intersection) == 0) {
-				continue;
-			}
-			mswallet.add_owner_wallet (wallet);
-		}
 		if (py_update) {
 			wallet._update (self);
 		}
@@ -1279,19 +1327,13 @@ export var Account =  __class__ ('Account', [object], {
 		else {
 			self._validate_multisig_name (py_name);
 		}
-		var owner_wallets = [];
-		var sowners = set (owners);
-		for (var wallet of self._wallets) {
-			if (len (set (wallet.addresses).intersection (sowners)) > 0) {
-				owner_wallets.append (wallet);
-			}
-		}
-		if (len (owner_wallets) == 0) {
+		var authorized_owners = list (set (self.addresses_get (dict ({'multisig': false}))).intersection (owners));
+		if (len (authorized_owners) == 0) {
 			var __except0__ = ValueError ('at least one owner of the multisig wallet has to be owned by this account');
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		var wallet = MultiSignatureWallet (self, py_name, owners, signatures_required, owner_wallets, __kwargtrans__ ({balance: balance}));
+		var wallet = MultiSignatureWallet (self, py_name, owners, signatures_required, authorized_owners, __kwargtrans__ ({balance: balance}));
 		if (len (set (owners).intersection (set (self.addresses))) == 0) {
 			var __except0__ = ValueError ('at least one owner of the multisig wallet has to be owned by this account');
 			__except0__.__cause__ = null;
@@ -1391,15 +1433,15 @@ export var Account =  __class__ ('Account', [object], {
 		else {
 		}
 		var address = multisig_wallet_address_new (owners, signatures_required);
-		if (!__in__ (address, self.addresses_get (dict ({'singlesig': false})))) {
-			return self.multisig_wallet_new (py_name, owners, signatures_required);
-		}
 		if (py_name == null || py_name == '') {
 			var __except0__ = ValueError ('invalid name: {} ({})'.format (py_name, py_typeof (py_name)));
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
 		self._validate_multisig_name (py_name);
+		if (!__in__ (address, self.addresses_get (dict ({'singlesig': false})))) {
+			return self.multisig_wallet_new (py_name, owners, signatures_required);
+		}
 		var wallet = self.wallet_for_address (address, dict ({'singlesig': false}));
 		if (wallet == null) {
 			var __except0__ = RuntimeError ('bug: should always find the (ms) wallet at this point');
@@ -2647,7 +2689,7 @@ Object.defineProperty (SingleSignatureWallet, 'start_index', property.call (Sing
 Object.defineProperty (SingleSignatureWallet, 'wallet_index', property.call (SingleSignatureWallet, SingleSignatureWallet._get_wallet_index));;
 export var MultiSignatureWallet =  __class__ ('MultiSignatureWallet', [BaseWallet], {
 	__module__: __name__,
-	get __init__ () {return __get__ (this, function (self, account, wallet_name, owners, signatures_required, owner_wallets, balance) {
+	get __init__ () {return __get__ (this, function (self, account, wallet_name, owners, signatures_required, authorized_owners, balance) {
 		if (typeof balance == 'undefined' || (balance != null && balance.hasOwnProperty ("__kwargtrans__"))) {;
 			var balance = null;
 		};
@@ -2662,7 +2704,7 @@ export var MultiSignatureWallet =  __class__ ('MultiSignatureWallet', [BaseWalle
 						case 'wallet_name': var wallet_name = __allkwargs0__ [__attrib0__]; break;
 						case 'owners': var owners = __allkwargs0__ [__attrib0__]; break;
 						case 'signatures_required': var signatures_required = __allkwargs0__ [__attrib0__]; break;
-						case 'owner_wallets': var owner_wallets = __allkwargs0__ [__attrib0__]; break;
+						case 'authorized_owners': var authorized_owners = __allkwargs0__ [__attrib0__]; break;
 						case 'balance': var balance = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
@@ -2710,14 +2752,14 @@ export var MultiSignatureWallet =  __class__ ('MultiSignatureWallet', [BaseWalle
 			self._loaded = true;
 		}
 		self.balance = balance;
-		if (len (owner_wallets) == 0) {
+		if (len (authorized_owners) == 0) {
 			var __except0__ = ValueError ('expected at least one owner wallet');
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		self._owner_wallets = [];
-		for (var ow of owner_wallets) {
-			self.add_owner_wallet (ow);
+		self._authorized_owner_addresses = set ();
+		for (var owner of authorized_owners) {
+			self.add_authorized_owner (owner);
 		}
 	});},
 	get _address_getter () {return __get__ (this, function (self) {
@@ -2833,6 +2875,22 @@ export var MultiSignatureWallet =  __class__ ('MultiSignatureWallet', [BaseWalle
 		}
 		return self._owners;
 	});},
+	get _get_authorized_owners () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return list (self._authorized_owner_addresses);
+	});},
 	get _get_signatures_required () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -2904,7 +2962,8 @@ export var MultiSignatureWallet =  __class__ ('MultiSignatureWallet', [BaseWalle
 		}
 		else {
 		}
-		return MultiSignatureCoinTransactionBuilder (self, self._owner_wallets);
+		var owner_wallets = self._authorized_owners_get ();
+		return MultiSignatureCoinTransactionBuilder (self, owner_wallets);
 	});},
 	get transaction_sign () {return __get__ (this, function (self, transaction, balance) {
 		if (typeof balance == 'undefined' || (balance != null && balance.hasOwnProperty ("__kwargtrans__"))) {;
@@ -2925,8 +2984,9 @@ export var MultiSignatureWallet =  __class__ ('MultiSignatureWallet', [BaseWalle
 		}
 		else {
 		}
-		var first_signer = self._owner_wallets [0];
-		var other_signers = self._owner_wallets.__getslice__ (1, null, 1);
+		var owner_wallets = self._authorized_owners_get ();
+		var first_signer = owner_wallets [0];
+		var other_signers = owner_wallets.__getslice__ (1, null, 1);
 		if (balance == null) {
 			var balance = self._balance._tfbalance;
 		}
@@ -2936,7 +2996,7 @@ export var MultiSignatureWallet =  __class__ ('MultiSignatureWallet', [BaseWalle
 		}
 		return p;
 	});},
-	get add_owner_wallet () {return __get__ (this, function (self, wallet) {
+	get add_authorized_owner () {return __get__ (this, function (self, owner) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -2944,49 +3004,26 @@ export var MultiSignatureWallet =  __class__ ('MultiSignatureWallet', [BaseWalle
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'wallet': var wallet = __allkwargs0__ [__attrib0__]; break;
+						case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
 		}
 		else {
 		}
-		if (!(isinstance (wallet, SingleSignatureWallet))) {
-			var __except0__ = py_TypeError ('can only add SingleSignatureWallet as an owner wallet, invalid: {} ({})'.format (wallet, py_typeof (wallet)));
+		if (!(wallet_address_is_valid (owner, dict ({'multisig': false, 'nil': false})))) {
+			var __except0__ = ValueError ('MSWallet: add_authorized_owner: invalid owner address: {}'.format (owner));
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		for (var ow of self._owner_wallets) {
-			if (ow.wallet_name == wallet.wallet_name) {
-				return ;
-			}
-		}
-		if (len (set (wallet.addresses).intersection (set (self._owners))) == 0) {
-			var __except0__ = ValueError ("owner wallet {} has no addresses listed in this wallet's owners".format (wallet.wallet_name));
+		if (!__in__ (owner, self._owners)) {
+			var __except0__ = ValueError ('MSWallet: add_authorized_owner: address {} is not a valid owner for wallet {}'.format (owner, self.wallet_name));
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		self._owner_wallets.append (wallet);
-		var sort_by_wallet_index = function (a, b) {
-			if (arguments.length) {
-				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-					var __allkwargs0__ = arguments [__ilastarg0__--];
-					for (var __attrib0__ in __allkwargs0__) {
-						switch (__attrib0__) {
-							case 'a': var a = __allkwargs0__ [__attrib0__]; break;
-							case 'b': var b = __allkwargs0__ [__attrib0__]; break;
-						}
-					}
-				}
-			}
-			else {
-			}
-			return a.wallet_index - b.wallet_index;
-		};
-		self._owner_wallets = jsarr.py_sort (self._owner_wallets, sort_by_wallet_index);
+		self._authorized_owner_addresses.add (owner);
 	});},
-	get remove_owner_wallet () {return __get__ (this, function (self, wallet) {
+	get add_owner_if_authorized () {return __get__ (this, function (self, owner) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -2994,30 +3031,75 @@ export var MultiSignatureWallet =  __class__ ('MultiSignatureWallet', [BaseWalle
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'wallet': var wallet = __allkwargs0__ [__attrib0__]; break;
+						case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
 		}
 		else {
 		}
-		if (!(isinstance (wallet, SingleSignatureWallet))) {
-			var __except0__ = py_TypeError ('can only remove SingleSignatureWallet as an owner wallet, invalid: {} ({})'.format (wallet, py_typeof (wallet)));
+		if (!(wallet_address_is_valid (owner, dict ({'multisig': false, 'nil': false})))) {
+			var __except0__ = ValueError ('MSWallet: add_authorized_owner: invalid owner address: {}'.format (owner));
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		for (var [index, ow] of enumerate (self._owner_wallets)) {
-			if (ow.wallet_name != wallet.wallet_name) {
-				continue;
+		if (__in__ (owner, self._owners)) {
+			self._authorized_owner_addresses.add (owner);
+		}
+	});},
+	get remove_authorized_owner () {return __get__ (this, function (self, owner) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'owner': var owner = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
 			}
-			if (len (self._owner_wallets) == 1) {
-				var __except0__ = ValueError ('cannot remove owner wallet {} from multisig wallet {} as it is the sole owner within this account'.format (ow.wallet_name, self.wallet_name));
+		}
+		else {
+		}
+		if (!(wallet_address_is_valid (owner, dict ({'multisig': false, 'nil': false})))) {
+			var __except0__ = ValueError ('MSWallet: remove_authorized_owner: invalid owner address: {}'.format (owner));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		if (!__in__ (owner, self._authorized_owner_addresses)) {
+			return ;
+		}
+		if (len (self._authorized_owner_addresses) == 0) {
+			var __except0__ = ValueError ('MSWallet: remove_authorized_owner: cannot remove the only authorized owner ({}) left'.format (owner));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		self._authorized_owner_addresses.remove (owner);
+	});},
+	get has_other_authorized_addresses () {return __get__ (this, function (self, owners) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'owners': var owners = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		for (var owner of owners) {
+			if (!(wallet_address_is_valid (owner, dict ({'multisig': false, 'nil': false})))) {
+				var __except0__ = ValueError ('MSWallet: has_other_authorized_addresses: invalid owner address: {}'.format (owner));
 				__except0__.__cause__ = null;
 				throw __except0__;
 			}
-			jsarr.py_pop (self._owner_wallets, index);
-			break;
 		}
+		return len (self._authorized_owner_addresses.difference (owners)) > 0;
 	});},
 	get _update () {return __get__ (this, function (self, account) {
 		if (arguments.length) {
@@ -3084,9 +3166,32 @@ export var MultiSignatureWallet =  __class__ ('MultiSignatureWallet', [BaseWalle
 				self._balance._tfbalance.output_add (transaction, index, __kwargtrans__ ({confirmed: !(transaction.unconfirmed), spent: false}));
 			}
 		}
+	});},
+	get _authorized_owners_get () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return (function () {
+			var __accu0__ = [];
+			for (var owner of self._authorized_owner_addresses) {
+				__accu0__.append (self._account.wallet_get (dict ({'address': owner, 'multisig': false})));
+			}
+			return __accu0__;
+		}) ();
 	});}
 });
 Object.defineProperty (MultiSignatureWallet, 'signatures_required', property.call (MultiSignatureWallet, MultiSignatureWallet._get_signatures_required));
+Object.defineProperty (MultiSignatureWallet, 'authorized_owners', property.call (MultiSignatureWallet, MultiSignatureWallet._get_authorized_owners));
 Object.defineProperty (MultiSignatureWallet, 'owners', property.call (MultiSignatureWallet, MultiSignatureWallet._get_owners));;
 export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [object], {
 	__module__: __name__,
@@ -6364,13 +6469,18 @@ export var wallet_address_is_valid = function (address, opts) {
 	}
 	else {
 	}
-	var multisig = jsfunc.opts_get_with_defaults (opts, [tuple (['multisig', true])]);
+	var __left0__ = jsfunc.opts_get_with_defaults (opts, [tuple (['multisig', true]), tuple (['nil', true])]);
+	var multisig = __left0__ [0];
+	var nil = __left0__ [1];
 	try {
 		var uh = UnlockHash.from_str (address);
-		if (__in__ (uh.uhtype.value, tuple ([UnlockHashType.NIL.value, UnlockHashType.PUBLIC_KEY.value]))) {
+		if (nil && uh.uhtype.value == UnlockHashType.NIL.value) {
 			return true;
 		}
-		return multisig && uh.uhtype.value == UnlockHashType.MULTI_SIG.value;
+		if (multisig && uh.uhtype.value == UnlockHashType.MULTI_SIG.value) {
+			return true;
+		}
+		return uh.uhtype.value == UnlockHashType.PUBLIC_KEY.value;
 	}
 	catch (__except0__) {
 		if (isinstance (__except0__, Exception)) {

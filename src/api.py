@@ -549,6 +549,7 @@ class Account:
         """
         wallet = self._wallet_new(len(self._wallets), wallet_name, start_index, address_count, update=update)
         self._wallets.append(wallet)
+        self._add_addresses_as_owners_to_all_possible_multisig_wallets(wallet.addresses)
         return wallet
 
     def wallet_update(self, wallet_index, wallet_name, start_index, address_count, update=True):
@@ -559,22 +560,37 @@ class Account:
         if wallet_index < 0 or wallet_index >= len(self._wallets):
             raise ValueError("wallet index {} is out of range".format(wallet_index))
         wallet = self._wallets[wallet_index]
-        if wallet.start_index != start_index or wallet.address_count != address_count:
-            # remove the wallet from any multisig wallet it is part of
+        old_wallet_name = wallet.wallet_name
+        if wallet.start_index != start_index or wallet.address_count != address_count: # create a new wallet if needed
+            new_wallet = self._wallet_new(wallet_index, wallet_name, start_index, address_count, update=update)
+            # collect all ms wallets it was/is an owner from
+            old_wallet_addresses = set(new_wallet.addresses)
+            new_wallet_addresses = set(new_wallet.addresses)
+            mswallets = []
             for mswallet in self._multisig_wallets:
-                owners_intersection = set(mswallet.owners).intersection(set(wallet.addresses))
-                if len(owners_intersection) == 0:
-                    continue
-                mswallet.remove_owner_wallet(wallet)
-            # create new wallet
-            self._wallets[wallet_index] = self._wallet_new(wallet_index, wallet_name, start_index, address_count, update=update)
-            # update selected_wallet if this was it
-            swname = self.selected_wallet_name
-            if swname != None and swname == wallet.wallet_name:
-                self._selected_wallet = self._wallets[wallet_index]
-        else:
-            self._wallets[wallet_index].wallet_name = wallet_name
-        return self._wallets[wallet_index]
+                owners = set(mswallet.owners)
+                if len(old_wallet_addresses.intersection(owners)) == 0:
+                    continue # skip if not relevant
+                # ensure we can update the address set
+                if not mswallet.has_other_authorized_addresses(old_wallet_addresses) and len(new_wallet_addresses.intersection(owners)) == 0:
+                    raise ValueError("cannot update address set of wallet {} as it is still owner of MultiSig Wallet {}".format(wallet.wallet_name, mswallet.wallet_name or mswallet.address))
+                mswallets.append(mswallet)
+            # update all collected ms wallets, as we now know it is valid to do so
+            for mswallet in mswallets:
+                # remove the addresses no longer in the new address set
+                for address in old_wallet_addresses.difference(new_wallet_addresses):
+                    mswallet.remove_authorized_owner(address)
+            wallet = new_wallet
+            self._wallets[wallet_index] = wallet
+        else: # update just the name
+            wallet.wallet_name = wallet_name
+        # update selected_wallet if this was it
+        swname = self.selected_wallet_name
+        if swname != None and swname == old_wallet_name:
+            self._selected_wallet = wallet
+        # add all addresses possible to all ms wallets
+        self._add_addresses_as_owners_to_all_possible_multisig_wallets(wallet.addresses)
+        return wallet # return the wallet
 
     def wallet_delete(self, wallet_index, wallet_name):
         # validate params
@@ -588,19 +604,40 @@ class Account:
             raise ValueError("invalid wallet name {}, does not match the wallet at the given wallet index {}".format(wallet_name, wallet_index))
         # ensure the wallet is not used by any multisig wallet
         wallet_to_delete = self._wallets[wallet_index]
-        # remove the wallet from any multisig wallet it is part of
+        # collect all ms wallets it was/is an owner from
+        wallet_addresses = set(wallet_to_delete.addresses)
+        mswallets = []
         for mswallet in self._multisig_wallets:
-            owners_intersection = set(mswallet.owners).intersection(set(wallet_to_delete.addresses))
-            if len(owners_intersection) == 0:
-                continue
-            mswallet.remove_owner_wallet(wallet_to_delete)
+            owners = set(mswallet.owners)
+            if len(wallet_addresses.intersection(owners)) == 0:
+                continue # skip if not relevant
+            # ensure we can update the address set
+            if not mswallet.has_other_authorized_addresses(wallet_addresses):
+                raise ValueError("cannot update address set of wallet {} as it is still owner of MultiSig Wallet {}".format(wallet_to_delete.wallet_name, mswallet.wallet_name or mswallet.address))
+            mswallets.append(mswallet)
+        # update all collected ms wallets, as we now know it is valid to do so
+        for mswallet in mswallets:
+            for address in wallet_addresses:
+                mswallet.remove_authorized_owner(address)
         # delete the wallet
         jsarr.pop(self._wallets, wallet_index)
-        # update wallet indexes of other wallets if there are beyond this wallet
+        # update selected_wallet if this was it
+        swname = self.selected_wallet_name
+        if swname != None and swname == wallet_to_delete.wallet_name:
+            self._selected_wallet = None
+        # update wallet indexes of other wallets if they are beyond this wallet
         if wallet_index != self.wallet_count:
             for wallet in self._wallets[wallet_index:]:
                 wallet._wallet_index -= 1
         # return nothing
+
+    def _add_addresses_as_owners_to_all_possible_multisig_wallets(self, addresses):
+        """
+        Utility function to add all addresses as owners, for a new wallet
+        """
+        for mswallet in self._multisig_wallets:
+            for address in addresses:
+                mswallet.add_owner_if_authorized(address)
 
     def _wallet_new(self, wallet_index, wallet_name, start_index, address_count, update=True):
         start_index = max(start_index, 0)
@@ -612,12 +649,6 @@ class Account:
             pairs.append(pair)
         wallet = SingleSignatureWallet(self, wallet_index, wallet_name, start_index, pairs)
         self._validate_wallet_state(wallet)
-        # add the wallet to any multisig wallet it is part of (and is not added to yet)
-        for mswallet in self._multisig_wallets:
-            owners_intersection = set(mswallet.owners).intersection(set(wallet.addresses))
-            if len(owners_intersection) == 0:
-                continue
-            mswallet.add_owner_wallet(wallet)
         # fetch wallet balance in background
         if update:
             wallet._update(self)
@@ -657,16 +688,12 @@ class Account:
         else:
             # ensure the name is not yet used
             self._validate_multisig_name(name)
-        # fetch all owners
-        owner_wallets = []
-        sowners = set(owners)
-        for wallet in self._wallets:
-            if len(set(wallet.addresses).intersection(sowners)) > 0:
-                owner_wallets.append(wallet)
-        if len(owner_wallets) == 0:
+        # fetch all authorized owner addresses
+        authorized_owners = list(set(self.addresses_get({'multisig': False})).intersection(owners))
+        if len(authorized_owners) == 0:
             raise ValueError("at least one owner of the multisig wallet has to be owned by this account")
         # create the wallet info (also validates the parameters)
-        wallet = MultiSignatureWallet(self, name, owners, signatures_required, owner_wallets, balance=balance)
+        wallet = MultiSignatureWallet(self, name, owners, signatures_required, authorized_owners, balance=balance)
         # ensure at least one owner is part of our balances
         if len(set(owners).intersection(set(self.addresses))) == 0:
             raise ValueError("at least one owner of the multisig wallet has to be owned by this account")
@@ -701,14 +728,14 @@ class Account:
 
     def multisig_wallet_update(self, name, owners, signatures_required):
         """
-        Delete (name=None||"") or update the name for an address.
+        Update the name for a multisig wallet or create a new multisig wallet.
         """
         address = multisig_wallet_address_new(owners, signatures_required)
-        if address not in self.addresses_get({'singlesig': False}):
-            return self.multisig_wallet_new(name, owners, signatures_required)
         if name == None or name == '':
             raise ValueError("invalid name: {} ({})".format(name, type(name)))
         self._validate_multisig_name(name)
+        if address not in self.addresses_get({'singlesig': False}):
+            return self.multisig_wallet_new(name, owners, signatures_required)
         wallet = self.wallet_for_address(address, {'singlesig': False})
         if wallet == None:
             raise RuntimeError("bug: should always find the (ms) wallet at this point")
@@ -1125,7 +1152,7 @@ class SingleSignatureWallet(BaseWallet):
 
 
 class MultiSignatureWallet(BaseWallet):
-    def __init__(self, account, wallet_name, owners, signatures_required, owner_wallets, balance=None):
+    def __init__(self, account, wallet_name, owners, signatures_required, authorized_owners, balance=None):
         # init base class
         super().__init__(wallet_name)
         # init this class
@@ -1144,12 +1171,12 @@ class MultiSignatureWallet(BaseWallet):
         if balance != None:
             self._loaded = True
         self.balance = balance
-        if len(owner_wallets) == 0:
+        if len(authorized_owners) == 0:
             raise ValueError("expected at least one owner wallet")
         # add all owner wallets
-        self._owner_wallets = []
-        for ow in owner_wallets:
-            self.add_owner_wallet(ow)
+        self._authorized_owner_addresses = set()
+        for owner in authorized_owners:
+            self.add_authorized_owner(owner)
 
     def _address_getter(self):
         return self._address
@@ -1177,6 +1204,10 @@ class MultiSignatureWallet(BaseWallet):
         return self._owners
 
     @property
+    def authorized_owners(self):
+        return list(self._authorized_owner_addresses)
+
+    @property
     def signatures_required(self):
         return self._signatures_required
 
@@ -1197,11 +1228,13 @@ class MultiSignatureWallet(BaseWallet):
         )
 
     def transaction_new(self):
-        return MultiSignatureCoinTransactionBuilder(self, self._owner_wallets)
+        owner_wallets = self._authorized_owners_get()
+        return MultiSignatureCoinTransactionBuilder(self, owner_wallets)
 
     def transaction_sign(self, transaction, balance=None):
-        first_signer = self._owner_wallets[0]
-        other_signers = self._owner_wallets[1:]
+        owner_wallets = self._authorized_owners_get()
+        first_signer = owner_wallets[0]
+        other_signers = owner_wallets[1:]
         if balance == None:
             balance = self._balance._tfbalance
         p = first_signer.transaction_sign(transaction, balance=balance)
@@ -1209,30 +1242,33 @@ class MultiSignatureWallet(BaseWallet):
             p = jsasync.chain(p, _create_signer_cb_for_wallet(signer, balance=balance))
         return p
 
-    def add_owner_wallet(self, wallet):
-        if not isinstance(wallet, SingleSignatureWallet):
-            raise TypeError("can only add SingleSignatureWallet as an owner wallet, invalid: {} ({})".format(wallet, type(wallet)))
-        for ow in self._owner_wallets:
-            if ow.wallet_name == wallet.wallet_name:
-                return # already part of this ms wallet
-        if len(set(wallet.addresses).intersection(set(self._owners))) == 0:
-            raise ValueError("owner wallet {} has no addresses listed in this wallet's owners".format(wallet.wallet_name))
-        self._owner_wallets.append(wallet)
-        # sort owners by wallet index
-        def sort_by_wallet_index(a, b):
-            return a.wallet_index - b.wallet_index
-        self._owner_wallets = jsarr.sort(self._owner_wallets, sort_by_wallet_index) 
+    def add_authorized_owner(self, owner):
+        if not wallet_address_is_valid(owner, {'multisig': False, 'nil': False}):
+            raise ValueError("MSWallet: add_authorized_owner: invalid owner address: {}".format(owner))
+        if owner not in self._owners:
+            raise ValueError("MSWallet: add_authorized_owner: address {} is not a valid owner for wallet {}".format(owner, self.wallet_name))
+        self._authorized_owner_addresses.add(owner)
 
-    def remove_owner_wallet(self, wallet):
-        if not isinstance(wallet, SingleSignatureWallet):
-            raise TypeError("can only remove SingleSignatureWallet as an owner wallet, invalid: {} ({})".format(wallet, type(wallet)))
-        for index, ow in enumerate(self._owner_wallets):
-            if ow.wallet_name != wallet.wallet_name:
-                continue
-            if len(self._owner_wallets) == 1:
-                raise ValueError("cannot remove owner wallet {} from multisig wallet {} as it is the sole owner within this account".format(ow.wallet_name, self.wallet_name))
-            jsarr.pop(self._owner_wallets, index)
-            break
+    def add_owner_if_authorized(self, owner):
+        if not wallet_address_is_valid(owner, {'multisig': False, 'nil': False}):
+            raise ValueError("MSWallet: add_authorized_owner: invalid owner address: {}".format(owner))
+        if owner in self._owners:
+            self._authorized_owner_addresses.add(owner)
+
+    def remove_authorized_owner(self, owner):
+        if not wallet_address_is_valid(owner, {'multisig': False, 'nil': False}):
+            raise ValueError("MSWallet: remove_authorized_owner: invalid owner address: {}".format(owner))
+        if owner not in self._authorized_owner_addresses:
+            return # nop op, not important
+        if len(self._authorized_owner_addresses) == 0:
+            raise ValueError("MSWallet: remove_authorized_owner: cannot remove the only authorized owner ({}) left".format(owner))
+        self._authorized_owner_addresses.remove(owner)
+
+    def has_other_authorized_addresses(self, owners):
+        for owner in owners:
+            if not wallet_address_is_valid(owner, {'multisig': False, 'nil': False}):
+                raise ValueError("MSWallet: has_other_authorized_addresses: invalid owner address: {}".format(owner))
+        return len(self._authorized_owner_addresses.difference(owners)) > 0
 
     def _update(self, account):
         def cb(result):
@@ -1252,6 +1288,9 @@ class MultiSignatureWallet(BaseWallet):
             uhstr = co.condition.unlockhash.__str__()
             if uhstr == address:
                 self._balance._tfbalance.output_add(transaction, index, confirmed=(not transaction.unconfirmed), spent=False)
+
+    def _authorized_owners_get(self):
+        return [self._account.wallet_get({'address': owner, 'multisig': False}) for owner in self._authorized_owner_addresses]
 
 
 class CoinTransactionBuilder:
@@ -2515,14 +2554,17 @@ def wallet_address_is_valid(address, opts=None):
     :returns: True if the mnemonic is valid, False otherwise
     :rtype: bool 
     """
-    multisig = jsfunc.opts_get_with_defaults(opts, [
+    multisig, nil = jsfunc.opts_get_with_defaults(opts, [
         ('multisig', True),
+        ('nil', True),
     ])
     try:
         uh = UnlockHash.from_str(address)
-        if uh.uhtype.value in (UnlockHashType.NIL.value, UnlockHashType.PUBLIC_KEY.value):
+        if nil and uh.uhtype.value == UnlockHashType.NIL.value:
             return True
-        return multisig and uh.uhtype.value == UnlockHashType.MULTI_SIG.value
+        if multisig and uh.uhtype.value == UnlockHashType.MULTI_SIG.value:
+            return True
+        return uh.uhtype.value == UnlockHashType.PUBLIC_KEY.value
     except Exception:
         return False
 
