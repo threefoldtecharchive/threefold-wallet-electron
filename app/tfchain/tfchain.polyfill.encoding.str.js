@@ -562,13 +562,34 @@ export var compare = function (a, b) {
 	}
 	else {
 	}
-	if (a < b) {
+	if (a == null) {
+		return (b == null ? 0 : 1);
+	}
+	else if (b == null) {
 		return -(1);
 	}
-	if (b < a) {
-		return 1;
+	var out = 0;
+	
+	    out = a.localeCompare(b, { sensitivity: 'base' })
+	    
+	return out;
+};
+export var equal = function (a, b) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'a': var a = __allkwargs0__ [__attrib0__]; break;
+					case 'b': var b = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
 	}
-	return 0;
+	else {
+	}
+	return compare (a, b) == 0;
 };
 export var String =  __class__ ('String', [object], {
 	__module__: __name__,

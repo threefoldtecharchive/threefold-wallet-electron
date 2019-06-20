@@ -245,7 +245,7 @@ export var Account =  __class__ ('Account', [object], {
 		}
 		else {
 		}
-		if (!(isinstance (value, str)) || value == '') {
+		if (!(isinstance (value, str)) || jsstr.equal (value, '')) {
 			var __except0__ = py_TypeError ('value has to be a non-empty str, invalid: {} ({})'.format (value, py_typeof (value)));
 			__except0__.__cause__ = null;
 			throw __except0__;
@@ -638,14 +638,14 @@ export var Account =  __class__ ('Account', [object], {
 		var multisig = __left0__ [1];
 		if (singlesig) {
 			for (var wallet of self._wallets) {
-				if (wallet.wallet_name == py_name) {
+				if (jsstr.equal (wallet.wallet_name, py_name)) {
 					return wallet;
 				}
 			}
 		}
 		if (multisig) {
 			for (var wallet of self._multisig_wallets) {
-				if (wallet.wallet_name == py_name) {
+				if (jsstr.equal (wallet.wallet_name, py_name)) {
 					return wallet;
 				}
 			}
@@ -683,7 +683,7 @@ export var Account =  __class__ ('Account', [object], {
 		}
 		if (multisig) {
 			for (var wallet of self._multisig_wallets) {
-				if (wallet.address == address) {
+				if (jsstr.equal (wallet.address, address)) {
 					return wallet;
 				}
 			}
@@ -1046,7 +1046,7 @@ export var Account =  __class__ ('Account', [object], {
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		if (!(isinstance (wallet_name, str)) || wallet_name == '') {
+		if (!(isinstance (wallet_name, str)) || jsstr.equal (wallet_name, '')) {
 			var __except0__ = py_TypeError ('wallet name has to be an non empty str, invalid: {} ({})'.format (wallet_name, py_typeof (wallet_name)));
 			__except0__.__cause__ = null;
 			throw __except0__;
@@ -1087,7 +1087,7 @@ export var Account =  __class__ ('Account', [object], {
 			wallet.wallet_name = wallet_name;
 		}
 		var swname = self.selected_wallet_name;
-		if (swname != null && swname == old_wallet_name) {
+		if (swname != null && jsstr.equal (swname, old_wallet_name)) {
 			self._selected_wallet = wallet;
 		}
 		self._add_addresses_as_owners_to_all_possible_multisig_wallets (wallet.addresses);
@@ -1114,7 +1114,7 @@ export var Account =  __class__ ('Account', [object], {
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		if (!(isinstance (wallet_name, str)) || wallet_name == '') {
+		if (!(isinstance (wallet_name, str)) || jsstr.equal (wallet_name, '')) {
 			var __except0__ = py_TypeError ('wallet name has to be an non empty str, invalid: {} ({})'.format (wallet_name, py_typeof (wallet_name)));
 			__except0__.__cause__ = null;
 			throw __except0__;
@@ -1151,7 +1151,7 @@ export var Account =  __class__ ('Account', [object], {
 		}
 		jsarr.py_pop (self._wallets, wallet_index);
 		var swname = self.selected_wallet_name;
-		if (swname != null && swname == wallet_to_delete.wallet_name) {
+		if (swname != null && jsstr.equal (swname, wallet_to_delete.wallet_name)) {
 			self._selected_wallet = null;
 		}
 		if (wallet_index != self.wallet_count) {
@@ -1237,7 +1237,7 @@ export var Account =  __class__ ('Account', [object], {
 			if (wallet.wallet_index == candidate.wallet_index) {
 				continue;
 			}
-			if (wallet.wallet_name && candidate.wallet_name && wallet.wallet_name == candidate.wallet_name) {
+			if (wallet.wallet_name && candidate.wallet_name && jsstr.equal (wallet.wallet_name, candidate.wallet_name)) {
 				var __except0__ = ValueError ('a wallet already exists with wallet_name {}'.format (candidate.wallet_name));
 				__except0__.__cause__ = null;
 				throw __except0__;
@@ -1249,7 +1249,7 @@ export var Account =  __class__ ('Account', [object], {
 			}
 		}
 		for (var mswallet of self._multisig_wallets) {
-			if (mswallet.wallet_name != null && candidate.wallet_name != null && mswallet.wallet_name == candidate.wallet_name) {
+			if (mswallet.wallet_name != null && candidate.wallet_name != null && jsstr.equal (mswallet.wallet_name, candidate.wallet_name)) {
 				var __except0__ = ValueError ('a multisig wallet with the name {} is already stored in this account'.format (candidate.wallet_name));
 				__except0__.__cause__ = null;
 				throw __except0__;
@@ -1433,7 +1433,7 @@ export var Account =  __class__ ('Account', [object], {
 		else {
 		}
 		var address = multisig_wallet_address_new (owners, signatures_required);
-		if (py_name == null || py_name == '') {
+		if (py_name == null || jsstr.equal (py_name, '')) {
 			var __except0__ = ValueError ('invalid name: {} ({})'.format (py_name, py_typeof (py_name)));
 			__except0__.__cause__ = null;
 			throw __except0__;
@@ -1467,9 +1467,9 @@ export var Account =  __class__ ('Account', [object], {
 		else {
 		}
 		for (var [index, wallet] of enumerate (self._multisig_wallets)) {
-			if (wallet.address == address) {
+			if (jsstr.equal (wallet.address, address)) {
 				var swalletname = self.selected_wallet_name;
-				if (swalletname != null && swalletname == wallet.wallet_name) {
+				if (swalletname != null && jsstr.equal (swalletname, wallet.wallet_name)) {
 					self._selected_wallet = null;
 				}
 				jsarr.py_pop (self._multisig_wallets, index);
@@ -3156,13 +3156,13 @@ export var MultiSignatureWallet =  __class__ ('MultiSignatureWallet', [BaseWalle
 				continue;
 			}
 			var uhstr = ci.parent_output.condition.unlockhash.__str__ ();
-			if (uhstr == address) {
+			if (jsstr.equal (uhstr, address)) {
 				self._balance._tfbalance.output_add (transaction, index, __kwargtrans__ ({confirmed: !(transaction.unconfirmed), spent: true}));
 			}
 		}
 		for (var [index, co] of enumerate (transaction.coin_outputs)) {
 			var uhstr = co.condition.unlockhash.__str__ ();
-			if (uhstr == address) {
+			if (jsstr.equal (uhstr, address)) {
 				self._balance._tfbalance.output_add (transaction, index, __kwargtrans__ ({confirmed: !(transaction.unconfirmed), spent: false}));
 			}
 		}
@@ -4065,7 +4065,7 @@ export var MultiSignatureBalance =  __class__ ('MultiSignatureBalance', [Balance
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		if (value == '') {
+		if (jsstr.equal (value, '')) {
 			var __except0__ = ValueError ('wallet name cannot be empty');
 			__except0__.__cause__ = null;
 			throw __except0__;
@@ -5016,7 +5016,7 @@ export var Currency =  __class__ ('Currency', [object], {
 		else if (isinstance (unit, bool)) {
 			var unit = (unit ? 'TFT' : null);
 		}
-		else if (unit == '') {
+		else if (jsstr.equal (unit, '')) {
 			var unit = null;
 		}
 		if (group == null) {
@@ -5032,7 +5032,7 @@ export var Currency =  __class__ ('Currency', [object], {
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		else if (decimal == null || decimal == '') {
+		else if (decimal == null || jsstr.equal (decimal, '')) {
 			var decimal = '.';
 		}
 		if (group == decimal) {
@@ -5662,7 +5662,7 @@ export var AddressBook =  __class__ ('AddressBook', [object], {
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		if (py_name == '') {
+		if (jsstr.equal (py_name, '')) {
 			var __except0__ = ValueError ('contact_get: contact name cannot be empty');
 			__except0__.__cause__ = null;
 			throw __except0__;
@@ -5797,7 +5797,7 @@ export var AddressBook =  __class__ ('AddressBook', [object], {
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		if (py_name == '') {
+		if (jsstr.equal (py_name, '')) {
 			var __except0__ = ValueError ('contact_update: contact name cannot be empty');
 			__except0__.__cause__ = null;
 			throw __except0__;
@@ -5857,7 +5857,7 @@ export var AddressBook =  __class__ ('AddressBook', [object], {
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		if (py_name == '') {
+		if (jsstr.equal (py_name, '')) {
 			var __except0__ = ValueError ('contact_delete: contact name cannot be empty');
 			__except0__.__cause__ = null;
 			throw __except0__;

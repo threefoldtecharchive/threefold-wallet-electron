@@ -200,7 +200,7 @@ class Account:
         return self._account_name
     @account_name.setter
     def account_name(self, value):
-        if not isinstance(value, str) or value == '':
+        if not isinstance(value, str) or jsstr.equal(value, ''):
             raise TypeError("value has to be a non-empty str, invalid: {} ({})".format(value, type(value)))
         self._previous_account_name = self._account_name
         self._account_name = value
@@ -378,11 +378,11 @@ class Account:
         ])
         if singlesig:
             for wallet in self._wallets:
-                if wallet.wallet_name == name:
+                if jsstr.equal(wallet.wallet_name, name):
                     return wallet
         if multisig:
             for wallet in self._multisig_wallets:
-                if wallet.wallet_name == name:
+                if jsstr.equal(wallet.wallet_name, name):
                     return wallet
         return None
 
@@ -397,7 +397,7 @@ class Account:
                     return wallet
         if multisig:
             for wallet in self._multisig_wallets:
-                if wallet.address == address:
+                if jsstr.equal(wallet.address, address):
                     return wallet
         return None
 
@@ -555,7 +555,7 @@ class Account:
     def wallet_update(self, wallet_index, wallet_name, start_index, address_count, update=True):
         if not isinstance(wallet_index, int):
             raise TypeError("wallet index has to be an integer, not be of type {}".format(type(wallet_index)))
-        if not isinstance(wallet_name, str) or wallet_name == '':
+        if not isinstance(wallet_name, str) or jsstr.equal(wallet_name, ''):
             raise TypeError("wallet name has to be an non empty str, invalid: {} ({})".format(wallet_name, type(wallet_name)))
         if wallet_index < 0 or wallet_index >= len(self._wallets):
             raise ValueError("wallet index {} is out of range".format(wallet_index))
@@ -586,7 +586,7 @@ class Account:
             wallet.wallet_name = wallet_name
         # update selected_wallet if this was it
         swname = self.selected_wallet_name
-        if swname != None and swname == old_wallet_name:
+        if swname != None and jsstr.equal(swname, old_wallet_name):
             self._selected_wallet = wallet
         # add all addresses possible to all ms wallets
         self._add_addresses_as_owners_to_all_possible_multisig_wallets(wallet.addresses)
@@ -596,7 +596,7 @@ class Account:
         # validate params
         if not isinstance(wallet_index, int):
             raise TypeError("wallet index has to be an integer, not be of type {}".format(type(wallet_index)))
-        if not isinstance(wallet_name, str) or wallet_name == '':
+        if not isinstance(wallet_name, str) or jsstr.equal(wallet_name, ''):
             raise TypeError("wallet name has to be an non empty str, invalid: {} ({})".format(wallet_name, type(wallet_name)))
         if wallet_index < 0 or wallet_index >= self.wallet_count:
             raise ValueError("wallet index {} is out of range".format(wallet_index))
@@ -623,7 +623,7 @@ class Account:
         jsarr.pop(self._wallets, wallet_index)
         # update selected_wallet if this was it
         swname = self.selected_wallet_name
-        if swname != None and swname == wallet_to_delete.wallet_name:
+        if swname != None and jsstr.equal(swname, wallet_to_delete.wallet_name):
             self._selected_wallet = None
         # update wallet indexes of other wallets if they are beyond this wallet
         if wallet_index != self.wallet_count:
@@ -659,13 +659,13 @@ class Account:
         for wallet in self._wallets:
             if wallet.wallet_index == candidate.wallet_index:
                 continue
-            if wallet.wallet_name and candidate.wallet_name and wallet.wallet_name == candidate.wallet_name:
+            if wallet.wallet_name and candidate.wallet_name and jsstr.equal(wallet.wallet_name, candidate.wallet_name):
                 raise ValueError("a wallet already exists with wallet_name {}".format(candidate.wallet_name))
             if len(addresses_set.intersection(set(wallet.addresses))) != 0:
                 raise ValueError("cannot use addresses for wallet {} as it overlaps with the addresses of wallet {}".format(candidate.wallet_name, wallet.wallet_name))
         # ensure also no name conflcits with multisig wallets
         for mswallet in self._multisig_wallets:
-            if mswallet.wallet_name != None and candidate.wallet_name != None and mswallet.wallet_name == candidate.wallet_name:
+            if mswallet.wallet_name != None and candidate.wallet_name != None and jsstr.equal(mswallet.wallet_name, candidate.wallet_name):
                 raise ValueError("a multisig wallet with the name {} is already stored in this account".format(candidate.wallet_name))
 
     def multisig_wallet_new(self, name, owners, signatures_required, update=True):
@@ -731,7 +731,7 @@ class Account:
         Update the name for a multisig wallet or create a new multisig wallet.
         """
         address = multisig_wallet_address_new(owners, signatures_required)
-        if name == None or name == '':
+        if name == None or jsstr.equal(name, ''):
             raise ValueError("invalid name: {} ({})".format(name, type(name)))
         self._validate_multisig_name(name)
         if address not in self.addresses_get({'singlesig': False}):
@@ -744,9 +744,9 @@ class Account:
 
     def multisig_wallet_delete(self, address):
         for index, wallet in enumerate(self._multisig_wallets):
-            if wallet.address == address:
+            if jsstr.equal(wallet.address, address):
                 swalletname = self.selected_wallet_name
-                if swalletname != None and swalletname == wallet.wallet_name:
+                if swalletname != None and jsstr.equal(swalletname, wallet.wallet_name):
                     self._selected_wallet = None
                 jsarr.pop(self._multisig_wallets, index)
                 return
@@ -1282,11 +1282,11 @@ class MultiSignatureWallet(BaseWallet):
             if ci.parent_output == None:
                 continue
             uhstr = ci.parent_output.condition.unlockhash.__str__()
-            if uhstr == address:
+            if jsstr.equal(uhstr, address):
                 self._balance._tfbalance.output_add(transaction, index, confirmed=(not transaction.unconfirmed), spent=True)
         for index, co in enumerate(transaction.coin_outputs):
             uhstr = co.condition.unlockhash.__str__()
-            if uhstr == address:
+            if jsstr.equal(uhstr, address):
                 self._balance._tfbalance.output_add(transaction, index, confirmed=(not transaction.unconfirmed), spent=False)
 
     def _authorized_owners_get(self):
@@ -1578,7 +1578,7 @@ class MultiSignatureBalance(Balance):
     def _wallet_name_setter(self, value):
         if not isinstance(value, str):
             raise TypeError("wallet name has to be a str, invalid {} ({})".format(value, type(value)))
-        if value == "":
+        if jsstr.equal(value, ""):
             raise ValueError("wallet name cannot be empty")
         self._wallet_name = value
 
@@ -2047,7 +2047,7 @@ class Currency:
             raise TypeError("unit has to be None, a bool or a non-empty str, invalid type: {}".format(type(unit)))
         elif isinstance(unit, bool):
             unit = 'TFT' if unit else None
-        elif unit == '':
+        elif jsstr.equal(unit, ''):
             unit = None
         # validate group option
         if group == None:
@@ -2057,7 +2057,7 @@ class Currency:
         # validate the decimal option
         if decimal != None and not isinstance(decimal, str):
             raise TypeError("decimal (separator) has to be None or a non-empty str, invalid type: {}".format(type(decimal)))
-        elif decimal == None or decimal == '':
+        elif decimal == None or jsstr.equal(decimal, ''):
             decimal = '.'
         if group == decimal:
             raise ValueError("group- and decimal separator cannot be the same character")
@@ -2268,7 +2268,7 @@ class AddressBook:
     def contact_get(self, name, opts=None):
         if not isinstance(name, str):
             raise TypeError("contact_get: contact name has to be of type str, invalid: {} ({})".format(name, type(name)))
-        if name == "":
+        if jsstr.equal(name, ""):
             raise ValueError("contact_get: contact name cannot be empty")
         singlesig, multisig = jsfunc.opts_get_with_defaults(opts, [
             ('singlesig', True),
@@ -2314,7 +2314,7 @@ class AddressBook:
     def contact_update(self, name, opts=None):
         if not isinstance(name, str):
             raise TypeError("contact_update: contact name has to be of type str, invalid: {} ({})".format(name, type(name)))
-        if name == "":
+        if jsstr.equal(name, ""):
             raise ValueError("contact_update: contact name cannot be empty")
         new_name, recipient = jsfunc.opts_get(opts, 'name', 'recipient')
         if new_name == None and recipient == None:
@@ -2345,7 +2345,7 @@ class AddressBook:
     def contact_delete(self, name):
         if not isinstance(name, str):
             raise TypeError("contact_delete: contact name has to be of type str, invalid: {} ({})".format(name, type(name)))
-        if name == "":
+        if jsstr.equal(name, ""):
             raise ValueError("contact_delete: contact name cannot be empty")
         if name in self._contacts:
             del self._contacts[name]

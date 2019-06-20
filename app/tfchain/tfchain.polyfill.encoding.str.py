@@ -191,12 +191,18 @@ def join(arr, sep):
     return s
 
 def compare(a, b):
-    if a < b:
+    if a == None:
+        return 0 if b == None else 1
+    elif b == None:
         return -1
-    if b < a:
-        return 1
-    return 0
+    out = 0
+    __pragma__("js", "{}", """
+    out = a.localeCompare(b, { sensitivity: 'base' })
+    """)
+    return out
 
+def equal(a, b):
+    return compare(a, b) == 0
 
 class String:
     """
