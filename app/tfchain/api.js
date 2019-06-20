@@ -2,6 +2,7 @@ import {AssertionError, AttributeError, BaseException, DeprecationWarning, Excep
 import {Currency as TFCurrency} from './tfchain.types.PrimitiveTypes.js';
 import {ConditionMultiSignature, ConditionNil, ConditionUnlockHash, OutputLock, UnlockHash, UnlockHashType} from './tfchain.types.ConditionTypes.js';
 import * as ConditionTypes from './tfchain.types.ConditionTypes.js';
+import {datetime} from './datetime.js';
 import * as tfwallet from './tfchain.wallet.js';
 import * as tfclient from './tfchain.client.js';
 import * as wbalance from './tfchain.balance.js';
@@ -1576,7 +1577,7 @@ export var Account =  __class__ ('Account', [object], {
 			else {
 			}
 			self._loaded = true;
-			self._intermezzo_update_count = 0;
+			self._intermezzo_update_count = int (datetime.now ().timestamp ());
 			return self;
 		};
 		if (itcb == null) {

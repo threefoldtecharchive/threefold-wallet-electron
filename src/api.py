@@ -23,6 +23,8 @@ import tfchain.balance as wbalance
 import tfchain.client as tfclient
 import tfchain.wallet as tfwallet
 
+from datetime import datetime
+
 from tfchain.types import ConditionTypes
 from tfchain.types.ConditionTypes import UnlockHash, UnlockHashType, OutputLock, ConditionNil, ConditionUnlockHash, ConditionMultiSignature
 from tfchain.types.PrimitiveTypes import Currency as TFCurrency
@@ -178,8 +180,8 @@ class Account:
     @property
     def intermezzo_update_count(self):
         """
-        :returns: The current update count (since last global account update)
-        :rtype: bool
+        :returns: The current update count (based on timestamp of last update)
+        :rtype: int
         """
         return self._intermezzo_update_count
 
@@ -813,7 +815,7 @@ class Account:
     def update_account(self, itcb=None):
         def cb_return_self():
             self._loaded = True
-            self._intermezzo_update_count = 0
+            self._intermezzo_update_count = int(datetime.now().timestamp())
             return self
         if itcb == None:
             def stub_cb(_, w):
