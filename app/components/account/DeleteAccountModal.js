@@ -20,14 +20,14 @@ const DeleteModal = ({ open, closeModal, name, handleDeleteAccountNameChange, de
     </Modal.Content>
     <Modal.Actions>
       <Button onClick={closeModal} negative>
-              No
+              Cancel
       </Button>
       <Button
         onClick={deleteAccount}
         positive
         labelPosition='right'
         icon='checkmark'
-        content='Yes'
+        content='Delete'
       />
     </Modal.Actions>
   </Modal>
