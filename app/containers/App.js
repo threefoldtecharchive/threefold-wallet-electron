@@ -39,9 +39,9 @@ class App extends Component {
     return (
       <React.Fragment>
         <Grid>
-          <Grid.Column width='4' style={{ paddingRight: 0 }}>
-            <div style={{ height: '100vh', background: 'linear-gradient(90deg, rgba(56,51,186,1) 0%, rgba(102,71,254,1) 100%)', overflow: 'auto', paddingBottom: 100 }}>
-              <Menu vertical style={{ width: '100%', background: 'linear-gradient(90deg, rgba(56,51,186,1) 0%, rgba(102,71,254,1) 100%)' }}>
+          <Grid.Column width='4' style={{ paddingRight: 0, borderRight: '1px solid grey' }}>
+            <div style={{ height: '100vh', background: '#1C1D31', overflow: 'auto', paddingBottom: 100 }}>
+              <Menu vertical style={{ width: '100%', background: '#1C1D31' }}>
                 <Menu.Item style={{ display: 'flex', marginTop: 40, marginBottom: 30 }}>
                   <img style={{ width: 75, height: 75 }} src={logo} />
                   <p style={{ fontFamily: 'SF UI Text Heavy', fontSize: 25, color: 'white', marginTop: 15, marginLeft: 20 }}>TFT Wallet</p>
@@ -53,7 +53,7 @@ class App extends Component {
                   onClick={this.handleItemClick}
                 >
                   <Icon style={iconStyle} name='grid layout' />
-                  Account
+                  <span>Account</span>
                 </Menu.Item>
                 <Menu.Item
                   style={menuItemStyle}
@@ -62,7 +62,7 @@ class App extends Component {
                   onClick={this.handleItemClick}
                 >
                   <Icon style={iconStyle} name='send' />
-                  Send
+                  <span>Send</span>
                 </Menu.Item>
                 <Menu.Item
                   style={menuItemStyle}
@@ -71,7 +71,7 @@ class App extends Component {
                   onClick={this.handleItemClick}
                 >
                   <Icon style={iconStyle} name='arrow circle left' />
-                  Receive
+                  <span>Receive</span>
                 </Menu.Item>
                 <Menu.Item
                   style={menuItemStyle}
@@ -80,7 +80,7 @@ class App extends Component {
                   onClick={this.handleItemClick}
                 >
                   <Icon style={iconStyle} name='check circle' />
-                  Sign Transaction
+                  <span>Sign Transaction</span>
                 </Menu.Item>
                 <Divider style={{ margin: 0 }} />
                 <Menu.Item
@@ -90,7 +90,7 @@ class App extends Component {
                   onClick={this.handleItemClick}
                 >
                   <Icon style={iconStyle} name='settings' />
-                  Settings
+                  <span>Settings</span>
                 </Menu.Item>
                 <Menu.Item
                   style={menuItemStyle}
@@ -99,7 +99,7 @@ class App extends Component {
                   onClick={this.handleItemClick}
                 >
                   <Icon style={iconStyle} name='sign-out' />
-                  Logout
+                  <span>Logout</span>
                 </Menu.Item>
               </Menu>
             </div>

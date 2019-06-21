@@ -38,6 +38,22 @@
   margin-bottom: 20px !important;
 }
 
+.gradientTitle {
+  text-transform: uppercase;
+	background: linear-gradient(to right, #7f88df 0%, #49d2d8 100%);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+  font-size: 28px;
+  margin-bottom: 0px;
+  margin-top: 0px;
+}
+
+.walletArrow {
+  background: linear-gradient(to right, #7f88df 0%, #49d2d8 100%) !important;
+	-webkit-background-clip: text !important;
+	-webkit-text-fill-color: transparent !important;
+}
+
 .pageGoBack {
   margin-left: 3%;
 }

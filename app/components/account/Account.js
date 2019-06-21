@@ -1,12 +1,27 @@
 // @flow
 import { connect } from 'react-redux'
 import React, { Component } from 'react'
-import { Segment, Icon, Divider, Card, Loader, Dimmer } from 'semantic-ui-react'
+import { Segment, Icon, Divider, Card, Loader, Dimmer, Grid } from 'semantic-ui-react'
 import routes from '../../constants/routes'
 import { updateAccount } from '../../actions'
 import styles from '../home/Home.css'
 import Footer from '../footer'
 import { truncate } from 'lodash'
+
+const cardStyle = {
+  margin: 'auto',
+  height: 180,
+  width: 350,
+  marginBottom: 30,
+  marginTop: 0,
+  boxShadow: 'none',
+  background: '#1C1D31'
+}
+
+const createWalletCardStyle = {
+  ...cardStyle,
+  border: '1px solid #4f52d2'
+}
 
 const mapStateToProps = state => {
   if (!state.account.state) {
@@ -64,23 +79,20 @@ class Account extends Component {
     let isOneOrMoreUnconfirmed = account.balance.unconfirmed_coins_total.greater_than(0)
     return (
       <div style={{ margin: 'auto' }}>
-        <div style={{ display: 'flex', marginBottom: 10 }}>
-          <p style={{ fontFamily: 'Arial, Bold', fontSize: 12, textTransform: 'uppercase' }}>Wallets</p>
-          <Icon name='credit card outline' style={{ marginLeft: 10, marginTop: -2 }} />
+        <div style={{ background: 'linear-gradient(90deg, rgba(46,141,221,1) 0%, rgba(47,198,172,1) 100%)', width: '100%', textAlign: 'center', height: 50, paddingTop: 15, borderRadius: 2 }}>
+          <p style={{ fontFamily: 'SF UI Text Bold', fontSize: 16, textTransform: 'uppercase' }}>Personal Wallets</p>
         </div>
-        <Card.Group>
+        <Card.Group style={{ paddingLeft: 50, paddingRight: 50, paddingTop: 50 }}>
           {wallets.map(w => {
             return this.renderWalletContent(w)
           })}
           {this.renderCreateWalletCard(false)}
         </Card.Group>
         {isOneOrMoreUnconfirmed ? (<p style={{ fontSize: 12, marginBottom: 30, marginLeft: 25 }}>Wallet balance amounts with (*) have unconfirmed balances</p>) : null}
-        <Divider style={{ marginTop: -20 }} />
-        <div style={{ display: 'flex', marginBottom: 10 }}>
-          <p style={{ fontFamily: 'Arial, Bold', fontSize: 12, textTransform: 'uppercase' }}>Multisig Wallets</p>
-          <Icon name='credit card outline' style={{ marginLeft: 10, marginTop: -2 }} />
+        <div style={{ background: 'linear-gradient(90deg, rgba(251,100,164,1) 0%, rgba(244,154,93,1) 100%)', width: '100%', textAlign: 'center', height: 50, paddingTop: 15, borderRadius: 2, marginTop: 20 }}>
+          <p style={{ fontFamily: 'SF UI Text Bold', fontSize: 16, textTransform: 'uppercase' }}>Multisig Wallets</p>
         </div>
-        <Card.Group >
+        <Card.Group style={{ paddingLeft: 50, paddingRight: 50, paddingTop: 30 }}>
           {multiSigWallets.map(w => {
             return this.renderWalletContent(w)
           })}
@@ -114,17 +126,17 @@ class Account extends Component {
                 <p style={{ fontSize: 14 }}>{w.signatures_required}/{w.owners.length}</p>
               </Card.Description>
             ) : null}
-            <Icon name='chevron right' style={{ position: 'absolute', right: 20, top: 135, fontSize: 25, opacity: '0.3', color: 'white' }} />
-            <Card.Description style={{ color: 'white', marginTop: 10, marginBottom: 10, fontFamily: 'SF UI Text Light', display: 'flex' }}>
+            <Icon className={styles.walletArrow} name='chevron right' style={{ position: 'absolute', right: 20, top: 135, fontSize: 25, opacity: '0.3', color: 'white' }} />
+            <Card.Description style={{ color: 'white', marginTop: 10, marginBottom: 10, fontFamily: 'SF UI Text Bold', display: 'flex' }}>
               <Icon name='unlock' style={{ fontSize: 16, marginLeft: 20 }} />
               <p style={{ marginLeft: 30, marginTop: -8 }}>{unlockedBalance}</p>
             </Card.Description>
-            <Card.Description style={{ textAlign: 'left', color: 'white', marginTop: 20, marginBottom: 10, fontFamily: 'SF UI Text Light', display: 'flex' }}>
+            <Card.Description style={{ textAlign: 'left', color: 'white', marginTop: 20, marginBottom: 10, fontFamily: 'SF UI Text Bold', display: 'flex' }}>
               <Icon name='lock' style={{ fontSize: 16, marginLeft: 20 }} />
               <p style={{ marginLeft: 30, marginTop: -8 }}>{lockedBalance}</p>
             </Card.Description>
             <Divider />
-            <Card.Header style={{ textAlign: 'center', color: 'white', fontSize: 18, textTransform: 'uppercase', marginTop: 20, fontFamily: 'SF UI Text Light' }}>
+            <Card.Header style={{ textAlign: 'center', color: 'white', fontSize: 16, marginTop: 20, fontFamily: 'SF UI Text Bold' }}>
               wallet {truncate(w.wallet_name, { length: 14 }) || truncate(w.address, { length: 14 })}
             </Card.Header>
           </div>
@@ -137,7 +149,7 @@ class Account extends Component {
       }
 
       return (
-        <Card key={w.wallet_name || w.address} style={{ boxShadow: 'none', height: 180, width: 350, marginTop: 0, marginRight: 20, marginBottom: 30, background: '#29272D' }} onClick={onClick}>
+        <Card key={w.wallet_name || w.address} style={cardStyle} onClick={onClick}>
           <Dimmer active={content == null}>
             <Loader />
           </Dimmer>
@@ -153,12 +165,12 @@ class Account extends Component {
       onClick = () => this.props.history.push(routes.WALLET_MULTI_NEW)
     }
     return (
-      <Card style={{ boxShadow: 'none', height: 180, width: 350, marginBottom: 60, marginTop: 0, background: 'linear-gradient(90deg, rgba(56,51,186,1) 0%, rgba(102,71,254,1) 100%)' }} onClick={onClick}>
+      <Card style={createWalletCardStyle} onClick={onClick}>
         <Card.Content style={{ textAlign: 'center' }}>
-          <Card.Header style={{ color: 'white', fontSize: 20, textTransform: 'uppercase', marginTop: 30, textAlign: 'center' }}>
+          <Card.Header style={{ color: 'white', fontFamily: 'SF UI Text Bold', fontSize: 16, textTransform: 'uppercase', marginTop: 30, textAlign: 'center' }}>
             {isMultisig ? 'Create multisig wallet' : 'Create wallet'}
           </Card.Header>
-          <Icon name='plus circle' style={{ position: 'absolute', left: 145, top: 110, fontSize: 40, opacity: '0.3' }} />
+          <Icon name='plus circle' style={{ position: 'absolute', left: 145, top: 110, fontSize: 40, color: '#4f52d2' }} />
         </Card.Content>
       </Card>
     )
@@ -178,31 +190,36 @@ class Account extends Component {
 
     if (this.props.is_loaded) {
       content = (
-        <div>
-          <div style={{ display: 'flex' }}>
-            <div style={{ width: '50%' }}>
-              <h3 style={{ color: 'white', marginTop: 0 }}>Total Balance</h3>
-              <h4 style={{ color: 'white', marginTop: 0 }}>{coinsTotal.str({ precision: 3 })} TFT</h4>
-              {unconfirmedTotalCoins.greater_than(0) ? (<span style={{ color: 'white', marginTop: 0, fontSize: 12 }}>* unconfirmed: {unconfirmedTotalCoins.str({ precision: 3 })} TFT</span>) : (<p />)}
-            </div>
-            <div style={{ width: '50%' }}>
-              <h4 style={{ color: 'white' }}><Icon name='lock' />Locked Balance</h4>
-              <h4 style={{ color: 'white', marginTop: 0 }}>{coinsLocked.str({ precision: 3 })}  TFT</h4>
-              {unconfirmedLockedCoins.greater_than(0) ? (<span style={{ color: 'white', marginTop: 0, fontSize: 12 }}>* unconfirmed: {unconfirmedLockedCoins.str({ precision: 3 })} TFT</span>) : (<p />)}
-              <h4 style={{ color: 'white' }}><Icon name='unlock' />Unlocked Balance</h4>
-              <h4 style={{ color: 'white', marginTop: 0, marginBottom: 0 }}>{coinsUnlocked.str({ precision: 3 })}  TFT</h4>
-              {unconfirmedUnlockedCoins.greater_than(0) ? (<span style={{ color: 'white', marginTop: 0, fontSize: 12 }}>* unconfirmed: {unconfirmedUnlockedCoins.str({ precision: 3 })} TFT </span>) : (<p />)}
-            </div>
-          </div>
-        </div>
+        <Grid columns='3'>
+          <Grid.Column style={{ textAlign: 'center' }}>
+            <h4 style={{ marginTop: 0 }}>Total Balance</h4>
+            <h4 className={styles.gradientTitle} >{coinsTotal.str({ precision: 3 })} TFT</h4>
+            {unconfirmedTotalCoins.greater_than(0) ? (<span style={{ color: 'white', fontSize: 12 }}>* unconfirmed: {unconfirmedTotalCoins.str({ precision: 3 })} TFT</span>) : (<p />)}
+          </Grid.Column>
+          <Grid.Column style={{ textAlign: 'center' }}>
+            <h4><Icon name='lock' />Locked Balance</h4>
+            <h4>{coinsLocked.str({ precision: 3 })}  TFT</h4>
+            {unconfirmedLockedCoins.greater_than(0) ? (<span style={{ color: 'white', fontSize: 12 }}>* unconfirmed: {unconfirmedLockedCoins.str({ precision: 3 })} TFT</span>) : (<p />)}
+          </Grid.Column>
+          <Grid.Column style={{ textAlign: 'center' }}>
+            <h4><Icon name='unlock' />Unlocked Balance</h4>
+            <h4 style={{ marginBottom: 0 }}>{coinsUnlocked.str({ precision: 3 })}  TFT</h4>
+            {unconfirmedUnlockedCoins.greater_than(0) ? (<span style={{ color: 'white', fontSize: 12 }}>* unconfirmed: {unconfirmedUnlockedCoins.str({ precision: 3 })} TFT </span>) : (<p />)}
+          </Grid.Column>
+        </Grid>
       )
     }
     return (
-      <Segment style={{ background: 'linear-gradient(90deg, rgba(51,55,186,1) 0%, rgba(71,122,254,1) 100%)', border: 'none' }}>
+      <Segment style={{ background: '#131421', border: 'none', paddingTop: 0, paddingLeft: 0, paddingRight: 0 }}>
         <Dimmer active={content == null}>
           <Loader />
         </Dimmer>
-        {content}
+        <div style={{ background: 'linear-gradient(90deg, rgba(102,60,198,1) 0%, rgba(169,92,202,1) 100%)', width: '100%', textAlign: 'center', height: 50, paddingTop: 15, borderRadius: 2 }}>
+          <p style={{ fontFamily: 'SF UI Text Bold', fontSize: 16, textTransform: 'uppercase' }}>Account Balance</p>
+        </div>
+        <div style={{ padding: 20 }}>
+          {content}
+        </div>
       </Segment>
     )
   }
@@ -225,7 +242,7 @@ class Account extends Component {
           <div style={{ margin: 'auto', width: '90%' }}>
             {this.renderAccountBalances()}
           </div>
-          <div style={{ margin: 'auto', width: '90%', marginTop: 20, paddingLeft: 50, paddingRight: 50, paddingTop: 20, background: '#1B1A1E' }}>
+          <div style={{ margin: 'auto', width: '90%', marginTop: 20, background: '#131421' }}>
             {this.renderWallets()}
           </div>
         </div>

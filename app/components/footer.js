@@ -43,7 +43,7 @@ class Footer extends Component {
     const tz = momentTz.tz.guess()
 
     return (
-      <div style={{ zIndex: 999, position: 'absolute', height: 70, bottom: 0, width: '100%', background: '#26242d', padding: 25 }}>
+      <div style={{ zIndex: 999, position: 'absolute', height: 70, bottom: 0, width: '100%', background: '#0C0C14', padding: 25 }}>
         {error || !chainConstants.chain_network
           ? <div>
             <Icon name='circle' style={{ color: 'red', marginLeft: 10 }} />
