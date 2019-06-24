@@ -1,7 +1,7 @@
 from tfchain.encoding.rivbin import RivineBinaryEncoder
 from tfchain.encoding.siabin import SiaBinaryEncoder
 
-from tfchain.types.PrimitiveTypes import Hash, Currency
+from tfchain.types.PrimitiveTypes import Hash, Currency, BinaryData
 from tfchain.types.IO import CoinOutput
 from tfchain.types import ConditionTypes
 
@@ -288,7 +288,7 @@ class TransactionBaseClass():
         """
         return self._custom_data_getter()
     def _custom_data_getter(self):
-        return bytes(jsarr.new_array(0))
+        return BinaryData(strencoding='base64')
     @data.setter
     def data(self, value):
         self._custom_data_setter(value)

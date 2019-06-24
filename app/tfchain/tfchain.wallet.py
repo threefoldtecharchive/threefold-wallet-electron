@@ -1767,7 +1767,7 @@ class CoinTransactionBuilder():
             txn.coin_inputs = inputs
 
             # if there is data to be added, add it as well
-            if data == None:
+            if data != None:
                 txn.data = data
 
             # generate the signature requests

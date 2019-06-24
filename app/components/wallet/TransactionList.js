@@ -186,6 +186,22 @@ function renderTransactionHeader (tx, explorerAddress, accountAddresses) {
           : (<p style={confirmedStyle}>Unconfirmed</p>)}
       </List.Header>
       {listItemDesc}
+      <div style={{ display: 'flex', margin: 1, marginRight: 10, justifyContent: 'space-between', marginLeft: 'auto' }}>
+        <List.Description style={listDescriptionStyle}>
+          <p style={{ fontSize: 14 }}>
+            {tx.sender ? (
+              <span>Sender Info: {tx.sender}</span>
+            ) : null }
+          </p>
+        </List.Description>
+        <List.Description style={listDescriptionStyle}>
+          <p style={{ fontSize: 14 }}>
+            {tx.message ? (
+              <span>Message: {tx.message}</span>
+            ) : null }
+          </p>
+        </List.Description>
+      </div>
     </div>
   )
 }

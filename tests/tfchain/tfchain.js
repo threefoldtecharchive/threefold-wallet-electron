@@ -1,4 +1,5 @@
 import * as tfchain from '../../app/tfchain/api.js'
+import { bytearray } from '../../app/tfchain/org.transcrypt.__runtime__.js';
 
 const _defs = {
   network: {
@@ -726,7 +727,89 @@ const _all = {
       // ... again, even if they do not exist
       addressBook.contact_delete('nope')
     })
+  },
+
+  decodeFormattedMessage: (assert) => {
+    const testCases = [
+      // arbitrary data
+      {
+        input: new Uint8Array([4, 2]),
+        output: '0x0402'
+      },
+      // no data
+      {
+        input: new Uint8Array(),
+        output: ''
+      },
+      {
+        input: null,
+        output: ''
+      },
+      // sender only
+      {
+        input: new Uint8Array([27, 82, 109, 220, 34, 150, 1, 8, 0].concat(chs('John Doe'))),
+        output: 'John Doe'
+      },
+      // message only
+      {
+        input: new Uint8Array([147, 38, 16, 162, 41, 240, 1, 0, 13].concat(chs('Hello, World!'))),
+        output: 'Hello, World!'
+      },
+      // sender + message
+      {
+        input: new Uint8Array([23, 134, 1, 29, 200, 154, 1, 8, 13].concat(chs('John Doe')).concat(chs('Hello, World!'))),
+        output: 'John Doe - Hello, World!'
+      }
+    ]
+    testCases.forEach(testCase => {
+      const output = tfchain.FormattedData.from_bin(testCase.input).str()
+      assert.equal(output, testCase.output)
+    })
+  },
+
+  encodeFormattedSenderMessageData: (assert) => {
+    const testCases = [
+      {
+        input: {
+          sender: null,
+          message: null
+        },
+        output: []
+      },
+      {
+        input: {
+          sender: 'John Doe',
+          message: null
+        },
+        output: new Uint8Array([27, 82, 109, 220, 34, 150, 1, 8, 0].concat(chs('John Doe')))
+      },
+      {
+        input: {
+          sender: null,
+          message: 'Hello, World!'
+        },
+        output: new Uint8Array([147, 38, 16, 162, 41, 240, 1, 0, 13].concat(chs('Hello, World!')))
+      },
+      {
+        input: {
+          sender: 'John Doe',
+          message: 'Hello, World!'
+        },
+        output: new Uint8Array([23, 134, 1, 29, 200, 154, 1, 8, 13].concat(chs('John Doe')).concat(chs('Hello, World!')))
+      }
+    ]
+    testCases.forEach(testCase => {
+      const data = tfchain.FormattedSenderMessageData(testCase.input.sender, testCase.input.message)
+      assert.equal(data.to_bin(), testCase.output)
+    })
   }
+}
+
+function ch (s) {
+  return s.charCodeAt(0)
+}
+function chs (s) {
+  return s.split('').map(c => ch(c))
 }
 
 const asserter = {

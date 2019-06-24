@@ -5,7 +5,7 @@ import * as jsobj from './tfchain.polyfill.encoding.object.js';
 import * as jsjson from './tfchain.polyfill.encoding.json.js';
 import * as ConditionTypes from './tfchain.types.ConditionTypes.js';
 import {CoinOutput} from './tfchain.types.IO.js';
-import {Currency, Hash} from './tfchain.types.PrimitiveTypes.js';
+import {BinaryData, Currency, Hash} from './tfchain.types.PrimitiveTypes.js';
 import {SiaBinaryEncoder} from './tfchain.encoding.siabin.js';
 import {RivineBinaryEncoder} from './tfchain.encoding.rivbin.js';
 var __name__ = 'tfchain.types.transactions.Base';
@@ -950,7 +950,7 @@ export var TransactionBaseClass =  __class__ ('TransactionBaseClass', [object], 
 		}
 		else {
 		}
-		return bytes (jsarr.new_array (0));
+		return BinaryData (__kwargtrans__ ({strencoding: 'base64'}));
 	});},
 	get _set_data () {return __get__ (this, function (self, value) {
 		if (arguments.length) {

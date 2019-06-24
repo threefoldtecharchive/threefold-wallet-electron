@@ -1,8 +1,11 @@
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __proxy__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, abs, all, any, assert, bool, bytearray, bytes, callable, chr, copy, deepcopy, delattr, dict, dir, divmod, enumerate, filter, float, getattr, hasattr, input, int, isinstance, issubclass, len, list, map, max, min, object, ord, pow, print, property, py_TypeError, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
+import {BinaryData} from './tfchain.types.PrimitiveTypes.js';
 import {Currency as TFCurrency} from './tfchain.types.PrimitiveTypes.js';
 import {ConditionMultiSignature, ConditionNil, ConditionUnlockHash, OutputLock, UnlockHash, UnlockHashType} from './tfchain.types.ConditionTypes.js';
 import * as ConditionTypes from './tfchain.types.ConditionTypes.js';
 import {datetime} from './datetime.js';
+import {SiaBinaryObjectEncoderBase} from './tfchain.encoding.siabin.js';
+import {RivineBinaryEncoder, RivineBinaryObjectEncoderBase} from './tfchain.encoding.rivbin.js';
 import * as tfwallet from './tfchain.wallet.js';
 import * as tfclient from './tfchain.client.js';
 import * as wbalance from './tfchain.balance.js';
@@ -3278,7 +3281,13 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 		}
 		else {
 		}
-		var data = jsfunc.opts_get (opts, 'data');
+		var __left0__ = jsfunc.opts_get (opts, 'message', 'sender', 'data');
+		var message = __left0__ [0];
+		var sender = __left0__ [1];
+		var data = __left0__ [2];
+		if (data == null && (message != null || sender != null)) {
+			var data = FormattedSenderMessageData (__kwargtrans__ ({sender: sender, message: message})).to_bin ();
+		}
 		var cb = function (result) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
@@ -3400,7 +3409,13 @@ export var MultiSignatureCoinTransactionBuilder =  __class__ ('MultiSignatureCoi
 		}
 		else {
 		}
-		var data = jsfunc.opts_get (opts, 'data');
+		var __left0__ = jsfunc.opts_get (opts, 'message', 'sender', 'data');
+		var message = __left0__ [0];
+		var sender = __left0__ [1];
+		var data = __left0__ [2];
+		if (data == null && (message != null || sender != null)) {
+			var data = FormattedSenderMessageData (__kwargtrans__ ({sender: sender, message: message})).to_bin ();
+		}
 		var balance = self._wallet.balance;
 		var tfbalance = balance._tfbalance;
 		var p = self._builder.send (__kwargtrans__ ({source: self._wallet.address, refund: self._wallet.address, data: data, balance: tfbalance}));
@@ -4313,9 +4328,40 @@ export var TransactionView =  __class__ ('TransactionView', [object], {
 		var __left0__ = aggregator.inputs_outputs_collect ();
 		var inputs = __left0__ [0];
 		var outputs = __left0__ [1];
-		return cls (identifier, height, transaction_order, timestamp, blockid, inputs, outputs);
+		var sender = '';
+		var message = '';
+		var raw_data = transaction.data.value;
+		if (len (raw_data) > 0) {
+			try {
+				var data = FormattedData.from_bin (raw_data);
+			}
+			catch (__except0__) {
+				if (isinstance (__except0__, Exception)) {
+					var e = __except0__;
+					jslog.debug ('error while decoding arbitrary data as raw data', raw_data, e);
+					var data = FormattedOpaqueData (raw_data);
+				}
+				else {
+					throw __except0__;
+				}
+			}
+			if (isinstance (data, FormattedSenderMessageData)) {
+				var sender = data.sender;
+				var message = data.message;
+			}
+			else {
+				var message = data.str ();
+			}
+		}
+		return cls (identifier, height, transaction_order, timestamp, blockid, inputs, outputs, __kwargtrans__ ({sender: sender, message: message}));
 	});},
-	get __init__ () {return __get__ (this, function (self, identifier, height, transaction_order, timestamp, blockid, inputs, outputs) {
+	get __init__ () {return __get__ (this, function (self, identifier, height, transaction_order, timestamp, blockid, inputs, outputs, sender, message) {
+		if (typeof sender == 'undefined' || (sender != null && sender.hasOwnProperty ("__kwargtrans__"))) {;
+			var sender = null;
+		};
+		if (typeof message == 'undefined' || (message != null && message.hasOwnProperty ("__kwargtrans__"))) {;
+			var message = null;
+		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -4330,6 +4376,8 @@ export var TransactionView =  __class__ ('TransactionView', [object], {
 						case 'blockid': var blockid = __allkwargs0__ [__attrib0__]; break;
 						case 'inputs': var inputs = __allkwargs0__ [__attrib0__]; break;
 						case 'outputs': var outputs = __allkwargs0__ [__attrib0__]; break;
+						case 'sender': var sender = __allkwargs0__ [__attrib0__]; break;
+						case 'message': var message = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
@@ -4361,6 +4409,16 @@ export var TransactionView =  __class__ ('TransactionView', [object], {
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
+		if (sender != null && !(isinstance (sender, str))) {
+			var __except0__ = py_TypeError ('sender is expected to be None or of type str, not be of type {}'.format (py_typeof (sender)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		if (message != null && !(isinstance (message, str))) {
+			var __except0__ = py_TypeError ('message is expected to be None or of type str, not be of type {}'.format (py_typeof (message)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
 		self._identifier = identifier;
 		self._height = height;
 		self._transaction_order = transaction_order;
@@ -4368,6 +4426,8 @@ export var TransactionView =  __class__ ('TransactionView', [object], {
 		self._blockid = blockid;
 		self._inputs = inputs;
 		self._outputs = outputs;
+		self._sender = sender;
+		self._message = message;
 	});},
 	get _get_identifier () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -4496,8 +4556,42 @@ export var TransactionView =  __class__ ('TransactionView', [object], {
 		else {
 		}
 		return self._outputs;
+	});},
+	get _get_sender () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._sender;
+	});},
+	get _get_message () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._message;
 	});}
 });
+Object.defineProperty (TransactionView, 'message', property.call (TransactionView, TransactionView._get_message));
+Object.defineProperty (TransactionView, 'sender', property.call (TransactionView, TransactionView._get_sender));
 Object.defineProperty (TransactionView, 'outputs', property.call (TransactionView, TransactionView._get_outputs));
 Object.defineProperty (TransactionView, 'inputs', property.call (TransactionView, TransactionView._get_inputs));
 Object.defineProperty (TransactionView, 'blockid', property.call (TransactionView, TransactionView._get_blockid));
@@ -5167,8 +5261,11 @@ export var Currency =  __class__ ('Currency', [object], {
 		if (value == null) {
 			self._value = TFCurrency ();
 		}
-		else if (isinstance (value, tuple ([int, float, TFCurrency]))) {
+		else if (isinstance (value, tuple ([int, TFCurrency]))) {
 			self._value = TFCurrency (__kwargtrans__ ({value: value}));
+		}
+		else if (isinstance (value, float)) {
+			self._value = Currency.from_str (jsstr.from_float (value))._value;
 		}
 		else if (isinstance (value, str)) {
 			self._value = Currency.from_str (value)._value;
@@ -5460,6 +5557,587 @@ export var Currency =  __class__ ('Currency', [object], {
 		return Currency (self._value.negate ());
 	});}
 });
+export var FormattedData =  __class__ ('FormattedData', [SiaBinaryObjectEncoderBase, RivineBinaryObjectEncoderBase], {
+	__module__: __name__,
+	Type: __class__ ('Type', [object], {
+		__module__: __name__,
+		get __init__ () {return __get__ (this, function (self, value) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+							case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+						}
+					}
+				}
+			}
+			else {
+			}
+			if (isinstance (value, AddressBookContactType)) {
+				var value = value.value;
+			}
+			if (!(isinstance (value, int))) {
+				var __except0__ = py_TypeError ('formatted data type value was expected to be an int, not be of type {}'.format (py_typeof (value)));
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
+			if (value < 0 || value > 2) {
+				var __except0__ = ValueError ('formatted data type out of range: {}'.format (value));
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
+			self._value = value;
+		});},
+		get _get_value () {return __get__ (this, function (self) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						}
+					}
+				}
+			}
+			else {
+			}
+			return self._value;
+		});},
+		get __eq__ () {return __get__ (this, function (self, other) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+							case 'other': var other = __allkwargs0__ [__attrib0__]; break;
+						}
+					}
+				}
+			}
+			else {
+			}
+			if (isinstance (other, FormattedData.Type)) {
+				return self.value == other.value;
+			}
+			return self.value == other;
+		});},
+		get __ne__ () {return __get__ (this, function (self, other) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+							case 'other': var other = __allkwargs0__ [__attrib0__]; break;
+						}
+					}
+				}
+			}
+			else {
+			}
+			return !(self.__eq__ (other));
+		});},
+		get __int__ () {return __get__ (this, function (self) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						}
+					}
+				}
+			}
+			else {
+			}
+			return self.value;
+		});}
+	}),
+	get from_bin () {return __getcm__ (this, function (cls, data) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+						case 'data': var data = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (data == null) {
+			FormattedOpaqueData (null);
+		}
+		if (len (data) < 7) {
+			return FormattedOpaqueData (data);
+		}
+		var expected_checksum = jshex.bytes_to_hex (jsarr.slice_array (data, 0, 6));
+		var content_data = jsarr.slice_array (data, 6);
+		var checksum = jshex.bytes_to_hex (jsarr.slice_array (jscrypto.blake2b (content_data), 0, 6));
+		if (!(jsstr.equal (expected_checksum, checksum))) {
+			var __except0__ = ValueError ('invalid FormattedData checksum: {}'.format (checksum));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		var dtype = int (content_data [0]);
+		var content_data = jsarr.slice_array (content_data, 1);
+		if (dtype == FormattedData.Type.TEXT_SENDER_MESSAGE.value) {
+			var out_data = FormattedSenderMessageData ();
+			out_data._binary_data_setter (content_data);
+			return out_data;
+		}
+		jslog.debug ('registering formatted data as opaque due to unknown format:', dtype, data);
+		return FormattedOpaqueData (data);
+	});},
+	get __init__ () {return __get__ (this, function (self, dtype) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'dtype': var dtype = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (!(isinstance (dtype, FormattedData.Type))) {
+			var __except0__ = py_TypeError ('invalid data type: {} ({})'.format (dtype, py_typeof (dtype)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		self._dtype = dtype;
+	});},
+	get str () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._str_getter ();
+	});},
+	get _str_getter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var __except0__ = NotImplementedError ('_str_getter is not yet implemented');
+		__except0__.__cause__ = null;
+		throw __except0__;
+	});},
+	get to_bin () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var enc = RivineBinaryEncoder ();
+		self.rivine_binary_encode (enc);
+		return enc.data;
+	});},
+	get _binary_data_getter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var __except0__ = NotImplementedError ('_binary_data_getter is not implemented');
+		__except0__.__cause__ = null;
+		throw __except0__;
+	});},
+	get _binary_data_setter () {return __get__ (this, function (self, data) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'data': var data = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var __except0__ = NotImplementedError ('_binary_data_setter is not implemented');
+		__except0__.__cause__ = null;
+		throw __except0__;
+	});},
+	get sia_binary_encode () {return __get__ (this, function (self, encoder) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'encoder': var encoder = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var enc = RivineBinaryEncoder ();
+		self.rivine_binary_encode (enc);
+		encoder.add_array (enc.data);
+	});},
+	get rivine_binary_encode () {return __get__ (this, function (self, encoder) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'encoder': var encoder = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (self._dtype.value == FormattedData.Type.OPAQUE.value) {
+			encoder.add_array (self._binary_data_getter ());
+			return ;
+		}
+		var data = self._binary_data_getter ();
+		if (len (data) == 0) {
+			return ;
+		}
+		var enc = RivineBinaryEncoder ();
+		enc.add_byte (self._dtype.value);
+		enc.add_array (data);
+		var checksum = jsarr.slice_array (jscrypto.blake2b (enc.data), 0, 6);
+		encoder.add_array (checksum);
+		encoder.add_byte (self._dtype.value);
+		encoder.add_array (data);
+	});}
+});
+Object.defineProperty (FormattedData.Type, 'value', property.call (FormattedData.Type, FormattedData.Type._get_value));;
+FormattedData.Type.OPAQUE = FormattedData.Type (0);
+FormattedData.Type.TEXT_SENDER_MESSAGE = FormattedData.Type (1);
+export var FormattedOpaqueData =  __class__ ('FormattedOpaqueData', [FormattedData], {
+	__module__: __name__,
+	get __init__ () {return __get__ (this, function (self, data) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'data': var data = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		__super__ (FormattedOpaqueData, '__init__') (self, FormattedData.Type.OPAQUE);
+		self._data = data;
+	});},
+	get _str_getter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (self._data == null || len (self._data) == 0) {
+			return '';
+		}
+		return '0x' + jshex.bytes_to_hex (self._data);
+	});},
+	get _binary_data_getter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._data;
+	});},
+	get _binary_data_setter () {return __get__ (this, function (self, data) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'data': var data = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		self._data = data;
+	});}
+});
+export var FormattedSenderMessageData =  __class__ ('FormattedSenderMessageData', [FormattedData], {
+	__module__: __name__,
+	get __init__ () {return __get__ (this, function (self, sender, message) {
+		if (typeof sender == 'undefined' || (sender != null && sender.hasOwnProperty ("__kwargtrans__"))) {;
+			var sender = null;
+		};
+		if (typeof message == 'undefined' || (message != null && message.hasOwnProperty ("__kwargtrans__"))) {;
+			var message = null;
+		};
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'sender': var sender = __allkwargs0__ [__attrib0__]; break;
+						case 'message': var message = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		__super__ (FormattedSenderMessageData, '__init__') (self, FormattedData.Type.TEXT_SENDER_MESSAGE);
+		if (sender != null && !(isinstance (sender, str))) {
+			var __except0__ = py_TypeError ('invalid sender: {} ({})'.format (sender, py_typeof (sender)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		if (message != null && !(isinstance (message, str))) {
+			var __except0__ = py_TypeError ('invalid message: {} ({})'.format (message, py_typeof (message)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		self._sender = sender || '';
+		self._message = message || '';
+	});},
+	get _get_sender () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._sender;
+	});},
+	get _get_message () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._message;
+	});},
+	get _str_getter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (self._sender != '') {
+			if (self._message != '') {
+				return (self._sender + ' - ') + self._message;
+			}
+			return self._sender;
+		}
+		return self._message;
+	});},
+	get _binary_data_getter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (!(self._sender) && !(self._message)) {
+			return bytearray ();
+		}
+		var enc = RivineBinaryEncoder ();
+		var sender = jsstr.to_utf8 (self._sender);
+		var lsender = len (sender);
+		enc.add_byte (lsender);
+		var message = jsstr.to_utf8 (self._message);
+		var lmessage = len (message);
+		enc.add_byte (lmessage);
+		if (lsender > 0) {
+			enc.add_array (sender);
+		}
+		if (lmessage > 0) {
+			enc.add_array (message);
+		}
+		return enc.data;
+	});},
+	get _binary_data_setter () {return __get__ (this, function (self, data) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'data': var data = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (len (data) == 0) {
+			self._sender = '';
+			self._message = '';
+			return ;
+		}
+		if (len (data) < 2) {
+			var __except0__ = ValueError ('invalid binary data set for FormattedSenderMessageData: {}'.format (data));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		var lsender = int (data [0]);
+		var lmessage = int (data [1]);
+		var ltotal = (lsender + lmessage) + 2;
+		if (ltotal != len (data)) {
+			jslog.debug ('invalid content data for FormattedSenderMessageData:', data);
+			var __except0__ = ValueError ('invalid binary data lenght (expected {}, but have {}): {}'.format (ltotal, len (data), data));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		if (lsender == 0) {
+			self._sender = '';
+		}
+		else {
+			var sender_data = jsarr.slice_array (data, 2, 2 + lsender);
+			try {
+				self._sender = jsstr.from_utf8 (sender_data);
+			}
+			catch (__except0__) {
+				if (isinstance (__except0__, Exception)) {
+					var e = __except0__;
+					jslog.debug ("error while decoding FormattedSenderMessageData's sender as UTF-8:", sender_data, e);
+					self._sender = jshex.bytes_to_hex (sender_data);
+				}
+				else {
+					throw __except0__;
+				}
+			}
+		}
+		if (lmessage == 0) {
+			self._message = '';
+		}
+		else {
+			var message_data = jsarr.slice_array (data, 2 + lsender, (2 + lsender) + lmessage);
+			try {
+				self._message = jsstr.from_utf8 (message_data);
+			}
+			catch (__except0__) {
+				if (isinstance (__except0__, Exception)) {
+					var e = __except0__;
+					jslog.debug ("error while decoding FormattedSenderMessageData's message as UTF-8:", message_data, e);
+					self._message = jshex.bytes_to_hex (message_data);
+				}
+				else {
+					throw __except0__;
+				}
+			}
+		}
+	});}
+});
+Object.defineProperty (FormattedSenderMessageData, 'message', property.call (FormattedSenderMessageData, FormattedSenderMessageData._get_message));
+Object.defineProperty (FormattedSenderMessageData, 'sender', property.call (FormattedSenderMessageData, FormattedSenderMessageData._get_sender));;
 export var AddressBook =  __class__ ('AddressBook', [object], {
 	__module__: __name__,
 	get _sort_contact_list_by_name_cb () {return function (a, b) {

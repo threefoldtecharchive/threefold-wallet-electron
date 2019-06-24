@@ -28,6 +28,15 @@ def from_utf8(bytes):
     """)
     return str
 
+def from_float(f):
+    if isinstance(f, float):
+        return str(f)
+    out = ""
+    __pragma__("js", "{}", """
+    out = f.toString()
+    """)
+    return out
+
 def zfill(s, n):
     if len(s) >= n:
         return s

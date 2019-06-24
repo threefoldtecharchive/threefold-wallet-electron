@@ -23,11 +23,15 @@ import tfchain.balance as wbalance
 import tfchain.client as tfclient
 import tfchain.wallet as tfwallet
 
+from tfchain.encoding.rivbin import RivineBinaryEncoder, RivineBinaryObjectEncoderBase
+from tfchain.encoding.siabin import SiaBinaryObjectEncoderBase
+
 from datetime import datetime
 
 from tfchain.types import ConditionTypes
 from tfchain.types.ConditionTypes import UnlockHash, UnlockHashType, OutputLock, ConditionNil, ConditionUnlockHash, ConditionMultiSignature
 from tfchain.types.PrimitiveTypes import Currency as TFCurrency
+from tfchain.types.PrimitiveTypes import BinaryData
 
 # BIP39 state object used for all Mnemonic purposes of this API
 __bip39 = bip39.Mnemonic()
@@ -1343,7 +1347,9 @@ class CoinTransactionBuilder:
 
         :returns: a promise that resolves with a transaction ID or rejects with an Exception
         """
-        data = jsfunc.opts_get(opts, 'data')
+        message, sender, data = jsfunc.opts_get(opts, 'message', 'sender', 'data')
+        if data == None and (message != None or sender != None):
+            data = FormattedSenderMessageData(sender=sender, message=message).to_bin()
         def cb(result):
             if result.submitted:
                 self._wallet._account._update_unconfirmed_account_balance_from_transaction(result.transaction)
@@ -1381,7 +1387,9 @@ class MultiSignatureCoinTransactionBuilder:
         return self
 
     def send(self, opts=None):
-        data = jsfunc.opts_get(opts, 'data')
+        message, sender, data = jsfunc.opts_get(opts, 'message', 'sender', 'data')
+        if data == None and (message != None or sender != None):
+            data = FormattedSenderMessageData(sender=sender, message=message).to_bin()
         balance = self._wallet.balance
         tfbalance = balance._tfbalance
         p = self._builder.send(
@@ -1709,10 +1717,26 @@ class TransactionView:
         # get all inputs and outputs
         inputs, outputs = aggregator.inputs_outputs_collect()
 
-        # return it all as a single view
-        return cls(identifier, height, transaction_order, timestamp, blockid, inputs, outputs)
+        # define sender and/or message
+        sender = ""
+        message = ""
+        raw_data = transaction.data.value
+        if len(raw_data) > 0:
+            try:
+                data = FormattedData.from_bin(raw_data)
+            except Exception as e:
+                jslog.debug("error while decoding arbitrary data as raw data", raw_data, e)
+                data = FormattedOpaqueData(raw_data)
+            if isinstance(data, FormattedSenderMessageData):
+                sender = data.sender
+                message = data.message
+            else:
+                message = data.str()
 
-    def __init__(self, identifier, height, transaction_order, timestamp, blockid, inputs, outputs):
+        # return it all as a single view
+        return cls(identifier, height, transaction_order, timestamp, blockid, inputs, outputs, sender=sender, message=message)
+
+    def __init__(self, identifier, height, transaction_order, timestamp, blockid, inputs, outputs, sender=None, message=None):
         if not isinstance(identifier, str):
             raise TypeError("identifier is expected to be of type str, not be of type {}".format(type(identifier)))
         if not isinstance(height, int):
@@ -1723,6 +1747,10 @@ class TransactionView:
             raise TypeError("timestamp is expected to be of type int, not be of type {}".format(type(timestamp)))
         if blockid != None and not isinstance(blockid, str):
             raise TypeError("blockid is expected to be None or of type str, not be of type {}".format(type(blockid)))
+        if sender != None and not isinstance(sender, str):
+            raise TypeError("sender is expected to be None or of type str, not be of type {}".format(type(sender)))
+        if message != None and not isinstance(message, str):
+            raise TypeError("message is expected to be None or of type str, not be of type {}".format(type(message)))
         self._identifier = identifier
         self._height = height
         self._transaction_order = transaction_order
@@ -1730,6 +1758,8 @@ class TransactionView:
         self._blockid = blockid
         self._inputs = inputs
         self._outputs = outputs
+        self._sender = sender
+        self._message = message
 
     @property
     def identifier(self):
@@ -1785,6 +1815,18 @@ class TransactionView:
         :rtype: list of CoinOutputViews
         """
         return self._outputs
+    @property
+    def sender(self):
+        """
+        :returns: the optional name of the sender
+        """
+        return self._sender
+    @property
+    def message(self):
+        """
+        :returns: the optional message of the sender
+        """
+        return self._message
 
 
 class WalletOutputAggregator:
@@ -2119,8 +2161,10 @@ class Currency:
     def __init__(self, value=None):
         if value == None:
             self._value = TFCurrency()
-        elif isinstance(value, (int, float, TFCurrency)):
+        elif isinstance(value, (int, TFCurrency)):
             self._value = TFCurrency(value=value)
+        elif isinstance(value, float):
+            self._value = Currency.from_str(jsstr.from_float(value))._value
         elif isinstance(value, str):
             self._value = Currency.from_str(value)._value
         elif isinstance(value, Currency):
@@ -2207,6 +2251,191 @@ class Currency:
 
     def negate(self):
         return Currency(self._value.negate())
+
+
+class FormattedData(SiaBinaryObjectEncoderBase, RivineBinaryObjectEncoderBase):
+    class Type:
+        def __init__(self, value):
+            if isinstance(value, AddressBookContactType):
+                value = value.value
+            if not isinstance(value, int):
+                raise TypeError("formatted data type value was expected to be an int, not be of type {}".format(type(value)))
+            if value < 0 or value > 2:
+                raise ValueError("formatted data type out of range: {}".format(value))
+            self._value = value
+
+        @property
+        def value(self):
+            return self._value
+
+        def __eq__(self, other):
+            if isinstance(other, FormattedData.Type):
+                return self.value == other.value
+            return self.value == other
+        def __ne__(self, other):
+            return not self.__eq__(other)
+
+        def __int__(self):
+            return self.value
+
+    @classmethod
+    def from_bin(cls, data):
+        if data == None:
+            FormattedOpaqueData(None)
+        if len(data) < 7:
+            return FormattedOpaqueData(data)
+        expected_checksum = jshex.bytes_to_hex(jsarr.slice_array(data, 0, 6))
+        content_data = jsarr.slice_array(data, 6)
+        checksum = jshex.bytes_to_hex(jsarr.slice_array(jscrypto.blake2b(content_data), 0, 6))
+        if not jsstr.equal(expected_checksum, checksum):
+            raise ValueError("invalid FormattedData checksum: {}".format(checksum))
+        dtype = int(content_data[0])
+        content_data = jsarr.slice_array(content_data, 1)
+        if dtype == FormattedData.Type.TEXT_SENDER_MESSAGE.value:
+            out_data = FormattedSenderMessageData()
+            out_data._binary_data_setter(content_data)
+            return out_data
+        jslog.debug("registering formatted data as opaque due to unknown format:", dtype, data)
+        return FormattedOpaqueData(data)
+
+    def __init__(self, dtype):
+        if not isinstance(dtype, FormattedData.Type):
+            raise TypeError("invalid data type: {} ({})".format(dtype, type(dtype)))
+        self._dtype = dtype
+    
+    def str(self):
+        return self._str_getter()
+    def _str_getter(self):
+        raise NotImplementedError("_str_getter is not yet implemented")
+
+    def to_bin(self):
+        enc = RivineBinaryEncoder()
+        self.rivine_binary_encode(enc)
+        return enc.data
+    
+    def _binary_data_getter(self):
+        raise NotImplementedError("_binary_data_getter is not implemented")
+    
+    def _binary_data_setter(self, data):
+        raise NotImplementedError("_binary_data_setter is not implemented")
+
+    def sia_binary_encode(self, encoder):
+        enc = RivineBinaryEncoder()
+        self.rivine_binary_encode(enc)
+        encoder.add_array(enc.data)
+
+    def rivine_binary_encode(self, encoder):
+        """
+        Encode this currency according to the Rivine Binary Encoding format.
+        """
+        if self._dtype.value == FormattedData.Type.OPAQUE.value:
+            encoder.add_array(self._binary_data_getter())
+            return
+        data = self._binary_data_getter()
+        if len(data) == 0:
+            return
+        enc = RivineBinaryEncoder()
+        enc.add_byte(self._dtype.value)
+        enc.add_array(data)
+        checksum = jsarr.slice_array(jscrypto.blake2b(enc.data), 0, 6)
+        encoder.add_array(checksum)
+        encoder.add_byte(self._dtype.value)
+        encoder.add_array(data)
+
+FormattedData.Type.OPAQUE = FormattedData.Type(0)
+FormattedData.Type.TEXT_SENDER_MESSAGE = FormattedData.Type(1)
+
+class FormattedOpaqueData(FormattedData):
+    def __init__(self, data):
+        super().__init__(FormattedData.Type.OPAQUE)
+        self._data = data
+    
+    def _str_getter(self):
+        if self._data == None or len(self._data) == 0:
+            return ""
+        return "0x" + jshex.bytes_to_hex(self._data)
+
+    def _binary_data_getter(self):
+        return self._data
+    
+    def _binary_data_setter(self, data):
+        self._data = data
+
+class FormattedSenderMessageData(FormattedData):
+    def __init__(self, sender=None, message=None):
+        super().__init__(FormattedData.Type.TEXT_SENDER_MESSAGE)
+        if sender != None and not isinstance(sender, str):
+            raise TypeError("invalid sender: {} ({})".format(sender, type(sender)))
+        if message != None and not isinstance(message, str):
+            raise TypeError("invalid message: {} ({})".format(message, type(message)))
+        self._sender = sender or ""
+        self._message = message or ""
+
+    @property
+    def sender(self):
+        return self._sender
+
+    @property
+    def message(self):
+        return self._message
+    
+    def _str_getter(self):
+        if self._sender != "":
+            if self._message != "":
+                return self._sender + " - " + self._message
+            return self._sender
+        return self._message
+
+    def _binary_data_getter(self):
+        if not self._sender and not self._message:
+            return bytearray()
+        enc = RivineBinaryEncoder()
+        sender = jsstr.to_utf8(self._sender)
+        lsender = len(sender)
+        enc.add_byte(lsender)
+        message = jsstr.to_utf8(self._message)
+        lmessage = len(message)
+        enc.add_byte(lmessage)
+        if lsender > 0:
+            enc.add_array(sender)
+        if lmessage > 0:
+            enc.add_array(message)
+        return enc.data
+    
+    def _binary_data_setter(self, data):
+        if len(data) == 0:
+            self._sender = ""
+            self._message = ""
+            return
+        if len(data) < 2:
+            raise ValueError("invalid binary data set for FormattedSenderMessageData: {}".format(data))
+        # get and ensure length
+        lsender = int(data[0])
+        lmessage = int(data[1])
+        ltotal = lsender + lmessage + 2
+        if ltotal != len(data):
+            jslog.debug("invalid content data for FormattedSenderMessageData:", data)
+            raise ValueError("invalid binary data lenght (expected {}, but have {}): {}".format(ltotal, len(data), data))
+        # decode sender
+        if lsender == 0:
+            self._sender = ""
+        else:
+            sender_data = jsarr.slice_array(data, 2, 2+lsender)
+            try:
+                self._sender = jsstr.from_utf8(sender_data)
+            except Exception as e:
+                jslog.debug("error while decoding FormattedSenderMessageData's sender as UTF-8:", sender_data, e)
+                self._sender = jshex.bytes_to_hex(sender_data)
+        # decode message
+        if lmessage == 0:
+            self._message = ""
+        else:
+            message_data = jsarr.slice_array(data, 2+lsender, 2+lsender+lmessage)
+            try:
+                self._message = jsstr.from_utf8(message_data)
+            except Exception as e:
+                jslog.debug("error while decoding FormattedSenderMessageData's message as UTF-8:", message_data, e)
+                self._message = jshex.bytes_to_hex(message_data)
 
 
 class AddressBook:

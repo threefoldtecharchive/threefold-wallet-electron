@@ -1070,7 +1070,7 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 			}
 			txn.miner_fee_add (miner_fee);
 			txn.coin_inputs = inputs;
-			if (data == null) {
+			if (data != null) {
 				txn.data = data;
 			}
 			var sig_requests = txn.signature_requests_new ();
