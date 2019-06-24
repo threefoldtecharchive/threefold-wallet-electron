@@ -5,6 +5,7 @@ import { account, accounts } from './account'
 import { routerLocations } from './router'
 import { transactions } from './transactions'
 import { error } from './error'
+import { reducer as formReducer } from 'redux-form'
 
 export default function createRootReducer (history) {
   return combineReducers({
@@ -13,6 +14,7 @@ export default function createRootReducer (history) {
     accounts,
     routerLocations,
     transactions,
-    error
+    error,
+    form: formReducer
   })
 }

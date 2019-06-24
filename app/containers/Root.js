@@ -4,6 +4,8 @@ import React, { Component } from 'react'
 import { ConnectedRouter } from 'connected-react-router'
 import Routes from '../Routes'
 import { loadAccounts, updateAccount, getTransactionsNotifications, setError } from '../actions'
+import Moment from 'moment'
+import momentLocalizer from 'react-widgets-moment'
 
 const os = require('os')
 const storage = require('electron-json-storage')
@@ -50,6 +52,9 @@ class Root extends Component {
     const dataPath = storage.getDefaultDataPath()
     const newPath = path.join(dataPath, '/tfchain/accounts')
     storage.setDataPath(newPath)
+
+    Moment.locale('nl-be')
+    momentLocalizer()
 
     // Load in accounts and put them in store
     const loadAccountsFromStorage = this.props.loadAccounts

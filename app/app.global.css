@@ -4,6 +4,7 @@
  */
 @import "~@fortawesome/fontawesome-free/css/all.css";
 @import '../node_modules/react-toastify/dist/ReactToastify.min.css';
+@import '../node_modules/react-widgets/dist/css/react-widgets.css';
 
 body {
   position: relative;

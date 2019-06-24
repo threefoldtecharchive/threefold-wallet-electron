@@ -5,14 +5,14 @@ const closeOnEscape = true
 
 class ConfirmationModal extends Component {
   render () {
-    const { open, closeModal, confirmTransaction, transactionType, selectedWallet, amount, owners, destination, signatureCount, datelock, timelock, selectedWalletRecipient, selectedRecipientAddress } = this.props
+    const { open, closeModal, confirmTransaction, transactionType, selectedWallet, amount, owners, destination, signatureCount, timestamp, selectedWalletRecipient, selectedRecipientAddress } = this.props
     return (
       <Modal open={open} closeOnEscape={closeOnEscape} onClose={closeModal}>
         <Modal.Header>Confirm transaction</Modal.Header>
         <Modal.Content image>
           <Modal.Description>
             <Header>Do you wish to confirm this transaction?</Header>
-            {renderModalBody(transactionType, selectedWallet, amount, owners, destination, signatureCount, timelock, datelock, selectedWalletRecipient, selectedRecipientAddress)}
+            {renderModalBody(transactionType, selectedWallet, amount, owners, destination, signatureCount, timestamp, selectedWalletRecipient, selectedRecipientAddress)}
           </Modal.Description>
         </Modal.Content>
         <Modal.Actions>
@@ -34,16 +34,14 @@ class ConfirmationModal extends Component {
 
 export default ConfirmationModal
 
-function renderModalBody (transactionType, selectedWallet, amount, owners, destination, signatureCount, timelock, datelock, selectedWalletRecipient, selectedRecipientAddress) {
+function renderModalBody (transactionType, selectedWallet, amount, owners, destination, signatureCount, timestamp, selectedWalletRecipient, selectedRecipientAddress) {
   if (!selectedWallet) {
     return null
   }
-  let timestamp
+
   let tz
-  if (datelock !== '') {
-    const concatDate = datelock + ' ' + timelock
-    const dateLockDate = new Date(concatDate).valueOf()
-    timestamp = moment(dateLockDate).format('MMMM Do YYYY, HH:mm')
+  if (timestamp) {
+    timestamp = moment(timestamp).format('MMMM Do YYYY, HH:mm')
     tz = moment.tz.guess()
   }
 

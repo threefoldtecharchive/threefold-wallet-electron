@@ -3780,7 +3780,7 @@ export var Balance =  __class__ ('Balance', [object], {
 		}
 		if (!(isinstance (amount, Currency))) {
 			try {
-				var amount = Currency.from_str (amount);
+				var amount = Currency (amount);
 			}
 			catch (__except0__) {
 				if (isinstance (__except0__, Exception)) {
@@ -5144,7 +5144,7 @@ export var Currency =  __class__ ('Currency', [object], {
 		if (group != '') {
 			var integer = jsstr.py_replace (integer, group, '');
 		}
-		return cls (jsstr.sprintf ('%s.%s', integer, fraction));
+		return cls (TFCurrency (__kwargtrans__ ({value: jsstr.sprintf ('%s.%s', integer, fraction)})));
 	});},
 	get __init__ () {return __get__ (this, function (self, value) {
 		if (typeof value == 'undefined' || (value != null && value.hasOwnProperty ("__kwargtrans__"))) {;
@@ -5167,8 +5167,11 @@ export var Currency =  __class__ ('Currency', [object], {
 		if (value == null) {
 			self._value = TFCurrency ();
 		}
-		else if (isinstance (value, tuple ([int, str, TFCurrency]))) {
+		else if (isinstance (value, tuple ([int, float, TFCurrency]))) {
 			self._value = TFCurrency (__kwargtrans__ ({value: value}));
+		}
+		else if (isinstance (value, str)) {
+			self._value = Currency.from_str (value)._value;
 		}
 		else if (isinstance (value, Currency)) {
 			self._value = TFCurrency (__kwargtrans__ ({value: value._value}));

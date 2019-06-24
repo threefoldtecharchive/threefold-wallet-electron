@@ -1495,7 +1495,7 @@ class Balance:
         # type-check and normalize amount (type)
         if not isinstance(amount, Currency):
             try:
-                amount = Currency.from_str(amount)
+                amount = Currency(amount)
             except Exception:
                 return False
         # ensure amount is strictly positive
@@ -2114,13 +2114,15 @@ class Currency:
         if group != '':
             integer = jsstr.replace(integer, group, '')
         # piggy-back on the regular TFCurrency logic
-        return cls(jsstr.sprintf('%s.%s', integer, fraction))
+        return cls(TFCurrency(value=jsstr.sprintf('%s.%s', integer, fraction)))
 
     def __init__(self, value=None):
         if value == None:
             self._value = TFCurrency()
-        elif isinstance(value, (int, str, TFCurrency)):
+        elif isinstance(value, (int, float, TFCurrency)):
             self._value = TFCurrency(value=value)
+        elif isinstance(value, str):
+            self._value = Currency.from_str(value)._value
         elif isinstance(value, Currency):
             self._value = TFCurrency(value=value._value)
         else:
