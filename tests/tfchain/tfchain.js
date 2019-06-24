@@ -57,6 +57,7 @@ const _all = {
     assert.equal(recoveredAccount.mnemonic, exampleMnemonic)
     assert.equal(recoveredAccount.seed, exampleEntropy)
     assert.equal(newAccount.network_type, 'standard')
+    assert.equal(newAccount.minimum_miner_fee.str(), '0.1')
     assert.true(newAccount.default_explorer_addresses_used)
     assert.equal(newAccount.explorer.explorer_addresses, _defs.network.standard.addresses)
     assert.equal(newAccount.wallets.length, 0) // wallets are not created by default

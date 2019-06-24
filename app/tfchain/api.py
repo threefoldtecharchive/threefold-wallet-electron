@@ -425,6 +425,13 @@ class Account:
         return self._network_type.__str__()
 
     @property
+    def minimum_miner_fee(self):
+        """
+        :returns: the minimum miner fee as a Currency Object
+        """
+        return Currency(self._network_type.minimum_miner_fee())
+
+    @property
     def explorer(self):
         """
         :returns: the raw explorer client that can be used for direct calls to the explorer (advancded users only)

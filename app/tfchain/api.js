@@ -729,6 +729,22 @@ export var Account =  __class__ ('Account', [object], {
 		}
 		return self._network_type.__str__ ();
 	});},
+	get _get_minimum_miner_fee () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return Currency (self._network_type.minimum_miner_fee ());
+	});},
 	get _get_explorer () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -1917,6 +1933,7 @@ Object.defineProperty (Account, 'wallet_count', property.call (Account, Account.
 Object.defineProperty (Account, 'multisig_wallets', property.call (Account, Account._get_multisig_wallets));
 Object.defineProperty (Account, 'wallets', property.call (Account, Account._get_wallets));
 Object.defineProperty (Account, 'explorer', property.call (Account, Account._get_explorer));
+Object.defineProperty (Account, 'minimum_miner_fee', property.call (Account, Account._get_minimum_miner_fee));
 Object.defineProperty (Account, 'network_type', property.call (Account, Account._get_network_type));
 Object.defineProperty (Account, 'wallet', property.call (Account, Account._get_wallet));
 Object.defineProperty (Account, 'selected_wallet', property.call (Account, Account._get_selected_wallet));
