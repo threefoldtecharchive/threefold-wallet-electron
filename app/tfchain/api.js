@@ -5900,6 +5900,11 @@ export var FormattedOpaqueData =  __class__ ('FormattedOpaqueData', [FormattedDa
 		else {
 		}
 		__super__ (FormattedOpaqueData, '__init__') (self, FormattedData.Type.OPAQUE);
+		if (data != null && !(jsarr.is_uint8_array (data))) {
+			var __except0__ = py_TypeError ('invalid opaque raw (non-)formatted data: {} ({})'.format (data, py_typeof (data)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
 		self._data = data;
 	});},
 	get _str_getter () {return __get__ (this, function (self) {
@@ -7143,6 +7148,50 @@ export var mnemonic_is_valid = function (mnemonic) {
 		if (isinstance (__except0__, Exception)) {
 			var e = __except0__;
 			jslog.debug (e);
+			return false;
+		}
+		else {
+			throw __except0__;
+		}
+	}
+};
+export var formatted_data_is_valid = function (opts) {
+	if (typeof opts == 'undefined' || (opts != null && opts.hasOwnProperty ("__kwargtrans__"))) {;
+		var opts = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'opts': var opts = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	var __left0__ = jsfunc.opts_get (opts, 'message', 'sender', 'data');
+	var message = __left0__ [0];
+	var sender = __left0__ [1];
+	var data = __left0__ [2];
+	try {
+		var fdata = null;
+		if (data != null) {
+			var fdata = FormattedOpaqueData (data);
+		}
+		else if (message != null || sender != null) {
+			var fdata = FormattedSenderMessageData (__kwargtrans__ ({sender: sender, message: message}));
+		}
+		else {
+			return true;
+		}
+		var bdata = fdata.to_bin ();
+		return len (bdata) <= 83;
+	}
+	catch (__except0__) {
+		if (isinstance (__except0__, Exception)) {
 			return false;
 		}
 		else {

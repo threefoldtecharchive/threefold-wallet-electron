@@ -2355,6 +2355,8 @@ FormattedData.Type.TEXT_SENDER_MESSAGE = FormattedData.Type(1)
 class FormattedOpaqueData(FormattedData):
     def __init__(self, data):
         super().__init__(FormattedData.Type.OPAQUE)
+        if data != None and not jsarr.is_uint8_array(data):
+            raise TypeError("invalid opaque raw (non-)formatted data: {} ({})".format(data, type(data)))
         self._data = data
     
     def _str_getter(self):
@@ -2784,6 +2786,28 @@ def mnemonic_is_valid(mnemonic):
     except Exception as e:
         jslog.debug(e)
         return False
+
+def formatted_data_is_valid(opts=None):
+    """
+    Validate if the given optional inputs can form a valid formatted data message.
+    Opaque raw data (data) takes precedence over sender/message data.
+    When encoded, the (formatted) data can maximum be 83 bytes of length.
+    :returns: True if the formatted data (when encoded) is valid, False otherwise
+    :rtype: bool
+    """
+    message, sender, data = jsfunc.opts_get(opts, 'message', 'sender', 'data')
+    try:
+        fdata = None
+        if data != None:
+            fdata = FormattedOpaqueData(data)
+        elif message != None or sender != None:
+            fdata = FormattedSenderMessageData(sender=sender, message=message)
+        else:
+            return True # no data is valid data
+        bdata = fdata.to_bin()
+        return len(bdata) <= 83 # arbitrary data can be max 83 bytes
+    except Exception:
+        return False # something is invalid
 
 def wallet_address_is_valid(address, opts=None):
     """

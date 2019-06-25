@@ -803,6 +803,49 @@ const _all = {
       const data = tfchain.FormattedSenderMessageData(testCase.input.sender, testCase.input.message)
       assert.equal(data.to_bin(), testCase.output)
     })
+  },
+
+  validateFormattedData: (assert) => {
+    const maxContentDataLength = 83 - 6 - 3
+    const testCases = [
+      // nil data
+      [true, {}],
+      // example formatted data
+      [true, { 'sender': 'John Doe' }],
+      [true, { 'message': 'Hello, World!' }],
+      [true, { 'sender': 'John Doe', 'message': 'Hello, World!' }],
+      // example raw data
+      [true, { 'data': new Uint8Array() }],
+      [true, { 'data': new Uint8Array([4, 2]) }],
+      // raw data has to be an Uint8Array
+      [false, { 'data': 'foo' }],
+      [false, { 'data': 42 }],
+      [false, { 'data': [1, 2, 3] }],
+      // data can not be longer than 83 bytes
+      [true, { 'data': new Uint8Array(new Array(83).fill(1)) }],
+      [false, { 'data': new Uint8Array(new Array(84).fill(1)) }],
+      [true, { 'sender': new Array(maxContentDataLength).fill('a').join('') }],
+      [false, { 'sender': new Array(maxContentDataLength + 1).fill('a').join('') }],
+      [true, { 'message': new Array(maxContentDataLength).fill('a').join('') }],
+      [false, { 'message': new Array(maxContentDataLength + 1).fill('a').join('') }],
+      [true, { 'sender': new Array(40).fill('a').join(''), 'message': new Array(maxContentDataLength - 40).fill('b').join('') }],
+      [true, { 'sender': new Array(maxContentDataLength - 35).fill('a').join(''), 'message': new Array(35).fill('b').join('') }],
+      [false, { 'sender': new Array(41).fill('a').join(''), 'message': new Array(maxContentDataLength - 40).fill('b').join('') }],
+      [false, { 'sender': new Array(maxContentDataLength - 35).fill('a').join(''), 'message': new Array(36).fill('b').join('') }],
+      [false, { 'sender': new Array(maxContentDataLength - 34).fill('a').join(''), 'message': new Array(36).fill('b').join('') }],
+      // unicode text is supported for sender/message content, as long as the binary-encoded version fits within the max allowed content data
+      [false, { 'sender': '吉温南完村止真購再備低護菱。静物書眼渡背従平通人。' }],
+      [true, { 'message': '吉温南完村止真購再備低護菱, 静物書眼渡背従平通人。' }],
+      [false, { 'message': '吉温南完村止真購再備低護菱。静物書眼渡背従平通人。' }],
+      [true, { 'sender': '吉温南完村止真購再', 'message': '備低護菱, 静物書眼渡背従平通人。' }],
+      [true, { 'message': '吉温南完村止真購再', 'sender': '備低護菱, 静物書眼渡背従平通人。' }],
+      [false, { 'sender': '吉温南完村止真購再。', 'message': '備低護菱, 静物書眼渡背従平通人。' }],
+      [false, { 'message': '吉温南完村止真購再。', 'sender': '備低護菱, 静物書眼渡背従平通人。' }]
+    ]
+    testCases.forEach(([expectedValidity, opts]) => {
+      const validity = tfchain.formatted_data_is_valid(opts)
+      assert.equal(validity, expectedValidity)
+    })
   }
 }
 
