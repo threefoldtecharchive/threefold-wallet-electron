@@ -82,7 +82,7 @@ export var Account =  __class__ ('Account', [object], {
 		var data = data.data;
 		var symmetric_key = jscrypto.SymmetricKey (password);
 		var payload = jsjson.json_loads (symmetric_key.decrypt (data.payload, jscrypto.RandomSymmetricEncryptionInput (data.iv, data.salt)));
-		if (account_name != payload ['account_name']) {
+		if (!(jsstr.equal (account_name, payload ['account_name']))) {
 			var __except0__ = ValueError ('account_name {} is unexpected, does not match account data'.format (account_name));
 			__except0__.__cause__ = null;
 			throw __except0__;
@@ -576,10 +576,10 @@ export var Account =  __class__ ('Account', [object], {
 		}
 		var name_defined = false;
 		var address_defined = false;
-		if (py_name != null && py_name != '') {
+		if (py_name != null && !(jsstr.equal (py_name, ''))) {
 			var name_defined = true;
 			var wallet = self.wallet_for_name (py_name, dict ({'singlesig': singlesig, 'multisig': multisig}));
-			if (address != null && address != '') {
+			if (address != null && !(jsstr.equal (address, ''))) {
 				if (!__in__ (address, wallet.addresses)) {
 					var __except0__ = ValueError ('found wallet for name {} but given address {} is not owned by wallet'.format (py_name, address));
 					__except0__.__cause__ = null;
@@ -590,10 +590,10 @@ export var Account =  __class__ ('Account', [object], {
 				return wallet;
 			}
 		}
-		if (address != null && address != '') {
+		if (address != null && !(jsstr.equal (address, ''))) {
 			var address_defined = true;
 			var wallet = self.wallet_for_address (address, dict ({'singlesig': singlesig, 'multisig': multisig}));
-			if (address != null && address != '') {
+			if (address != null && !(jsstr.equal (address, ''))) {
 				if (!__in__ (address, wallet.addresses)) {
 					var __except0__ = ValueError ('found wallet for name {} but given address {} is not owned by wallet'.format (py_name, address));
 					__except0__.__cause__ = null;
@@ -1424,13 +1424,13 @@ export var Account =  __class__ ('Account', [object], {
 		}
 		else {
 		}
-		if (a.wallet_name != '') {
-			if (b.wallet_name != '') {
+		if (!(jsstr.equal (a.wallet_name, ''))) {
+			if (!(jsstr.equal (b.wallet_name, ''))) {
 				return jsstr.compare (a.wallet_name, b.wallet_name);
 			}
 			return -(1);
 		}
-		if (b.wallet_name != '') {
+		if (!(jsstr.equal (b.wallet_name, ''))) {
 			return 1;
 		}
 		return jsstr.compare (a.address, b.address);
@@ -4008,7 +4008,7 @@ export var MultiSignatureBalance =  __class__ ('MultiSignatureBalance', [Balance
 		self._owners = owners;
 		self._signatures_required = signatures_required;
 		var address = multisig_wallet_address_new (self.owners, self.signatures_required);
-		if (address != self.address) {
+		if (!(jsstr.equal (address, self.address))) {
 			var __except0__ = RuntimeError ('BUG: (ms) address is {}, but expected it to be {}'.format (address, self.address));
 			__except0__.__cause__ = null;
 			throw __except0__;
@@ -5252,7 +5252,7 @@ export var Currency =  __class__ ('Currency', [object], {
 			var integer = s;
 			var fraction = '0';
 		}
-		if (group != '') {
+		if (!(jsstr.equal (group, ''))) {
 			var integer = jsstr.py_replace (integer, group, '');
 		}
 		return cls (TFCurrency (__kwargtrans__ ({value: jsstr.sprintf ('%s.%s', integer, fraction)})));
@@ -6044,8 +6044,8 @@ export var FormattedSenderMessageData =  __class__ ('FormattedSenderMessageData'
 		}
 		else {
 		}
-		if (self._sender != '') {
-			if (self._message != '') {
+		if (!(jsstr.equal (self._sender, ''))) {
+			if (!(jsstr.equal (self._message, ''))) {
 				return (self._sender + ' - ') + self._message;
 			}
 			return self._sender;
@@ -6536,7 +6536,7 @@ export var AddressBook =  __class__ ('AddressBook', [object], {
 			new_contact.contact_name = new_name;
 			self._contacts [new_name] = new_contact;
 		}
-		if (new_name != py_name) {
+		if (!(jsstr.equal (new_name, py_name))) {
 			delete self._contacts [py_name];
 		}
 		return self._contacts [new_name];

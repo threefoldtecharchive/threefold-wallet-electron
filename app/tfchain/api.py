@@ -86,7 +86,7 @@ class Account:
             data.payload, jscrypto.RandomSymmetricEncryptionInput(data.iv, data.salt)))
 
         # ensure the account name matches the name stored in the passed data
-        if account_name != payload['account_name']:
+        if not jsstr.equal(account_name, payload['account_name']):
             raise ValueError("account_name {} is unexpected, does not match account data".format(account_name))
         # restore the account
         account = cls(account_name, password, opts={
@@ -340,25 +340,25 @@ class Account:
         name_defined = False
         address_defined = False
         # if name is given, try to select by name
-        if name != None and name != "":
+        if name != None and not jsstr.equal(name, ""):
             name_defined = True
             wallet = self.wallet_for_name(name, {
                 'singlesig': singlesig,
                 'multisig': multisig,
             })
-            if address != None and address != "":
+            if address != None and not jsstr.equal(address, ""):
                 if address not in wallet.addresses:
                     raise ValueError("found wallet for name {} but given address {} is not owned by wallet".format(name, address))
             if wallet != None:
                 return wallet
         # if an address is given, try to select by address
-        if address != None and address != "":
+        if address != None and not jsstr.equal(address, ""):
             address_defined = True
             wallet = self.wallet_for_address(address, {
                 'singlesig': singlesig,
                 'multisig': multisig,
             })
-            if address != None and address != "":
+            if address != None and not jsstr.equal(address, ""):
                 if address not in wallet.addresses:
                     raise ValueError("found wallet for name {} but given address {} is not owned by wallet".format(name, address))
             if wallet != None:
@@ -731,11 +731,11 @@ class Account:
 
     @staticmethod
     def _sort_multisig_wallets_cb(a, b):
-        if a.wallet_name != "":
-            if b.wallet_name != "":
+        if not jsstr.equal(a.wallet_name, ""):
+            if not jsstr.equal(b.wallet_name, ""):
                 return jsstr.compare(a.wallet_name, b.wallet_name)
             return -1
-        if b.wallet_name != "":
+        if not jsstr.equal(b.wallet_name, ""):
             return 1
         return jsstr.compare(a.address, b.address)
 
@@ -1573,7 +1573,7 @@ class MultiSignatureBalance(Balance):
         self._signatures_required = signatures_required
         # validate address
         address = multisig_wallet_address_new(self.owners, self.signatures_required)
-        if address != self.address:
+        if not jsstr.equal(address, self.address):
             raise RuntimeError("BUG: (ms) address is {}, but expected it to be {}".format(address, self.address))
 
     @property
@@ -2160,7 +2160,7 @@ class Currency:
             integer = s
             fraction = '0'
         # remove group operator if it exists
-        if group != '':
+        if not jsstr.equal(group, ''):
             integer = jsstr.replace(integer, group, '')
         # piggy-back on the regular TFCurrency logic
         return cls(TFCurrency(value=jsstr.sprintf('%s.%s', integer, fraction)))
@@ -2389,8 +2389,8 @@ class FormattedSenderMessageData(FormattedData):
         return self._message
     
     def _str_getter(self):
-        if self._sender != "":
-            if self._message != "":
+        if not jsstr.equal(self._sender, ""):
+            if not jsstr.equal(self._message, ""):
                 return self._sender + " - " + self._message
             return self._sender
         return self._message
@@ -2579,7 +2579,7 @@ class AddressBook:
             new_contact = self._contacts[name]
             new_contact.contact_name = new_name
             self._contacts[new_name] = new_contact
-        if new_name != name:
+        if not jsstr.equal(new_name, name):
             # delete old contact if it used to exist under another name
             del self._contacts[name]
         return self._contacts[new_name]
