@@ -19,6 +19,7 @@ import WalletMultisig from './components/multisigwallet/MultiSigWallet'
 import WalletMultisigReceive from './components/multisigwallet/MultiSigReceive'
 import WalletMultisigSettings from './components/multisigwallet/MultiSigSettings'
 import HomeAndLogin from './containers/HomeAndLogin'
+import Addressbook from './components/addressbook/Addressbook'
 
 export default () => (
   <Switch>
@@ -58,6 +59,7 @@ const DefaultContainer = () => (
       <Route path={routes.SIGN} component={Sign} />
       <Route path={routes.SIGN_TRANSACTIONS} component={SignTransaction} />
       <Route path={routes.WALLET_NEW} component={NewWallet} />
+      <Route path={routes.ADDRESS_BOOK} component={Addressbook} />
     </Switch>
   </App>
 )

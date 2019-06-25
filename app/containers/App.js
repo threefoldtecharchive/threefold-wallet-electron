@@ -94,6 +94,15 @@ class App extends Component {
                 </Menu.Item>
                 <Menu.Item
                   style={menuItemStyle}
+                  name={'ADDRESS_BOOK'}
+                  active={activeItem === routes.ADDRESS_BOOK}
+                  onClick={this.handleItemClick}
+                >
+                  <Icon style={iconStyle} name='address book' />
+                  <span>Address Book</span>
+                </Menu.Item>
+                <Menu.Item
+                  style={menuItemStyle}
                   name={'HOME'}
                   active={activeItem === routes.HOME}
                   onClick={this.handleItemClick}

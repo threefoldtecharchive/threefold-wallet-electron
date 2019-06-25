@@ -4,7 +4,7 @@ import { debounce, escapeRegExp, filter, flatten } from 'lodash'
 import { Search, Message, Icon } from 'semantic-ui-react'
 import * as tfchain from '../../tfchain/api'
 
-const initialState = { results: [], value: '', addressError: false, showNoResults: true }
+const initialState = { results: [], addressError: false, showNoResults: true }
 
 const mapStateToProps = state => ({
   account: state.account.state
@@ -14,13 +14,15 @@ class SearchableAddress extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      ...initialState
+      ...initialState,
+      value: '' || this.props.value
     }
   }
 
   componentWillMount () {
     const sources = this.props.sources || {}
     let wallets = []
+    let contacts = []
     if (sources.wallets !== false) {
       wallets = flatten(this.props.account.wallets.map(wallet => {
         return wallet.addresses.map(a => {
@@ -33,7 +35,18 @@ class SearchableAddress extends Component {
       }))
     }
 
-    const source = wallets
+    if (sources.contacts !== false) {
+      contacts = flatten(this.props.account.address_book.contacts.map(contact => {
+        const name = contact.contact_name
+        return {
+          contact_name: name,
+          title: `contact: ${name}`,
+          value: contact.recipient
+        }
+      }))
+    }
+
+    const source = wallets.concat(contacts)
     this.setState({ source })
   }
 
@@ -56,7 +69,7 @@ class SearchableAddress extends Component {
       const re = new RegExp(escapeRegExp(this.state.value), 'i')
 
       // enable searching on name or address
-      const isMatch = result => (re.test(result.wallet_name) || re.test(result.value) || re.test(result.title))
+      const isMatch = result => (re.test(result.wallet_name) || re.test(result.value) || re.test(result.title) || re.test(result.contact_name))
       const results = filter(this.state.source, isMatch)
 
       this.props.setSearchValue(value)

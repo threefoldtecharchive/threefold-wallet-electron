@@ -15,5 +15,6 @@
   "TRANSFER": "/transfer",
   "LOGIN": "/login",
   "SIGN": "/sign",
-  "SIGN_TRANSACTIONS": "/signtx"
+  "SIGN_TRANSACTIONS": "/signtx",
+  "ADDRESS_BOOK": "/addressbook"
 }
