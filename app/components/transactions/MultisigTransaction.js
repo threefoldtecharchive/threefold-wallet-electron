@@ -441,7 +441,6 @@ class MultisigTransaction extends Component {
 
     const { contactName, ownerAddresses, signatureCount, signatureCountError, openAddMultiSigModal } = this.state
 
-    console.log(ownerAddresses)
     return (
       <div>
         <UpdateMultiSigContactModal

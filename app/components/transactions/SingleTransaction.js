@@ -1,15 +1,16 @@
 // @flow
 import { connect } from 'react-redux'
 import React, { Component } from 'react'
-import { Form, Loader, Dimmer } from 'semantic-ui-react'
+import { Form, Loader, Dimmer, Checkbox } from 'semantic-ui-react'
 import { toast } from 'react-toastify'
-import { updateAccount, setTransactionJson } from '../../actions'
+import { updateAccount, setTransactionJson, saveAccount } from '../../actions'
 import * as tfchain from '../../tfchain/api'
 import routes from '../../constants/routes'
 import SearchableAddress from '../common/SearchableAddress'
 import { withRouter } from 'react-router-dom'
 import TransactionBodyForm from './TransactionBodyForm'
 import TransactionConfirmationModal from './TransactionConfirmationModal'
+import UpdateContactModal from '../addressbook/UpdateContactModal'
 import moment from 'moment-timezone'
 
 const TransactionTypes = {
@@ -30,6 +31,9 @@ const mapDispatchToProps = (dispatch) => ({
   },
   setTransactionJson: (json) => {
     dispatch(setTransactionJson(json))
+  },
+  saveAccount: (account) => {
+    dispatch(saveAccount(account))
   }
 })
 
@@ -43,17 +47,36 @@ class SingleTransaction extends Component {
       wallets: [],
       loader: false,
       openConfirmationModal: false,
-      enableSubmit: false
+      enableSubmit: false,
+      openSaveModal: false,
+      enableSave: false
     }
   }
 
-  setSearchValue = (value) => {
-    this.setState({ destination: value, enableSubmit: true })
+  setSearchValue = (destination) => {
+    const { selectedWallet } = this.props.form.transactionForm.values
+
+    let destinationError = false
+    let sendToSelfError = false
+
+    if (!tfchain.wallet_address_is_valid(destination) || destination === '') {
+      destinationError = true
+      this.setState({ enableSubmit: false, enableSave: false })
+    } else if (selectedWallet && selectedWallet.is_address_owned_by_wallet(destination)) {
+      sendToSelfError = true
+      destinationError = true
+    }
+
+    if (!destinationError && !sendToSelfError) {
+      this.setState({ enableSave: true, enableSubmit: true })
+    }
+    this.setState({ destination })
   }
 
   renderDestinationForm = () => {
+    const { enableSave } = this.state
     return (
-      <Form style={{ height: '100%', width: '90%', margin: 'auto' }}>
+      <Form style={{ width: '90%', margin: 'auto', marginBottom: 30 }}>
         <Form.Field style={{ marginTop: 10, marginBottom: 20 }}>
           <label style={{ color: 'white' }}>Destination address</label>
           <SearchableAddress
@@ -61,8 +84,41 @@ class SingleTransaction extends Component {
             icon='send'
           />
         </Form.Field>
+        {enableSave ? (
+          <Form.Field style={{ float: 'right' }}>
+            <Checkbox label={<label style={{ color: 'white' }}>Save recipient to contacts</label>} onChange={this.openSaveModal} />
+          </Form.Field>
+        ) : null}
       </Form>
     )
+  }
+
+  handleContactNameChange = ({ target }) => (
+    this.setState({ contactName: target.value })
+  )
+
+  openSaveModal = () => {
+    const open = !this.state.openSaveModal
+    this.setState({ openSaveModal: open })
+  }
+
+  closeSaveModal = () => {
+    this.setState({ openSaveModal: false })
+  }
+
+  addContact = () => {
+    const { destination, contactName } = this.state
+    const { account } = this.props
+    const { address_book: addressBook } = account
+    try {
+      addressBook.contact_new(contactName, destination)
+      this.setState({ openSaveModal: false })
+      toast.success('Added contact')
+      this.props.saveAccount(account)
+    } catch (error) {
+      this.setState({ openSaveModal: false })
+      toast.error('Adding contact failed')
+    }
   }
 
   checkSingleTransactionFormValues = () => {
@@ -195,8 +251,18 @@ class SingleTransaction extends Component {
       )
     }
 
+    const { contactName, destination, openSaveModal } = this.state
     return (
       <div>
+        <UpdateContactModal
+          contactName={contactName}
+          handleContactNameChange={this.handleContactNameChange}
+          contactAddress={destination}
+          handleAddressChange={this.setSearchValue}
+          openUpdateModal={openSaveModal}
+          closeUpdateModal={this.closeSaveModal}
+          updateContact={this.addContact}
+        />
         {this.renderDestinationForm()}
         <TransactionBodyForm handleSubmit={this.handleSubmit} enableSubmit={this.state.enableSubmit} />
       </div>
