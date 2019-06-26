@@ -593,7 +593,7 @@ export var compare = function (a, b) {
 	}
 	var out = 0;
 	
-	    out = a.localeCompare(b, { sensitivity: 'base' })
+	    out = a.localeCompare(b, undefined, { sensitivity: 'base' })
 	    
 	return out;
 };

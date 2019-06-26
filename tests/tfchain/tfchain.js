@@ -730,6 +730,83 @@ const _all = {
     })
   },
 
+  // a unit test to companion issue #150
+  addressBookContactUpdateExistingContact: (assert) => {
+    const ab = new tfchain.AddressBook()
+    assert.equal(ab.contacts.length, 0)
+    assert.equal(ab.contact_names, [])
+
+    // create some contacts
+
+    assert.equal(ab.contact_new('a', '01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0').contact_name, 'a')
+    assert.equal(ab.contacts.length, 1)
+    assert.equal(ab.contact_names, ['a'])
+    assert.equal(ab.contact_get('a').recipient, '01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0')
+    assert.equal(ab.contact_get('A').recipient, '01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0')
+
+    assert.equal(ab.contact_new('b', [['01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0', '01370af706b547dd4e562a047e6265d7e7750771f9bff633b1a12dbd59b11712c6ef65edb1690d', '01956471980a60ec51a2d54e4b91f4b39ba26eca677ebb3f31929086f7431b17b7f8fe84985d59'], 1]).contact_name, 'b')
+    assert.equal(ab.contacts.length, 2)
+    assert.equal(ab.contact_names, ['a', 'b'])
+    assert.equal(ab.contact_get('a').recipient, '01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0')
+    assert.equal(ab.contact_get('A').recipient, '01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0')
+    assert.equal(tfchain.wallet_address_from_recipient(ab.contact_get('b').recipient), '03033eb72ebd94ca33544cadc1c6eb547a45bff7cc41e83d5168355eb5ec30f9d1db9311645c4a')
+    assert.equal(tfchain.wallet_address_from_recipient(ab.contact_get('B').recipient), '03033eb72ebd94ca33544cadc1c6eb547a45bff7cc41e83d5168355eb5ec30f9d1db9311645c4a')
+
+    assert.equal(ab.contact_new('c', '01370af706b547dd4e562a047e6265d7e7750771f9bff633b1a12dbd59b11712c6ef65edb1690d').contact_name, 'c')
+    assert.equal(ab.contacts.length, 3)
+    assert.equal(ab.contact_names, ['a', 'b', 'c'])
+    assert.equal(ab.contact_get('a').recipient, '01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0')
+    assert.equal(ab.contact_get('A').recipient, '01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0')
+    assert.equal(tfchain.wallet_address_from_recipient(ab.contact_get('b').recipient), '03033eb72ebd94ca33544cadc1c6eb547a45bff7cc41e83d5168355eb5ec30f9d1db9311645c4a')
+    assert.equal(tfchain.wallet_address_from_recipient(ab.contact_get('B').recipient), '03033eb72ebd94ca33544cadc1c6eb547a45bff7cc41e83d5168355eb5ec30f9d1db9311645c4a')
+    assert.equal(ab.contact_get('c').recipient, '01370af706b547dd4e562a047e6265d7e7750771f9bff633b1a12dbd59b11712c6ef65edb1690d')
+    assert.equal(ab.contact_get('C').recipient, '01370af706b547dd4e562a047e6265d7e7750771f9bff633b1a12dbd59b11712c6ef65edb1690d')
+
+    // update contacts their names...
+    // ... specifying the name and same recipient
+    assert.equal(ab.contact_update('a', { name: 'foo', recipient: '01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0' }).contact_name, 'foo')
+    assert.equal(ab.contacts.length, 3)
+    assert.equal(ab.contact_names, ['b', 'c', 'foo'])
+    assert.equal(ab.contact_get('foo').recipient, '01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0')
+    assert.equal(ab.contact_get('FOO').recipient, '01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0')
+    assert.equal(ab.contact_get('foO').recipient, '01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0')
+    assert.equal(tfchain.wallet_address_from_recipient(ab.contact_get('b').recipient), '03033eb72ebd94ca33544cadc1c6eb547a45bff7cc41e83d5168355eb5ec30f9d1db9311645c4a')
+    assert.equal(tfchain.wallet_address_from_recipient(ab.contact_get('B').recipient), '03033eb72ebd94ca33544cadc1c6eb547a45bff7cc41e83d5168355eb5ec30f9d1db9311645c4a')
+    assert.equal(ab.contact_get('c').recipient, '01370af706b547dd4e562a047e6265d7e7750771f9bff633b1a12dbd59b11712c6ef65edb1690d')
+    assert.equal(ab.contact_get('C').recipient, '01370af706b547dd4e562a047e6265d7e7750771f9bff633b1a12dbd59b11712c6ef65edb1690d')
+    // ... specifiying the name only
+    assert.equal(ab.contact_update('foo', { name: 'a' }).contact_name, 'a')
+    assert.equal(ab.contacts.length, 3)
+    assert.equal(ab.contact_names, ['a', 'b', 'c'])
+    assert.equal(ab.contact_get('a').recipient, '01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0')
+    assert.equal(ab.contact_get('A').recipient, '01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0')
+    assert.equal(tfchain.wallet_address_from_recipient(ab.contact_get('b').recipient), '03033eb72ebd94ca33544cadc1c6eb547a45bff7cc41e83d5168355eb5ec30f9d1db9311645c4a')
+    assert.equal(tfchain.wallet_address_from_recipient(ab.contact_get('B').recipient), '03033eb72ebd94ca33544cadc1c6eb547a45bff7cc41e83d5168355eb5ec30f9d1db9311645c4a')
+    assert.equal(ab.contact_get('c').recipient, '01370af706b547dd4e562a047e6265d7e7750771f9bff633b1a12dbd59b11712c6ef65edb1690d')
+    assert.equal(ab.contact_get('C').recipient, '01370af706b547dd4e562a047e6265d7e7750771f9bff633b1a12dbd59b11712c6ef65edb1690d')
+
+    // updating a contact to a completely different recipient type...
+    assert.equal(ab.contact_update('b', { recipient: '01956471980a60ec51a2d54e4b91f4b39ba26eca677ebb3f31929086f7431b17b7f8fe84985d59' }).contact_name, 'b')
+    assert.equal(ab.contacts.length, 3)
+    assert.equal(ab.contact_names, ['a', 'b', 'c'])
+    assert.equal(ab.contact_get('a').recipient, '01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0')
+    assert.equal(ab.contact_get('A').recipient, '01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0')
+    assert.equal(ab.contact_get('b').recipient, '01956471980a60ec51a2d54e4b91f4b39ba26eca677ebb3f31929086f7431b17b7f8fe84985d59')
+    assert.equal(ab.contact_get('B').recipient, '01956471980a60ec51a2d54e4b91f4b39ba26eca677ebb3f31929086f7431b17b7f8fe84985d59')
+    assert.equal(ab.contact_get('c').recipient, '01370af706b547dd4e562a047e6265d7e7750771f9bff633b1a12dbd59b11712c6ef65edb1690d')
+    assert.equal(ab.contact_get('C').recipient, '01370af706b547dd4e562a047e6265d7e7750771f9bff633b1a12dbd59b11712c6ef65edb1690d')
+    // ... you can do the same by giving the name...
+    assert.equal(ab.contact_update('b', { name: 'b', recipient: '01956471980a60ec51a2d54e4b91f4b39ba26eca677ebb3f31929086f7431b17b7f8fe84985d59' }).contact_name, 'b')
+    assert.equal(ab.contacts.length, 3)
+    assert.equal(ab.contact_names, ['a', 'b', 'c'])
+    assert.equal(ab.contact_get('a').recipient, '01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0')
+    assert.equal(ab.contact_get('A').recipient, '01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0')
+    assert.equal(ab.contact_get('b').recipient, '01956471980a60ec51a2d54e4b91f4b39ba26eca677ebb3f31929086f7431b17b7f8fe84985d59')
+    assert.equal(ab.contact_get('B').recipient, '01956471980a60ec51a2d54e4b91f4b39ba26eca677ebb3f31929086f7431b17b7f8fe84985d59')
+    assert.equal(ab.contact_get('c').recipient, '01370af706b547dd4e562a047e6265d7e7750771f9bff633b1a12dbd59b11712c6ef65edb1690d')
+    assert.equal(ab.contact_get('C').recipient, '01370af706b547dd4e562a047e6265d7e7750771f9bff633b1a12dbd59b11712c6ef65edb1690d')
+  },
+
   decodeFormattedMessage: (assert) => {
     const testCases = [
       // arbitrary data

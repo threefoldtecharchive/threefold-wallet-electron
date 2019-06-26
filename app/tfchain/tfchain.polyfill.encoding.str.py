@@ -206,7 +206,7 @@ def compare(a, b):
         return -1
     out = 0
     __pragma__("js", "{}", """
-    out = a.localeCompare(b, { sensitivity: 'base' })
+    out = a.localeCompare(b, undefined, { sensitivity: 'base' })
     """)
     return out
 

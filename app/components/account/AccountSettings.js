@@ -68,7 +68,7 @@ class AccountSettings extends Component {
       this.setState({ nameError: true })
       toast.error('account name is invalid')
       return false
-    } else if (name !== originalName && accounts.some(a => a.name.localeCompare(name, { sensitivity: 'base' }) === 0)) {
+    } else if (name !== originalName && accounts.some(a => a.name.localeCompare(name, undefined, { sensitivity: 'base' }) === 0)) {
       this.setState({ nameError: true })
       toast.error('account name is already used')
       return false
@@ -97,7 +97,7 @@ class AccountSettings extends Component {
 
   deleteAccount = () => {
     const { deleteName, originalName } = this.state
-    if (deleteName.localeCompare(originalName, { sensitivity: 'base' }) !== 0) {
+    if (deleteName.localeCompare(originalName, undefined, { sensitivity: 'base' }) !== 0) {
       return this.setState({ deleteNameError: true })
     }
     this.props.deleteAccount(this.props.account)
@@ -238,7 +238,7 @@ class AccountSettings extends Component {
         />
       )
     }
-    if (accounts.some(a => a.name.localeCompare(name, { sensitivity: 'base' }) === 0)) {
+    if (accounts.some(a => a.name.localeCompare(name, undefined, { sensitivity: 'base' }) === 0)) {
       return (
         <Message
           error

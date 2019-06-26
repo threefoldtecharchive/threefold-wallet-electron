@@ -6262,7 +6262,7 @@ export var AddressBook =  __class__ ('AddressBook', [object], {
 		}
 		else {
 		}
-		self._contacts = dict ({});
+		self._contacts = [];
 	});},
 	get _get_is_empty () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -6312,7 +6312,7 @@ export var AddressBook =  __class__ ('AddressBook', [object], {
 		}
 		var contacts = (function () {
 			var __accu0__ = [];
-			for (var contact of jsobj.dict_values (self._contacts)) {
+			for (var contact of self._contacts) {
 				__accu0__.append (contact);
 			}
 			return __accu0__;
@@ -6335,8 +6335,8 @@ export var AddressBook =  __class__ ('AddressBook', [object], {
 		}
 		var contact_names = (function () {
 			var __accu0__ = [];
-			for (var contact_name of jsobj.get_keys (self._contacts)) {
-				__accu0__.append (contact_name);
+			for (var contact of self._contacts) {
+				__accu0__.append (contact.contact_name);
 			}
 			return __accu0__;
 		}) ();
@@ -6374,12 +6374,18 @@ export var AddressBook =  __class__ ('AddressBook', [object], {
 		var __left0__ = jsfunc.opts_get_with_defaults (opts, [tuple (['singlesig', true]), tuple (['multisig', true])]);
 		var singlesig = __left0__ [0];
 		var multisig = __left0__ [1];
-		if (!__in__ (py_name, self._contacts)) {
+		var contact = null;
+		for (var pcontact of self._contacts) {
+			if (jsstr.equal (pcontact.contact_name, py_name)) {
+				var contact = pcontact;
+				break;
+			}
+		}
+		if (contact == null) {
 			var __except0__ = ValueError ('no contact available in address book with name {}'.format (py_name));
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		var contact = self._contacts [py_name];
 		if (contact._ctype.value == AddressBookContactType.SINGLE_SIGNATURE.value) {
 			if (!(singlesig)) {
 				var __except0__ = ValueError ('contact {} is available in address book, but user filter does not allow single sig contacts'.format (py_name));
@@ -6434,12 +6440,15 @@ export var AddressBook =  __class__ ('AddressBook', [object], {
 		}
 		else {
 		}
-		if (__in__ (contact.contact_name, self._contacts)) {
-			var __except0__ = ValueError ('a contact with name {} already exists'.format (contact.contact_name));
-			__except0__.__cause__ = null;
-			throw __except0__;
+		var cname = contact.contact_name;
+		for (var econtact of self._contacts) {
+			if (jsstr.equal (econtact.contact_name, cname)) {
+				var __except0__ = ValueError ('a contact with name {} (={}) already exists'.format (cname, econtact.contact_name));
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
 		}
-		self._contacts [contact.contact_name] = contact;
+		self._contacts.append (contact);
 	});},
 	get _contact_new () {return __get__ (this, function (self, py_name, recipient) {
 		if (arguments.length) {
@@ -6509,17 +6518,26 @@ export var AddressBook =  __class__ ('AddressBook', [object], {
 		var __left0__ = jsfunc.opts_get (opts, 'name', 'recipient');
 		var new_name = __left0__ [0];
 		var recipient = __left0__ [1];
+		var contact = null;
+		var contact_index = -(1);
+		for (var [index, pcontact] of enumerate (self._contacts)) {
+			if (jsstr.equal (pcontact.contact_name, py_name)) {
+				var contact = pcontact;
+				var contact_index = index;
+				break;
+			}
+		}
 		if (new_name == null && recipient == null) {
-			if (!__in__ (py_name, self._contacts)) {
+			if (contact == null) {
 				var __except0__ = ValueError ('no contact available in address book with name {} and no info given to create it'.format (py_name));
 				__except0__.__cause__ = null;
 				throw __except0__;
 			}
 			jslog.warning ('nop contact update for contact {}'.format (py_name));
-			return self._contacts [py_name];
+			return contact;
 		}
 		var new_name = new_name || py_name;
-		if (!__in__ (py_name, self._contacts)) {
+		if (contact == null) {
 			if (recipient == null) {
 				var __except0__ = ValueError ('no contact with name {} could be found and no recipient is given to create a new one'.format (py_name));
 				__except0__.__cause__ = null;
@@ -6527,19 +6545,27 @@ export var AddressBook =  __class__ ('AddressBook', [object], {
 			}
 			return self.contact_new (new_name, recipient);
 		}
+		var new_contact = null;
 		if (recipient != null) {
 			var new_contact = self._contact_new (new_name, recipient);
-			self._contacts [new_name] = new_contact;
 		}
 		else {
-			var new_contact = self._contacts [py_name];
+			var new_contact = contact;
 			new_contact.contact_name = new_name;
-			self._contacts [new_name] = new_contact;
 		}
-		if (!(jsstr.equal (new_name, py_name))) {
-			delete self._contacts [py_name];
+		if (new_contact == null) {
+			var __except0__ = RuntimeError ('BUG: new_contact should not be None at this time');
+			__except0__.__cause__ = null;
+			throw __except0__;
 		}
-		return self._contacts [new_name];
+		if (jsstr.equal (new_name, py_name)) {
+			self._contacts [contact_index] = new_contact;
+		}
+		else {
+			jsarr.py_pop (self._contacts, contact_index);
+			self._contacts.append (new_contact);
+		}
+		return new_contact;
 	});},
 	get contact_delete () {return __get__ (this, function (self, py_name) {
 		if (arguments.length) {
@@ -6566,8 +6592,15 @@ export var AddressBook =  __class__ ('AddressBook', [object], {
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		if (__in__ (py_name, self._contacts)) {
-			delete self._contacts [py_name];
+		var contact_index = -(1);
+		for (var [index, contact] of enumerate (self._contacts)) {
+			if (jsstr.equal (contact.contact_name, py_name)) {
+				var contact_index = index;
+				break;
+			}
+		}
+		if (contact_index > -(1)) {
+			jsarr.py_pop (self._contacts, contact_index);
 		}
 	});},
 	get serialize () {return __get__ (this, function (self) {

@@ -2487,7 +2487,7 @@ class AddressBook:
         return ab
 
     def __init__(self):
-        self._contacts = {}
+        self._contacts = [] # TODO: sort contacts each time it is updated, and implemented a smarter search algo
 
     @property
     def is_empty(self):
@@ -2499,12 +2499,12 @@ class AddressBook:
 
     @property
     def contacts(self):
-        contacts = [contact for contact in jsobj.dict_values(self._contacts)]
+        contacts = [contact for contact in self._contacts]
         return jsarr.sort(contacts, AddressBook._sort_contact_list_by_name_cb)
 
     @property
     def contact_names(self):
-        contact_names = [contact_name for contact_name in jsobj.get_keys(self._contacts)]
+        contact_names = [contact.contact_name for contact in self._contacts]
         return jsarr.sort(contact_names, AddressBook._sort_contact_name_list_cb)
 
     def contact_get(self, name, opts=None):
@@ -2516,9 +2516,13 @@ class AddressBook:
             ('singlesig', True),
             ('multisig', True),
         ])
-        if name not in self._contacts:
+        contact = None
+        for pcontact in self._contacts:
+            if jsstr.equal(pcontact.contact_name, name):
+                contact = pcontact
+                break
+        if contact == None:
             raise ValueError("no contact available in address book with name {}".format(name))
-        contact = self._contacts[name]
         if contact._ctype.value == AddressBookContactType.SINGLE_SIGNATURE.value:
             if not singlesig:
                 raise ValueError("contact {} is available in address book, but user filter does not allow single sig contacts".format(name))
@@ -2537,10 +2541,12 @@ class AddressBook:
 
     def _contact_add(self, contact):
         # ensure contact doesn't exist yet with this name
-        if contact.contact_name in self._contacts:
-            raise ValueError("a contact with name {} already exists".format(contact.contact_name))
+        cname = contact.contact_name
+        for econtact in self._contacts:
+            if jsstr.equal(econtact.contact_name, cname):
+                raise ValueError("a contact with name {} (={}) already exists".format(cname, econtact.contact_name))
         # add contact
-        self._contacts[contact.contact_name] = contact
+        self._contacts.append(contact)
 
     def _contact_new(self, name, recipient):
         condition = unlock_condition_from_recipient(recipient)
@@ -2559,38 +2565,56 @@ class AddressBook:
         if jsstr.equal(name, ""):
             raise ValueError("contact_update: contact name cannot be empty")
         new_name, recipient = jsfunc.opts_get(opts, 'name', 'recipient')
+        # fetch contact if it exists already
+        contact = None
+        contact_index = -1
+        for index, pcontact in enumerate(self._contacts):
+            if jsstr.equal(pcontact.contact_name, name):
+                contact = pcontact
+                contact_index = index
+                break
+        # check if any opts are given
         if new_name == None and recipient == None:
-            if name not in self._contacts:
+            if contact == None:
                 raise ValueError("no contact available in address book with name {} and no info given to create it".format(name))
             jslog.warning("nop contact update for contact {}".format(name))
-            return self._contacts[name]
+            return contact
         new_name = new_name or name
         # find contact
-        if name not in self._contacts:
+        if contact == None:
             # create contact from scratch
             if recipient == None:
                 raise ValueError("no contact with name {} could be found and no recipient is given to create a new one".format(name))
             return self.contact_new(new_name, recipient)
         # overwrite contact if recipient is given
+        new_contact = None
         if recipient != None:
             new_contact = self._contact_new(new_name, recipient)
-            self._contacts[new_name] = new_contact
         else: # or else update existing contact
-            new_contact = self._contacts[name]
+            new_contact = contact
             new_contact.contact_name = new_name
-            self._contacts[new_name] = new_contact
-        if not jsstr.equal(new_name, name):
-            # delete old contact if it used to exist under another name
-            del self._contacts[name]
-        return self._contacts[new_name]
+        if new_contact == None:
+            raise RuntimeError("BUG: new_contact should not be None at this time")
+        # move contact or overwrite contact
+        if jsstr.equal(new_name, name):
+            self._contacts[contact_index] = new_contact
+        else:
+            jsarr.pop(self._contacts, contact_index)
+            self._contacts.append(new_contact)
+        return new_contact
 
     def contact_delete(self, name):
         if not isinstance(name, str):
             raise TypeError("contact_delete: contact name has to be of type str, invalid: {} ({})".format(name, type(name)))
         if jsstr.equal(name, ""):
             raise ValueError("contact_delete: contact name cannot be empty")
-        if name in self._contacts:
-            del self._contacts[name]
+        contact_index = -1
+        for index, contact in enumerate(self._contacts):
+            if jsstr.equal(contact.contact_name, name):
+                contact_index = index
+                break
+        if contact_index > -1:
+            jsarr.pop(self._contacts, contact_index)
 
     def serialize(self):
         return {

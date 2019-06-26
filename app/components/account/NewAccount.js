@@ -157,7 +157,7 @@ class NewAccount extends Component {
         />
       )
     }
-    if (accounts.some(a => a.name.localeCompare(name, { sensitivity: 'base' }) === 0)) {
+    if (accounts.some(a => a.name.localeCompare(name, undefined, { sensitivity: 'base' }) === 0)) {
       return (
         <Message
           error
@@ -188,7 +188,7 @@ class NewAccount extends Component {
 
     if (name === '' || name.length > 48) {
       nameError = true
-    } else if (accounts.some(a => a.name.localeCompare(name, { sensitivity: 'base' }) === 0)) {
+    } else if (accounts.some(a => a.name.localeCompare(name, undefined, { sensitivity: 'base' }) === 0)) {
       nameError = true
     }
 
