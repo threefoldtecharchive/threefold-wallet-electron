@@ -37,6 +37,8 @@ class AddressBook extends Component {
       openUpdateMultisigModal: false,
       contactAddress: '',
       contactName: '',
+      newContactAddress: '',
+      newContactName: '',
       signatureCount: 2,
       ownerAddressErrors: [false, false],
       ownerAddresses: ['', ''],
@@ -141,18 +143,20 @@ class AddressBook extends Component {
   openUpdateModal = (contact) => {
     const { contact_name: contactName, recipient: contactAddress } = contact
     const open = !this.state.openUpdateModal
-    this.setState({ openUpdateModal: open, contactName, contactAddress })
+    this.setState({ openUpdateModal: open, contactName, contactAddress, newContactName: contactName, newContactAddress: contactAddress })
   }
 
   closeUpdateModal = () => {
     this.setState({ openUpdateModal: false })
   }
 
-  updateContact = (contactName, contactAddress) => {
+  updateContact = () => {
     const { account } = this.props
     const { address_book: addressBook } = account
+    const { newContactName, newContactAddress, contactName } = this.state
+
     try {
-      addressBook.contact_update(contactName, { name: contactName, recipient: contactAddress })
+      addressBook.contact_update(contactName, { name: newContactName, recipient: newContactAddress })
       this.setState({ openUpdateModal: false })
       toast.success('Updated contact')
       this.props.saveAccount(account)
@@ -168,6 +172,14 @@ class AddressBook extends Component {
 
   handleContactNameChange = ({ target }) => (
     this.setState({ contactName: target.value })
+  )
+
+  handleNewAddressChange = (value) => {
+    this.setState({ newContactAddress: value })
+  }
+
+  handleNewContactNameChange = ({ target }) => (
+    this.setState({ newContactName: target.value })
   )
 
   handleSignatureCountChange = ({ target }) => {
@@ -246,7 +258,7 @@ class AddressBook extends Component {
   openUpdateMultisigModal = (contact) => {
     const { contact_name: contactName, recipient } = contact
     const open = !this.state.openUpdateMultisigModal
-    this.setState({ openUpdateMultisigModal: open, contactName, ownerAddresses: recipient[1], signatureCount: recipient[0] })
+    this.setState({ openUpdateMultisigModal: open, contactName, newContactName: contactName, ownerAddresses: recipient[1], signatureCount: recipient[0] })
   }
 
   closeUpdateMultisigModal = () => {
@@ -254,7 +266,7 @@ class AddressBook extends Component {
   }
 
   updateMultiSigContact = () => {
-    const { contactName, ownerAddresses, signatureCount, ownerAddressErrors } = this.state
+    const { newContactName, contactName, ownerAddresses, signatureCount, ownerAddressErrors } = this.state
     let { signatureCountError } = this.state
 
     if (!signatureCountError && !(!isNaN(signatureCount) && signatureCount >= 1 && signatureCount <= ownerAddresses.length)) {
@@ -268,7 +280,7 @@ class AddressBook extends Component {
       const { account } = this.props
       const { address_book: addressBook } = account
       try {
-        addressBook.contact_update(contactName, [ownerAddresses, signatureCount])
+        addressBook.contact_update(contactName, { name: newContactName, recipient: [ownerAddresses, signatureCount] })
         this.setState({ openUpdateMultisigModal: false })
         toast.success('Updated multisig contact')
         this.props.saveAccount(account)
@@ -311,6 +323,8 @@ class AddressBook extends Component {
     const {
       contactName,
       contactAddress,
+      newContactName,
+      newContactAddress,
       openAddModal,
       openDeleteModal,
       openUpdateModal,
@@ -340,10 +354,10 @@ class AddressBook extends Component {
           addContact={this.addContact}
         />
         <UpdateContactModal
-          contactName={contactName}
-          handleContactNameChange={this.handleContactNameChange}
-          contactAddress={contactAddress}
-          handleAddressChange={this.handleAddressChange}
+          contactName={newContactName}
+          handleContactNameChange={this.handleNewContactNameChange}
+          contactAddress={newContactAddress}
+          handleAddressChange={this.handleNewAddressChange}
           openUpdateModal={openUpdateModal}
           closeUpdateModal={this.closeUpdateModal}
           updateContact={this.updateContact}
@@ -363,8 +377,8 @@ class AddressBook extends Component {
           signatureCountError={signatureCountError}
         />
         <UpdateMultiSigContactModal
-          contactName={contactName}
-          handleContactNameChange={this.handleContactNameChange}
+          contactName={newContactName}
+          handleContactNameChange={this.handleNewContactNameChange}
           handleAddressOwnerChange={this.handleAddressOwnerChange}
           handleSignatureCountChange={this.handleSignatureCountChange}
           ownerAddresses={ownerAddresses}

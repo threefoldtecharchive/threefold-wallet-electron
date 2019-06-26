@@ -30,7 +30,7 @@ const UpdateModal = ({ openUpdateModal, closeUpdateModal, contactName, handleCon
         Cancel
       </Button>
       <Button
-        onClick={() => updateContact(contactName, contactAddress)}
+        onClick={() => updateContact()}
         positive
         labelPosition='right'
         icon='checkmark'
