@@ -1,9 +1,9 @@
 // @flow
 import { connect } from 'react-redux'
 import React, { Component } from 'react'
-import { Form, Input, Icon, Loader, Dimmer, Message, Popup, Dropdown, Divider } from 'semantic-ui-react'
+import { Form, Input, Icon, Loader, Dimmer, Message, Popup, Dropdown, Divider, Checkbox } from 'semantic-ui-react'
 import { toast } from 'react-toastify'
-import { updateAccount, setTransactionJson } from '../../actions'
+import { updateAccount, setTransactionJson, saveAccount } from '../../actions'
 import * as tfchain from '../../tfchain/api'
 import moment from 'moment'
 import routes from '../../constants/routes'
@@ -11,7 +11,8 @@ import TransactionConfirmationModal from './TransactionConfirmationModal'
 import SearchableAddress from '../common/SearchableAddress'
 import { withRouter } from 'react-router-dom'
 import TransactionBodyForm from './TransactionBodyForm'
-import { cloneDeep } from 'lodash'
+import UpdateMultiSigContactModal from '../addressbook/UpdateMultiSigContactModal'
+import { cloneDeep, filter } from 'lodash'
 
 const TransactionTypes = {
   SINGLE: 'SINGLE',
@@ -31,6 +32,9 @@ const mapDispatchToProps = (dispatch) => ({
   },
   setTransactionJson: (json) => {
     dispatch(setTransactionJson(json))
+  },
+  saveAccount: (account) => {
+    dispatch(saveAccount(account))
   }
 })
 
@@ -46,7 +50,10 @@ class MultisigTransaction extends Component {
       ownerAddresses: ['', ''],
       signatureCountError: false,
       openConfirmationModal: false,
-      enableSubmit: false
+      enableSubmit: false,
+      enableSave: false,
+      openAddMultiSigModal: false,
+      contactName: ''
     }
   }
 
@@ -95,7 +102,7 @@ class MultisigTransaction extends Component {
       this.setState({ ownerAddressErrors })
     }
     const newOwnerAddresses = ownerAddresses[index] = value
-    this.setState({ ownerAddress: newOwnerAddresses })
+    this.setState({ ownerAddress: newOwnerAddresses, selectedContact: null })
     this.checkOwnerAddressesErrors()
   }
 
@@ -118,7 +125,7 @@ class MultisigTransaction extends Component {
     }
 
     if (areAllOwnersFilledIn && !signatureCountErrorValidation && !hasOwnerAddressErrors) {
-      this.setState({ enableSubmit: true, signatureCountError: signatureCountErrorValidation })
+      this.setState({ enableSubmit: true, enableSave: true, signatureCountError: signatureCountErrorValidation })
     }
   }
 
@@ -148,7 +155,8 @@ class MultisigTransaction extends Component {
   }
 
   renderDestinationForm = () => {
-    const { transactionType, signatureCount } = this.state
+    const { transactionType, signatureCount, enableSave, selectedContact } = this.state
+
     if (transactionType === TransactionTypes.MULTISIG) {
       return (
         <Form style={{ width: '90%', margin: 'auto', marginBottom: 10 }}>
@@ -157,6 +165,11 @@ class MultisigTransaction extends Component {
               {this.renderOwnerInputFields()}
               <Icon name='plus circle' style={{ fontSize: 30, marginTop: 20, cursor: 'pointer', position: 'relative', left: '45%' }} onClick={() => this.addOwnerAddress()} />
             </Form.Field>
+            {enableSave && !selectedContact ? (
+              <Form.Field style={{ float: 'right' }}>
+                <Checkbox label={<label style={{ color: 'white' }}>Save recipient to contacts</label>} onChange={this.openAddMultiSigModal} />
+              </Form.Field>
+            ) : null}
             <Form.Field>
               <div style={{ display: 'flex' }}>
                 <label style={{ float: 'left', color: 'white' }}>Signature count</label>
@@ -196,23 +209,66 @@ class MultisigTransaction extends Component {
             labeled
             selection
             icon='address book'
-            text='one of your contacts'
+            placeholder='select on of your contacts'
             value={selectedContact}
-            onChange={this.selectContact}
-          />
+            onChange={(e, v) => {
+              this.selectContact(v.value)
+            }} />
         </Form.Field >
         <Divider horizontal style={{ color: 'white', marginTop: 10 }}>Or</Divider>
       </Form>
     )
   }
 
-  selectContact = (event, data) => {
-    const { recipient } = data.value
+  selectContact = (selectedContact) => {
+    const { recipient } = selectedContact
     const clonedRecipient = cloneDeep(recipient)
     const [signatureCount, ownerAddresses] = clonedRecipient
-    this.setState({ signatureCount, ownerAddresses, selectedContact: data.value })
+    this.setState({ signatureCount, ownerAddresses, selectedContact })
     this.checkOwnerAddressesErrors(signatureCount, ownerAddresses)
   }
+
+  openAddMultiSigModal = () => {
+    const open = !this.state.openAddMultiSigModal
+    this.setState({ openAddMultiSigModal: open })
+  }
+
+  closeMultisigModal = () => {
+    this.setState({ openAddMultiSigModal: false })
+  }
+
+  addMultiSigContact = () => {
+    const { contactName, ownerAddresses, signatureCount, ownerAddressErrors } = this.state
+    let { signatureCountError } = this.state
+
+    if (!signatureCountError && !(!isNaN(signatureCount) && signatureCount >= 1 && signatureCount <= ownerAddresses.length)) {
+      signatureCountError = true
+      this.setState({ signatureCountError })
+    }
+
+    const hasOwnerAddressErrors = ownerAddressErrors.filter(e => e === true).length > 0
+    const areAllOwnersFilledIn = filter(ownerAddresses, o => o === '').length === 0
+    if (!signatureCountError && !hasOwnerAddressErrors && areAllOwnersFilledIn) {
+      const { account } = this.props
+      const { address_book: addressBook } = account
+      try {
+        addressBook.contact_new(contactName, [ownerAddresses, signatureCount])
+        this.setState({ openAddMultiSigModal: false })
+        toast.success('Added multisig contact')
+        this.props.saveAccount(account)
+      } catch (error) {
+        console.log(error)
+        this.setState({ openAddMultiSigModal: false })
+        toast.error('Adding multisig contact failed')
+      }
+    } else {
+      toast.error('Form not filled in correctly')
+    }
+  }
+
+  handleContactNameChange = ({ target }) => (
+    this.setState({ contactName: target.value })
+  )
 
   checkMultisigTransactionFormValues = () => {
     const {
@@ -245,6 +301,7 @@ class MultisigTransaction extends Component {
     }
 
     if (!signatureCountErrorValidation && selectedWallet && !hasOwnerAddressErrors && areAllOwnersFilledIn && !destinationError) {
+      this.setState({ enableSave: true })
       return true
     }
     this.setState({
@@ -382,8 +439,25 @@ class MultisigTransaction extends Component {
       )
     }
 
+    const { contactName, ownerAddresses, signatureCount, signatureCountError, openAddMultiSigModal } = this.state
+
+    console.log(ownerAddresses)
     return (
       <div>
+        <UpdateMultiSigContactModal
+          contactName={contactName}
+          handleContactNameChange={this.handleContactNameChange}
+          handleAddressOwnerChange={this.handleAddressOwnerChange}
+          handleSignatureCountChange={this.handleSignatureCountChange}
+          ownerAddresses={ownerAddresses}
+          openUpdateMultisigModal={openAddMultiSigModal}
+          closeUpdateMultisigModal={this.closeMultisigModal}
+          updateMultiSigContact={this.addMultiSigContact}
+          addOwnerAddress={this.addOwnerAddress}
+          removeOwnerAddress={this.removeOwnerAddress}
+          signatureCount={signatureCount}
+          signatureCountError={signatureCountError}
+        />
         {this.renderAddressBook()}
         {this.renderDestinationForm()}
         <TransactionBodyForm handleSubmit={this.handleSubmit} enableSubmit={this.state.enableSubmit} />
