@@ -2,7 +2,7 @@ import React from 'react'
 import { Dimmer, Loader, List } from 'semantic-ui-react'
 import uuid from 'uuid'
 import moment from 'moment'
-import { differenceWith, flatten, isEqual } from 'lodash'
+import { differenceWith, flatten, isEqual, find } from 'lodash'
 const { shell } = require('electron')
 
 const confirmedStyle = {
@@ -141,10 +141,23 @@ function renderTransactionBody (tx, explorerAddress, chainTimestamp, account) {
 }
 
 function _addressDisplayElement (address, account) {
+  const { address_book: addressBook } = account
+  const { contacts } = addressBook
+
   const wallet = account.wallet_for_address(address)
   if (wallet && wallet.wallet_name) {
     return <span><span style={hashFont}>{address}</span> (wallet {`${wallet.wallet_name}`})</span>
   }
+
+  // Filter out multisig contacts
+  const filteredContacts = contacts.filter(contact => !(contact.recipient instanceof Array))
+
+  // Check if address to display is a contact from addressboek
+  const contact = find(filteredContacts, contact => contact.recipient === address)
+  if (contact) {
+    return <span><span style={hashFont}>{contact.recipient}</span> (contact: {contact.contact_name})</span>
+  }
+
   return <span><span style={hashFont}>{address}</span></span>
 }
 
