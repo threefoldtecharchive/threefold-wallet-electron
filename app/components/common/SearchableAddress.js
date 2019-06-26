@@ -37,6 +37,7 @@ class SearchableAddress extends Component {
 
     if (sources.contacts !== false) {
       contacts = flatten(this.props.account.address_book.contacts.map(contact => {
+        if (contact.recipient instanceof Array) return null
         const name = contact.contact_name
         return {
           contact_name: name,
@@ -46,7 +47,7 @@ class SearchableAddress extends Component {
       }))
     }
 
-    const source = wallets.concat(contacts)
+    const source = wallets.concat(contacts.filter(Boolean))
     this.setState({ source })
   }
 
@@ -98,7 +99,7 @@ class SearchableAddress extends Component {
             leading: true
           })}
           results={results}
-          value={value}
+          value={value || this.props.value}
           placeholder='address'
           showNoResults={showNoResults}
           icon={<Icon name={this.props.icon} position='left' style={{ color: '#0e72f5' }} />}

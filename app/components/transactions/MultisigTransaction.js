@@ -1,7 +1,7 @@
 // @flow
 import { connect } from 'react-redux'
 import React, { Component } from 'react'
-import { Form, Input, Icon, Loader, Dimmer, Message, Popup } from 'semantic-ui-react'
+import { Form, Input, Icon, Loader, Dimmer, Message, Popup, Dropdown, Divider } from 'semantic-ui-react'
 import { toast } from 'react-toastify'
 import { updateAccount, setTransactionJson } from '../../actions'
 import * as tfchain from '../../tfchain/api'
@@ -11,6 +11,7 @@ import TransactionConfirmationModal from './TransactionConfirmationModal'
 import SearchableAddress from '../common/SearchableAddress'
 import { withRouter } from 'react-router-dom'
 import TransactionBodyForm from './TransactionBodyForm'
+import { cloneDeep } from 'lodash'
 
 const TransactionTypes = {
   SINGLE: 'SINGLE',
@@ -98,9 +99,7 @@ class MultisigTransaction extends Component {
     this.checkOwnerAddressesErrors()
   }
 
-  checkOwnerAddressesErrors = (signatureCount = this.state.signatureCount) => {
-    const { ownerAddressErrors, ownerAddresses } = this.state
-
+  checkOwnerAddressesErrors = (signatureCount = this.state.signatureCount, ownerAddresses = this.state.ownerAddresses, ownerAddressErrors = this.state.ownerAddressErrors) => {
     const hasOwnerAddressErrors = ownerAddressErrors.filter(e => e === true).length > 0
 
     let areAllOwnersFilledIn = false
@@ -133,9 +132,10 @@ class MultisigTransaction extends Component {
             <SearchableAddress
               setSearchValue={(e) => this.handleAddressOwnerChange(e, index)}
               icon='user'
+              value={owner}
             />
             {ownerAddresses.length > 2
-              ? (<Icon name='trash' onClick={() => this.removeOwnerAddress(owner, index)} style={{ fontSize: 20, position: 'relative', float: 'right', top: -30, right: -50, marginLeft: 20 }} />)
+              ? (<Icon name='trash' onClick={() => this.removeOwnerAddress(index)} style={{ fontSize: 20, position: 'relative', float: 'right', top: -30, right: -50, marginLeft: 20 }} />)
               : (null)}
           </Form.Field>
         </div>
@@ -152,7 +152,7 @@ class MultisigTransaction extends Component {
     if (transactionType === TransactionTypes.MULTISIG) {
       return (
         <Form style={{ width: '90%', margin: 'auto', marginBottom: 10 }}>
-          <Form.Field style={{ marginTop: 10 }}>
+          <Form.Field>
             <Form.Field >
               {this.renderOwnerInputFields()}
               <Icon name='plus circle' style={{ fontSize: 30, marginTop: 20, cursor: 'pointer', position: 'relative', left: '45%' }} onClick={() => this.addOwnerAddress()} />
@@ -169,6 +169,49 @@ class MultisigTransaction extends Component {
         </Form>
       )
     }
+  }
+
+  renderAddressBook = () => {
+    const { selectedContact } = this.state
+    const { address_book: addressbook } = this.props.account
+    const addressBookOptions = addressbook.contacts.map(contact => {
+      if (!(contact.recipient instanceof Array)) return null
+      const name = contact.contact_name
+      return {
+        key: name,
+        text: `contact: ${name}`,
+        value: contact
+      }
+    }).filter(Boolean)
+
+    return (
+      <Form style={{ width: '90%', margin: 'auto' }}>
+        <Form.Field >
+          <label style={{ color: 'white' }}>Select a contact</label>
+          <Dropdown
+            button
+            options={addressBookOptions}
+            className='icon'
+            fluid
+            labeled
+            selection
+            icon='address book'
+            text='one of your contacts'
+            value={selectedContact}
+            onChange={this.selectContact}
+          />
+        </Form.Field >
+        <Divider horizontal style={{ color: 'white', marginTop: 10 }}>Or</Divider>
+      </Form>
+    )
+  }
+
+  selectContact = (event, data) => {
+    const { recipient } = data.value
+    const clonedRecipient = cloneDeep(recipient)
+    const [signatureCount, ownerAddresses] = clonedRecipient
+    this.setState({ signatureCount, ownerAddresses, selectedContact: data.value })
+    this.checkOwnerAddressesErrors(signatureCount, ownerAddresses)
   }
 
   checkMultisigTransactionFormValues = () => {
@@ -341,6 +384,7 @@ class MultisigTransaction extends Component {
 
     return (
       <div>
+        {this.renderAddressBook()}
         {this.renderDestinationForm()}
         <TransactionBodyForm handleSubmit={this.handleSubmit} enableSubmit={this.state.enableSubmit} />
       </div>
