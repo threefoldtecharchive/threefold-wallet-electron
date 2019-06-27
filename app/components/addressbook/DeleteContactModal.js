@@ -7,9 +7,18 @@ const DeleteModal = ({ openDeleteModal, closeModal, contactName, contactAddress,
   <Modal open={openDeleteModal} closeOnEscape={closeOnEscape} onClose={closeModal} basic size='small'>
     <Modal.Header>Delete this contact?</Modal.Header>
     <Modal.Content image>
-      <Modal.Description>
-        {contactName} : {contactAddress}
-      </Modal.Description>
+      {contactAddress instanceof Array ? (
+        <Modal.Description>
+          Name: {contactName}
+          {contactAddress[1].map(address => {
+            return (<p style={{ fontSize: 16 }}>{address}</p>)
+          })}
+        </Modal.Description>
+      ) : (
+        <Modal.Description>
+          {contactName} : {contactAddress}
+        </Modal.Description>
+      )}
     </Modal.Content>
     <Modal.Actions>
       <Button onClick={closeModal} negative>

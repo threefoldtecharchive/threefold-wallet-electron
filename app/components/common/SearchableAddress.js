@@ -60,7 +60,7 @@ class SearchableAddress extends Component {
     this.setState({ value })
 
     setTimeout(() => {
-      if (this.state.value.length < 1) return this.setState(initialState)
+      // if (this.state.value.length < 1) return this.setState(initialState)
       if (!tfchain.wallet_address_is_valid(value)) {
         this.setState({ addressError: true })
       } else {

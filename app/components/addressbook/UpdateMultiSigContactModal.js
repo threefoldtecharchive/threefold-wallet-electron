@@ -9,7 +9,7 @@ const AddModal = ({ openUpdateMultisigModal, closeUpdateMultisigModal, contactNa
     <Modal.Header>Add a contact</Modal.Header>
     <Modal.Content image>
       <Modal.Description>
-        <Form style={{ width: '90%', margin: 'auto', marginTop: 10 }}>
+        <Form style={{ width: '100%', margin: 'auto', marginTop: 10 }}>
           <Form.Field>
             <label style={{ color: 'white' }}>Contact Name</label>
             <Input value={contactName} onChange={handleContactNameChange} placeholder='name' />
@@ -20,7 +20,7 @@ const AddModal = ({ openUpdateMultisigModal, closeUpdateMultisigModal, contactNa
           </Form.Field>
           <Form.Field>
             <label style={{ color: 'white' }}>Signature count</label>
-            <Input type='number' value={signatureCount} onChange={handleSignatureCountChange} placeholder='signature count' disabled={editAddressess} />
+            <Input type='number' value={signatureCount} onChange={handleSignatureCountChange} placeholder='signature count' disabled={!editAddressess} />
             {renderSignatureCountError(signatureCountError)}
           </Form.Field>
         </Form>

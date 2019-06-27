@@ -1,7 +1,7 @@
 // @flow
 import { connect } from 'react-redux'
 import React, { Component } from 'react'
-import { Button, Icon, Divider, List } from 'semantic-ui-react'
+import { Button, Icon, Divider, List, Segment } from 'semantic-ui-react'
 import styles from '../home/Home.css'
 import { saveAccount, updateAccount } from '../../actions'
 import { toast } from 'react-toastify'
@@ -11,7 +11,7 @@ import UpdateContactModal from './UpdateContactModal'
 import AddMultiSigContactModal from './AddMultiSigContactModal'
 import UpdateMultiSigContactModal from './UpdateMultiSigContactModal'
 import * as tfchain from '../../tfchain/api'
-import { filter, truncate } from 'lodash'
+import { filter, cloneDeep } from 'lodash'
 
 const mapStateToProps = state => ({
   account: state.account.state
@@ -55,36 +55,46 @@ class AddressBook extends Component {
       )
     } else {
       return (
-        <List>
+        <List divided inverted relaxed>
           {addressBook.contacts.map(contact => {
             let updateAction = (<Icon name='settings'style={{ color: 'white', marginRight: 30, cursor: 'pointer' }} onClick={() => this.openUpdateModal(contact)} />)
-            let recipient = (
-              <div>
-                <List.Content style={{ float: 'left' }}>Contact: {contact.contact_name}</List.Content>
-                <List.Content >Address: {contact.recipient}</List.Content>
-              </div>
-            )
             if (contact.recipient instanceof Array) {
-              const truncatedRecipients = contact.recipient[1].map(recep => truncate(recep, { length: 30 })).join(', ')
               updateAction = (<Icon name='settings'style={{ color: 'white', marginRight: 30, cursor: 'pointer' }} onClick={() => this.openUpdateMultisigModal(contact)} />)
-              recipient = (
-                <div>
-                  <List.Content style={{ float: 'left' }}>Multisig Contact: {contact.contact_name}</List.Content>
-                  <List.Content >Addresses: {truncatedRecipients}</List.Content>
-                </div>
+              return (
+                <List.Item>
+                  <List.Header style={{ float: 'left' }}>Multisig: {contact.contact_name}</List.Header>
+                  <div style={{ display: 'flex', position: 'absolute', right: 0 }}>
+                    {updateAction}
+                    <Icon name='trash' style={{ color: 'white', marginRight: 30, cursor: 'pointer' }} onClick={() => this.openDeleteModal(contact)} />
+                  </div>
+                  <br />
+                  <List.Content>
+                    <br />
+                    {contact.recipient[1].map(recep => {
+                      return (
+                        <div>
+                          {recep}
+                        </div>
+                      )
+                    })}
+                  </List.Content>
+                </List.Item>
+              )
+            } else {
+              return (
+                <List.Item>
+                  <List.Content >
+                    <List.Header style={{ float: 'left' }}>{contact.contact_name}</List.Header>
+                    <div style={{ display: 'flex', position: 'absolute', right: 0 }}>
+                      {updateAction}
+                      <Icon name='trash' style={{ color: 'white', marginRight: 30, cursor: 'pointer' }} onClick={() => this.openDeleteModal(contact)} />
+                    </div>
+                    <br />
+                    {contact.recipient}
+                  </List.Content>
+                </List.Item>
               )
             }
-
-            return (
-              <List.Item>
-                <Divider />
-                <List.Content floated='right'>
-                  {updateAction}
-                  <Icon name='trash' style={{ color: 'white', marginRight: 30, cursor: 'pointer' }} onClick={() => this.openDeleteModal(contact)} />
-                </List.Content>
-                {recipient}
-              </List.Item>
-            )
           })}
         </List>
       )
@@ -220,7 +230,7 @@ class AddressBook extends Component {
 
   openAddMultiSigModal = () => {
     const open = !this.state.openAddMultiSigModal
-    this.setState({ openAddMultiSigModal: open })
+    this.setState({ openAddMultiSigModal: open, contactName: '' })
   }
 
   closeMultisigModal = () => {
@@ -256,7 +266,8 @@ class AddressBook extends Component {
   }
 
   openUpdateMultisigModal = (contact) => {
-    const { contact_name: contactName, recipient } = contact
+    const clonedContact = cloneDeep(contact)
+    const { contact_name: contactName, recipient } = clonedContact
     const open = !this.state.openUpdateMultisigModal
     this.setState({ openUpdateMultisigModal: open, contactName, newContactName: contactName, ownerAddresses: recipient[1], signatureCount: recipient[0] })
   }
@@ -307,12 +318,12 @@ class AddressBook extends Component {
             <Icon onClick={() => this.props.history.goBack()} style={{ fontSize: 25, marginLeft: 15, marginTop: 5, cursor: 'pointer', zIndex: 5 }} name='chevron circle left' />
             <span onClick={() => this.props.history.goBack()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
           </div>
-          <div style={{ width: '90%', margin: 'auto', textAlign: 'right', marginTop: 30 }}>
+          <Segment inverted style={{ width: '90%', margin: 'auto', marginTop: 30, padding: 30 }}>
             {this.renderContactList()}
-            <div style={{ display: 'flex', float: 'right' }}>
-              <Button onClick={this.openAddModal} className={styles.acceptButton} style={{ marginTop: 40, marginRight: 20 }} size='big'>Create contact</Button>
-              <Button onClick={this.openAddMultiSigModal} className={styles.acceptButton} style={{ marginTop: 40 }} size='big'>Create multisig contact</Button>
-            </div>
+          </Segment>
+          <div style={{ display: 'flex', float: 'right', marginRight: '5%' }}>
+            <Button onClick={this.openAddModal} className={styles.acceptButton} style={{ marginTop: 40, marginRight: 20 }} size='big'>Create contact</Button>
+            <Button onClick={this.openAddMultiSigModal} className={styles.acceptButton} style={{ marginTop: 40 }} size='big'>Create multisig contact</Button>
           </div>
         </div>
       </div>
