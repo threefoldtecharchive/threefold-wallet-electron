@@ -334,6 +334,7 @@ class AddressBook extends Component {
       signatureCountError,
       openUpdateMultisigModal
     } = this.state
+    const canEdit = true
 
     return (
       <React.Fragment>
@@ -377,6 +378,7 @@ class AddressBook extends Component {
           signatureCountError={signatureCountError}
         />
         <UpdateMultiSigContactModal
+          editAddressess={canEdit}
           contactName={newContactName}
           handleContactNameChange={this.handleNewContactNameChange}
           handleAddressOwnerChange={this.handleAddressOwnerChange}

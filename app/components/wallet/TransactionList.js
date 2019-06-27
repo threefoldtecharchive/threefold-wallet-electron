@@ -1,8 +1,9 @@
 import React from 'react'
-import { Dimmer, Loader, List } from 'semantic-ui-react'
+import { Dimmer, Loader, List, Icon, Label } from 'semantic-ui-react'
 import uuid from 'uuid'
 import moment from 'moment'
 import { differenceWith, flatten, isEqual, find } from 'lodash'
+import styles from '../home/Home.css'
 const { shell } = require('electron')
 
 const confirmedStyle = {
@@ -26,7 +27,7 @@ const hashFont = {
   fontSize: 12
 }
 
-const TransactionList = ({ loader, transactions, chainInfo, account }) => {
+const TransactionList = ({ loader, transactions, chainInfo, account, addContact }) => {
   if (loader) {
     return (
       <Dimmer active={loader} >
@@ -52,7 +53,7 @@ const TransactionList = ({ loader, transactions, chainInfo, account }) => {
               <List.Item key={uuid.v4()} style={{ borderBottom: '1px solid grey' }}>
                 <List.Content>
                   {renderTransactionHeader(tx, explorerAddress, accountAddresses)}
-                  {renderTransactionBody(tx, explorerAddress, chainTimestamp, account)}
+                  {renderTransactionBody(tx, explorerAddress, chainTimestamp, account, addContact)}
                 </List.Content>
               </List.Item>
             )
@@ -69,7 +70,7 @@ const TransactionList = ({ loader, transactions, chainInfo, account }) => {
   }
 }
 
-function renderTransactionBody (tx, explorerAddress, chainTimestamp, account) {
+function renderTransactionBody (tx, explorerAddress, chainTimestamp, account, addContact) {
   if (tx.inputs.length > 0) {
     return tx.inputs.map(input => {
       return (
@@ -80,23 +81,23 @@ function renderTransactionBody (tx, explorerAddress, chainTimestamp, account) {
             })}</span>
             {renderLockedValue(input.lock, input.lock_is_timestamp, chainTimestamp)}
           </List.Description>
-          <List.Description style={listDescriptionStyle} as='a'>
+          <List.Description style={listDescriptionStyle}>
             {input.senders.map(sender => {
               return (
-                <div key={tx.identifier + '_in_' + sender} style={{ display: 'flex', marginTop: 5 }} onClick={() => shell.openExternal(`${explorerAddress}/hash.html?hash=${sender}`)}>
+                <div key={tx.identifier + '_in_' + sender} style={{ display: 'flex', marginTop: 5 }}>
                   From:
                   <p style={{ fontSize: 14, marginBottom: 0, fontFamily: 'Lucida Typewriter', position: 'relative', left: 19 }}>
-                    {_addressDisplayElement(sender, account)}
+                    {_addressDisplayElement(sender, account, explorerAddress, addContact)}
                   </p>
                 </div>
               )
             })}
           </List.Description>
-          <List.Description style={{ color: 'white', display: 'flex', marginTop: 3 }} as='a'>
-            <div key={tx.identifier + '_in_' + input.recipient} style={{ display: 'flex', marginTop: 5 }} onClick={() => shell.openExternal(`${explorerAddress}/hash.html?hash=${input.recipient}`)}>
+          <List.Description style={{ color: 'white', display: 'flex', marginTop: 3 }}>
+            <div key={tx.identifier + '_in_' + input.recipient} style={{ display: 'flex', marginTop: 5 }}>
               To:
               <p style={{ fontSize: 14, marginBottom: 0, fontFamily: 'Lucida Typewriter', position: 'relative', left: 37 }}>
-                {_addressDisplayElement(input.recipient, account)}
+                {_addressDisplayElement(input.recipient, account, explorerAddress, addContact)}
               </p>
             </div>
           </List.Description>
@@ -114,23 +115,23 @@ function renderTransactionBody (tx, explorerAddress, chainTimestamp, account) {
             {out.is_fee ? (<span style={{ marginLeft: 3 }}>(fee)</span>) : null}
             {renderLockedValue(out.lock, out.lock_is_timestamp, chainTimestamp)}
           </List.Description>
-          <List.Description style={listDescriptionStyle} as='a'>
+          <List.Description style={listDescriptionStyle}>
             {out.senders.map(sender => {
               return (
-                <div key={tx.identifier + '_out_' + sender} style={{ display: 'flex', marginTop: 5 }} onClick={() => shell.openExternal(`${explorerAddress}/hash.html?hash=${sender}`)}>
+                <div key={tx.identifier + '_out_' + sender} style={{ display: 'flex', marginTop: 5 }}>
                   From:
                   <p style={{ fontSize: 14, marginBottom: 0, fontFamily: 'Lucida Typewriter', position: 'relative', left: 19 }}>
-                    {_addressDisplayElement(sender, account)}
+                    {_addressDisplayElement(sender, account, explorerAddress, addContact)}
                   </p>
                 </div>
               )
             })}
           </List.Description>
-          <List.Description style={{ color: 'white', display: 'flex', marginTop: 3 }} as='a'>
-            <div key={tx.identifier + '_out_' + out.recipient} style={{ display: 'flex', marginTop: 5 }} onClick={() => shell.openExternal(`${explorerAddress}/hash.html?hash=${out.recipient}`)}>
+          <List.Description style={{ color: 'white', display: 'flex', marginTop: 3 }}>
+            <div key={tx.identifier + '_out_' + out.recipient} style={{ display: 'flex', marginTop: 5 }}>
               To:
               <p style={{ fontSize: 14, marginBottom: 0, fontFamily: 'Lucida Typewriter', position: 'relative', left: 37 }}>
-                {_addressDisplayElement(out.recipient, account)}
+                {_addressDisplayElement(out.recipient, account, explorerAddress, addContact)}
               </p>
             </div>
           </List.Description>
@@ -140,25 +141,60 @@ function renderTransactionBody (tx, explorerAddress, chainTimestamp, account) {
   }
 }
 
-function _addressDisplayElement (address, account) {
+function _addressDisplayElement (address, account, explorerAddress, addContact) {
+  const openExplorerIcon = (<Icon style={{ cursor: 'pointer', marginLeft: 10, marginRight: 10 }} name='external alternate' onClick={() => shell.openExternal(`${explorerAddress}/hash.html?hash=${address}`)} />)
+  let addressElement = (<span style={hashFont}>{address}</span>)
+
+  // default add single sig contact (pass address as a single string)
+  let onClick = () => addContact(address)
+  const wallet = account.wallet_for_address(address)
+  if (wallet) {
+    // if there is a wallet associated with the address than pass recipient (can be single string or array in case of multisig)
+    onClick = () => addContact(wallet.recipient_get())
+  }
+
+  let contactOrWallet = (<Label onClick={onClick} className={styles.tinyAcceptButton} as='a'>
+    <Icon name='plus' />
+  Add to contacts
+  </Label>)
+
   const { address_book: addressBook } = account
   const { contacts } = addressBook
 
-  const wallet = account.wallet_for_address(address)
-  if (wallet && wallet.wallet_name) {
-    return <span><span style={hashFont}>{address}</span> (wallet {`${wallet.wallet_name}`})</span>
-  }
-
   // Filter out multisig contacts
-  const filteredContacts = contacts.filter(contact => !(contact.recipient instanceof Array))
-
+  const singleContacts = contacts.filter(contact => !(contact.recipient instanceof Array))
   // Check if address to display is a contact from addressboek
-  const contact = find(filteredContacts, contact => contact.recipient === address)
+  const contact = find(singleContacts, contact => contact.recipient === address)
+
+  // Single sig contact
   if (contact) {
-    return <span><span style={hashFont}>{contact.recipient}</span> (contact: {contact.contact_name})</span>
+    addressElement = (<span style={hashFont}>{contact.recipient}</span>)
+    contactOrWallet = (<span>(contact: {contact.contact_name})</span>)
   }
 
-  return <span><span style={hashFont}>{address}</span></span>
+  // Single sig wallet
+  if (wallet && wallet.wallet_name) {
+    addressElement = (<span style={hashFont}>{address}</span>)
+    contactOrWallet = (<span>(wallet {`${wallet.wallet_name}`})</span>)
+  }
+
+  // If nothing above and there is a ms wallet connected to the recipients, show ms wallet contact
+  if (wallet && wallet.is_multisig) {
+    const msContacts = contacts.filter(contact => contact.recipient instanceof Array)
+    const msContact = find(msContacts, contact => isEqual(contact.recipient[1], wallet.authorized_owners))
+    if (msContact) {
+      addressElement = (<React.Fragment><span style={hashFont}>{address}</span></React.Fragment>)
+      contactOrWallet = (<span>(contact: {msContact.contact_name})</span>)
+    }
+  }
+
+  return (
+    <React.Fragment>
+      {addressElement}
+      {openExplorerIcon}
+      {contactOrWallet}
+    </React.Fragment>
+  )
 }
 
 // TODO: this should be above each transaction as we see transactions,
@@ -190,7 +226,7 @@ function renderTransactionHeader (tx, explorerAddress, accountAddresses) {
 
   return (
     <div>
-      <List.Header as='a' style={{ color: 'white' + '!important', display: 'flex' }} onClick={() => shell.openExternal(`${explorerAddress}/hash.html?hash=${tx.identifier}`)}>
+      <List.Header style={{ color: 'white' + '!important', display: 'flex' }} onClick={() => shell.openExternal(`${explorerAddress}/hash.html?hash=${tx.identifier}`)}>
         <span style={listHeaderColor}>TXID {tx.identifier}:</span>
         {tx.confirmed
           ? (<p style={confirmedStyle}>

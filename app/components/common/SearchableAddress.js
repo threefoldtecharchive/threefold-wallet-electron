@@ -95,7 +95,7 @@ class SearchableAddress extends Component {
         <Search
           style={this.props.style}
           onResultSelect={this.handleResultSelect}
-          onSearchChange={debounce(this.handleSearchChange, 500, {
+          onSearchChange={this.props.disabled === false ? null : debounce(this.handleSearchChange, 500, {
             leading: true
           })}
           results={results}

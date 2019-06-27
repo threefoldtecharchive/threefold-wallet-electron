@@ -8,6 +8,10 @@ import Footer from '../footer'
 import BalanceGrid from '../wallet/BalanceGrid'
 import TransactionsList from '../wallet/TransactionList'
 import { truncate } from 'lodash'
+import { saveAccount, updateAccount } from '../../actions'
+import UpdateContactModal from '../addressBook/UpdateContactModal'
+import UpdateMultiSigContactModal from '../addressBook/UpdateMultiSigContactModal'
+import { toast } from 'react-toastify'
 const { shell } = require('electron')
 
 const mapStateToProps = state => {
@@ -31,13 +35,27 @@ const mapStateToProps = state => {
   }
 }
 
+const mapDispatchToProps = (dispatch) => ({
+  saveAccount: (account) => {
+    dispatch(saveAccount(account))
+  },
+  updateAccount: (account) => {
+    dispatch(updateAccount(account))
+  }
+})
+
 class Wallet extends Component {
   constructor (props) {
     super(props)
     this.state = {
       transactions: [],
       intervalId: undefined,
-      loader: false
+      loader: false,
+      contactName: '',
+      contactAddress: '',
+      openAddModal: false,
+      ownerAddresses: ['', ''],
+      signatureCount: 2
     }
   }
 
@@ -94,6 +112,63 @@ class Wallet extends Component {
     )
   }
 
+  openAddModal = (contactAddress) => {
+    if (contactAddress instanceof Array) {
+      const [signatureCount, ownerAddresses] = contactAddress
+      const open = !this.state.openAddMultisigModal
+      return this.setState({ openAddMultisigModal: open, contactName: '', ownerAddresses, signatureCount })
+    }
+    const open = !this.state.openAddModal
+    this.setState({ openAddModal: open, contactAddress, contactName: '' })
+  }
+
+  closeAddModal = () => {
+    this.setState({ openAddModal: false })
+  }
+
+  addContact = () => {
+    const { contactAddress, contactName } = this.state
+    const { account } = this.props
+    const { address_book: addressBook } = account
+    try {
+      addressBook.contact_new(contactName, contactAddress)
+      this.setState({ openAddModal: false })
+      toast.success('Added contact')
+      this.props.saveAccount(account)
+    } catch (error) {
+      console.log(error)
+      this.setState({ openAddModal: false })
+      toast.error('Adding contact failed')
+    }
+  }
+
+  handleAddressChange = (value) => {
+    this.setState({ contactAddress: value })
+  }
+
+  handleContactNameChange = ({ target }) => (
+    this.setState({ contactName: target.value })
+  )
+
+  closeAddMultisigModal = () => {
+    this.setState({ openAddMultisigModal: false })
+  }
+
+  addMultiSigContact = () => {
+    const { contactName, ownerAddresses, signatureCount } = this.state
+    const { account } = this.props
+    const { address_book: addressBook } = account
+    try {
+      addressBook.contact_new(contactName, [ownerAddresses, signatureCount])
+      this.setState({ openAddMultisigModal: false })
+      toast.success('Added multisig contact')
+      this.props.saveAccount(account)
+    } catch (error) {
+      this.setState({ openAddMultisigModal: false })
+      toast.error('Adding multisig contact failed')
+    }
+  }
+
   render () {
     // If refreshed in development and data in store is deleted, route to account.
     if (!this.props.account.selected_wallet) {
@@ -105,9 +180,29 @@ class Wallet extends Component {
     const { chain_info: chainConstants } = account
 
     const wallet = this.props.account.selected_wallet
+    const { contactName, contactAddress, openAddModal, ownerAddresses, signatureCount, openAddMultisigModal } = this.state
     const active = true
     return (
       <div>
+        <UpdateContactModal
+          contactName={contactName}
+          handleContactNameChange={this.handleContactNameChange}
+          contactAddress={contactAddress}
+          handleAddressChange={this.handleAddressChange}
+          openUpdateModal={openAddModal}
+          closeUpdateModal={this.closeAddModal}
+          updateContact={this.addContact}
+        />
+        <UpdateMultiSigContactModal
+          editAddressess={false}
+          contactName={contactName}
+          handleContactNameChange={this.handleContactNameChange}
+          ownerAddresses={ownerAddresses}
+          openUpdateMultisigModal={openAddMultisigModal}
+          closeUpdateMultisigModal={this.closeAddMultisigModal}
+          updateMultiSigContact={this.addMultiSigContact}
+          signatureCount={signatureCount}
+        />
         {!wallet ? (
           <Dimmer >
             <Loader active={active} content='Loading wallet transaction' />
@@ -131,7 +226,7 @@ class Wallet extends Component {
                     {this.renderOwnerList()}
                   </Segment>
                   <Segment style={{ width: '90%', height: '40vh', overflow: 'auto', overflowY: 'scroll', margin: 'auto', background: '#29272E', marginTop: 20 }}>
-                    <TransactionsList account={this.props.account} loader={this.state.loader} transactions={wallet.balance.transactions} chainInfo={chainConstants} />
+                    <TransactionsList account={this.props.account} loader={this.state.loader} transactions={wallet.balance.transactions} chainInfo={chainConstants} addContact={this.openAddModal} />
                   </Segment>
                 </div>
               </div>
@@ -156,5 +251,5 @@ function _addressDisplayElement (address, account) {
 
 export default connect(
   mapStateToProps,
-  null
+  mapDispatchToProps
 )(Wallet)
