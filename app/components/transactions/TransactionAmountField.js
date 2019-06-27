@@ -40,7 +40,7 @@ class TransactionAmountField extends Component {
       <div style={{ marginBottom: 20 }}>
         <div style={{ display: 'flex' }}>
           <Form.Field style={{ width: '70%' }}>
-            <label style={{ color: 'white' }}>{label}</label>
+            <label style={{ color: 'white' }}>{label} *</label>
             <Input
               value={value}
               onChange={this.onInputChange}

@@ -5,14 +5,14 @@ const closeOnEscape = true
 
 class ConfirmationModal extends Component {
   render () {
-    const { open, closeModal, confirmTransaction, transactionType, selectedWallet, amount, owners, destination, signatureCount, timestamp, selectedWalletRecipient, selectedRecipientAddress, minimumMinerFee } = this.props
+    const { open, closeModal, confirmTransaction, transactionType, selectedWallet, amount, owners, destination, signatureCount, timestamp, selectedWalletRecipient, selectedRecipientAddress, minimumMinerFee, description } = this.props
     return (
       <Modal open={open} closeOnEscape={closeOnEscape} onClose={closeModal}>
         <Modal.Header>Confirm transaction</Modal.Header>
         <Modal.Content image>
           <Modal.Description>
             <Header>Do you wish to confirm this transaction?</Header>
-            {renderModalBody(transactionType, selectedWallet, amount, owners, destination, signatureCount, timestamp, selectedWalletRecipient, selectedRecipientAddress, minimumMinerFee)}
+            {renderModalBody(transactionType, selectedWallet, amount, owners, destination, signatureCount, timestamp, selectedWalletRecipient, selectedRecipientAddress, minimumMinerFee, description)}
           </Modal.Description>
         </Modal.Content>
         <Modal.Actions>
@@ -34,7 +34,7 @@ class ConfirmationModal extends Component {
 
 export default ConfirmationModal
 
-function renderModalBody (transactionType, selectedWallet, amount, owners, destination, signatureCount, timestamp, selectedWalletRecipient, selectedRecipientAddress, minimumMinerFee) {
+function renderModalBody (transactionType, selectedWallet, amount, owners, destination, signatureCount, timestamp, selectedWalletRecipient, selectedRecipientAddress, minimumMinerFee, description) {
   if (!selectedWallet) {
     return null
   }
@@ -121,6 +121,17 @@ function renderModalBody (transactionType, selectedWallet, amount, owners, desti
           </List.Description>
         </List.Content>
       </List.Item>
+      {description ? (
+        <List.Item>
+          <Icon name='right triangle' />
+          <List.Content>
+            <List.Header>Description: </List.Header>
+            <List.Description>
+              {description}
+            </List.Description>
+          </List.Content>
+        </List.Item>
+      ) : null}
       {recipients}
       {timestamp ? (
         <List.Item>

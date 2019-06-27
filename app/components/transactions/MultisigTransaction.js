@@ -135,7 +135,7 @@ class MultisigTransaction extends Component {
       return (
         <div key={index} >
           <Form.Field style={{ marginTop: 20 }}>
-            <label style={{ float: 'left', color: 'white' }}>Owner address</label>
+            <label style={{ float: 'left', color: 'white' }}>Owner address *</label>
             <SearchableAddress
               setSearchValue={(e) => this.handleAddressOwnerChange(e, index)}
               icon='user'
@@ -172,7 +172,7 @@ class MultisigTransaction extends Component {
             ) : null}
             <Form.Field>
               <div style={{ display: 'flex' }}>
-                <label style={{ float: 'left', color: 'white' }}>Signature count</label>
+                <label style={{ float: 'left', color: 'white' }}>Signature count *</label>
                 <Popup offset={0} size='large' position='right center' content='Signature count is the count of signatures that this multsig wallet requires to send tansactions.' trigger={<Icon style={{ fontSize: 12, float: 'left', marginLeft: 10 }} name='question circle' />} />
               </div>
               <Input style={{ marginTop: 10 }} type='number' placeholder='1' min='0' value={signatureCount} onChange={this.handleSignatureCountChange} />
@@ -318,7 +318,7 @@ class MultisigTransaction extends Component {
   }
 
   buildMultiSignTransaction = () => {
-    const { selectedWallet, signatureCount, ownerAddresses, amount, description, datelock, timelock } = this.state
+    const { selectedWallet, signatureCount, ownerAddresses, amount, datelock, timelock, description } = this.state
     let timestamp
     if (datelock !== '') {
       const concatDate = datelock + ' ' + timelock
@@ -346,7 +346,7 @@ class MultisigTransaction extends Component {
         return this.setState({ loader: false, errorMessage: errorMessage })
       }
     }
-    builder.send({ data: description }).then(result => {
+    builder.send({ message: description }).then(result => {
       this.setState({ ownerAddressErrors: [false, false], amountError: false, loader: false })
       if (result.submitted) {
         toast('Multisign Transaction ' + result.transaction.id + ' submitted')
@@ -419,7 +419,7 @@ class MultisigTransaction extends Component {
     }
 
     if (this.state.openConfirmationModal) {
-      const { openConfirmationModal, transactionType, destination, selectedWalletRecipient, selectedRecipientAddress, ownerAddresses, signatureCount } = this.state
+      const { openConfirmationModal, transactionType, destination, selectedWalletRecipient, selectedRecipientAddress, ownerAddresses, signatureCount, description } = this.state
       const { amount, datetime, selectedWallet } = this.state
       return (
         <TransactionConfirmationModal
@@ -436,6 +436,7 @@ class MultisigTransaction extends Component {
           owners={ownerAddresses}
           signatureCount={signatureCount}
           minimumMinerFee={this.props.account.minimum_miner_fee}
+          description={description}
         />
       )
     }

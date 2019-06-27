@@ -1,12 +1,13 @@
 import React, { Component } from 'react'
 import { Field, reduxForm } from 'redux-form'
-import { Form, Dropdown, Button, Message } from 'semantic-ui-react'
+import { Form, Dropdown, Button, Message, Input } from 'semantic-ui-react'
 import { connect } from 'react-redux'
 import styles from '../home/Home.css'
 import { truncate, concat } from 'lodash'
 import { DateTimePicker } from 'react-widgets'
 import moment from 'moment-timezone'
 import TransactionAmountField from './TransactionAmountField'
+import * as tfchain from '../../tfchain/api'
 
 const mapStateToProps = state => {
   if (!state.account.state) {
@@ -21,7 +22,7 @@ const mapStateToProps = state => {
 
 const validate = (values, props) => {
   const errors = {}
-  const { amount, selectedWallet, datetime } = values
+  const { amount, selectedWallet, datetime, description } = values
   const { account } = props
 
   if (!selectedWallet) {
@@ -33,6 +34,10 @@ const validate = (values, props) => {
     errors.amount = 'Not a valid amount'
   } else if (selectedWallet && !selectedWallet.balance.spend_amount_is_valid(amount)) {
     errors.amount = 'Not enough balance'
+  }
+
+  if (!tfchain.formatted_data_is_valid({ message: description })) {
+    errors.description = 'Not a valid description'
   }
 
   if (validateTimeLockChange(datetime, account)) {
@@ -65,6 +70,21 @@ const renderDateTimeField = ({
     />
     {((error && <Message negative>{error}</Message>) ||
         (warning && <span>{warning}</span>))}
+  </Form.Field>
+)
+
+const renderField = ({
+  input,
+  label,
+  type,
+  meta: { touched, error, warning }
+}) => (
+  <Form.Field>
+    <label style={{ color: 'white' }}>{label}</label>
+    <div>
+      <Input {...input} placeholder={label} type={type} />
+      {touched && (error && <Message negative>{error}</Message>)}
+    </div>
   </Form.Field>
 )
 
@@ -109,7 +129,7 @@ class TransactionBodyForm extends Component {
     const { selectedWallet } = this.state
     return (
       <Form.Field>
-        <label style={{ color: 'white' }}>Select Wallet</label>
+        <label style={{ color: 'white' }}>Select Wallet *</label>
         <Dropdown
           placeholder='Select wallet'
           options={data}
@@ -168,6 +188,12 @@ class TransactionBodyForm extends Component {
           label='amount'
         />
         <Field
+          name='description'
+          type='text'
+          component={renderField}
+          label='description'
+        />
+        <Field
           name='datetime'
           label='datetime'
           component={renderDateTimeField}
@@ -177,7 +203,7 @@ class TransactionBodyForm extends Component {
           component={this.renderDropdownList}
           data={walletOptions}
         />
-
+        <label style={{ fontSize: 12 }}>Fields with * are required</label>
         <div style={{ float: 'right' }}>
           <Button disabled={!enableSubmit || invalid} type='submit' className={styles.acceptButton} style={{ marginTop: 20, marginRight: 10, float: 'left', background: '#015DE1', color: 'white' }} size='big'>Send</Button>
         </div>

@@ -80,7 +80,7 @@ class InternalTransaction extends Component {
       return (
         <Form style={{ width: '90%', margin: 'auto' }}>
           <Form.Field style={{ marginTop: 10 }}>
-            <label style={{ color: 'white' }}>Select your destination wallet</label>
+            <label style={{ color: 'white' }}>Select your destination wallet *</label>
             <Dropdown
               placeholder='Select Wallet'
               fluid
@@ -92,7 +92,7 @@ class InternalTransaction extends Component {
           </Form.Field>
           {selectedWalletRecipient.is_multisig ? (null) : (
             <Form.Field>
-              <label style={{ color: 'white' }}>Destination Address</label>
+              <label style={{ color: 'white' }}>Destination Address *</label>
               <Dropdown
                 style={{ marginBottom: 20, marginTop: 10 }}
                 placeholder='Select Address'
@@ -281,7 +281,7 @@ class InternalTransaction extends Component {
         return this.setState({ loader: false, errorMessage: errorMessage })
       }
     }
-    builder.send({ data: description }).then(result => {
+    builder.send({ message: description }).then(result => {
       this.setState({ destinationError: false, amountError: false, loader: false })
       if (result.submitted) {
         toast('Transaction ' + result.transaction.id + ' submitted')
@@ -361,7 +361,7 @@ class InternalTransaction extends Component {
     }
 
     if (this.state.openConfirmationModal) {
-      const { openConfirmationModal, transactionType, destination, selectedWalletRecipient, selectedRecipientAddress } = this.state
+      const { openConfirmationModal, transactionType, destination, selectedWalletRecipient, selectedRecipientAddress, description } = this.state
       const { amount, datetime, selectedWallet } = this.state
       return (
         <TransactionConfirmationModal
@@ -376,6 +376,7 @@ class InternalTransaction extends Component {
           amount={amount}
           timestamp={datetime}
           minimumMinerFee={this.props.account.minimum_miner_fee}
+          description={description}
         />
       )
     }
