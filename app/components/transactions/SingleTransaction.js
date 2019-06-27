@@ -76,7 +76,7 @@ class SingleTransaction extends Component {
   renderDestinationForm = () => {
     const { enableSave } = this.state
     return (
-      <Form style={{ width: '90%', margin: 'auto', marginBottom: 30 }}>
+      <Form style={{ width: '90%', margin: 'auto' }}>
         <Form.Field style={{ marginTop: 10, marginBottom: 20 }}>
           <label style={{ color: 'white' }}>Destination address</label>
           <SearchableAddress
@@ -247,6 +247,7 @@ class SingleTransaction extends Component {
           selectedWallet={selectedWallet}
           amount={amount}
           timestamp={datetime}
+          minimumMinerFee={this.props.account.minimum_miner_fee}
         />
       )
     }

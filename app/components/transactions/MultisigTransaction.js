@@ -435,6 +435,7 @@ class MultisigTransaction extends Component {
           timestamp={datetime}
           owners={ownerAddresses}
           signatureCount={signatureCount}
+          minimumMinerFee={this.props.account.minimum_miner_fee}
         />
       )
     }

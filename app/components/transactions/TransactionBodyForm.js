@@ -1,11 +1,12 @@
 import React, { Component } from 'react'
 import { Field, reduxForm } from 'redux-form'
-import { Form, Dropdown, Input, Button, Message } from 'semantic-ui-react'
+import { Form, Dropdown, Button, Message } from 'semantic-ui-react'
 import { connect } from 'react-redux'
 import styles from '../home/Home.css'
 import { truncate, concat } from 'lodash'
 import { DateTimePicker } from 'react-widgets'
 import moment from 'moment-timezone'
+import TransactionAmountField from './TransactionAmountField'
 
 const mapStateToProps = state => {
   if (!state.account.state) {
@@ -28,16 +29,16 @@ const validate = (values, props) => {
   }
   if (!amount) {
     errors.amount = 'Required'
-  }
-  if (amount <= 0) {
-    errors.amount = 'Amount cannot be negative or 0'
-  }
-  if (selectedWallet && !selectedWallet.balance.spend_amount_is_valid(amount)) {
+  } else if (!selectedWallet.balance.spend_amount_is_valid(amount)) {
+    errors.amount = 'Not a valid amount'
+  } else if (selectedWallet && !selectedWallet.balance.spend_amount_is_valid(amount)) {
     errors.amount = 'Not enough balance'
   }
+
   if (validateTimeLockChange(datetime, account)) {
     errors.datetime = 'Datetime cannot be in the past'
   }
+
   return errors
 }
 
@@ -50,20 +51,6 @@ function validateTimeLockChange (datetime, account) {
   return timestamp <= chainInfo.chain_timestamp
 }
 
-const renderField = ({
-  input,
-  label,
-  type,
-  meta: { touched, error, warning }
-}) => (
-  <Form.Field>
-    <label style={{ color: 'white' }}>{label}</label>
-    <Input {...input} placeholder={label} type={type} style={{ background: '#0c111d !important', color: '#7784a9' }} />
-    {((error && <Message negative>{error}</Message>) ||
-        (warning && <span>{warning}</span>))}
-  </Form.Field>
-)
-
 const renderDateTimeField = ({
   input,
   label,
@@ -73,7 +60,6 @@ const renderDateTimeField = ({
     <label style={{ color: 'white' }}>{label}</label>
     <DateTimePicker
       onChange={value => {
-        console.log('---datetime value-----', value)
         input.onChange(value)
       }}
     />
@@ -85,21 +71,32 @@ const renderDateTimeField = ({
 class TransactionBodyForm extends Component {
   constructor (props) {
     super(props)
+    const { account } = this.props
     let selectedWallet
-    if (this.props.account.selected_wallet) {
-      selectedWallet = this.props.account.selected_wallet
+    if (account.selected_wallet) {
+      selectedWallet = account.selected_wallet
     } else {
-      selectedWallet = this.props.account.wallets[0]
+      selectedWallet = account.wallets[0]
     }
     this.state = {
-      selectedWallet
+      selectedWallet,
+      minimumMinerFee: account.minimum_miner_fee
     }
   }
 
   componentDidMount () {
     this.props.initialize({
+      selectedWallet: this.state.selectedWallet
+    })
+  }
+
+  setMaxAmount = () => {
+    const { account } = this.props
+    const minimumMinerFee = account.minimum_miner_fee
+    const maxAmount = this.state.selectedWallet.balance.coins_unlocked.minus(minimumMinerFee).str()
+    this.props.initialize({
       selectedWallet: this.state.selectedWallet,
-      amount: 1
+      amount: maxAmount
     })
   }
 
@@ -154,15 +151,20 @@ class TransactionBodyForm extends Component {
   }
 
   render () {
+    const { selectedWallet } = this.state
     const { handleSubmit, invalid, enableSubmit } = this.props
     const walletOptions = this.mapWalletsToDropdownOption()
 
     return (
-      <Form style={{ width: '90%', margin: 'auto' }} onSubmit={handleSubmit} initialValues={{ amount: 1, selectedWallet: this.state.selectedWallet }}>
+      <Form style={{ width: '90%', margin: 'auto', marginTop: 50 }} onSubmit={handleSubmit} initialValues={{ selectedWallet }}>
         <Field
           name='amount'
-          type='number'
-          component={renderField}
+          type='text'
+          props={{
+            selectedWallet,
+            setMaxAmount: this.setMaxAmount
+          }}
+          component={TransactionAmountField}
           label='amount'
         />
         <Field

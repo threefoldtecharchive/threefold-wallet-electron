@@ -5,14 +5,14 @@ const closeOnEscape = true
 
 class ConfirmationModal extends Component {
   render () {
-    const { open, closeModal, confirmTransaction, transactionType, selectedWallet, amount, owners, destination, signatureCount, timestamp, selectedWalletRecipient, selectedRecipientAddress } = this.props
+    const { open, closeModal, confirmTransaction, transactionType, selectedWallet, amount, owners, destination, signatureCount, timestamp, selectedWalletRecipient, selectedRecipientAddress, minimumMinerFee } = this.props
     return (
       <Modal open={open} closeOnEscape={closeOnEscape} onClose={closeModal}>
         <Modal.Header>Confirm transaction</Modal.Header>
         <Modal.Content image>
           <Modal.Description>
             <Header>Do you wish to confirm this transaction?</Header>
-            {renderModalBody(transactionType, selectedWallet, amount, owners, destination, signatureCount, timestamp, selectedWalletRecipient, selectedRecipientAddress)}
+            {renderModalBody(transactionType, selectedWallet, amount, owners, destination, signatureCount, timestamp, selectedWalletRecipient, selectedRecipientAddress, minimumMinerFee)}
           </Modal.Description>
         </Modal.Content>
         <Modal.Actions>
@@ -34,7 +34,7 @@ class ConfirmationModal extends Component {
 
 export default ConfirmationModal
 
-function renderModalBody (transactionType, selectedWallet, amount, owners, destination, signatureCount, timestamp, selectedWalletRecipient, selectedRecipientAddress) {
+function renderModalBody (transactionType, selectedWallet, amount, owners, destination, signatureCount, timestamp, selectedWalletRecipient, selectedRecipientAddress, minimumMinerFee) {
   if (!selectedWallet) {
     return null
   }
@@ -117,7 +117,7 @@ function renderModalBody (transactionType, selectedWallet, amount, owners, desti
         <List.Content>
           <List.Header>Amount: </List.Header>
           <List.Description>
-            {amount} TFT
+            {minimumMinerFee.plus(amount).str()} TFT (* including minerfee: {minimumMinerFee.str()})
           </List.Description>
         </List.Content>
       </List.Item>

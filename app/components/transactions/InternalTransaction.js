@@ -375,6 +375,7 @@ class InternalTransaction extends Component {
           selectedWallet={selectedWallet}
           amount={amount}
           timestamp={datetime}
+          minimumMinerFee={this.props.account.minimum_miner_fee}
         />
       )
     }
