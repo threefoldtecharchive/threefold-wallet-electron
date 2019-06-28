@@ -1,3 +1,21 @@
+# v0.2.0 (2018.06.28)
+
+Features:
+
+- support a local address book that allows the user to store and use addresses as contacts.
+- allow the user to export the transaction history of a wallet to PDF.
+- redesign the UI layout by introducing a clear sidebar to bundle the main actions available to the user.
+- support sending messages when transferring coins.
+
+Improvements:
+
+- display balance available and miner fee to be paid in transfer page.
+
+Fixes:
+
+- fix the labels of certain buttons to make their function more or clear or to match the companion description.
+- introduce base-sensitivity JS str compare on API level where it makes sense to avoid names that are too similar.
+
 # v0.1.3 (2018.06.19)
 
 Features:
