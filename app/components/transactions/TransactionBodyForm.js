@@ -113,10 +113,15 @@ class TransactionBodyForm extends Component {
   setMaxAmount = () => {
     const { account } = this.props
     const minimumMinerFee = account.minimum_miner_fee
-    const maxAmount = this.state.selectedWallet.balance.coins_unlocked.minus(minimumMinerFee).str()
+    let maxAmount = this.state.selectedWallet.balance.coins_unlocked.plus(this.state.selectedWallet.balance.unconfirmed_coins_unlocked)
+    if (maxAmount.less_than(minimumMinerFee)) {
+      maxAmount = tfchain.Currency()
+    } else {
+      maxAmount = maxAmount.minus(minimumMinerFee)
+    }
     this.props.initialize({
       selectedWallet: this.state.selectedWallet,
-      amount: maxAmount
+      amount: maxAmount.str()
     })
   }
 
