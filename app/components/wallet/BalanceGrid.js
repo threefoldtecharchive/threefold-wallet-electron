@@ -17,7 +17,7 @@ const WalletBalanceGrid = ({ walletBalance }) => {
       <div style={{ background: 'linear-gradient(90deg, rgba(102,60,198,1) 0%, rgba(169,92,202,1) 100%)', width: '100%', textAlign: 'center', height: 50, paddingTop: 15, borderRadius: 2 }}>
         <p style={{ fontFamily: 'SF UI Text Bold', fontSize: 16, textTransform: 'uppercase' }}>Wallet Balance</p>
       </div>
-      <div div style={{ padding: 20 }}>
+      <div style={{ padding: 20 }}>
         <Grid columns='3'>
           <Grid.Column style={{ textAlign: 'center' }}>
             <h4 style={{ marginTop: 0 }}>Total Balance</h4>

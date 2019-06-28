@@ -253,6 +253,7 @@
     "@babel/cli": "^7.4.4",
     "@babel/node": "^7.4.5",
     "@fortawesome/fontawesome-free": "^5.5.0",
+    "@react-pdf/renderer": "^1.6.3",
     "core-js": "^2.6.5",
     "devtron": "^1.4.0",
     "electron-debug": "^2.0.0",

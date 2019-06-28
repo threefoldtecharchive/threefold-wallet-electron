@@ -1,7 +1,7 @@
 // @flow
 import { connect } from 'react-redux'
 import React, { Component } from 'react'
-import { Segment, Icon, Divider } from 'semantic-ui-react'
+import { Segment, Icon, Divider, Button } from 'semantic-ui-react'
 import routes from '../../constants/routes'
 import styles from '../home/Home.css'
 import Footer from '../footer'
@@ -10,6 +10,7 @@ import TransactionsList from './TransactionList'
 import { saveAccount, updateAccount } from '../../actions'
 import UpdateContactModal from '../addressBook/UpdateContactModal'
 import UpdateMultiSigContactModal from '../addressBook/UpdateMultiSigContactModal'
+import ExportToPdfModal from './ExportToPdfModal'
 import { toast } from 'react-toastify'
 
 const mapStateToProps = state => {
@@ -144,6 +145,15 @@ class Wallet extends Component {
     }
   }
 
+  openExportModal = () => {
+    const open = !this.state.openExportModal
+    this.setState({ openExportModal: open })
+  }
+
+  closeExportModal = () => {
+    this.setState({ openExportModal: false })
+  }
+
   render () {
     // If refreshed in development and data in store is deleted, route to account.
     if (!this.props.account.selected_wallet) {
@@ -153,8 +163,17 @@ class Wallet extends Component {
 
     const { account } = this.props
     const { chain_info: chainConstants } = account
-    const { contactName, contactAddress, openAddModal, ownerAddresses, signatureCount, openAddMultisigModal } = this.state
+    const { contactName, contactAddress, openAddModal, ownerAddresses, signatureCount, openAddMultisigModal, openExportModal } = this.state
     const wallet = this.props.account.selected_wallet
+
+    if (openExportModal) {
+      return (
+        <ExportToPdfModal
+          openExportModal={openExportModal}
+          closeExportModal={this.closeExportModal}
+        />
+      )
+    }
 
     return (
       <div>
@@ -190,6 +209,7 @@ class Wallet extends Component {
           <div style={{ height: '100vh', overflow: 'auto', paddingBottom: 250, marginTop: 10 }}>
             {this.renderWalletBalanceGrid()}
             <Segment style={{ width: '90%', height: '45vh', overflow: 'auto', overflowY: 'scroll', margin: 'auto', background: '#29272E', marginTop: 20 }}>
+              <Button size='tiny' style={{ float: 'right' }} className={styles.tinyAcceptButton} onClick={() => this.openExportModal()}>Export to PDF</Button>
               <TransactionsList account={this.props.account} loader={this.state.loader} transactions={wallet.balance.transactions} chainInfo={chainConstants} addContact={this.openAddModal} />
             </Segment>
           </div>
