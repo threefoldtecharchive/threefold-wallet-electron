@@ -58,6 +58,7 @@ Index:
        - [Wallet transfer page](#transfer)
        - [Wallet receive page](#receive)
        - [Wallet sign page](#sign)
+  - [Address book page](#address-book)
 
 ### Home
 
@@ -126,6 +127,7 @@ Index:
 ![screenshot of wallet transfer page](/docs/images/scrshot_wallet_transfer.png)
 
 > Allows you to transfer tokens from one wallet to another. The destination can be a regular (personal) wallet, multi-signature wallet as well as one of your own wallets.
+> Depending on which destination wallet you want to send you, you'll need to select the correct tab.
 >
 > You cannot transfer 0 tokens or more tokens (+ the minimum transaction fee of `0.1 TFT`) than available in your account.
 >
@@ -157,6 +159,13 @@ Index:
 > 
 > For regular (personal) wallets you can also update the start index and address length. You can have no more than `8` addresses per wallet, and at least `1` is required. This allows you to provide aliases for different purposes to the same wallet. The start index defines what addresses are generated. In short, each address is generated using the seed of your account plus an index as the input for the private/public cryptographic key pair that is used to sign with a wallet and from which an address is generated. As an example if you have start index `1`, and address length `3`, than the wallet will use the indices `2, 3, 4 and 5`.
 >> :bulb: For multi-signature wallets this is not used, and thus it is not available in the settings page of a multi-signature wallet.
+
+#### Address Book
+
+![screenshot of account creation page](/docs/images/scrshot_address_book.png)
+
+> This page allows you to create, delete and modify contacts.
+> A contact is identified by a name and can represent a single-signature wallet as well as a multi-signature wallet.
 
 ## Developer Docs
 
