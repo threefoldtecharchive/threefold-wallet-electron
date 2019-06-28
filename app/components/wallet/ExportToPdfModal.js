@@ -30,18 +30,21 @@ const mapStateToProps = state => {
 class ExportToPDF extends Component {
   constructor (props) {
     super(props)
+    const wallet = this.props.account.selected_wallet
+
     this.state = {
       noTransactions: false,
       disableExportButton: false,
       startDate: undefined,
-      endDate: undefined
+      endDate: undefined,
+      filePath: `${__dirname}/transactions_${wallet.wallet_name}.pdf`
     }
   }
 
   componentWillMount () {
     if (this.props.openExportModal) {
       const wallet = this.props.account.selected_wallet
-      ReactPDF.render(<PdfTransactionList transactions={wallet.balance.transactions} />, `${__dirname}/example.pdf`)
+      ReactPDF.render(<PdfTransactionList transactions={wallet.balance.transactions} />, this.state.filePath)
     }
   }
 
@@ -81,14 +84,14 @@ class ExportToPDF extends Component {
     if (transactions.length === 0) {
       return this.setState({ noTransactions: true, disableExportButton: true })
     }
-    ReactPDF.render(<PdfTransactionList transactions={transactions} startDate={startDate} endDate={endDate} />, `${__dirname}/example.pdf`)
+    ReactPDF.render(<PdfTransactionList transactions={transactions} startDate={startDate} endDate={endDate} />, this.state.filePath)
     this.setState({ noTransactions: false, disableExportButton: false })
   }
 
   render () {
     const closeOnEscape = true
     const { openExportModal, closeExportModal } = this.props
-    const filePath = `${__dirname}/example.pdf`
+    const filePath = this.state.filePath
     return (
       <Modal open={openExportModal} closeOnEscape={closeOnEscape} onClose={closeExportModal} basic size='small'>
         <Modal.Header>Export Transactions to PDF</Modal.Header>

@@ -54,7 +54,9 @@ const PdfTransactionList = ({ transactions, startDate, endDate }) => {
     <Document>
       <Page wrap size='A4' style={styles.pageStyle}>
         <Text style={styles.title}>Transaction list</Text>
-        <Text style={styles.dateTitle}>From: {moment.unix(startDate).format('DD-MM-YYYY, HH:mm')}, Until: {moment.unix(endDate).format('DD-MM-YYYY, HH:mm')}</Text>
+        {startDate && endDate && (
+          <Text style={styles.dateTitle}>From: {moment.unix(startDate).format('DD-MM-YYYY, HH:mm')}, Until: {moment.unix(endDate).format('DD-MM-YYYY, HH:mm')}</Text>
+        )}
         {transactions.map(tx => {
           return (
             <View style={styles.body}>

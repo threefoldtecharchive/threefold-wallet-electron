@@ -5,3 +5,4 @@ app/main.prod.js.map
 release/
 .vscode
 dll/
+app/*.pdf
