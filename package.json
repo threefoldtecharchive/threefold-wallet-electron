@@ -1,7 +1,7 @@
 {
   "name": "tfchain-wallet",
   "productName": "TFChainWallet",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "description": "A TFChain Desktop Wallet Manager.",
   "scripts": {
     "build": "concurrently \"yarn build-main\" \"yarn build-renderer\"",
