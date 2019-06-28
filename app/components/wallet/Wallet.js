@@ -1,7 +1,7 @@
 // @flow
 import { connect } from 'react-redux'
 import React, { Component } from 'react'
-import { Segment, Icon, Divider } from 'semantic-ui-react'
+import { Segment, Icon, Divider, Button } from 'semantic-ui-react'
 import routes from '../../constants/routes'
 import styles from '../home/Home.css'
 import Footer from '../footer'
@@ -11,6 +11,8 @@ import { saveAccount, updateAccount } from '../../actions'
 import UpdateContactModal from '../addressBook/UpdateContactModal'
 import UpdateMultiSigContactModal from '../addressBook/UpdateMultiSigContactModal'
 import { toast } from 'react-toastify'
+import { PDFDownloadLink } from '@react-pdf/renderer'
+import PdfTransactionList from './PdfTransactionList'
 
 const mapStateToProps = state => {
   if (!state.account.state) {
@@ -192,6 +194,11 @@ class Wallet extends Component {
             <Segment style={{ width: '90%', height: '45vh', overflow: 'auto', overflowY: 'scroll', margin: 'auto', background: '#29272E', marginTop: 20 }}>
               <TransactionsList account={this.props.account} loader={this.state.loader} transactions={wallet.balance.transactions} chainInfo={chainConstants} addContact={this.openAddModal} />
             </Segment>
+            <div style={{ marginTop: 20, float: 'right', marginRight: '5%', marginBottom: 20 }}>
+              <PDFDownloadLink document={<PdfTransactionList transactions={wallet.balance.transactions} />} fileName='transactions.pdf'>
+                {({ blob, url, loading, error }) => (loading ? 'Loading document...' : <Button className={styles.acceptButton}>Export to PDF</Button>)}
+              </PDFDownloadLink>
+            </div>
           </div>
         </div>
         <Footer />
