@@ -1,6 +1,6 @@
 import React from 'react'
 import { Document, Page, Text, View } from '@react-pdf/renderer'
-import moment from 'moment'
+import moment from 'moment-timezone'
 
 const styles = {
   title: {
@@ -9,6 +9,10 @@ const styles = {
     textAlign: 'center',
     backgroundColor: '#e4e4e4',
     textTransform: 'uppercase'
+  },
+  dateTitle: {
+    marginTop: 10,
+    fontSize: 14
   },
   pageStyle: {
     padding: 50
@@ -45,11 +49,12 @@ const styles = {
   }
 }
 
-const PdfTransactionList = ({ transactions }) => {
+const PdfTransactionList = ({ transactions, startDate, endDate }) => {
   return (
     <Document>
       <Page wrap size='A4' style={styles.pageStyle}>
         <Text style={styles.title}>Transaction list</Text>
+        <Text style={styles.dateTitle}>From: {moment.unix(startDate).format('DD-MM-YYYY, HH:mm')}, Until: {moment.unix(endDate).format('DD-MM-YYYY, HH:mm')}</Text>
         {transactions.map(tx => {
           return (
             <View style={styles.body}>
@@ -60,7 +65,7 @@ const PdfTransactionList = ({ transactions }) => {
                 <View>
                   {tx.confirmed
                     ? (<Text style={styles.date}>
-                      Confirmed at {moment.unix(tx.timestamp).format('MMMM Do YYYY, HH:mm')}
+                      Confirmed at {moment.unix(tx.timestamp).format('DD-MM-YYYY, HH:mm')}
                     </Text>)
                     : (<Text>Unconfirmed</Text>)}
                 </View>
