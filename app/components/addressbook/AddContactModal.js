@@ -33,7 +33,7 @@ const AddModal = ({ openAddModal, closeAddModal, contactName, handleContactNameC
         positive
         labelPosition='right'
         icon='checkmark'
-        content='Yes'
+        content='Create'
       />
     </Modal.Actions>
   </Modal>

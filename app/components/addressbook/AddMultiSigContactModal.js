@@ -35,7 +35,7 @@ const AddModal = ({ openAddMultiSigModal, closeMultisigModal, contactName, handl
         positive
         labelPosition='right'
         icon='checkmark'
-        content='Yes'
+        content='Create'
       />
     </Modal.Actions>
   </Modal>
