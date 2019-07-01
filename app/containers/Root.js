@@ -53,7 +53,7 @@ class Root extends Component {
     const newPath = path.join(dataPath, '/tfchain/accounts')
     storage.setDataPath(newPath)
 
-    Moment.locale('nl-be')
+    Moment.locale()
     momentLocalizer()
 
     // Load in accounts and put them in store
