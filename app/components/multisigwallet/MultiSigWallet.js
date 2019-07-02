@@ -188,15 +188,6 @@ class Wallet extends Component {
     const { contactName, contactAddress, openAddModal, ownerAddresses, signatureCount, openAddMultisigModal, openExportModal } = this.state
     const active = true
 
-    if (openExportModal) {
-      return (
-        <ExportToPdfModal
-          openExportModal={openExportModal}
-          closeExportModal={this.changeStateExportModel}
-        />
-      )
-    }
-
     return (
       <div>
         {openExportModal && <ExportToPdfModal
