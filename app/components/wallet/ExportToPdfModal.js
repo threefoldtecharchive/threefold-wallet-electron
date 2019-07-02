@@ -90,7 +90,7 @@ class ExportToPDF extends Component {
     if (transactions.length === 0) {
       return this.setState({ noTransactions: true, disableExportButton: true })
     }
-    ReactPDF.render(<PdfTransactionList transactions={transactions} />, this.state.filePath)
+    ReactPDF.render(<PdfTransactionList transactions={transactions} startDate={startDate} endDate={endDate} />, this.state.filePath)
     this.setState({ noTransactions: false, disableExportButton: false })
   }
 

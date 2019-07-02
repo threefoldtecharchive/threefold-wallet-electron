@@ -49,12 +49,12 @@ const styles = {
   }
 }
 
-const PdfTransactionList = ({ transactions }) => {
+const PdfTransactionList = ({ transactions, startDate, endDate }) => {
   return (
     <Document>
       <Page wrap size='A4' style={styles.pageStyle}>
         <Text style={styles.title}>Transaction list</Text>
-        {<Text style={styles.dateTitle}>From: {moment.unix(transactions[transactions.length - 1].timestamp).format('DD-MM-YYYY')}, Until: {moment.unix(transactions[0].timestamp).format('DD-MM-YYYY')}</Text>}
+        {<Text style={styles.dateTitle}>From: {moment.unix(startDate).format('DD-MM-YYYY')}, Until: {moment().unix(endDate).format('DD-MM-YYYY')}</Text>}
         {transactions.map(tx => {
           return (
             <View style={styles.body}>
