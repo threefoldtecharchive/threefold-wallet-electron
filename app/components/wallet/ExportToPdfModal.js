@@ -6,6 +6,7 @@ import ReactPDF from '@react-pdf/renderer'
 import PdfTransactionList from './PdfTransactionList'
 import { DateTimePicker } from 'react-widgets'
 import moment from 'moment-timezone'
+import { toast } from 'react-toastify'
 
 const mapStateToProps = state => {
   if (!state.account.state) {
@@ -45,9 +46,9 @@ class ExportToPDF extends Component {
 
   componentWillMount () {
     if (this.props.openExportModal) {
+      const { startDate, endDate } = this.state
       const wallet = this.props.account.selected_wallet
-      console.log(this.state.filePath)
-      ReactPDF.render(<PdfTransactionList transactions={wallet.balance.transactions} />, this.state.filePath)
+      ReactPDF.render(<PdfTransactionList transactions={wallet.balance.transactions} startDate={startDate} endDate={endDate} />, this.state.filePath)
     }
   }
 
@@ -90,8 +91,15 @@ class ExportToPDF extends Component {
     if (transactions.length === 0) {
       return this.setState({ noTransactions: true, disableExportButton: true })
     }
+    console.log(startDate)
+    console.log(endDate)
     ReactPDF.render(<PdfTransactionList transactions={transactions} startDate={startDate} endDate={endDate} />, this.state.filePath)
     this.setState({ noTransactions: false, disableExportButton: false })
+  }
+
+  sendToast = () => {
+    toast('Exported transactionslist!')
+    this.props.closeExportModal()
   }
 
   render () {
@@ -123,7 +131,7 @@ class ExportToPDF extends Component {
           <Button basic color='red' inverted onClick={closeExportModal}>
             <Icon name='remove' /> Cancel
           </Button>
-          <Button color='green' inverted href={filePath} onClick={this.props.closeExportModal} disabled={this.state.disableExportButton} >
+          <Button color='green' inverted href={filePath} onClick={this.sendToast} disabled={this.state.disableExportButton} >
             <Icon name='checkmark' /> Export
           </Button>
         </Modal.Actions>
