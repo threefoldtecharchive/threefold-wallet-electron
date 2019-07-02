@@ -1,4 +1,5 @@
 import { connect } from 'react-redux'
+import { remote } from 'electron'
 import React, { Component } from 'react'
 import { Button, Icon, Modal, Message, Form } from 'semantic-ui-react'
 import ReactPDF from '@react-pdf/renderer'
@@ -31,19 +32,21 @@ class ExportToPDF extends Component {
   constructor (props) {
     super(props)
     const wallet = this.props.account.selected_wallet
+    const transactions = wallet.balance.transactions
 
     this.state = {
       noTransactions: false,
       disableExportButton: false,
-      startDate: undefined,
-      endDate: undefined,
-      filePath: `${__dirname}/transactions_${wallet.wallet_name}.pdf`
+      startDate: transactions[transactions.length - 1].timestamp,
+      endDate: transactions[0].timestamp,
+      filePath: `${remote.app.getPath('userData')}/transactions_${wallet.wallet_name}.pdf`
     }
   }
 
   componentWillMount () {
     if (this.props.openExportModal) {
       const wallet = this.props.account.selected_wallet
+      console.log(this.state.filePath)
       ReactPDF.render(<PdfTransactionList transactions={wallet.balance.transactions} />, this.state.filePath)
     }
   }
@@ -53,7 +56,7 @@ class ExportToPDF extends Component {
     const { startDate: stateStartDate, endDate: stateEndDate } = this.state
 
     // Typical usage (don't forget to compare props):
-    if (stateStartDate && stateEndDate) {
+    if (stateStartDate || stateEndDate) {
       if (endDate !== stateEndDate || startDate !== stateStartDate) {
         this.handleGeneratePDF(stateStartDate, stateEndDate)
       }
@@ -61,37 +64,40 @@ class ExportToPDF extends Component {
   }
 
   handleStartDateChange = (v) => {
-    const startDate = moment(v).unix()
+    const wallet = this.props.account.selected_wallet
+    const transactions = wallet.balance.transactions
+    const startDate = v !== null ? moment(v).unix() : transactions[transactions.length - 1].timestamp
     this.setState({ startDate })
   }
 
   handleEndDateChange = (v) => {
-    const endDate = moment(v).unix()
+    const wallet = this.props.account.selected_wallet
+    const transactions = wallet.balance.transactions
+    const endDate = v !== null ? moment(v).unix() : transactions[0].timestamp
     this.setState({ endDate })
   }
 
   handleGeneratePDF = (startDate, endDate) => {
     const wallet = this.props.account.selected_wallet
     let transactions = wallet.balance.transactions
-    if (startDate && endDate) {
-      transactions = transactions.map(tx => {
-        if (tx.timestamp >= startDate && tx.timestamp <= endDate) {
-          return tx
-        }
-      }).filter(Boolean)
-    }
+
+    transactions = transactions.map(tx => {
+      if (tx.timestamp >= startDate && tx.timestamp <= endDate) {
+        return tx
+      }
+    }).filter(Boolean)
 
     if (transactions.length === 0) {
       return this.setState({ noTransactions: true, disableExportButton: true })
     }
-    ReactPDF.render(<PdfTransactionList transactions={transactions} startDate={startDate} endDate={endDate} />, this.state.filePath)
+    ReactPDF.render(<PdfTransactionList transactions={transactions} />, this.state.filePath)
     this.setState({ noTransactions: false, disableExportButton: false })
   }
 
   render () {
     const closeOnEscape = true
-    const { openExportModal, closeExportModal } = this.props
     const filePath = this.state.filePath
+    const { openExportModal, closeExportModal } = this.props
     return (
       <Modal open={openExportModal} closeOnEscape={closeOnEscape} onClose={closeExportModal} basic size='small'>
         <Modal.Header>Export Transactions to PDF</Modal.Header>
@@ -117,7 +123,7 @@ class ExportToPDF extends Component {
           <Button basic color='red' inverted onClick={closeExportModal}>
             <Icon name='remove' /> Cancel
           </Button>
-          <Button color='green' inverted href={filePath} disabled={this.state.disableExportButton} >
+          <Button color='green' inverted href={filePath} onClick={this.props.closeExportModal} disabled={this.state.disableExportButton} >
             <Icon name='checkmark' /> Export
           </Button>
         </Modal.Actions>
