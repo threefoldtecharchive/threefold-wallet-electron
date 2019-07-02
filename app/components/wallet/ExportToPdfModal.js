@@ -7,6 +7,9 @@ import PdfTransactionList from './PdfTransactionList'
 import { DateTimePicker } from 'react-widgets'
 import moment from 'moment-timezone'
 import { toast } from 'react-toastify'
+import { move } from 'fs-extra-p'
+
+const { dialog } = remote
 
 const mapStateToProps = state => {
   if (!state.account.state) {
@@ -33,22 +36,20 @@ class ExportToPDF extends Component {
   constructor (props) {
     super(props)
     const wallet = this.props.account.selected_wallet
-    const transactions = wallet.balance.transactions
 
     this.state = {
       noTransactions: false,
       disableExportButton: false,
-      startDate: transactions[transactions.length - 1].timestamp,
-      endDate: transactions[0].timestamp,
-      filePath: `${remote.app.getPath('userData')}/transactions_${wallet.wallet_name}.pdf`
+      startDate: this.findLatestDate(),
+      endDate: this.findOldestDate(),
+      tempFilePath: `${remote.app.getPath('userData')}/transactions_${wallet.wallet_name}.pdf`,
+      filePath: `${remote.app.getPath('downloads')}/transactions_${wallet.wallet_name}.pdf`
     }
   }
 
   componentWillMount () {
     if (this.props.openExportModal) {
-      const { startDate, endDate } = this.state
-      const wallet = this.props.account.selected_wallet
-      ReactPDF.render(<PdfTransactionList transactions={wallet.balance.transactions} startDate={startDate} endDate={endDate} />, this.state.filePath)
+      this.handleGeneratePDF(this.state.startDate, this.state.endDate)
     }
   }
 
@@ -65,17 +66,41 @@ class ExportToPDF extends Component {
   }
 
   handleStartDateChange = (v) => {
-    const wallet = this.props.account.selected_wallet
-    const transactions = wallet.balance.transactions
-    const startDate = v !== null ? moment(v).unix() : transactions[transactions.length - 1].timestamp
+    if (v !== null) {
+      return this.setState({ startDate: moment(v).unix() })
+    }
+    const startDate = this.findLatestDate()
     this.setState({ startDate })
   }
 
   handleEndDateChange = (v) => {
+    if (v !== null) {
+      return this.setState({ endDate: moment(v).unix() })
+    }
+    const endDate = this.findOldestDate()
+    this.setState({ endDate })
+  }
+
+  findOldestDate = () => {
     const wallet = this.props.account.selected_wallet
     const transactions = wallet.balance.transactions
-    const endDate = v !== null ? moment(v).unix() : transactions[0].timestamp
-    this.setState({ endDate })
+
+    return transactions.map(transaction => {
+      if (transaction.confirmed) {
+        return transaction.timestamp
+      }
+    })[0]
+  }
+
+  findLatestDate = () => {
+    const wallet = this.props.account.selected_wallet
+    const transactions = wallet.balance.transactions
+
+    return transactions.reverse().map(transaction => {
+      if (transaction.confirmed) {
+        return transaction.timestamp
+      }
+    })[0]
   }
 
   handleGeneratePDF = (startDate, endDate) => {
@@ -91,20 +116,23 @@ class ExportToPDF extends Component {
     if (transactions.length === 0) {
       return this.setState({ noTransactions: true, disableExportButton: true })
     }
-    console.log(startDate)
-    console.log(endDate)
-    ReactPDF.render(<PdfTransactionList transactions={transactions} startDate={startDate} endDate={endDate} />, this.state.filePath)
+
+    ReactPDF.render(<PdfTransactionList transactions={transactions} startDate={startDate} endDate={endDate} />, this.state.tempFilePath)
     this.setState({ noTransactions: false, disableExportButton: false })
   }
 
-  sendToast = () => {
-    toast('Exported transactionslist!')
-    this.props.closeExportModal()
+  savePdf = () => {
+    dialog.showSaveDialog({ title: 'Save transactionlist', defaultPath: this.state.filePath }, (path) => {
+      if (path !== undefined) {
+        move(this.state.tempFilePath, path, { overwrite: true })
+        toast(`Transactionlist exported to ${path}`)
+        this.props.closeExportModal()
+      }
+    })
   }
 
   render () {
     const closeOnEscape = true
-    const filePath = this.state.filePath
     const { openExportModal, closeExportModal } = this.props
     return (
       <Modal open={openExportModal} closeOnEscape={closeOnEscape} onClose={closeExportModal} basic size='small'>
@@ -131,7 +159,7 @@ class ExportToPDF extends Component {
           <Button basic color='red' inverted onClick={closeExportModal}>
             <Icon name='remove' /> Cancel
           </Button>
-          <Button color='green' inverted href={filePath} onClick={this.sendToast} disabled={this.state.disableExportButton} >
+          <Button color='green' inverted onClick={this.savePdf} disabled={this.state.disableExportButton} >
             <Icon name='checkmark' /> Export
           </Button>
         </Modal.Actions>
