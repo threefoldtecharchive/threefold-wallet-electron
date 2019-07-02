@@ -1,7 +1,7 @@
 // @flow
 import { connect } from 'react-redux'
 import React, { Component } from 'react'
-import { Segment, Icon, Divider, List, Dimmer, Loader } from 'semantic-ui-react'
+import { Segment, Icon, Divider, List, Dimmer, Loader, Button } from 'semantic-ui-react'
 import routes from '../../constants/routes'
 import styles from '../home/Home.css'
 import Footer from '../footer'
@@ -12,7 +12,8 @@ import { saveAccount, updateAccount } from '../../actions'
 import UpdateContactModal from '../addressBook/UpdateContactModal'
 import UpdateMultiSigContactModal from '../addressBook/UpdateMultiSigContactModal'
 import { toast } from 'react-toastify'
-const { shell } = require('electron')
+import ExportToPdfModal from '../wallet/ExportToPdfModal'
+import { shell } from 'electron'
 
 const mapStateToProps = state => {
   if (!state.account.state) {
@@ -169,6 +170,10 @@ class Wallet extends Component {
     }
   }
 
+  changeStateExportModel = () => {
+    this.setState({ openExportModal: !this.state.openExportModal })
+  }
+
   render () {
     // If refreshed in development and data in store is deleted, route to account.
     if (!this.props.account.selected_wallet) {
@@ -180,10 +185,15 @@ class Wallet extends Component {
     const { chain_info: chainConstants } = account
 
     const wallet = this.props.account.selected_wallet
-    const { contactName, contactAddress, openAddModal, ownerAddresses, signatureCount, openAddMultisigModal } = this.state
+    const { contactName, contactAddress, openAddModal, ownerAddresses, signatureCount, openAddMultisigModal, openExportModal } = this.state
     const active = true
+
     return (
       <div>
+        {openExportModal && <ExportToPdfModal
+          openExportModal={openExportModal}
+          closeExportModal={this.changeStateExportModel}
+        />}
         <UpdateContactModal
           contactName={contactName}
           handleContactNameChange={this.handleContactNameChange}
@@ -226,6 +236,7 @@ class Wallet extends Component {
                     {this.renderOwnerList()}
                   </Segment>
                   <Segment style={{ width: '90%', height: '40vh', overflow: 'auto', overflowY: 'scroll', margin: 'auto', background: '#29272E', marginTop: 20 }}>
+                    <Button size='tiny' style={{ float: 'right' }} className={styles.tinyAcceptButton} onClick={() => this.changeStateExportModel()}>Export to PDF</Button>
                     <TransactionsList account={this.props.account} loader={this.state.loader} transactions={wallet.balance.transactions} chainInfo={chainConstants} addContact={this.openAddModal} />
                   </Segment>
                 </div>
