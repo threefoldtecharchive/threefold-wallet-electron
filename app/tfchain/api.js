@@ -1535,8 +1535,14 @@ export var Account =  __class__ ('Account', [object], {
 		if (len (self._wallets) == 0) {
 			return 0;
 		}
-		var lw = self._wallets [len (self._wallets) - 1];
-		return lw.start_index + lw.address_count;
+		var start_index = 0;
+		for (var wallet of self._wallets) {
+			var si = wallet.start_index + wallet.address_count;
+			if (si > start_index) {
+				var start_index = si;
+			}
+		}
+		return start_index;
 	});},
 	get serialize () {return __get__ (this, function (self) {
 		if (arguments.length) {

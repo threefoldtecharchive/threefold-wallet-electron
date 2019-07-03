@@ -778,8 +778,12 @@ class Account:
         """
         if len(self._wallets) == 0:
             return 0
-        lw = self._wallets[len(self._wallets)-1]
-        return lw.start_index+lw.address_count
+        start_index = 0
+        for wallet in self._wallets:
+            si = wallet.start_index + wallet.address_count
+            if si > start_index:
+                start_index = si
+        return start_index
 
     def serialize(self):
         """
