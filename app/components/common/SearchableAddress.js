@@ -27,7 +27,7 @@ class SearchableAddress extends Component {
       wallets = flatten(this.props.account.wallets.map(wallet => {
         return wallet.addresses.map(a => {
           return {
-            key: wallet.wallet_name,
+            wallet_name: wallet.wallet_name,
             title: `wallet: ${wallet.wallet_name} - ${a}`,
             value: a
           }
@@ -40,7 +40,7 @@ class SearchableAddress extends Component {
         if (contact.recipient instanceof Array) return null
         const name = contact.contact_name
         return {
-          key: name,
+          contact_name: name,
           title: `contact: ${name}`,
           value: contact.recipient
         }
