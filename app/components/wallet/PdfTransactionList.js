@@ -54,33 +54,31 @@ const PdfTransactionList = ({ transactions, startDate, endDate }) => {
     <Document>
       <Page wrap size='A4' style={styles.pageStyle}>
         <Text style={styles.title}>Transaction list</Text>
-        {startDate && endDate && (
-          <Text style={styles.dateTitle}>From: {moment.unix(startDate).format('DD-MM-YYYY, HH:mm')}, Until: {moment.unix(endDate).format('DD-MM-YYYY, HH:mm')}</Text>
-        )}
+        <Text style={styles.dateTitle}>From: {moment.unix(startDate).format('DD-MM-YYYY')}, Until: {moment.unix(endDate).format('DD-MM-YYYY')}</Text>
         {transactions.map(tx => {
           return (
-            <View style={styles.body}>
-              <View style={styles.row}>
-                <Text style={styles.txid}>
-                  TXID: {tx.identifier}
-                </Text>
-                <View>
-                  {tx.confirmed
-                    ? (<Text style={styles.date}>
-                      Confirmed at {moment.unix(tx.timestamp).format('DD-MM-YYYY, HH:mm')}
-                    </Text>)
-                    : (<Text>Unconfirmed</Text>)}
-                </View>
-                <View>
-                  {renderTransactionBody(tx)}
-                </View>
-                <View>
-                  {tx.message ? (
-                    <Text style={styles.addresses}>Message: {tx.message}</Text>
-                  ) : null }
+            tx.confirmed && (
+              <View style={styles.body}>
+                <View style={styles.row}>
+                  <Text style={styles.txid}>
+                    TXID: {tx.identifier}
+                  </Text>
+                  <View>
+                    <Text style={styles.date}>
+                        Confirmed at {moment.unix(tx.timestamp).format('DD-MM-YYYY, HH:mm')}
+                    </Text>
+                  </View>
+                  <View>
+                    {renderTransactionBody(tx)}
+                  </View>
+                  <View>
+                    {tx.message ? (
+                      <Text style={styles.addresses}>Message: {tx.message}</Text>
+                    ) : null }
+                  </View>
                 </View>
               </View>
-            </View>
+            )
           )
         })}
         <Text style={styles.pageNumber} render={({ pageNumber, totalPages }) => (
