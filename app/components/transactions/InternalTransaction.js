@@ -65,12 +65,13 @@ class InternalTransaction extends Component {
               placeholder='Select Wallet'
               fluid
               selection
+              search
               options={walletsOptions}
               onChange={this.selectWalletRecipient}
-              value={selectedWalletRecipient.wallet_name === '' ? selectedWalletRecipient.address : selectedWalletRecipient.wallet_name}
+              value={selectedWalletRecipient ? (selectedWalletRecipient.wallet_name === '' ? selectedWalletRecipient.address : selectedWalletRecipient.wallet_name) : ''}
             />
           </Form.Field>
-          {selectedWalletRecipient.is_multisig ? (null) : (
+          {selectedWalletRecipient && selectedWalletRecipient.is_multisig ? (null) : (
             <Form.Field>
               <label style={{ color: 'white' }}>Destination Address *</label>
               <Dropdown
@@ -78,6 +79,7 @@ class InternalTransaction extends Component {
                 placeholder='Select Address'
                 fluid
                 selection
+                search
                 options={addressOptions}
                 onChange={this.selectAddress}
                 value={selectedRecipientAddress}
