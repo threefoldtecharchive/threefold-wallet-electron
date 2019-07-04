@@ -46,27 +46,7 @@ class InternalTransaction extends Component {
   }
 
   componentWillMount () {
-    const walletsOptions = this.mapOtherWalletsToDropdownOption(this.state.selectedWallet)
-    let selectedWalletRecipient = null
-    if (walletsOptions.length === 0) {
-      this.setState({
-        selectedWalletRecipient
-      })
-      return
-    }
-
-    selectedWalletRecipient = this.props.account.wallet_for_name(walletsOptions[0].value)
-    if (!selectedWalletRecipient) {
-      selectedWalletRecipient = this.props.account.wallet_for_address(walletsOptions[0].value)
-    }
-    const addressOptions = this.mapRecipientAddressesToDropdownOption(selectedWalletRecipient)
-    const selectedRecipientAddress = selectedWalletRecipient.address
-    this.setState({
-      walletsOptions,
-      addressOptions,
-      selectedWalletRecipient,
-      selectedRecipientAddress
-    })
+    this.mapDestinationDropdown(this.state.selectedWallet)
   }
 
   setSearchValue = (value) => {
@@ -228,8 +208,28 @@ class InternalTransaction extends Component {
   }
 
   mapDestinationDropdown = (wallet) => {
-    const options = this.mapOtherWalletsToDropdownOption(wallet)
-    this.setState({ walletsOptions: options })
+    const walletsOptions = this.mapOtherWalletsToDropdownOption(wallet)
+    let selectedWalletRecipient = null
+    if (walletsOptions.length === 0) {
+      this.setState({
+        selectedWalletRecipient
+      })
+      return
+    }
+
+    selectedWalletRecipient = this.props.account.wallet_for_name(walletsOptions[0].value)
+    if (!selectedWalletRecipient) {
+      selectedWalletRecipient = this.props.account.wallet_for_address(walletsOptions[0].value)
+    }
+
+    const addressOptions = this.mapRecipientAddressesToDropdownOption(selectedWalletRecipient)
+    const selectedRecipientAddress = selectedWalletRecipient.address
+    this.setState({
+      walletsOptions,
+      addressOptions,
+      selectedWalletRecipient,
+      selectedRecipientAddress
+    })
   }
 
   checkInternalTransactionFormValues = () => {
