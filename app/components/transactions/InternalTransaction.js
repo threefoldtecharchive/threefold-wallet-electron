@@ -227,6 +227,11 @@ class InternalTransaction extends Component {
     this.setState({ selectedRecipientAddress: data.value })
   }
 
+  mapDestinationDropdown = (wallet) => {
+    const options = this.mapOtherWalletsToDropdownOption(wallet)
+    this.setState({ walletsOptions: options })
+  }
+
   checkInternalTransactionFormValues = () => {
     const {
       selectedWalletRecipient
@@ -384,7 +389,7 @@ class InternalTransaction extends Component {
     return (
       <div>
         {this.renderDestinationForm()}
-        <TransactionBodyForm handleSubmit={this.handleSubmit} enableSubmit={this.state.enableSubmit} />
+        <TransactionBodyForm handleSubmit={this.handleSubmit} mapDestinationDropdown={this.mapDestinationDropdown} enableSubmit={this.state.enableSubmit} />
       </div>
     )
   }

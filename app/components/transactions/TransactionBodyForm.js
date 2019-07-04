@@ -144,6 +144,7 @@ class TransactionBodyForm extends Component {
           onChange={(e, v) => {
             input.onChange(v.value)
             this.selectWallet(v.value)
+            this.props.mapDestinationDropdown(v.value)
           }} />
       </Form.Field>
     )
