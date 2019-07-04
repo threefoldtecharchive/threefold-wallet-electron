@@ -36,6 +36,7 @@ class App extends Component {
   render () {
     const { children } = this.props
     const { activeItem } = this.state
+    console.log(activeItem)
     return (
       <React.Fragment>
         <Grid>
@@ -85,8 +86,8 @@ class App extends Component {
                 <Divider style={{ margin: 0 }} />
                 <Menu.Item
                   style={menuItemStyle}
-                  name={'ACCOUNT_SETTINGS'}
-                  active={activeItem === routes.ACCOUNT_SETTINGS}
+                  name={this.props.history.location.pathname === routes.WALLET ? 'WALLET_SETTINGS' : 'ACCOUNT_SETTINGS'}
+                  active={activeItem === routes.ACCOUNT_SETTINGS || activeItem === routes.WALLET_SETTINGS}
                   onClick={this.handleItemClick}
                 >
                   <Icon style={iconStyle} name='settings' />
