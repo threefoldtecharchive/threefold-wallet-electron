@@ -1,5 +1,6 @@
 import React from 'react'
 import { Document, Page, Text, View } from '@react-pdf/renderer'
+import { find } from 'lodash'
 import moment from 'moment-timezone'
 
 const styles = {
@@ -49,7 +50,7 @@ const styles = {
   }
 }
 
-const PdfTransactionList = ({ transactions, startDate, endDate }) => {
+const PdfTransactionList = ({ transactions, startDate, endDate, account }) => {
   return (
     <Document>
       <Page wrap size='A4' style={styles.pageStyle}>
@@ -69,7 +70,7 @@ const PdfTransactionList = ({ transactions, startDate, endDate }) => {
                     </Text>
                   </View>
                   <View>
-                    {renderTransactionBody(tx)}
+                    {renderTransactionBody(tx, account)}
                   </View>
                   <View>
                     {tx.message ? (
@@ -89,7 +90,7 @@ const PdfTransactionList = ({ transactions, startDate, endDate }) => {
   )
 }
 
-function renderTransactionBody (tx) {
+function renderTransactionBody (tx, account) {
   if (tx.inputs.length > 0) {
     return tx.inputs.map(input => {
       return (
@@ -98,12 +99,12 @@ function renderTransactionBody (tx) {
           {input.senders.map(sender => {
             return (
               <Text style={styles.addresses}>
-                From: {sender}
+                From: {sender + getAddressName(sender, account)}
               </Text>
             )
           })}
           <Text style={styles.addresses}>
-            To: {input.recipient}
+            To: {input.recipient + getAddressName(input.recipient, account)}
           </Text>
         </View>
       )
@@ -118,14 +119,24 @@ function renderTransactionBody (tx) {
           </Text>
           {out.senders.map(sender => {
             return (
-              <Text style={styles.addresses}>From: {sender}</Text>
+              <Text style={styles.addresses}>From: {sender + getAddressName(sender, account)}</Text>
             )
           })}
-          <Text style={styles.addresses}>To: {out.recipient}</Text>
+          <Text style={styles.addresses}>To: {out.recipient + getAddressName(out.recipient, account)}</Text>
         </View>
       )
     })
   }
+}
+
+function getAddressName (sender, account) {
+  const { address_book: addressbook } = account
+  const { contacts } = addressbook
+  const singleContacts = contacts.filter(contact => !(contact.recipient instanceof Array))
+  const contact = find(singleContacts, contact => contact.recipient === sender)
+  const wallet = account.wallet_for_address(sender)
+
+  return contact && contact.contact_name ? ' (contact: ' + contact.contact_name + ')' : wallet && wallet.wallet_name ? ' (wallet: ' + wallet.wallet_name + ')' : ''
 }
 
 export default PdfTransactionList
