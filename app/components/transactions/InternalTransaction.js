@@ -46,27 +46,7 @@ class InternalTransaction extends Component {
   }
 
   componentWillMount () {
-    const walletsOptions = this.mapOtherWalletsToDropdownOption(this.state.selectedWallet)
-    let selectedWalletRecipient = null
-    if (walletsOptions.length === 0) {
-      this.setState({
-        selectedWalletRecipient
-      })
-      return
-    }
-
-    selectedWalletRecipient = this.props.account.wallet_for_name(walletsOptions[0].value)
-    if (!selectedWalletRecipient) {
-      selectedWalletRecipient = this.props.account.wallet_for_address(walletsOptions[0].value)
-    }
-    const addressOptions = this.mapRecipientAddressesToDropdownOption(selectedWalletRecipient)
-    const selectedRecipientAddress = selectedWalletRecipient.address
-    this.setState({
-      walletsOptions,
-      addressOptions,
-      selectedWalletRecipient,
-      selectedRecipientAddress
-    })
+    this.mapDestinationDropdown(this.state.selectedWallet)
   }
 
   setSearchValue = (value) => {
@@ -85,12 +65,13 @@ class InternalTransaction extends Component {
               placeholder='Select Wallet'
               fluid
               selection
+              search
               options={walletsOptions}
               onChange={this.selectWalletRecipient}
               value={selectedWalletRecipient.wallet_name === '' ? selectedWalletRecipient.address : selectedWalletRecipient.wallet_name}
             />
           </Form.Field>
-          {selectedWalletRecipient.is_multisig ? (null) : (
+          { selectedWalletRecipient.is_multisig ? (null) : (
             <Form.Field>
               <label style={{ color: 'white' }}>Destination Address *</label>
               <Dropdown
@@ -98,6 +79,7 @@ class InternalTransaction extends Component {
                 placeholder='Select Address'
                 fluid
                 selection
+                search
                 options={addressOptions}
                 onChange={this.selectAddress}
                 value={selectedRecipientAddress}
@@ -225,6 +207,34 @@ class InternalTransaction extends Component {
 
   selectAddress = (event, data) => {
     this.setState({ selectedRecipientAddress: data.value })
+  }
+
+  mapDestinationDropdown = (wallet) => {
+    const walletsOptions = this.mapOtherWalletsToDropdownOption(wallet)
+    let selectedWalletRecipient = null
+    if (walletsOptions.length === 0) {
+      this.setState({
+        selectedWalletRecipient
+      })
+      return
+    }
+
+    selectedWalletRecipient = this.state.selectedWalletRecipient || this.props.account.wallet_for_name(walletsOptions[0].value)
+
+    if (!selectedWalletRecipient) {
+      selectedWalletRecipient = this.props.account.wallet_for_address(walletsOptions[0].value)
+    } else if (wallet.wallet_name === selectedWalletRecipient.wallet_name) {
+      selectedWalletRecipient = this.props.account.wallet_for_name(walletsOptions[0].value)
+    }
+
+    const addressOptions = this.mapRecipientAddressesToDropdownOption(selectedWalletRecipient)
+    const selectedRecipientAddress = selectedWalletRecipient.address
+    this.setState({
+      walletsOptions,
+      addressOptions,
+      selectedWalletRecipient,
+      selectedRecipientAddress
+    })
   }
 
   checkInternalTransactionFormValues = () => {
@@ -384,7 +394,7 @@ class InternalTransaction extends Component {
     return (
       <div>
         {this.renderDestinationForm()}
-        <TransactionBodyForm handleSubmit={this.handleSubmit} enableSubmit={this.state.enableSubmit} />
+        <TransactionBodyForm handleSubmit={this.handleSubmit} mapDestinationDropdown={this.mapDestinationDropdown} enableSubmit={this.state.enableSubmit} />
       </div>
     )
   }

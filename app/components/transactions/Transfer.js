@@ -1,6 +1,7 @@
 // @flow
+import { connect } from 'react-redux'
 import React, { Component } from 'react'
-import { Tab, Divider } from 'semantic-ui-react'
+import { Tab, Divider, Button } from 'semantic-ui-react'
 import styles from '../home/Home.css'
 import SingleTransaction from './SingleTransaction'
 import MultisigTransaction from './MultisigTransaction'
@@ -13,12 +14,17 @@ const tabStyle = {
   overflow: 'auto'
 }
 
+const mapStateToProps = state => ({
+  account: state.account.state
+})
+
 class Transfer extends Component {
   render () {
+    const hasInternal = this.props.account.wallet_count <= 1
     const panes = [
-      { menuItem: 'Single Transaction', render: () => <Tab.Pane style={tabStyle}><SingleTransaction /></Tab.Pane> },
-      { menuItem: 'Internal Transaction', render: () => <Tab.Pane style={tabStyle}><InternalTransaction /></Tab.Pane> },
-      { menuItem: 'Multisig Transaction', render: () => <Tab.Pane style={tabStyle}><MultisigTransaction /></Tab.Pane> }
+      { menuItem: <Button className={'item'}>Single Transaction</Button>, render: () => <Tab.Pane style={tabStyle}><SingleTransaction /></Tab.Pane> },
+      { menuItem: <Button disabled={hasInternal} className={hasInternal ? styles.disableTab : 'item'}>Internal Transaction</Button>, render: () => <Tab.Pane style={tabStyle}><InternalTransaction /></Tab.Pane> },
+      { menuItem: <Button className={'item'}>Multisig Transaction</Button>, render: () => <Tab.Pane style={tabStyle}><MultisigTransaction /></Tab.Pane> }
     ]
 
     return (
@@ -36,4 +42,7 @@ class Transfer extends Component {
   }
 }
 
-export default Transfer
+export default connect(
+  mapStateToProps,
+  null
+)(Transfer)

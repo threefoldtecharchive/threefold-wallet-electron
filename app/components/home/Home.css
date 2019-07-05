@@ -71,6 +71,12 @@
   color: red;
 }
 
+.disableTab {
+  color: white !important;
+  background: none !important;
+  border-left: 1px solid 
+}
+
 .acceptButton {
   background: linear-gradient(90deg, rgba(82,77,218,1) 0%, rgba(102,71,254,1) 100%) !important;
   font-family: SF UI Text Regular !important;
