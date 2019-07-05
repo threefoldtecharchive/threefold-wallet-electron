@@ -219,9 +219,12 @@ class InternalTransaction extends Component {
       return
     }
 
-    selectedWalletRecipient = this.props.account.wallet_for_name(walletsOptions[0].value)
+    selectedWalletRecipient = this.state.selectedWalletRecipient || this.props.account.wallet_for_name(walletsOptions[0].value)
+
     if (!selectedWalletRecipient) {
       selectedWalletRecipient = this.props.account.wallet_for_address(walletsOptions[0].value)
+    } else if (wallet.wallet_name === selectedWalletRecipient.wallet_name) {
+      selectedWalletRecipient = this.props.account.wallet_for_name(walletsOptions[0].value)
     }
 
     const addressOptions = this.mapRecipientAddressesToDropdownOption(selectedWalletRecipient)
