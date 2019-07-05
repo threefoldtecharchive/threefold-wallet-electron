@@ -68,10 +68,10 @@ class InternalTransaction extends Component {
               search
               options={walletsOptions}
               onChange={this.selectWalletRecipient}
-              value={selectedWalletRecipient ? (selectedWalletRecipient.wallet_name === '' ? selectedWalletRecipient.address : selectedWalletRecipient.wallet_name) : ''}
+              value={selectedWalletRecipient.wallet_name === '' ? selectedWalletRecipient.address : selectedWalletRecipient.wallet_name}
             />
           </Form.Field>
-          {selectedWalletRecipient && selectedWalletRecipient.is_multisig ? (null) : (
+          { selectedWalletRecipient.is_multisig ? (null) : (
             <Form.Field>
               <label style={{ color: 'white' }}>Destination Address *</label>
               <Dropdown
