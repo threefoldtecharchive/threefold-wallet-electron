@@ -33,6 +33,10 @@ const styles = {
   addresses: {
     fontSize: 10
   },
+  column: {
+    flexDirection: 'column',
+    paddingBottom: 10
+  },
   receivedAmount: {
     color: 'green',
     fontSize: 10
@@ -56,11 +60,11 @@ const PdfTransactionList = ({ transactions, startDate, endDate, account }) => {
       <Page wrap size='A4' style={styles.pageStyle}>
         <Text style={styles.title}>Transaction list</Text>
         <Text style={styles.dateTitle}>From: {moment.unix(startDate).format('DD-MM-YYYY')}, Until: {moment.unix(endDate).format('DD-MM-YYYY')}</Text>
-        {transactions.map(tx => {
-          return (
-            tx.confirmed && (
-              <View style={styles.body}>
-                <View style={styles.row}>
+        <View style={styles.body}>
+          {transactions.map(tx => {
+            return (
+              tx.confirmed && (
+                <View style={styles.column}>
                   <Text style={styles.txid}>
                     TXID: {tx.identifier}
                   </Text>
@@ -78,10 +82,10 @@ const PdfTransactionList = ({ transactions, startDate, endDate, account }) => {
                     ) : null }
                   </View>
                 </View>
-              </View>
+              )
             )
-          )
-        })}
+          })}
+        </View>
         <Text style={styles.pageNumber} render={({ pageNumber, totalPages }) => (
           `${pageNumber} / ${totalPages}`
         )} fixed />
@@ -98,14 +102,24 @@ function renderTransactionBody (tx, account) {
           <Text style={styles.receivedAmount}>Amount: + {input.amount.str({ unit: true })}</Text>
           {input.senders.map(sender => {
             return (
-              <Text style={styles.addresses}>
-                From: {sender + getAddressName(sender, account)}
-              </Text>
+              <View style={styles.addresses}>
+                <Text>
+                  From: {sender}
+                </Text>
+                <Text>
+                  {getAddressName(sender, account)}
+                </Text>
+              </View>
             )
           })}
-          <Text style={styles.addresses}>
-            To: {input.recipient + getAddressName(input.recipient, account)}
-          </Text>
+          <View style={styles.addresses}>
+            <Text>
+              From: {input.recipient}
+            </Text>
+            <Text>
+              {getAddressName(input.recipient, account)}
+            </Text>
+          </View>
         </View>
       )
     })
@@ -119,10 +133,24 @@ function renderTransactionBody (tx, account) {
           </Text>
           {out.senders.map(sender => {
             return (
-              <Text style={styles.addresses}>From: {sender + getAddressName(sender, account)}</Text>
+              <View style={styles.addresses}>
+                <Text>
+                  From: {sender}
+                </Text>
+                <Text>
+                  {getAddressName(sender, account)}
+                </Text>
+              </View>
             )
           })}
-          <Text style={styles.addresses}>To: {out.recipient + getAddressName(out.recipient, account)}</Text>
+          <View style={styles.addresses}>
+            <Text>
+              To: {out.recipient}
+            </Text>
+            <Text>
+              {getAddressName(out.recipient, account)}
+            </Text>
+          </View>
         </View>
       )
     })
@@ -136,7 +164,13 @@ function getAddressName (sender, account) {
   const contact = find(singleContacts, contact => contact.recipient === sender)
   const wallet = account.wallet_for_address(sender)
 
-  return contact && contact.contact_name ? ' (contact: ' + contact.contact_name + ')' : wallet && wallet.wallet_name ? ' (wallet: ' + wallet.wallet_name + ')' : ''
+  if (contact) {
+    return ` (contact: ${contact.contact_name})`
+  } else if (wallet) {
+    return ` (wallet: ${wallet.wallet_name})`
+  }
+
+  return ''
 }
 
 export default PdfTransactionList

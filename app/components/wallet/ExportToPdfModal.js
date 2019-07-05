@@ -42,7 +42,7 @@ class ExportToPDF extends Component {
       disableExportButton: false,
       startDate: this.findLatestDate(),
       endDate: this.findOldestDate(),
-      tempFilePath: `${remote.app.getPath('userData')}/transactions_${wallet.wallet_name}.pdf`,
+      tempFilePath: `${remote.app.getPath('temp')}/transactions_${wallet.wallet_name}.pdf`,
       filePath: `${remote.app.getPath('downloads')}/transactions_${wallet.wallet_name}.pdf`
     }
   }
