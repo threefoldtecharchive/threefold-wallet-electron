@@ -20,9 +20,10 @@ const mapStateToProps = state => ({
 
 class Transfer extends Component {
   render () {
+    const hasInternal = this.props.account.wallet_count <= 1
     const panes = [
       { menuItem: <Button className={'item'}>Single Transaction</Button>, render: () => <Tab.Pane style={tabStyle}><SingleTransaction /></Tab.Pane> },
-      { menuItem: <Button className={'item'} disabled={this.props.account.wallet_count <= 1} style={{ color: 'white !important' }}>Internal Transaction</Button>, render: () => <Tab.Pane style={tabStyle}><InternalTransaction /></Tab.Pane> },
+      { menuItem: <Button disabled={hasInternal} className={hasInternal ? styles.disableTab : 'item'}>Internal Transaction</Button>, render: () => <Tab.Pane style={tabStyle}><InternalTransaction /></Tab.Pane> },
       { menuItem: <Button className={'item'}>Multisig Transaction</Button>, render: () => <Tab.Pane style={tabStyle}><MultisigTransaction /></Tab.Pane> }
     ]
 
