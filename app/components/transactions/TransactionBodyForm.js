@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { Field, reduxForm } from 'redux-form'
-import { Form, Dropdown, Button, Message, Input } from 'semantic-ui-react'
+import { Form, Dropdown, Button, Message, Input, Popup, Icon } from 'semantic-ui-react'
 import { connect } from 'react-redux'
 import styles from '../home/Home.css'
 import { truncate, concat } from 'lodash'
@@ -63,7 +63,10 @@ const renderDateTimeField = ({
   meta: { touched, error, warning }
 }) => (
   <Form.Field>
-    <label style={{ color: 'white' }}>{label}</label>
+    <div style={{ display: 'flex', marginBottom: 5 }}>
+      <label style={{ color: 'white' }}>{label}</label>
+      <Popup offset={0} size='large' position='right center' content='If a date is provided, sent coins will be locked until this date.' trigger={<Icon style={{ fontSize: 12, float: 'left', marginLeft: 10 }} name='question circle' />} />
+    </div>
     <DateTimePicker
       onChange={value => {
         input.onChange(value)
@@ -202,7 +205,7 @@ class TransactionBodyForm extends Component {
         />
         <Field
           name='datetime'
-          label='datetime'
+          label='locked until'
           component={renderDateTimeField}
         />
         <Field
