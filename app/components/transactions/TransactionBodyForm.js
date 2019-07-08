@@ -8,6 +8,7 @@ import { DateTimePicker } from 'react-widgets'
 import moment from 'moment-timezone'
 import TransactionAmountField from './TransactionAmountField'
 import * as tfchain from '../../tfchain/api'
+import { withRouter } from 'react-router-dom'
 
 const mapStateToProps = state => {
   if (!state.account.state) {
@@ -211,6 +212,7 @@ class TransactionBodyForm extends Component {
         />
         <label style={{ fontSize: 12 }}>Fields with * are required</label>
         <div style={{ float: 'right' }}>
+          <Button type='button' onClick={() => this.props.history.goBack()} className={styles.cancelButton} style={{ marginTop: 20, marginRight: 10, float: 'left' }} size='big'>Cancel</Button>
           <Button disabled={!enableSubmit || invalid} type='submit' className={styles.acceptButton} style={{ marginTop: 20, marginRight: 10, float: 'left', background: '#015DE1', color: 'white' }} size='big'>Send</Button>
         </div>
       </Form>
@@ -218,10 +220,10 @@ class TransactionBodyForm extends Component {
   }
 }
 
-export default connect(
+export default withRouter(connect(
   mapStateToProps,
   null)(reduxForm({
   form: 'transactionForm', // a unique identifier for this form
   validate, // <--- validation function given to redux-form
   destroyOnUnmount: false
-})(TransactionBodyForm))
+})(TransactionBodyForm)))
