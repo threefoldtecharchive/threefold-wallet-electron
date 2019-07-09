@@ -5,8 +5,10 @@ import moment from 'moment-timezone'
 
 const styles = {
   title: {
-    margin: 'auto',
-    fontSize: 25,
+    width: 250,
+    padding: 2,
+    fontSize: 24,
+    flexGrow: 1,
     textAlign: 'center',
     backgroundColor: '#e4e4e4',
     textTransform: 'uppercase'
@@ -35,7 +37,17 @@ const styles = {
   },
   column: {
     flexDirection: 'column',
+    marginBottom: 10
+  },
+  headerBlock: {
+    fontSize: 14,
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
     paddingBottom: 10
+  },
+  accountBlock: {
+    paddingRight: 20,
+    flexDirection: 'column'
   },
   receivedAmount: {
     color: 'green',
@@ -51,6 +63,20 @@ const styles = {
   pageNumber: {
     float: 'right',
     fontSize: 12
+  },
+  balance: {
+    fontSize: 13,
+    flexDirection: 'row',
+    paddingTop: 10
+  },
+  balanceItem: {
+    paddingRight: 15
+  },
+  endLine: {
+    marginTop: 10,
+    marginBottom: 10,
+    borderBottomColor: 'black',
+    borderBottomWidth: 0.5
   }
 }
 
@@ -58,31 +84,40 @@ const PdfTransactionList = ({ transactions, startDate, endDate, account }) => {
   return (
     <Document>
       <Page wrap size='A4' style={styles.pageStyle}>
-        <Text style={styles.title}>Transaction list</Text>
+        <View style={styles.headerBlock}>
+          <View style={styles.accountBlock}>
+            <Text>Threefold {account.account_name}</Text>
+            <Text>Wallet: {account.selected_wallet.wallet_name}</Text>
+          </View>
+          <Text style={styles.title}>Transaction list</Text>
+        </View>
         <Text style={styles.dateTitle}>From: {moment.unix(startDate).format('DD-MM-YYYY')}, Until: {moment.unix(endDate).format('DD-MM-YYYY')}</Text>
         <View style={styles.body}>
-          {transactions.map(tx => {
+          {transactions.map((tx) => {
             return (
-              tx.confirmed && (
-                <View style={styles.column}>
-                  <Text style={styles.txid}>
-                    TXID: {tx.identifier}
+              <View style={styles.column}>
+                <Text style={styles.txid}>
+                  {tx.index}. TXID: {tx.identifier}
+                </Text>
+                <View>
+                  <Text style={styles.date}>
+                      Confirmed at {moment.unix(tx.timestamp).format('DD-MM-YYYY, HH:mm')}
                   </Text>
-                  <View>
-                    <Text style={styles.date}>
-                        Confirmed at {moment.unix(tx.timestamp).format('DD-MM-YYYY, HH:mm')}
-                    </Text>
-                  </View>
-                  <View>
-                    {renderTransactionBody(tx, account)}
-                  </View>
-                  <View>
-                    {tx.message ? (
-                      <Text style={styles.addresses}>Message: {tx.message}</Text>
-                    ) : null }
-                  </View>
                 </View>
-              )
+                <View style={styles.balance}>
+                  <Text style={styles.balanceItem}>{tx.beginBalance.str() && (`Begin balance: ${tx.beginBalance.str()}`)}</Text>
+                  <Text style={styles.balanceItem}>{tx.endBalance && (`End balance: ${tx.endBalance.str()}`)}</Text>
+                </View>
+                <View>
+                  {renderTransactionBody(tx, account)}
+                </View>
+                <View>
+                  {tx.message ? (
+                    <Text style={styles.addresses}>Message: {tx.message}</Text>
+                  ) : null }
+                </View>
+                <View style={styles.endLine} />
+              </View>
             )
           })}
         </View>

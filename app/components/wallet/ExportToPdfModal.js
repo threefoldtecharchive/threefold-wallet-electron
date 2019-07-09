@@ -36,7 +36,6 @@ const mapStateToProps = state => {
 class ExportToPDF extends Component {
   constructor (props) {
     super(props)
-    const wallet = this.props.account.selected_wallet
 
     this.state = {
       noTransactions: false,
@@ -44,9 +43,61 @@ class ExportToPDF extends Component {
       startDate: undefined,
       endDate: undefined,
       generatingPdf: false,
-      tempFilePath: `${remote.app.getPath('temp')}/transactions_${wallet.wallet_name}.pdf`,
-      filePath: `${remote.app.getPath('downloads')}/transactions_${wallet.wallet_name}.pdf`
+      transactions: [],
+      tempFilePath: undefined,
+      filePath: undefined
     }
+  }
+
+  mapTransactions = () => {
+    const wallet = this.props.account.selected_wallet
+    const transactionlist = wallet.balance.transactions
+
+    let currentYear = moment.unix(transactionlist[0].timestamp).year()
+    let index = 0
+
+    const tempFilePath = `${remote.app.getPath('temp')}/transactions_${wallet.wallet_name}.pdf`
+    const filePath = `${remote.app.getPath('downloads')}/transactions_${wallet.wallet_name}.pdf`
+
+    let beginBalance
+    let endBalance
+
+    const transactions = transactionlist.reverse().map((tx, txIndex) => {
+      const year = moment.unix(tx.timestamp).year()
+      if (year !== currentYear) {
+        currentYear = year
+        index = 0
+      }
+
+      index++
+
+      beginBalance = endBalance
+
+      if (tx.inputs.length > 0) {
+        tx.inputs.map((input) => {
+          if (txIndex >= 1) {
+            endBalance = beginBalance.plus(input.amount)
+          } else {
+            beginBalance = input.amount
+            endBalance = beginBalance
+          }
+        })
+      }
+
+      if (tx.outputs.length > 0) {
+        tx.outputs.map(output => {
+          endBalance = endBalance.minus(output.amount)
+        })
+      }
+
+      return Object.assign(tx, { index }, { beginBalance }, { endBalance })
+    })
+
+    this.setState({ transactions, tempFilePath, filePath })
+  }
+
+  componentWillMount () {
+    this.mapTransactions()
   }
 
   componentDidUpdate (prevProps, prevState) {
@@ -81,21 +132,17 @@ class ExportToPDF extends Component {
   findOldestDate = () => {
     const wallet = this.props.account.selected_wallet
     const transactions = wallet.balance.transactions
-
     return findLast(transactions, { confirmed: true }).timestamp
   }
 
   findLatestDate = () => {
     const wallet = this.props.account.selected_wallet
     const transactions = wallet.balance.transactions
-
     return find(transactions, { confirmed: true }).timestamp
   }
 
   checkDateInput = (startDate, endDate) => {
-    const wallet = this.props.account.selected_wallet
-    let transactions = wallet.balance.transactions
-
+    let transactions = this.state.transactions
     if (!startDate) {
       startDate = this.findOldestDate()
     }
