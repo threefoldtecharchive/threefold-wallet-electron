@@ -57,13 +57,10 @@ class SearchableAddress extends Component {
   }
 
   handleSearchChange = (e, { value }) => {
-    this.setState({ value })
-    this.filterSearchInput()
+    this.filterSearchInput(value)
   }
 
-  filterSearchInput = () => {
-    const value = this.state.value
-
+  filterSearchInput = (value) => {
     this.setState({ addressError: !tfchain.wallet_address_is_valid(value) })
 
     const re = new RegExp(escapeRegExp(this.state.value), 'i')
@@ -82,15 +79,16 @@ class SearchableAddress extends Component {
 
     // If results are found, show a dropdown list with possible selection
     this.setState({
-      results: results
+      results,
+      value
     })
   }
 
   handleOnFocus = (e) => {
     const { value, source } = this.state
 
-    if (value !== undefined) {
-      return this.filterSearchInput()
+    if (value) {
+      return this.filterSearchInput(value)
     }
 
     this.setState({
