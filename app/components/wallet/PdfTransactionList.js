@@ -95,7 +95,7 @@ const PdfTransactionList = ({ transactions, startDate, endDate, account }) => {
         <View style={styles.body}>
           {transactions.map((tx) => {
             return (
-              <View style={styles.column}>
+              <View style={styles.column} key={tx.identifier}>
                 <Text style={styles.txid}>
                   {tx.index}. TXID: {tx.identifier}
                 </Text>
@@ -137,7 +137,7 @@ function renderTransactionBody (tx, account) {
           <Text style={styles.receivedAmount}>Amount: + {input.amount.str({ unit: true })}</Text>
           {input.senders.map(sender => {
             return (
-              <View style={styles.addresses}>
+              <View style={styles.addresses} key={sender}>
                 <Text>
                   From: {sender}
                 </Text>

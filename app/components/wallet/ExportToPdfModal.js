@@ -40,13 +40,10 @@ class ExportToPDF extends Component {
     this.state = {
       noTransactions: false,
       disableExportButton: false,
-      startDate: undefined,
-      endDate: undefined,
       generatingPdf: false,
-      transactions: [],
-      tempFilePath: undefined,
-      filePath: undefined
+      transactions: []
     }
+    this._isMounted = false
   }
 
   mapTransactions = () => {
@@ -96,7 +93,8 @@ class ExportToPDF extends Component {
     this.setState({ transactions, tempFilePath, filePath })
   }
 
-  componentWillMount () {
+  componentDidMount () {
+    this._isMounted = true
     this.mapTransactions()
   }
 
@@ -110,6 +108,10 @@ class ExportToPDF extends Component {
         this.checkDateInput(stateStartDate, stateEndDate)
       }
     }
+  }
+
+  componentWillUnmount () {
+    this._isMounted = false
   }
 
   handleStartDateChange = (v) => {
@@ -163,26 +165,28 @@ class ExportToPDF extends Component {
     return transactions
   }
 
-  handleGeneratePDF = async (startDate, endDate) => {
-    const transactions = await this.checkDateInput(startDate, endDate)
+  handleGeneratePDF = (startDate, endDate) => {
+    const transactions = this.checkDateInput(startDate, endDate)
 
     if (this.state.noTransactions) {
       return this.setState({ generatingPdf: false })
     }
 
-    await ReactPDF.render(<PdfTransactionList transactions={transactions} startDate={last(transactions).timestamp} endDate={first(transactions).timestamp} account={this.props.account} />, this.state.tempFilePath)
+    ReactPDF.render(<PdfTransactionList transactions={transactions} startDate={last(transactions).timestamp} endDate={first(transactions).timestamp} account={this.props.account} />, this.state.tempFilePath)
     this.savePdf()
     return this.setState({ noTransactions: false, disableExportButton: false })
   }
 
   savePdf = () => {
     dialog.showSaveDialog({ title: 'Save transactionlist', defaultPath: this.state.filePath }, (path) => {
-      if (path !== undefined) {
-        move(this.state.tempFilePath, path, { overwrite: true })
-        toast(`Transactionlist exported to ${path}`)
-        this.props.closeExportModal()
+      if (this._isMounted) {
+        if (path) {
+          move(this.state.tempFilePath, path, { overwrite: true })
+          toast(`Transactionlist exported to ${path}`)
+          this.props.closeExportModal()
+        }
+        return this.setState({ generatingPdf: false })
       }
-      this.setState({ generatingPdf: false })
     })
   }
 
