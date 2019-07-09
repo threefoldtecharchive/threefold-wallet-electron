@@ -118,7 +118,7 @@ class ExportToPDF extends Component {
     if (v !== null) {
       return this.setState({ startDate: moment(v).unix() })
     }
-    const startDate = this.findLatestDate()
+    const startDate = this.findOldestDate()
     this.setState({ startDate })
   }
 
@@ -127,7 +127,7 @@ class ExportToPDF extends Component {
       return this.setState({ endDate: moment(v).unix() })
     }
 
-    const endDate = this.findOldestDate()
+    const endDate = this.findLatestDate()
     this.setState({ endDate })
   }
 
@@ -162,17 +162,18 @@ class ExportToPDF extends Component {
       return this.setState({ noTransactions: true, disableExportButton: true, generatingPdf: false })
     }
 
-    return transactions
+    return this.setState({ transactions, noTransactions: false, disableExportButton: false })
   }
 
   handleGeneratePDF = (startDate, endDate) => {
-    const transactions = this.checkDateInput(startDate, endDate)
+    this.checkDateInput(startDate, endDate)
+    const { transactions } = this.state
 
     if (this.state.noTransactions) {
       return this.setState({ generatingPdf: false })
     }
 
-    ReactPDF.render(<PdfTransactionList transactions={transactions} startDate={last(transactions).timestamp} endDate={first(transactions).timestamp} account={this.props.account} />, this.state.tempFilePath)
+    ReactPDF.render(<PdfTransactionList transactions={transactions} startDate={first(transactions).timestamp} endDate={last(transactions).timestamp} account={this.props.account} />, this.state.tempFilePath)
     this.savePdf()
     return this.setState({ noTransactions: false, disableExportButton: false })
   }
