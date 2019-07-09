@@ -62,7 +62,7 @@ class Sign extends Component {
               />
             </Form.Field>
             <CopyToClipboard text={json} onCopy={() => console.log('copied')}>
-              <Label onClick={() => toast('Seed copied to clipboard')} style={{ display: 'block', margin: 'auto', width: 200, cursor: 'pointer' }}><Icon name='clipboard' /> copy json to clipboard</Label>
+              <Label onClick={() => toast('Transaction json copied to clipboard')} style={{ display: 'block', margin: 'auto', width: 200, cursor: 'pointer' }}><Icon name='clipboard' /> copy json to clipboard</Label>
             </CopyToClipboard>
           </Form>
           <Button className={styles.cancelButton} onClick={() => this.goBackToAccount()} style={{ marginTop: 20, float: 'left', background: '#2B3C72', color: 'white', marginRight: 15, position: 'relative', left: '80%' }} size='big'>Go to account</Button>

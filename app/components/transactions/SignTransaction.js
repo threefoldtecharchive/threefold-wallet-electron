@@ -188,7 +188,7 @@ class SignTransaction extends Component {
             </Form.Field>
             {this.renderErrorMessage()}
             <CopyToClipboard text={json} onCopy={() => console.log('copied')}>
-              <Label onClick={() => toast('Seed copied to clipboard')} style={{ display: 'block', margin: 'auto', width: 200, cursor: 'pointer' }}><Icon name='clipboard' /> copy json to clipboard</Label>
+              <Label onClick={() => toast('Transaction json copied to clipboard')} style={{ display: 'block', margin: 'auto', width: 200, cursor: 'pointer' }}><Icon name='clipboard' /> copy json to clipboard</Label>
             </CopyToClipboard>
             <Button className={styles.acceptButton} onClick={() => this.signAndSend()} style={{ marginTop: 20, background: '#2B3C72', color: 'white', float: 'right' }} size='big'>Sign and send</Button>
           </Form>

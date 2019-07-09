@@ -223,6 +223,8 @@ class SingleTransaction extends Component {
     return this.openConfirmationModal()
   }
 
+  mapDestinationDropdown = (wallet) => {}
+
   render () {
     if (this.state.loader) {
       return (
@@ -266,7 +268,7 @@ class SingleTransaction extends Component {
           updateContact={this.addContact}
         />
         {this.renderDestinationForm()}
-        <TransactionBodyForm handleSubmit={this.handleSubmit} enableSubmit={this.state.enableSubmit} />
+        <TransactionBodyForm handleSubmit={this.handleSubmit} enableSubmit={this.state.enableSubmit} mapDestinationDropdown={this.mapDestinationDropdown} />
       </div>
     )
   }
