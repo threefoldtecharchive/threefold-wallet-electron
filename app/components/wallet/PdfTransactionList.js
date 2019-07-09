@@ -1,11 +1,14 @@
 import React from 'react'
 import { Document, Page, Text, View } from '@react-pdf/renderer'
+import { find } from 'lodash'
 import moment from 'moment-timezone'
 
 const styles = {
   title: {
-    margin: 'auto',
-    fontSize: 25,
+    width: 250,
+    padding: 2,
+    fontSize: 24,
+    flexGrow: 1,
     textAlign: 'center',
     backgroundColor: '#e4e4e4',
     textTransform: 'uppercase'
@@ -32,6 +35,20 @@ const styles = {
   addresses: {
     fontSize: 10
   },
+  column: {
+    flexDirection: 'column',
+    marginBottom: 10
+  },
+  headerBlock: {
+    fontSize: 14,
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    paddingBottom: 10
+  },
+  accountBlock: {
+    paddingRight: 20,
+    flexDirection: 'column'
+  },
   receivedAmount: {
     color: 'green',
     fontSize: 10
@@ -46,41 +63,64 @@ const styles = {
   pageNumber: {
     float: 'right',
     fontSize: 12
+  },
+  balance: {
+    fontSize: 13,
+    flexDirection: 'row',
+    paddingTop: 10
+  },
+  balanceItem: {
+    paddingRight: 15
+  },
+  endLine: {
+    marginTop: 10,
+    marginBottom: 10,
+    borderBottomColor: 'black',
+    borderBottomWidth: 0.5
   }
 }
 
-const PdfTransactionList = ({ transactions, startDate, endDate }) => {
+const PdfTransactionList = ({ transactions, startDate, endDate, account }) => {
   return (
     <Document>
       <Page wrap size='A4' style={styles.pageStyle}>
-        <Text style={styles.title}>Transaction list</Text>
+        <View style={styles.headerBlock}>
+          <View style={styles.accountBlock}>
+            <Text>Threefold {account.account_name}</Text>
+            <Text>Wallet: {account.selected_wallet.wallet_name}</Text>
+          </View>
+          <Text style={styles.title}>Transaction list</Text>
+        </View>
         <Text style={styles.dateTitle}>From: {moment.unix(startDate).format('DD-MM-YYYY')}, Until: {moment.unix(endDate).format('DD-MM-YYYY')}</Text>
-        {transactions.map(tx => {
-          return (
-            tx.confirmed && (
-              <View style={styles.body}>
-                <View style={styles.row}>
-                  <Text style={styles.txid}>
-                    TXID: {tx.identifier}
+        <View style={styles.body}>
+          {transactions.map((tx) => {
+            return (
+              <View style={styles.column} key={tx.identifier}>
+                <Text style={styles.txid}>
+                  {tx.index}. TXID: {tx.identifier}
+                </Text>
+                <View>
+                  <Text style={styles.date}>
+                      Confirmed at {moment.unix(tx.timestamp).format('DD-MM-YYYY, HH:mm')}
                   </Text>
-                  <View>
-                    <Text style={styles.date}>
-                        Confirmed at {moment.unix(tx.timestamp).format('DD-MM-YYYY, HH:mm')}
-                    </Text>
-                  </View>
-                  <View>
-                    {renderTransactionBody(tx)}
-                  </View>
-                  <View>
-                    {tx.message ? (
-                      <Text style={styles.addresses}>Message: {tx.message}</Text>
-                    ) : null }
-                  </View>
                 </View>
+                <View style={styles.balance}>
+                  <Text style={styles.balanceItem}>{tx.beginBalance.str() && (`Begin balance: ${tx.beginBalance.str()}`)}</Text>
+                  <Text style={styles.balanceItem}>{tx.endBalance && (`End balance: ${tx.endBalance.str()}`)}</Text>
+                </View>
+                <View>
+                  {renderTransactionBody(tx, account)}
+                </View>
+                <View>
+                  {tx.message ? (
+                    <Text style={styles.addresses}>Message: {tx.message}</Text>
+                  ) : null }
+                </View>
+                <View style={styles.endLine} />
               </View>
             )
-          )
-        })}
+          })}
+        </View>
         <Text style={styles.pageNumber} render={({ pageNumber, totalPages }) => (
           `${pageNumber} / ${totalPages}`
         )} fixed />
@@ -89,7 +129,7 @@ const PdfTransactionList = ({ transactions, startDate, endDate }) => {
   )
 }
 
-function renderTransactionBody (tx) {
+function renderTransactionBody (tx, account) {
   if (tx.inputs.length > 0) {
     return tx.inputs.map(input => {
       return (
@@ -97,14 +137,24 @@ function renderTransactionBody (tx) {
           <Text style={styles.receivedAmount}>Amount: + {input.amount.str({ unit: true })}</Text>
           {input.senders.map(sender => {
             return (
-              <Text style={styles.addresses}>
-                From: {sender}
-              </Text>
+              <View style={styles.addresses} key={sender}>
+                <Text>
+                  From: {sender}
+                </Text>
+                <Text>
+                  {getAddressName(sender, account)}
+                </Text>
+              </View>
             )
           })}
-          <Text style={styles.addresses}>
-            To: {input.recipient}
-          </Text>
+          <View style={styles.addresses}>
+            <Text>
+              From: {input.recipient}
+            </Text>
+            <Text>
+              {getAddressName(input.recipient, account)}
+            </Text>
+          </View>
         </View>
       )
     })
@@ -118,14 +168,44 @@ function renderTransactionBody (tx) {
           </Text>
           {out.senders.map(sender => {
             return (
-              <Text style={styles.addresses}>From: {sender}</Text>
+              <View style={styles.addresses}>
+                <Text>
+                  From: {sender}
+                </Text>
+                <Text>
+                  {getAddressName(sender, account)}
+                </Text>
+              </View>
             )
           })}
-          <Text style={styles.addresses}>To: {out.recipient}</Text>
+          <View style={styles.addresses}>
+            <Text>
+              To: {out.recipient}
+            </Text>
+            <Text>
+              {getAddressName(out.recipient, account)}
+            </Text>
+          </View>
         </View>
       )
     })
   }
+}
+
+function getAddressName (sender, account) {
+  const { address_book: addressbook } = account
+  const { contacts } = addressbook
+  const singleContacts = contacts.filter(contact => !(contact.recipient instanceof Array))
+  const contact = find(singleContacts, contact => contact.recipient === sender)
+  const wallet = account.wallet_for_address(sender)
+
+  if (contact) {
+    return ` (contact: ${contact.contact_name})`
+  } else if (wallet) {
+    return ` (wallet: ${wallet.wallet_name})`
+  }
+
+  return ''
 }
 
 export default PdfTransactionList

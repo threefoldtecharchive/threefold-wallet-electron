@@ -10,6 +10,7 @@ import TransactionsList from './TransactionList'
 import { saveAccount, updateAccount } from '../../actions'
 import UpdateContactModal from '../addressBook/UpdateContactModal'
 import UpdateMultiSigContactModal from '../addressBook/UpdateMultiSigContactModal'
+import { find } from 'lodash'
 import ExportToPdfModal from './ExportToPdfModal'
 import { toast } from 'react-toastify'
 
@@ -162,6 +163,8 @@ class Wallet extends Component {
     const wallet = this.props.account.selected_wallet
     const transactions = wallet.balance.transactions
 
+    const hasConfirmedTx = find(transactions, { confirmed: true })
+
     return (
       <div>
         {openExportModal && <ExportToPdfModal
@@ -200,7 +203,7 @@ class Wallet extends Component {
           <div style={{ height: '100vh', overflow: 'auto', paddingBottom: 250, marginTop: 10 }}>
             {this.renderWalletBalanceGrid()}
             <Segment style={{ width: '90%', height: '45vh', overflow: 'auto', overflowY: 'scroll', margin: 'auto', background: '#29272E', marginTop: 20 }}>
-              {(transactions.length > 0 && <Button size='tiny' style={{ float: 'right' }} className={styles.tinyAcceptButton} onClick={() => this.changeStateExportModel()}>Export to PDF</Button>)}
+              {(hasConfirmedTx && <Button size='tiny' style={{ float: 'right' }} className={styles.tinyAcceptButton} onClick={() => this.changeStateExportModel()}>Export to PDF</Button>)}
               <TransactionsList account={this.props.account} loader={this.state.loader} transactions={transactions} chainInfo={chainConstants} addContact={this.openAddModal} />
             </Segment>
           </div>
