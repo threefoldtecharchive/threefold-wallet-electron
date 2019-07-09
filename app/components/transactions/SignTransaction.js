@@ -88,7 +88,7 @@ class SignTransaction extends Component {
       const json = JSON.parse(target.value)
       return this.setState({ json: JSON.stringify(json), jsonError: false })
     } catch (error) {
-      return this.setState({ jsonError: true, json: JSON.stringify(target.value) })
+      return this.setState({ jsonError: true, json: target.value })
     }
   }
 
