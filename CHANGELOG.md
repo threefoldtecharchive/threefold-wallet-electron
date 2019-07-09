@@ -1,20 +1,21 @@
-# v0.2.0 (2018.07.09)
+# v0.2.1 (2018.07.09)
+
 Features:
 
 - searchable address fields now suggest contacts and wallets when clicked upon.
-- transaction list to pdf is now added on multisig wallet pages.
+- the transaction lists of multisig wallets also support the export-to-pdf functionality that was already available for regular wallets.
 
 Improvements:
 
 - renamed some action buttons in order to display their meaning better.
-- improved speed exporting transactions to pdf functionallity.
+- significant performance improvements for the exporting transactions to pdf functionallity.
 - transaction list to pdf layout.
 
 Fixes:
 
-- dates across app are now shown correctly.
-- fixed bug in internal transaction when only 1 wallet is created.
-- fixed displaying of unconfirmed balance on account page
+- dates across app are now shown correctly (in English and local timezone).
+- fixed bugs for internal transactions that appeared when only one wallet was available.
+- fixed displaying of unconfirmed balance on account page.
 
 # v0.2.0 (2018.06.28)
 
