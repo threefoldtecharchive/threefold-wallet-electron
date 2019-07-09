@@ -99,7 +99,7 @@ class WalletReceive extends Component {
           <p className={styles.pageHeaderSubtitle}>Receive tokens by scanning the QR code</p>
         </div>
         <Divider className={styles.pageDivider} />
-        <div style={{ margin: 'auto', height: '68vh', overflow: 'auto', paddingBottom: 30 }}>
+        <div style={{ margin: 'auto', height: '74vh', overflow: 'auto', paddingBottom: 30 }}>
           <Form style={{ margin: 'auto', width: '90%' }}>
             <Form.Field style={{ textAlign: 'center' }}>
               <label style={{ color: 'white', fontFamily: 'SF UI Text Light', fontSize: 18 }}>Wallet</label>

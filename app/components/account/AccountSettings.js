@@ -293,7 +293,7 @@ class AccountSettings extends Component {
           <p className={styles.pageHeaderSubtitle}>Manage your account and wallet settings</p>
         </div>
         <Divider className={styles.pageDivider} />
-        <div style={{ height: '68vh', overflow: 'auto', paddingBottom: 30, textAlign: 'center' }}>
+        <div style={{ height: '74vh', overflow: 'auto', paddingBottom: 30, textAlign: 'center' }}>
           <Form error style={{ width: '90%', margin: 'auto', marginTop: 10, marginBottom: 50, height: '17vh' }} onKeyDown={this.onKeyDown}>
             <Form.Field error={nameError}>
               <label style={{ float: 'left', color: 'white' }}>Name</label>
