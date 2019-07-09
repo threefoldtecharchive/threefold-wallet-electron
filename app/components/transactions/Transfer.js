@@ -35,7 +35,7 @@ class Transfer extends Component {
         </div>
         <Divider className={styles.pageDivider} />
         <div style={{ height: '80vh', paddingBottom: 100 }}>
-          <Tab menu={{ color: 'white', inverted: true, attached: true }} panes={panes} style={{ width: '90%', margin: 'auto', height: '100%' }} />
+          <Tab menu={{ inverted: true, attached: true }} panes={panes} style={{ width: '90%', margin: 'auto', height: '100%' }} />
         </div>
       </div>
     )
