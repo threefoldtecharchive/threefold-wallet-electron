@@ -6,7 +6,7 @@ import ReactPDF from '@react-pdf/renderer'
 import PdfTransactionList from './PdfTransactionList'
 import { DateTimePicker } from 'react-widgets'
 import moment from 'moment-timezone'
-import { find, findLast, first, last } from 'lodash'
+import { find, findLast, first, last, groupBy, toArray } from 'lodash'
 import { toast } from 'react-toastify'
 import { move } from 'fs-extra-p'
 
@@ -58,6 +58,7 @@ class ExportToPDF extends Component {
 
     let beginBalance
     let endBalance
+    let previousDate = moment.unix(transactionlist[0].timestamp).format('YYYY/MM/DD')
 
     const transactions = transactionlist.reverse().map((tx, txIndex) => {
       const year = moment.unix(tx.timestamp).year()
@@ -66,7 +67,11 @@ class ExportToPDF extends Component {
         index = 0
       }
 
-      index++
+      const currentDate = moment.unix(tx.timestamp).format('YYYY/MM/DD')
+      if (currentDate !== previousDate) {
+        index++
+        previousDate = currentDate
+      }
 
       beginBalance = endBalance
 
@@ -90,7 +95,9 @@ class ExportToPDF extends Component {
       return Object.assign(tx, { index }, { beginBalance }, { endBalance })
     })
 
-    this.setState({ transactions, tempFilePath, filePath })
+    // Grouping by day
+    const groupedTxs = toArray(groupBy(transactions, tx => moment.unix(tx.timestamp).format('YYYY/MM/DD')))
+    this.setState({ transactions: groupedTxs, tempFilePath, filePath })
   }
 
   componentDidMount () {
@@ -132,15 +139,13 @@ class ExportToPDF extends Component {
   }
 
   findOldestDate = () => {
-    const wallet = this.props.account.selected_wallet
-    const transactions = wallet.balance.transactions
-    return findLast(transactions, { confirmed: true }).timestamp
+    const { transactions } = this.state
+    return findLast(last(transactions), { confirmed: true }).timestamp
   }
 
   findLatestDate = () => {
-    const wallet = this.props.account.selected_wallet
-    const transactions = wallet.balance.transactions
-    return find(transactions, { confirmed: true }).timestamp
+    const { transactions } = this.state
+    return find(first(transactions), { confirmed: true }).timestamp
   }
 
   checkDateInput = (startDate, endDate) => {
@@ -173,7 +178,7 @@ class ExportToPDF extends Component {
       return this.setState({ generatingPdf: false })
     }
 
-    ReactPDF.render(<PdfTransactionList transactions={transactions} startDate={first(transactions).timestamp} endDate={last(transactions).timestamp} account={this.props.account} />, this.state.tempFilePath)
+    ReactPDF.render(<PdfTransactionList transactions={transactions} startDate={first(first(transactions)).timestamp} endDate={last(last(transactions)).timestamp} account={this.props.account} />, this.state.tempFilePath)
     this.savePdf()
     return this.setState({ noTransactions: false, disableExportButton: false })
   }
