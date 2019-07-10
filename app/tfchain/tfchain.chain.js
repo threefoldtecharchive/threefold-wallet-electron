@@ -459,6 +459,27 @@ export var Type =  __class__ ('Type', [object], {
 		var __except0__ = ValueError ('invalid network type {}'.format (self.value));
 		__except0__.__cause__ = null;
 		throw __except0__;
+	});},
+	get currency_unit () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (self.__eq__ (Type.TFCHAIN)) {
+			return 'TFT';
+		}
+		var __except0__ = ValueError ('invalid network type {}'.format (self.value));
+		__except0__.__cause__ = null;
+		throw __except0__;
 	});}
 });
 Object.defineProperty (Type, 'value', property.call (Type, Type._get_value));;

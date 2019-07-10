@@ -21,18 +21,18 @@ const WalletBalanceGrid = ({ walletBalance }) => {
         <Grid columns='3'>
           <Grid.Column style={{ textAlign: 'center' }}>
             <h4 style={{ marginTop: 0 }}>Total Balance</h4>
-            <h4 className={styles.gradientTitle} >{coinsTotal.str({ precision: 3 })} TFT</h4>
-            {unconfirmedTotalCoins.greater_than(0) ? (<span style={{ color: 'white', fontSize: 12 }}>* unconfirmed: {unconfirmedTotalCoins.str({ precision: 3 })} TFT</span>) : (<p />)}
+            <h4 className={styles.gradientTitle} >{coinsTotal.str({ precision: 3, unit: true })}</h4>
+            {unconfirmedTotalCoins.greater_than(0) ? (<span style={{ color: 'white', fontSize: 12 }}>* unconfirmed: {unconfirmedTotalCoins.str({ precision: 3, unit: true })}</span>) : (<p />)}
           </Grid.Column>
           <Grid.Column style={{ textAlign: 'center' }}>
             <h4><Icon name='lock' />Locked Balance</h4>
-            <h4>{coinsLocked.str({ precision: 3 })}  TFT</h4>
-            {unconfirmedLockedCoins.greater_than(0) ? (<span style={{ color: 'white', fontSize: 12 }}>* unconfirmed: {unconfirmedLockedCoins.str({ precision: 3 })} TFT</span>) : (<p />)}
+            <h4>{coinsLocked.str({ precision: 3, unit: true })}</h4>
+            {unconfirmedLockedCoins.greater_than(0) ? (<span style={{ color: 'white', fontSize: 12 }}>* unconfirmed: {unconfirmedLockedCoins.str({ precision: 3, unit: true })}</span>) : (<p />)}
           </Grid.Column>
           <Grid.Column style={{ textAlign: 'center' }}>
             <h4><Icon name='unlock' />Unlocked Balance</h4>
-            <h4 style={{ marginBottom: 0 }}>{coinsUnlocked.str({ precision: 3 })}  TFT</h4>
-            {unconfirmedUnlockedCoins.greater_than(0) ? (<span style={{ color: 'white', fontSize: 12 }}>* unconfirmed: {unconfirmedUnlockedCoins.str({ precision: 3 })} TFT </span>) : (<p />)}
+            <h4 style={{ marginBottom: 0 }}>{coinsUnlocked.str({ precision: 3, unit: true })}</h4>
+            {unconfirmedUnlockedCoins.greater_than(0) ? (<span style={{ color: 'white', fontSize: 12 }}>* unconfirmed: {unconfirmedUnlockedCoins.str({ precision: 3, unit: true })} </span>) : (<p />)}
           </Grid.Column>
         </Grid>
       </div>
