@@ -105,17 +105,17 @@ class Account extends Component {
   renderWalletContent = (w) => {
     let content = null
     if (w.is_loaded) {
-      let unlockedBalance = `${w.balance.coins_unlocked.str({ precision: 3 })} TFT`
-      let lockedBalance = `${w.balance.coins_locked.str({ precision: 3 })} TFT`
+      let unlockedBalance = `${w.balance.coins_unlocked.str({ precision: 3, unit: true })}`
+      let lockedBalance = `${w.balance.coins_locked.str({ precision: 3, unit: true })}`
 
       if (w.balance.unconfirmed_coins_unlocked.not_equal_to(0)) {
         const totalUnlockedBalance = w.balance.unconfirmed_coins_unlocked.plus(w.balance.coins_unlocked)
-        unlockedBalance = `${totalUnlockedBalance.str({ precision: 3 })} TFT *`
+        unlockedBalance = `${totalUnlockedBalance.str({ precision: 3, unit: true })} *`
       }
 
       if (w.balance.unconfirmed_coins_locked.not_equal_to(0)) {
         const totalLockedBalance = w.balance.unconfirmed_coins_locked.plus(w.balance.coins_locked)
-        lockedBalance = `${totalLockedBalance.str({ precision: 3 })} TFT *`
+        lockedBalance = `${totalLockedBalance.str({ precision: 3, unit: true })} *`
       }
 
       content = (
@@ -193,18 +193,18 @@ class Account extends Component {
         <Grid columns='3'>
           <Grid.Column style={{ textAlign: 'center' }}>
             <h4 style={{ marginTop: 0 }}>Total Balance</h4>
-            <h4 className={styles.gradientTitle} >{coinsTotal.str({ precision: 3 })} TFT</h4>
-            {unconfirmedTotalCoins.greater_than(0) ? (<span style={{ color: 'white', fontSize: 12 }}>* unconfirmed: {unconfirmedTotalCoins.str({ precision: 3 })} TFT</span>) : (<p />)}
+            <h4 className={styles.gradientTitle} >{coinsTotal.str({ precision: 3, unit: true })}</h4>
+            {unconfirmedTotalCoins.greater_than(0) ? (<span style={{ color: 'white', fontSize: 12 }}>* unconfirmed: {unconfirmedTotalCoins.str({ precision: 3, unit: true })}</span>) : (<p />)}
           </Grid.Column>
           <Grid.Column style={{ textAlign: 'center' }}>
             <h4><Icon name='lock' />Locked Balance</h4>
-            <h4>{coinsLocked.str({ precision: 3 })}  TFT</h4>
-            {unconfirmedLockedCoins.greater_than(0) ? (<span style={{ color: 'white', fontSize: 12 }}>* unconfirmed: {unconfirmedLockedCoins.str({ precision: 3 })} TFT</span>) : (<p />)}
+            <h4>{coinsLocked.str({ precision: 3, unit: true })}</h4>
+            {unconfirmedLockedCoins.greater_than(0) ? (<span style={{ color: 'white', fontSize: 12 }}>* unconfirmed: {unconfirmedLockedCoins.str({ precision: 3, unit: true })}</span>) : (<p />)}
           </Grid.Column>
           <Grid.Column style={{ textAlign: 'center' }}>
             <h4><Icon name='unlock' />Unlocked Balance</h4>
-            <h4 style={{ marginBottom: 0 }}>{coinsUnlocked.str({ precision: 3 })}  TFT</h4>
-            {unconfirmedUnlockedCoins.greater_than(0) ? (<span style={{ color: 'white', fontSize: 12 }}>* unconfirmed: {unconfirmedUnlockedCoins.str({ precision: 3 })} TFT </span>) : (<p />)}
+            <h4 style={{ marginBottom: 0 }}>{coinsUnlocked.str({ precision: 3, unit: true })}</h4>
+            {unconfirmedUnlockedCoins.greater_than(0) ? (<span style={{ color: 'white', fontSize: 12 }}>* unconfirmed: {unconfirmedUnlockedCoins.str({ precision: 3, unit: true })} </span>) : (<p />)}
           </Grid.Column>
         </Grid>
       )

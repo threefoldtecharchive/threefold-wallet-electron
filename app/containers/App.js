@@ -44,7 +44,7 @@ class App extends Component {
               <Menu vertical style={{ width: '100%', background: '#1C1D31' }}>
                 <Menu.Item style={{ display: 'flex', marginTop: 40, marginBottom: 30 }}>
                   <img style={{ width: 75, height: 75 }} src={logo} />
-                  <p style={{ fontFamily: 'SF UI Text Heavy', fontSize: 25, color: 'white', marginTop: 15, marginLeft: 20 }}>TFT Wallet</p>
+                  <p style={{ fontFamily: 'SF UI Text Heavy', fontSize: 25, color: 'white', marginTop: 15, marginLeft: 20 }}>TF Wallet</p>
                 </Menu.Item>
                 <Menu.Item
                   style={menuItemStyle}

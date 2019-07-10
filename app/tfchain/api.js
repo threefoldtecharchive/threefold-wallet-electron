@@ -531,7 +531,7 @@ export var Account =  __class__ ('Account', [object], {
 				return __accu0__;
 			}) ();
 		}
-		return AccountBalance (self.account_name, __kwargtrans__ ({balances: balances, msbalances: msbalances}));
+		return AccountBalance (self.account_name, self._chain, __kwargtrans__ ({balances: balances, msbalances: msbalances}));
 	});},
 	get _get_selected_wallet_name () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -807,6 +807,22 @@ export var Account =  __class__ ('Account', [object], {
 		else {
 		}
 		return self._chain.__str__ ();
+	});},
+	get _get_chain_currency_unit () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._chain.currency_unit ();
 	});},
 	get _get_network_type () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -2040,6 +2056,7 @@ Object.defineProperty (Account, 'wallets', property.call (Account, Account._get_
 Object.defineProperty (Account, 'explorer', property.call (Account, Account._get_explorer));
 Object.defineProperty (Account, 'minimum_miner_fee', property.call (Account, Account._get_minimum_miner_fee));
 Object.defineProperty (Account, 'network_type', property.call (Account, Account._get_network_type));
+Object.defineProperty (Account, 'chain_currency_unit', property.call (Account, Account._get_chain_currency_unit));
 Object.defineProperty (Account, 'chain_type', property.call (Account, Account._get_chain_type));
 Object.defineProperty (Account, 'wallet', property.call (Account, Account._get_wallet));
 Object.defineProperty (Account, 'selected_wallet', property.call (Account, Account._get_selected_wallet));
@@ -2699,7 +2716,7 @@ export var SingleSignatureWallet =  __class__ ('SingleSignatureWallet', [BaseWal
 		if (value == null) {
 			var value = wbalance.SingleSigWalletBalance ();
 		}
-		self._balance = SingleSignatureBalance (self._tfwallet.network_type, __kwargtrans__ ({tfbalance: value, addresses_all: self.addresses}));
+		self._balance = SingleSignatureBalance (self._account._chain, self._tfwallet.network_type, __kwargtrans__ ({tfbalance: value, addresses_all: self.addresses}));
 	});},
 	get transaction_new () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -3073,7 +3090,7 @@ export var MultiSignatureWallet =  __class__ ('MultiSignatureWallet', [BaseWalle
 		if (value == null) {
 			var value = wbalance.MultiSigWalletBalance ();
 		}
-		self._balance = MultiSignatureBalance (self.owners, self.signatures_required, self._account._network_type, __kwargtrans__ ({tfbalance: value, addresses_all: self.addresses}));
+		self._balance = MultiSignatureBalance (self.owners, self.signatures_required, self._account._chain, self._account._network_type, __kwargtrans__ ({tfbalance: value, addresses_all: self.addresses}));
 	});},
 	get transaction_new () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -3659,7 +3676,7 @@ export var _create_signer_cb_for_wallet = function (wallet, balance) {
 };
 export var AccountBalance =  __class__ ('AccountBalance', [object], {
 	__module__: __name__,
-	get __init__ () {return __get__ (this, function (self, account_name, balances, msbalances) {
+	get __init__ () {return __get__ (this, function (self, account_name, chain_type, balances, msbalances) {
 		if (typeof balances == 'undefined' || (balances != null && balances.hasOwnProperty ("__kwargtrans__"))) {;
 			var balances = null;
 		};
@@ -3674,6 +3691,7 @@ export var AccountBalance =  __class__ ('AccountBalance', [object], {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
 						case 'account_name': var account_name = __allkwargs0__ [__attrib0__]; break;
+						case 'chain_type': var chain_type = __allkwargs0__ [__attrib0__]; break;
 						case 'balances': var balances = __allkwargs0__ [__attrib0__]; break;
 						case 'msbalances': var msbalances = __allkwargs0__ [__attrib0__]; break;
 					}
@@ -3688,6 +3706,12 @@ export var AccountBalance =  __class__ ('AccountBalance', [object], {
 			throw __except0__;
 		}
 		self._account_name = account_name;
+		if (!(isinstance (chain_type, tfchaintype.Type))) {
+			var __except0__ = py_TypeError ('chain_type has to be of type tfchain.chan.Type, not be of type {}'.format (py_typeof (chain_type)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		self._chain_type = chain_type;
 		var balances = (balances == null ? [] : balances);
 		var msbalances = (msbalances == null ? [] : msbalances);
 		self._balances = jsarr.concat (balances, msbalances);
@@ -3706,13 +3730,15 @@ export var AccountBalance =  __class__ ('AccountBalance', [object], {
 		}
 		else {
 		}
-		return Currency.sum (...(function () {
+		var c = Currency.sum (...(function () {
 			var __accu0__ = [];
 			for (var balance of self._balances) {
 				__accu0__.append (balance.coins_unlocked);
 			}
 			return __accu0__;
 		}) ());
+		c.unit = self._chain_type.currency_unit ();
+		return c;
 	});},
 	get _get_coins_locked () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -3728,13 +3754,15 @@ export var AccountBalance =  __class__ ('AccountBalance', [object], {
 		}
 		else {
 		}
-		return Currency.sum (...(function () {
+		var c = Currency.sum (...(function () {
 			var __accu0__ = [];
 			for (var balance of self._balances) {
 				__accu0__.append (balance.coins_locked);
 			}
 			return __accu0__;
 		}) ());
+		c.unit = self._chain_type.currency_unit ();
+		return c;
 	});},
 	get _get_coins_total () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -3750,7 +3778,9 @@ export var AccountBalance =  __class__ ('AccountBalance', [object], {
 		}
 		else {
 		}
-		return self.coins_unlocked.plus (self.coins_locked);
+		var c = self.coins_unlocked.plus (self.coins_locked);
+		c.unit = self._chain_type.currency_unit ();
+		return c;
 	});},
 	get _get_unconfirmed_coins_unlocked () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -3766,13 +3796,15 @@ export var AccountBalance =  __class__ ('AccountBalance', [object], {
 		}
 		else {
 		}
-		return Currency.sum (...(function () {
+		var c = Currency.sum (...(function () {
 			var __accu0__ = [];
 			for (var balance of self._balances) {
 				__accu0__.append (balance.unconfirmed_coins_unlocked);
 			}
 			return __accu0__;
 		}) ());
+		c.unit = self._chain_type.currency_unit ();
+		return c;
 	});},
 	get _get_unconfirmed_coins_locked () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -3788,13 +3820,15 @@ export var AccountBalance =  __class__ ('AccountBalance', [object], {
 		}
 		else {
 		}
-		return Currency.sum (...(function () {
+		var c = Currency.sum (...(function () {
 			var __accu0__ = [];
 			for (var balance of self._balances) {
 				__accu0__.append (balance.unconfirmed_coins_locked);
 			}
 			return __accu0__;
 		}) ());
+		c.unit = self._chain_type.currency_unit ();
+		return c;
 	});},
 	get _get_unconfirmed_coins_total () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -3810,7 +3844,9 @@ export var AccountBalance =  __class__ ('AccountBalance', [object], {
 		}
 		else {
 		}
-		return self.unconfirmed_coins_unlocked.plus (self.unconfirmed_coins_locked);
+		var c = self.unconfirmed_coins_unlocked.plus (self.unconfirmed_coins_locked);
+		c.unit = self._chain_type.currency_unit ();
+		return c;
 	});}
 });
 Object.defineProperty (AccountBalance, 'unconfirmed_coins_total', property.call (AccountBalance, AccountBalance._get_unconfirmed_coins_total));
@@ -3821,7 +3857,7 @@ Object.defineProperty (AccountBalance, 'coins_locked', property.call (AccountBal
 Object.defineProperty (AccountBalance, 'coins_unlocked', property.call (AccountBalance, AccountBalance._get_coins_unlocked));;
 export var Balance =  __class__ ('Balance', [object], {
 	__module__: __name__,
-	get __init__ () {return __get__ (this, function (self, network_type, tfbalance, addresses_all) {
+	get __init__ () {return __get__ (this, function (self, chain_type, network_type, tfbalance, addresses_all) {
 		if (typeof tfbalance == 'undefined' || (tfbalance != null && tfbalance.hasOwnProperty ("__kwargtrans__"))) {;
 			var tfbalance = null;
 		};
@@ -3835,6 +3871,7 @@ export var Balance =  __class__ ('Balance', [object], {
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'chain_type': var chain_type = __allkwargs0__ [__attrib0__]; break;
 						case 'network_type': var network_type = __allkwargs0__ [__attrib0__]; break;
 						case 'tfbalance': var tfbalance = __allkwargs0__ [__attrib0__]; break;
 						case 'addresses_all': var addresses_all = __allkwargs0__ [__attrib0__]; break;
@@ -3844,6 +3881,12 @@ export var Balance =  __class__ ('Balance', [object], {
 		}
 		else {
 		}
+		if (!(isinstance (chain_type, tfchaintype.Type))) {
+			var __except0__ = py_TypeError ('chain_type has to be of type tfchain.chain.Type, not be of type {}'.format (py_typeof (chain_type)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		self._chain_type = chain_type;
 		if (!(isinstance (network_type, tfchaintype.NetworkType))) {
 			var __except0__ = py_TypeError ('network_type has to be of type tfchain.chain.NetworkType, not be of type {}'.format (py_typeof (network_type)));
 			__except0__.__cause__ = null;
@@ -3949,7 +3992,9 @@ export var Balance =  __class__ ('Balance', [object], {
 		}
 		else {
 		}
-		return Currency (self._tfbalance.available);
+		var c = Currency (self._tfbalance.available);
+		c.unit = self._chain_type.currency_unit ();
+		return c;
 	});},
 	get _get_coins_locked () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -3965,7 +4010,9 @@ export var Balance =  __class__ ('Balance', [object], {
 		}
 		else {
 		}
-		return Currency (self._tfbalance.locked);
+		var c = Currency (self._tfbalance.locked);
+		c.unit = self._chain_type.currency_unit ();
+		return c;
 	});},
 	get _get_coins_total () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -3981,7 +4028,9 @@ export var Balance =  __class__ ('Balance', [object], {
 		}
 		else {
 		}
-		return self.coins_unlocked.plus (self.coins_locked);
+		var c = self.coins_unlocked.plus (self.coins_locked);
+		c.unit = self._chain_type.currency_unit ();
+		return c;
 	});},
 	get _get_unconfirmed_coins_unlocked () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -3997,7 +4046,9 @@ export var Balance =  __class__ ('Balance', [object], {
 		}
 		else {
 		}
-		return Currency (self._tfbalance.unconfirmed);
+		var c = Currency (self._tfbalance.unconfirmed);
+		c.unit = self._chain_type.currency_unit ();
+		return c;
 	});},
 	get _get_unconfirmed_coins_locked () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -4013,7 +4064,9 @@ export var Balance =  __class__ ('Balance', [object], {
 		}
 		else {
 		}
-		return Currency (self._tfbalance.unconfirmed_locked);
+		var c = Currency (self._tfbalance.unconfirmed_locked);
+		c.unit = self._chain_type.currency_unit ();
+		return c;
 	});},
 	get _get_unconfirmed_coins_total () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -4029,7 +4082,9 @@ export var Balance =  __class__ ('Balance', [object], {
 		}
 		else {
 		}
-		return self.unconfirmed_coins_unlocked.plus (self.unconfirmed_coins_locked);
+		var c = self.unconfirmed_coins_unlocked.plus (self.unconfirmed_coins_locked);
+		c.unit = self._chain_type.currency_unit ();
+		return c;
 	});},
 	get _get_transactions () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -4725,7 +4780,7 @@ Object.defineProperty (TransactionView, 'confirmed', property.call (TransactionV
 Object.defineProperty (TransactionView, 'identifier', property.call (TransactionView, TransactionView._get_identifier));;
 export var WalletOutputAggregator =  __class__ ('WalletOutputAggregator', [object], {
 	__module__: __name__,
-	get __init__ () {return __get__ (this, function (self, addresses) {
+	get __init__ () {return __get__ (this, function (self, chain_type, addresses) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -4733,6 +4788,7 @@ export var WalletOutputAggregator =  __class__ ('WalletOutputAggregator', [objec
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'chain_type': var chain_type = __allkwargs0__ [__attrib0__]; break;
 						case 'addresses': var addresses = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
@@ -4740,10 +4796,18 @@ export var WalletOutputAggregator =  __class__ ('WalletOutputAggregator', [objec
 		}
 		else {
 		}
+		if (!(isinstance (chain_type, tfchaintype.Type))) {
+			var __except0__ = py_TypeError ('chain_type has to be of type tfchain.chan.Type, not be of type {}'.format (py_typeof (chain_type)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		self._chain_type = chain_type;
 		self._our_addresses = addresses;
 		self._our_input = Currency ();
+		self._our_input.unit = self._chain_type.currency_unit ();
 		self._our_send_addresses = set ();
 		self._other_input = Currency ();
+		self._other_input.unit = self._chain_type.currency_unit ();
 		self._other_send_addresses = set ();
 		self._all_balances = dict ({});
 		self._fee_balances = dict ({});
@@ -4903,6 +4967,7 @@ export var WalletOutputAggregator =  __class__ ('WalletOutputAggregator', [objec
 				if (amount.less_than_or_equal_to (0)) {
 					continue;
 				}
+				amount.unit = self._chain_type.currency_unit ();
 				if (__in__ (address, self._our_addresses)) {
 					inputs.append (CoinOutputView (__kwargtrans__ ({senders: other_send_addresses, recipient: address, amount: amount, lock: lock, lock_is_timestamp: (lock == 0 ? false : OutputLock (lock).is_timestamp), fee: false})));
 				}
@@ -4913,6 +4978,7 @@ export var WalletOutputAggregator =  __class__ ('WalletOutputAggregator', [objec
 		}
 		if (we_sent_coin_outputs) {
 			for (var [address, amount] of jsobj.get_items (self._fee_balances)) {
+				amount.unit = self._chain_type.currency_unit ();
 				outputs.append (CoinOutputView (__kwargtrans__ ({senders: our_send_addresses, recipient: address, amount: amount.times (ratio), lock: 0, lock_is_timestamp: false, fee: true})));
 			}
 		}
@@ -5207,7 +5273,10 @@ Object.defineProperty (ChainInfo, 'chain_version', property.call (ChainInfo, Cha
 Object.defineProperty (ChainInfo, 'chain_name', property.call (ChainInfo, ChainInfo._get_chain_name));;
 export var Currency =  __class__ ('Currency', [object], {
 	__module__: __name__,
-	get _parse_opts () {return function (opts) {
+	get _parse_opts () {return function (opts, default_unit) {
+		if (typeof default_unit == 'undefined' || (default_unit != null && default_unit.hasOwnProperty ("__kwargtrans__"))) {;
+			var default_unit = null;
+		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -5215,6 +5284,7 @@ export var Currency =  __class__ ('Currency', [object], {
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'opts': var opts = __allkwargs0__ [__attrib0__]; break;
+						case 'default_unit': var default_unit = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
@@ -5232,7 +5302,12 @@ export var Currency =  __class__ ('Currency', [object], {
 			throw __except0__;
 		}
 		else if (isinstance (unit, bool)) {
-			var unit = (unit ? 'TFT' : null);
+			if (unit) {
+				var unit = (default_unit != null ? default_unit : '');
+			}
+			else {
+				var unit = null;
+			}
 		}
 		else if (jsstr.equal (unit, '')) {
 			var unit = null;
@@ -5400,6 +5475,52 @@ export var Currency =  __class__ ('Currency', [object], {
 			self._value = TFCurrency (__kwargtrans__ ({value: jsdec.Decimal (value)}));
 		}
 	});},
+	get _get_unit () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (self._unit == null) {
+			return '';
+		}
+		return self._unit;
+	});},
+	get _set_unit () {return __get__ (this, function (self, value) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (value == null) {
+			self._unit = null;
+		}
+		else if (isinstance (value, str)) {
+			self._unit = (value != '' ? value : null);
+		}
+		else {
+			var __except0__ = ValueError ('invalid unit cannot be set: {} ({})'.format (value, py_typeof (value)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+	});},
 	get str () {return __get__ (this, function (self, opts) {
 		if (typeof opts == 'undefined' || (opts != null && opts.hasOwnProperty ("__kwargtrans__"))) {;
 			var opts = null;
@@ -5418,7 +5539,7 @@ export var Currency =  __class__ ('Currency', [object], {
 		}
 		else {
 		}
-		var __left0__ = Currency._parse_opts (opts);
+		var __left0__ = Currency._parse_opts (opts, __kwargtrans__ ({default_unit: self.unit}));
 		var unit = __left0__ [0];
 		var group = __left0__ [1];
 		var decimal = __left0__ [2];
@@ -5458,7 +5579,7 @@ export var Currency =  __class__ ('Currency', [object], {
 		else {
 			var s = jsstr.sprintf ('%s%s%s', integer, decimal, fraction);
 		}
-		if (unit != null) {
+		if (unit != null && unit != '') {
 			var s = jsstr.sprintf ('%s %s', s, unit);
 		}
 		return s;
@@ -5481,7 +5602,14 @@ export var Currency =  __class__ ('Currency', [object], {
 		if (!(isinstance (other, Currency))) {
 			return self.plus (Currency (other));
 		}
-		return Currency (self._value.plus (other._value));
+		if (self.unit != '' && other.unit != '' && self.unit != other.unit) {
+			var __except0__ = ValueError ('cannot add currency values of different units ({} != {})'.format (self.unit, other.unit));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		var c = Currency (self._value.plus (other._value));
+		c.unit = (self.unit != '' ? self.unit : other.unit);
+		return c;
 	});},
 	get minus () {return __get__ (this, function (self, other) {
 		if (arguments.length) {
@@ -5501,7 +5629,14 @@ export var Currency =  __class__ ('Currency', [object], {
 		if (!(isinstance (other, Currency))) {
 			return self.minus (Currency (other));
 		}
-		return Currency (self._value.minus (other._value));
+		if (self.unit != '' && other.unit != '' && self.unit != other.unit) {
+			var __except0__ = ValueError ('cannot add currency values of different units ({} != {})'.format (self.unit, other.unit));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		var c = Currency (self._value.minus (other._value));
+		c.unit = (self.unit != '' ? self.unit : other.unit);
+		return c;
 	});},
 	get times () {return __get__ (this, function (self, other) {
 		if (arguments.length) {
@@ -5521,7 +5656,14 @@ export var Currency =  __class__ ('Currency', [object], {
 		if (!(isinstance (other, Currency))) {
 			return self.times (Currency (other));
 		}
-		return Currency (self._value.times (other._value));
+		if (self.unit != '' && other.unit != '' && self.unit != other.unit) {
+			var __except0__ = ValueError ('cannot add currency values of different units ({} != {})'.format (self.unit, other.unit));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		var c = Currency (self._value.times (other._value));
+		c.unit = (self.unit != '' ? self.unit : other.unit);
+		return c;
 	});},
 	get divided_by () {return __get__ (this, function (self, other) {
 		if (arguments.length) {
@@ -5541,7 +5683,14 @@ export var Currency =  __class__ ('Currency', [object], {
 		if (!(isinstance (other, Currency))) {
 			return self.divided_by (Currency (other));
 		}
-		return Currency (self._value.divided_by (other._value));
+		if (self.unit != '' && other.unit != '' && self.unit != other.unit) {
+			var __except0__ = ValueError ('cannot add currency values of different units ({} != {})'.format (self.unit, other.unit));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		var c = Currency (self._value.divided_by (other._value));
+		c.unit = (self.unit != '' ? self.unit : other.unit);
+		return c;
 	});},
 	get equal_to () {return __get__ (this, function (self, other) {
 		if (arguments.length) {
@@ -5677,9 +5826,12 @@ export var Currency =  __class__ ('Currency', [object], {
 		}
 		else {
 		}
-		return Currency (self._value.negate ());
+		var c = Currency (self._value.negate ());
+		c.unit = self.unit;
+		return c;
 	});}
 });
+Object.defineProperty (Currency, 'unit', property.call (Currency, Currency._get_unit, Currency._set_unit));;
 export var FormattedData =  __class__ ('FormattedData', [SiaBinaryObjectEncoderBase, RivineBinaryObjectEncoderBase], {
 	__module__: __name__,
 	Type: __class__ ('Type', [object], {
