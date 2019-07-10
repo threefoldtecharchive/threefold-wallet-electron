@@ -117,7 +117,7 @@ function renderModalBody (transactionType, selectedWallet, amount, owners, desti
         <List.Content>
           <List.Header>Amount: </List.Header>
           <List.Description>
-            {minimumMinerFee.plus(amount).str({ unit: true })} (* including minerfee: {minimumMinerFee.str()})
+            {minimumMinerFee.plus(amount).str({ unit: true })} (* including minerfee: {minimumMinerFee.str({ unit: true })})
           </List.Description>
         </List.Content>
       </List.Item>
