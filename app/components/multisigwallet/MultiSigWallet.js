@@ -230,7 +230,7 @@ class Wallet extends Component {
                   <Icon onClick={() => this.goBack()} style={{ fontSize: 25, marginLeft: 15, marginTop: 5, cursor: 'pointer', zIndex: 5 }} name='chevron circle left' />
                   <span onClick={() => this.goBack()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
                 </div>
-                <div style={{ height: '100vh', overflow: 'auto', paddingBottom: 250, marginTop: 10 }}>
+                <div style={{ paddingBottom: 20, marginTop: 10 }}>
                   {this.renderWalletBalanceGrid()}
                   <Segment style={{ width: '90%', height: 100, overflow: 'auto', overflowY: 'scroll', margin: 'auto', background: '#29272E', marginTop: 20 }}>
                     {this.renderOwnerList()}

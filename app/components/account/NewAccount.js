@@ -300,7 +300,7 @@ class NewAccount extends Component {
           <p style={{ fontFamily: 'SF UI Text Bold', fontSize: 25, marginBottom: 0 }}>New Account</p>
         </div>
         <Divider className={styles.pageDivider} />
-        <div style={{ height: '75vh', overflowY: 'scroll', paddingBottom: 30 }}>
+        <div style={{ paddingBottom: 30 }}>
           <Form error style={{ width: '50%', margin: 'auto', marginTop: 5, marginBottom: 50, fontSize: 18 }} onKeyDown={this.onKeyDown}>
             <Form.Field>
               <label style={{ float: 'left', color: 'white', marginRight: 20 }}>What network do you want to choose? </label>

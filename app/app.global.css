@@ -7,7 +7,6 @@
 @import '../node_modules/react-widgets/dist/css/react-widgets.css';
 
 body {
-  position: relative;
   color: white;
   height: 100vh;
   width: 100%;

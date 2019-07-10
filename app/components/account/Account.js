@@ -5,7 +5,6 @@ import { Segment, Icon, Divider, Card, Loader, Dimmer, Grid } from 'semantic-ui-
 import routes from '../../constants/routes'
 import { updateAccount } from '../../actions'
 import styles from '../home/Home.css'
-import Footer from '../footer'
 import { truncate } from 'lodash'
 
 const cardStyle = {
@@ -238,7 +237,7 @@ class Account extends Component {
           <p className={styles.pageHeaderSubtitle}>Your account overview and wallets</p>
         </div>
         <Divider className={styles.pageDivider} />
-        <div style={{ height: '100vh', overflow: 'auto', paddingBottom: 250 }}>
+        <div style={{ height: '100vh', paddingBottom: 50 }}>
           <div style={{ margin: 'auto', width: '90%' }}>
             {this.renderAccountBalances()}
           </div>
@@ -246,7 +245,6 @@ class Account extends Component {
             {this.renderWallets()}
           </div>
         </div>
-        <Footer />
       </div>
     )
   }

@@ -12,7 +12,6 @@ import UpdateMultiSigContactModal from '../addressBook/UpdateMultiSigContactModa
 import { find } from 'lodash'
 import ExportToPdfModal from './ExportToPdfModal'
 import { toast } from 'react-toastify'
-import { Scrollbars } from 'react-custom-scrollbars'
 
 const mapStateToProps = state => {
   if (!state.account.state) {
@@ -212,15 +211,13 @@ class Wallet extends Component {
             <Icon onClick={() => this.goBack()} style={{ fontSize: 25, marginLeft: 15, marginTop: 5, cursor: 'pointer', zIndex: 5 }} name='chevron circle left' />
             <span onClick={() => this.goBack()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
           </div>
-          <Scrollbars style={{ height: '100vh' }} renderThumbVertical={props => <div {...props} style={{ backgroundColor: 'yellow' }} />} >
-            <div style={{ paddingBottom: 20, marginTop: 10 }}>
-              {this.renderWalletBalanceGrid()}
-              <Segment style={{ width: '90%', height: '45vh', overflow: 'auto', overflowY: 'scroll', margin: 'auto', background: '#29272E', marginTop: 20 }}>
-                {(hasConfirmedTx && <Button size='tiny' style={{ float: 'right' }} className={styles.tinyAcceptButton} onClick={() => this.changeStateExportModel()}>Export to PDF</Button>)}
-                <TransactionsList account={this.props.account} loader={this.state.loader} transactions={transactions} chainInfo={chainConstants} addContact={this.openAddModal} />
-              </Segment>
-            </div>
-          </Scrollbars>
+          <div style={{ paddingBottom: 20, marginTop: 10 }}>
+            {this.renderWalletBalanceGrid()}
+            <Segment style={{ width: '90%', height: '45vh', overflow: 'auto', overflowY: 'scroll', margin: 'auto', background: '#29272E', marginTop: 20 }}>
+              {(hasConfirmedTx && <Button size='tiny' style={{ float: 'right' }} className={styles.tinyAcceptButton} onClick={() => this.changeStateExportModel()}>Export to PDF</Button>)}
+              <TransactionsList account={this.props.account} loader={this.state.loader} transactions={transactions} chainInfo={chainConstants} addContact={this.openAddModal} />
+            </Segment>
+          </div>
         </div>
       </div>
     )

@@ -3,7 +3,6 @@ import { connect } from 'react-redux'
 import React, { Component } from 'react'
 import { Icon, Input, Divider, Dropdown, Segment, Label, Form } from 'semantic-ui-react'
 import styles from '../home/Home.css'
-import Footer from '../footer'
 import QRCode from 'qrcode.react'
 import { flatten } from 'lodash'
 import { CopyToClipboard } from 'react-copy-to-clipboard'
@@ -93,13 +92,13 @@ class WalletReceive extends Component {
     const { amount, selectedAddress, selectedWallet } = this.state
 
     return (
-      <div style={{ height: 1000, overflowY: 'scroll' }}>
+      <div >
         <div className={styles.pageHeader}>
           <p className={styles.pageHeaderTitle}>Receive </p>
           <p className={styles.pageHeaderSubtitle}>Receive tokens by scanning the QR code</p>
         </div>
         <Divider className={styles.pageDivider} />
-        <div style={{ margin: 'auto', height: '74vh', overflow: 'auto', paddingBottom: 30 }}>
+        <div style={{ margin: 'auto', paddingBottom: 30 }}>
           <Form style={{ margin: 'auto', width: '90%' }}>
             <Form.Field style={{ textAlign: 'center' }}>
               <label style={{ color: 'white', fontFamily: 'SF UI Text Light', fontSize: 18 }}>Wallet</label>

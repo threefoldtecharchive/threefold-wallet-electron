@@ -47,7 +47,7 @@ class Sign extends Component {
           <Icon onClick={() => this.goBackToWallet()} style={{ fontSize: 25, marginLeft: 15, marginTop: 5, cursor: 'pointer', zIndex: 5 }} name='chevron circle left' />
           <span onClick={() => this.goBackToWallet()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
         </div>
-        <div style={{ height: '65vh', paddingBottom: 30, overflow: 'auto' }}>
+        <div style={{ paddingBottom: 30 }}>
           <Form error style={{ width: '50%', margin: 'auto', marginTop: 0 }}>
             <Form.Field style={{ marginTop: 30 }}>
               <p style={{ fontSize: 14 }}>Before completing this transaction, one or more signatures are required. Copy this transaction JSON and send it to the persons that must sign this.</p>

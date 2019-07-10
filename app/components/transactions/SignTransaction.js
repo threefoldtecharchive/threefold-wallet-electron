@@ -154,13 +154,13 @@ class SignTransaction extends Component {
     }
 
     return (
-      <div>
+      <div style={{ paddingBottom: 20 }}>
         <div className={styles.pageHeader}>
           <p className={styles.pageHeaderTitle}>Sign Transaction</p>
           <p className={styles.pageHeaderSubtitle}>Paste a JSON Transaction to sign a multisign transaction</p>
         </div>
         <Divider className={styles.pageDivider} />
-        <div style={{ height: '100vh', paddingBottom: 250, overflow: 'auto' }}>
+        <div>
           <Form error style={{ width: '90%', margin: 'auto', marginTop: 0 }} onKeyDown={this.onKeyDown}>
             <Form.Field>
               <label style={{ color: 'white' }}>Select wallet</label>

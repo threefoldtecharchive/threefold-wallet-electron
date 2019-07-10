@@ -39,9 +39,9 @@ class App extends Component {
     const { activeItem } = this.state
     return (
       <React.Fragment>
-        <Grid>
-          <Grid.Column width='4' style={{ paddingRight: 0, borderRight: '1px solid grey' }}>
-            <Scrollbars style={{ height: '90vh' }}>
+        <Grid style={{ height: 'calc(100vh - 50px)', marginBottom: 0 }}>
+          <Grid.Column width='4' style={{ paddingRight: 0, borderRight: '1px solid grey', paddingBottom: 0, marginBottom: 0 }}>
+            <Scrollbars style={{ height: '90vh' }} renderThumbVertical={props => <div {...props} style={{ backgroundColor: 'grey' }} />}>
               <div style={{ background: '#1C1D31' }}>
                 <Menu vertical style={{ width: '100%', background: '#1C1D31' }}>
                   <Menu.Item style={{ display: 'flex', marginTop: 40, marginBottom: 30 }}>
@@ -116,8 +116,10 @@ class App extends Component {
               </div>
             </Scrollbars>
           </Grid.Column>
-          <Grid.Column width='12' style={{ paddingLeft: 0 }}>
-            {children}
+          <Grid.Column width='12'>
+            <Scrollbars style={{ height: '90vh' }} renderThumbVertical={props => <div {...props} style={{ backgroundColor: 'grey' }} />}>
+              {children}
+            </Scrollbars>
           </Grid.Column>
         </Grid>
         <Footer />
