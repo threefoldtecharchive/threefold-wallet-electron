@@ -242,7 +242,7 @@ export var Account =  __class__ ('Account', [object], {
 		self._seed = seed;
 		self._wallets = [];
 		self._multisig_wallets = [];
-		self._chain_info = ChainInfo ();
+		self._chain_info = ChainInfo (self._chain);
 		self._selected_wallet = null;
 		self._address_book = AddressBook ();
 		self._loaded = false;
@@ -1771,7 +1771,7 @@ export var Account =  __class__ ('Account', [object], {
 			}
 			else {
 			}
-			self._chain_info = ChainInfo (info);
+			self._chain_info = ChainInfo (self._chain, info);
 			return null;
 		};
 		return jsasync.chain (self._explorer_client.blockchain_info_get (), cb);
@@ -3707,6 +3707,7 @@ export var AccountBalance =  __class__ ('AccountBalance', [object], {
 		}
 		self._account_name = account_name;
 		if (!(isinstance (chain_type, tfchaintype.Type))) {
+			jslog.error ('received unexptected chain_type for account balance:', chain_type);
 			var __except0__ = py_TypeError ('chain_type has to be of type tfchain.chan.Type, not be of type {}'.format (py_typeof (chain_type)));
 			__except0__.__cause__ = null;
 			throw __except0__;
@@ -4102,7 +4103,7 @@ export var Balance =  __class__ ('Balance', [object], {
 		}
 		var transactions = [];
 		for (var transaction of self._tfbalance.transactions) {
-			transactions.append (TransactionView.from_transaction (transaction, self._tfbalance.addresses));
+			transactions.append (TransactionView.from_transaction (transaction, self._chain_type, __kwargtrans__ ({addresses: self._tfbalance.addresses})));
 		}
 		return transactions;
 	});}
@@ -4273,7 +4274,7 @@ Object.defineProperty (MultiSignatureBalance, 'addresses', property.call (MultiS
 Object.defineProperty (MultiSignatureBalance, 'address', property.call (MultiSignatureBalance, MultiSignatureBalance._get_address));;
 export var BlockView =  __class__ ('BlockView', [object], {
 	__module__: __name__,
-	get from_block () {return __getcm__ (this, function (cls, block, addresses) {
+	get from_block () {return __getcm__ (this, function (cls, block, chain_type, addresses) {
 		if (typeof addresses == 'undefined' || (addresses != null && addresses.hasOwnProperty ("__kwargtrans__"))) {;
 			var addresses = null;
 		};
@@ -4285,6 +4286,7 @@ export var BlockView =  __class__ ('BlockView', [object], {
 					switch (__attrib0__) {
 						case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
 						case 'block': var block = __allkwargs0__ [__attrib0__]; break;
+						case 'chain_type': var chain_type = __allkwargs0__ [__attrib0__]; break;
 						case 'addresses': var addresses = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
@@ -4297,7 +4299,7 @@ export var BlockView =  __class__ ('BlockView', [object], {
 		var identifier = block.id.__str__ ();
 		var transactions = [];
 		for (var transaction of block.transactions) {
-			transactions.append (TransactionView.from_transaction (transaction, __kwargtrans__ ({addresses: addresses})));
+			transactions.append (TransactionView.from_transaction (transaction, chain_type, __kwargtrans__ ({addresses: addresses})));
 		}
 		return cls (identifier, height, timestamp, transactions);
 	});},
@@ -4450,7 +4452,7 @@ export var TransactionView =  __class__ ('TransactionView', [object], {
 		}
 		return 0;
 	};},
-	get from_transaction () {return __getcm__ (this, function (cls, transaction, addresses) {
+	get from_transaction () {return __getcm__ (this, function (cls, transaction, chain_type, addresses) {
 		if (typeof addresses == 'undefined' || (addresses != null && addresses.hasOwnProperty ("__kwargtrans__"))) {;
 			var addresses = null;
 		};
@@ -4462,6 +4464,7 @@ export var TransactionView =  __class__ ('TransactionView', [object], {
 					switch (__attrib0__) {
 						case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
 						case 'transaction': var transaction = __allkwargs0__ [__attrib0__]; break;
+						case 'chain_type': var chain_type = __allkwargs0__ [__attrib0__]; break;
 						case 'addresses': var addresses = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
@@ -4485,7 +4488,7 @@ export var TransactionView =  __class__ ('TransactionView', [object], {
 		if (addresses == null) {
 			return cls (identifier, height, transaction_order, timestamp, blockid, [], []);
 		}
-		var aggregator = WalletOutputAggregator (addresses);
+		var aggregator = WalletOutputAggregator (chain_type, addresses);
 		for (var co of transaction.coin_outputs) {
 			if (!(co.is_fee)) {
 				aggregator.add_coin_output (__kwargtrans__ ({address: co.condition.unlockhash.__str__ (), lock: co.condition.lock.value, amount: co.value}));
@@ -4797,6 +4800,7 @@ export var WalletOutputAggregator =  __class__ ('WalletOutputAggregator', [objec
 		else {
 		}
 		if (!(isinstance (chain_type, tfchaintype.Type))) {
+			jslog.error ('received unexptected chain_type for account balance:', chain_type);
 			var __except0__ = py_TypeError ('chain_type has to be of type tfchain.chan.Type, not be of type {}'.format (py_typeof (chain_type)));
 			__except0__.__cause__ = null;
 			throw __except0__;
@@ -5119,7 +5123,7 @@ Object.defineProperty (CoinOutputView, 'recipient', property.call (CoinOutputVie
 Object.defineProperty (CoinOutputView, 'senders', property.call (CoinOutputView, CoinOutputView._get_senders));;
 export var ChainInfo =  __class__ ('ChainInfo', [object], {
 	__module__: __name__,
-	get __init__ () {return __get__ (this, function (self, tf_chain_info) {
+	get __init__ () {return __get__ (this, function (self, chain_type, tf_chain_info) {
 		if (typeof tf_chain_info == 'undefined' || (tf_chain_info != null && tf_chain_info.hasOwnProperty ("__kwargtrans__"))) {;
 			var tf_chain_info = null;
 		};
@@ -5130,6 +5134,7 @@ export var ChainInfo =  __class__ ('ChainInfo', [object], {
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'chain_type': var chain_type = __allkwargs0__ [__attrib0__]; break;
 						case 'tf_chain_info': var tf_chain_info = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
@@ -5137,6 +5142,12 @@ export var ChainInfo =  __class__ ('ChainInfo', [object], {
 		}
 		else {
 		}
+		if (!(isinstance (chain_type, tfchaintype.Type))) {
+			var __except0__ = py_TypeError ('chain_type has to be of type tfchain.chan.Type, not be of type {}'.format (py_typeof (chain_type)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		self._chain_type = chain_type;
 		if (tf_chain_info == null) {
 			var tf_chain_info = tfclient.ExplorerBlockchainInfo ();
 		}
@@ -5262,7 +5273,7 @@ export var ChainInfo =  __class__ ('ChainInfo', [object], {
 		else {
 		}
 		var addresses = jsfunc.opts_get (opts, 'addresses');
-		return BlockView.from_block (self._tf_chain_info.last_block, __kwargtrans__ ({addresses: addresses}));
+		return BlockView.from_block (self._tf_chain_info.last_block, self._chain_type, __kwargtrans__ ({addresses: addresses}));
 	});}
 });
 Object.defineProperty (ChainInfo, 'explorer_address', property.call (ChainInfo, ChainInfo._get_explorer_address));

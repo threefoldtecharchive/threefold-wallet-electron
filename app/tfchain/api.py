@@ -229,7 +229,7 @@ class Account:
         self._seed = seed
         self._wallets = [] # start with no wallets, can be created using the `wallet_new` instance method
         self._multisig_wallets = []
-        self._chain_info = ChainInfo()
+        self._chain_info = ChainInfo(self._chain)
         self._selected_wallet = None
         self._address_book = AddressBook()
 
@@ -947,7 +947,7 @@ class Account:
 
     def _update_chain_info(self):
         def cb(info):
-            self._chain_info = ChainInfo(info)
+            self._chain_info = ChainInfo(self._chain, info)
             return None
         return jsasync.chain(self._explorer_client.blockchain_info_get(), cb)
 
@@ -1554,6 +1554,7 @@ class AccountBalance:
             raise TypeError("account_name has to be of type str, not be of type {}".format(type(account_name)))
         self._account_name = account_name
         if not isinstance(chain_type, tfchaintype.Type):
+            jslog.error('received unexptected chain_type for account balance:', chain_type)
             raise TypeError("chain_type has to be of type tfchain.chan.Type, not be of type {}".format(type(chain_type)))
         self._chain_type = chain_type
         balances = [] if balances == None else balances
@@ -1682,7 +1683,7 @@ class Balance:
     def transactions(self):
         transactions = []
         for transaction in self._tfbalance.transactions:
-            transactions.append(TransactionView.from_transaction(transaction, self._tfbalance.addresses))
+            transactions.append(TransactionView.from_transaction(transaction, self._chain_type, addresses=self._tfbalance.addresses))
         return transactions
 
 
@@ -1740,7 +1741,7 @@ class BlockView:
     """
 
     @classmethod
-    def from_block(cls, block, addresses=None):
+    def from_block(cls, block, chain_type, addresses=None):
         # gather const information
         height = block.height
         timestamp = block.timestamp
@@ -1748,7 +1749,7 @@ class BlockView:
         # gather transactions
         transactions = []
         for transaction in block.transactions:
-            transactions.append(TransactionView.from_transaction(transaction, addresses=addresses))
+            transactions.append(TransactionView.from_transaction(transaction, chain_type, addresses=addresses))
         # return BlockView
         return cls(identifier, height, timestamp, transactions)
 
@@ -1814,7 +1815,7 @@ class TransactionView:
         return 0
 
     @classmethod
-    def from_transaction(cls, transaction, addresses=None):
+    def from_transaction(cls, transaction, chain_type, addresses=None):
         # gather const information
         identifier = transaction.id
         if transaction.unconfirmed:
@@ -1833,7 +1834,7 @@ class TransactionView:
             return cls(identifier, height, transaction_order, timestamp, blockid, [], [])
 
         # go through all outputs and inputs and keep track of the addresses, locks and amounts
-        aggregator = WalletOutputAggregator(addresses)
+        aggregator = WalletOutputAggregator(chain_type, addresses)
         for co in transaction.coin_outputs:
             if not co.is_fee:
                 aggregator.add_coin_output(
@@ -1973,6 +1974,7 @@ class TransactionView:
 class WalletOutputAggregator:
     def __init__(self, chain_type, addresses):
         if not isinstance(chain_type, tfchaintype.Type):
+            jslog.error('received unexptected chain_type for account balance:', chain_type)
             raise TypeError("chain_type has to be of type tfchain.chan.Type, not be of type {}".format(type(chain_type)))
         self._chain_type = chain_type
         self._our_addresses = addresses
@@ -2157,10 +2159,13 @@ class ChainInfo:
     at this exact moment, as useful for the TF Desktop Wallet App.
     """
 
-    def __init__(self, tf_chain_info=None):
+    def __init__(self, chain_type, tf_chain_info=None):
         """
         Create a new ChainInfo object.
         """
+        if not isinstance(chain_type, tfchaintype.Type):
+            raise TypeError("chain_type has to be of type tfchain.chan.Type, not be of type {}".format(type(chain_type)))
+        self._chain_type = chain_type
         if tf_chain_info == None:
             tf_chain_info = tfclient.ExplorerBlockchainInfo()
         elif not isinstance(tf_chain_info, tfclient.ExplorerBlockchainInfo):
@@ -2221,8 +2226,7 @@ class ChainInfo:
         :rtype: BlockView
         """
         addresses = jsfunc.opts_get(opts, 'addresses')
-        return BlockView.from_block(self._tf_chain_info.last_block, addresses=addresses)
-
+        return BlockView.from_block(self._tf_chain_info.last_block, self._chain_type, addresses=addresses)
 
 class Currency:
     @staticmethod
