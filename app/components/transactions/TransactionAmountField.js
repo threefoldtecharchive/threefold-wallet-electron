@@ -53,7 +53,7 @@ class TransactionAmountField extends Component {
             className='gradient-text'
             onClick={() => this.props.setMaxAmount()}
           >
-            Available balance: {selectedWallet.balance.coins_total.str({ unit: true })}
+            Available balance: {selectedWallet.balance.coins_unlocked.str({ unit: true })}
           </label>
         </div>
         <label style={{ color: 'white' }}>Minerfee: {minerFee.str({ unit: true })}, amount including minerfee: {totalAmount.str({ unit: true })}</label>
