@@ -322,13 +322,6 @@ class NewAccount extends Component {
                   checked={this.state.network === 'testnet'}
                   onChange={this.handleNetworkChange}
                 />
-                <Radio style={{ marginRight: 30, color: 'white' }}
-                  label={<label style={{ color: 'white' }}>devnet</label>}
-                  name='radioGroup'
-                  value='devnet'
-                  checked={this.state.network === 'devnet'}
-                  onChange={this.handleNetworkChange}
-                />
               </div>
             </Form.Field>
             <Form.Field error={nameError}>
