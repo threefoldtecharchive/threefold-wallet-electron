@@ -97,7 +97,7 @@ const PdfTransactionList = ({ transactions, startDate, endDate, account }) => {
         <Text style={styles.dateTitle}>From: {moment.unix(startDate).format('DD-MM-YYYY')}, Until: {moment.unix(endDate).format('DD-MM-YYYY')}</Text>
         <View style={styles.body}>
           {transactions.map((tx) => {
-            return (
+            return (tx.length > 0 &&
               <View>
                 <View style={styles.balance}>
                   <Text>{tx[0].beginBalance.str() && (`Begin balance: ${tx[0].beginBalance.str({ unit: true })}`)}</Text>

@@ -6,7 +6,7 @@ import ReactPDF from '@react-pdf/renderer'
 import PdfTransactionList from './PdfTransactionList'
 import { DateTimePicker } from 'react-widgets'
 import moment from 'moment-timezone'
-import { first, last, groupBy, toArray } from 'lodash'
+import { find, first, last, groupBy, toArray } from 'lodash'
 import { toast } from 'react-toastify'
 import { move } from 'fs-extra-p'
 
@@ -153,6 +153,7 @@ class ExportToPDF extends Component {
 
   checkDateInput = (startDate, endDate) => {
     let { transactions } = this.state
+    let amountOfDays = 0
     if (!startDate) {
       startDate = this.findOldestDate()
     }
@@ -162,15 +163,26 @@ class ExportToPDF extends Component {
 
     transactions = transactions.map(tx => {
       return tx.map(t => {
+        console.log(moment.unix(t.timestamp).format('DD/MM/YYYY'))
         if (t.confirmed && t.timestamp >= startDate && t.timestamp <= endDate) {
           return t
         }
       }).filter(Boolean)
     })
 
-    if (transactions[0].length === 0) {
+    transactions.map(tx => {
+      if (tx.length > 0) {
+        amountOfDays++
+      }
+    })
+
+    console.log(amountOfDays)
+
+    if (amountOfDays === 0) {
       return this.setState({ noTransactions: true, disableExportButton: true, generatingPdf: false })
     }
+
+    console.log(transactions)
 
     return this.setState({ mappedTransactions: transactions, noTransactions: false, disableExportButton: false })
   }
@@ -183,7 +195,7 @@ class ExportToPDF extends Component {
       return this.setState({ generatingPdf: false })
     }
 
-    ReactPDF.render(<PdfTransactionList transactions={mappedTransactions} startDate={first(first(mappedTransactions)).timestamp} endDate={last(last(mappedTransactions)).timestamp} account={this.props.account} />, this.state.tempFilePath)
+    ReactPDF.render(<PdfTransactionList transactions={mappedTransactions} startDate={find(mappedTransactions, (tx) => { return tx.length > 0 })[0].timestamp} endDate={last(last(mappedTransactions)).timestamp} account={this.props.account} />, this.state.tempFilePath)
     this.savePdf()
     return this.setState({ noTransactions: false, disableExportButton: false })
   }
