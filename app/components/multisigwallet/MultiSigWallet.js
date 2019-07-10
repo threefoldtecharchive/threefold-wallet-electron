@@ -7,7 +7,7 @@ import styles from '../home/Home.css'
 import Footer from '../footer'
 import BalanceGrid from '../wallet/BalanceGrid'
 import TransactionsList from '../wallet/TransactionList'
-import { truncate } from 'lodash'
+import { truncate, find } from 'lodash'
 import { saveAccount, updateAccount } from '../../actions'
 import UpdateContactModal from '../addressBook/UpdateContactModal'
 import UpdateMultiSigContactModal from '../addressBook/UpdateMultiSigContactModal'
@@ -187,6 +187,8 @@ class Wallet extends Component {
     const wallet = this.props.account.selected_wallet
     const { contactName, contactAddress, openAddModal, ownerAddresses, signatureCount, openAddMultisigModal, openExportModal } = this.state
     const active = true
+    const transactions = wallet.balance.transactions
+    const hasConfirmedTx = find(transactions, { confirmed: true })
 
     return (
       <div>
@@ -236,7 +238,7 @@ class Wallet extends Component {
                     {this.renderOwnerList()}
                   </Segment>
                   <Segment style={{ width: '90%', height: '40vh', overflow: 'auto', overflowY: 'scroll', margin: 'auto', background: '#29272E', marginTop: 20 }}>
-                    <Button size='tiny' style={{ float: 'right' }} className={styles.tinyAcceptButton} onClick={() => this.changeStateExportModel()}>Export to PDF</Button>
+                    {hasConfirmedTx && <Button size='tiny' style={{ float: 'right' }} className={styles.tinyAcceptButton} onClick={() => this.changeStateExportModel()}>Export to PDF</Button>}
                     <TransactionsList account={this.props.account} loader={this.state.loader} transactions={wallet.balance.transactions} chainInfo={chainConstants} addContact={this.openAddModal} />
                   </Segment>
                 </div>
