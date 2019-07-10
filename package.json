@@ -280,7 +280,6 @@
     "redux-form": "^8.2.4",
     "redux-thunk": "^2.3.0",
     "semantic-ui-react": "^0.87.1",
-    "simplebar-react": "^1.1.0",
     "source-map-support": "^0.5.9",
     "testcafe": "^1.2.0",
     "uuid": "^3.3.2"
