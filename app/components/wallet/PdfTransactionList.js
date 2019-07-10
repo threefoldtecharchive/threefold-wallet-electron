@@ -89,7 +89,7 @@ const PdfTransactionList = ({ transactions, startDate, endDate, account }) => {
       <Page wrap size='A4' style={styles.pageStyle}>
         <View style={styles.headerBlock}>
           <View style={styles.accountBlock}>
-            <Text>Threefold {account.account_name}</Text>
+            <Text>Account: {account.account_name}</Text>
             <Text>Wallet: {account.selected_wallet.wallet_name}</Text>
           </View>
           <Text style={styles.title}>Transaction list</Text>
@@ -179,7 +179,7 @@ function renderTransactionBody (tx, account) {
           </Text>
           {out.senders.map(sender => {
             return (
-              <View style={styles.addresses}>
+              <View key={sender} style={styles.addresses}>
                 <Text>
                   From: {sender}
                 </Text>
