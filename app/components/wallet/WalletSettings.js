@@ -248,7 +248,6 @@ class WalletSettings extends Component {
             {this.renderUpdateError()}
           </Form>
         </div>
-        <Footer />
       </div>
     )
   }

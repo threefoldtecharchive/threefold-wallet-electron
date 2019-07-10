@@ -134,7 +134,6 @@ class WalletReceive extends Component {
             </Form.Field>
           </Form>
         </div>
-        <Footer />
       </div>
     )
   }

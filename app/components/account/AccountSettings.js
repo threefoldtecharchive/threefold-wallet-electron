@@ -312,7 +312,6 @@ class AccountSettings extends Component {
             <Button className={styles.acceptButton} size='big' type='submit' onClick={this.saveAccount} style={{ marginTop: 10, margin: 'auto', background: '#015DE1', color: 'white', width: 180 }}>Save</Button>
           </div>
         </div>
-        <Footer />
       </div>
     )
   }
