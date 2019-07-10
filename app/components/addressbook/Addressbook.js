@@ -61,7 +61,7 @@ class AddressBook extends Component {
             if (contact.recipient instanceof Array) {
               updateAction = (<Icon name='settings'style={{ color: 'white', marginRight: 30, cursor: 'pointer' }} onClick={() => this.openUpdateMultisigModal(contact)} />)
               return (
-                <List.Item>
+                <List.Item key={contact.contact_name}>
                   <List.Header style={{ float: 'left' }}>Multisig: {contact.contact_name}</List.Header>
                   <div style={{ display: 'flex', position: 'absolute', right: 0 }}>
                     {updateAction}
@@ -82,7 +82,7 @@ class AddressBook extends Component {
               )
             } else {
               return (
-                <List.Item>
+                <List.Item key={contact.contact_name}>
                   <List.Content >
                     <List.Header style={{ float: 'left' }}>{contact.contact_name}</List.Header>
                     <div style={{ display: 'flex', position: 'absolute', right: 0 }}>
