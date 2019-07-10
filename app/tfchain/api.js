@@ -10,8 +10,9 @@ import * as tfwallet from './tfchain.wallet.js';
 import * as tfclient from './tfchain.client.js';
 import * as wbalance from './tfchain.balance.js';
 import * as tfexplorer from './tfchain.explorer.js';
-import * as tfnetwork from './tfchain.network.js';
+import * as tfchaintype from './tfchain.chain.js';
 import * as tferrors from './tfchain.errors.js';
+import * as tfrivbin from './tfchain.encoding.rivbin.js';
 import * as tfsiabin from './tfchain.encoding.siabin.js';
 import * as bip39 from './tfchain.crypto.mnemonic.js';
 import * as jsarr from './tfchain.polyfill.array.js';
@@ -73,13 +74,34 @@ export var Account =  __class__ ('Account', [object], {
 		if (isinstance (data, str)) {
 			var data = jsjson.json_loads (data);
 		}
-		if (data.version != 1) {
-			jslog.warning ('data object with invalid version:', data);
-			var __except0__ = ValueError ('account data of version {} is not supported'.format (data.version));
-			__except0__.__cause__ = null;
-			throw __except0__;
+		if (data.version == 1) {
+			return Account._deserialize_v1 (account_name, password, data.data);
 		}
-		var data = data.data;
+		if (data.version == 2) {
+			return Account._deserialize_v2 (account_name, password, data.data);
+		}
+		jslog.warning ('data object with invalid version:', data);
+		var __except0__ = ValueError ('account data of version {} is not supported'.format (data.version));
+		__except0__.__cause__ = null;
+		throw __except0__;
+	});},
+	get _deserialize_v1 () {return __getcm__ (this, function (cls, account_name, password, data) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+						case 'account_name': var account_name = __allkwargs0__ [__attrib0__]; break;
+						case 'password': var password = __allkwargs0__ [__attrib0__]; break;
+						case 'data': var data = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
 		var symmetric_key = jscrypto.SymmetricKey (password);
 		var payload = jsjson.json_loads (symmetric_key.decrypt (data.payload, jscrypto.RandomSymmetricEncryptionInput (data.iv, data.salt)));
 		if (!(jsstr.equal (account_name, payload ['account_name']))) {
@@ -88,6 +110,60 @@ export var Account =  __class__ ('Account', [object], {
 			throw __except0__;
 		}
 		var account = cls (account_name, password, __kwargtrans__ ({opts: dict ({'seed': jshex.bytes_from_hex (payload ['seed']), 'network': payload ['network_type'], 'addresses': payload.get_or ('explorer_addresses', null)})}));
+		if (__in__ ('wallets', payload)) {
+			var wallet_data_objs = payload ['wallets'] || [];
+			for (var data of wallet_data_objs) {
+				account.wallet_new (data.wallet_name, data.start_index, data.address_count, __kwargtrans__ ({py_update: false}));
+			}
+		}
+		if (__in__ ('multisig_wallets', payload)) {
+			var ms_wallet_data_objs = payload ['multisig_wallets'] || [];
+			for (var data of ms_wallet_data_objs) {
+				account.multisig_wallet_new (__kwargtrans__ ({py_name: data.wallet_name, owners: data.owners, signatures_required: data.signatures_required, py_update: false}));
+			}
+		}
+		if (__in__ ('address_book', payload)) {
+			account._address_book = AddressBook.deserialize (payload ['address_book'] || jsobj.new_dict ());
+		}
+		return account;
+	});},
+	get _deserialize_v2 () {return __getcm__ (this, function (cls, account_name, password, data) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+						case 'account_name': var account_name = __allkwargs0__ [__attrib0__]; break;
+						case 'password': var password = __allkwargs0__ [__attrib0__]; break;
+						case 'data': var data = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var pub_info = data ['public'];
+		var pub_account_name = pub_info ['account_name'];
+		var pub_chain_type = pub_info ['chain_type'];
+		var pub_network_type = pub_info ['network_type'];
+		var symmetric_key = jscrypto.SymmetricKey (password);
+		var priv_info = data ['private'];
+		var payload = jsjson.json_loads (symmetric_key.decrypt (priv_info.data, jscrypto.RandomSymmetricEncryptionInput (priv_info.iv, priv_info.salt)));
+		var checksum_input = tfrivbin.encode_all (pub_account_name, pub_chain_type, pub_network_type);
+		var checksum = jshex.bytes_to_hex (jscrypto.sha256 (checksum_input));
+		if (checksum != payload ['public_checksum']) {
+			var __except0__ = ValueError ("loaded public info's checksum {} for account {} does not match loaded encrypted checksum {}".format (checksum, account_name, payload ['public_checksum']));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		if (!(jsstr.equal (account_name, pub_account_name))) {
+			var __except0__ = ValueError ('account_name {} is unexpected, does not match account data'.format (account_name));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		var account = cls (account_name, password, __kwargtrans__ ({opts: dict ({'seed': jshex.bytes_from_hex (payload ['seed']), 'chain': pub_chain_type, 'network': pub_network_type, 'addresses': payload.get_or ('explorer_addresses', null)})}));
 		if (__in__ ('wallets', payload)) {
 			var wallet_data_objs = payload ['wallets'] || [];
 			for (var data of wallet_data_objs) {
@@ -125,10 +201,11 @@ export var Account =  __class__ ('Account', [object], {
 		}
 		else {
 		}
-		var __left0__ = jsfunc.opts_get (opts, 'seed', 'network', 'addresses');
+		var __left0__ = jsfunc.opts_get (opts, 'seed', 'chain', 'network', 'addresses');
 		var seed = __left0__ [0];
-		var network_type = __left0__ [1];
-		var explorer_addresses = __left0__ [2];
+		var chain_type = __left0__ [1];
+		var network_type = __left0__ [2];
+		var explorer_addresses = __left0__ [3];
 		if (!(isinstance (account_name, str))) {
 			var __except0__ = py_TypeError ('account_name is not a str, while this was not expected. Invalid: {} ({})'.format (account_name, py_typeof (account_name)));
 			__except0__.__cause__ = null;
@@ -159,6 +236,7 @@ export var Account =  __class__ ('Account', [object], {
 		else {
 			var mnemonic = entropy_to_mnemonic (seed);
 		}
+		self._chain = tfchaintype.Type (chain_type);
 		self.explorer_update (network_type, dict ({'addresses': explorer_addresses}));
 		self._mnemonic = mnemonic;
 		self._seed = seed;
@@ -294,11 +372,12 @@ export var Account =  __class__ ('Account', [object], {
 		}
 		var explorer_addresses = jsfunc.opts_get (opts, 'addresses');
 		self._use_default_explorer_addresses = explorer_addresses == null;
+		var npt = self._chain.network_type ();
 		if (self._use_default_explorer_addresses) {
 			if (network_type == null) {
-				var network_type = tfnetwork.Type.STANDARD;
+				var network_type = npt.default_network_type ();
 			}
-			var network_type = tfnetwork.Type (network_type);
+			var network_type = npt (network_type);
 			var explorer_addresses = network_type.default_explorer_addresses ();
 			self._explorer_client = tfexplorer.Client (explorer_addresses);
 			self._explorer_client = tfclient.TFChainClient (self._explorer_client);
@@ -312,7 +391,7 @@ export var Account =  __class__ ('Account', [object], {
 				throw __except0__;
 			}
 		}
-		var network_type = tfnetwork.Type (network_type);
+		var network_type = npt (network_type);
 		self._network_type = network_type;
 	});},
 	get _get_mnemonic () {return __get__ (this, function (self) {
@@ -712,6 +791,22 @@ export var Account =  __class__ ('Account', [object], {
 			return null;
 		}
 		return self._wallets [0];
+	});},
+	get _get_chain_type () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._chain.__str__ ();
 	});},
 	get _get_network_type () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -1566,11 +1661,15 @@ export var Account =  __class__ ('Account', [object], {
 		for (var wallet of self._multisig_wallets) {
 			multisig_wallets.append (dict ({'wallet_name': wallet.wallet_name, 'owners': wallet.owners, 'signatures_required': wallet.signatures_required}));
 		}
-		var payload = dict ({'account_name': self.account_name, 'network_type': self.network_type, 'explorer_addresses': (self.default_explorer_addresses_used ? null : self.explorer.explorer_addresses), 'seed': jshex.bytes_to_hex (self.seed), 'wallets': (len (wallets) == 0 ? null : wallets), 'multisig_wallets': (len (multisig_wallets) == 0 ? null : multisig_wallets), 'address_book': (self._address_book.is_empty ? null : self._address_book.serialize ())});
-		var __left0__ = self._symmetric_key.encrypt (payload);
+		var public_payload = dict ({'account_name': self.account_name, 'chain_type': self.chain_type, 'network_type': self.network_type});
+		var checksum_input = tfrivbin.encode_all (public_payload ['account_name'], public_payload ['chain_type'], public_payload ['network_type']);
+		var checksum = jshex.bytes_to_hex (jscrypto.sha256 (checksum_input));
+		var private_payload = dict ({'explorer_addresses': (self.default_explorer_addresses_used ? null : self.explorer.explorer_addresses), 'seed': jshex.bytes_to_hex (self.seed), 'wallets': (len (wallets) == 0 ? null : wallets), 'multisig_wallets': (len (multisig_wallets) == 0 ? null : multisig_wallets), 'address_book': (self._address_book.is_empty ? null : self._address_book.serialize ()), 'public_checksum': checksum});
+		var __left0__ = self._symmetric_key.encrypt (private_payload);
 		var ct = __left0__ [0];
 		var rsei = __left0__ [1];
-		return dict ({'version': 1, 'data': dict ({'payload': ct, 'salt': rsei.salt, 'iv': rsei.init_vector})});
+		var private_payload = dict ({'data': ct, 'salt': rsei.salt, 'iv': rsei.init_vector});
+		return dict ({'version': 2, 'data': dict ({'public': public_payload, 'private': private_payload})});
 	});},
 	get update_account () {return __get__ (this, function (self, itcb) {
 		if (typeof itcb == 'undefined' || (itcb != null && itcb.hasOwnProperty ("__kwargtrans__"))) {;
@@ -1941,6 +2040,7 @@ Object.defineProperty (Account, 'wallets', property.call (Account, Account._get_
 Object.defineProperty (Account, 'explorer', property.call (Account, Account._get_explorer));
 Object.defineProperty (Account, 'minimum_miner_fee', property.call (Account, Account._get_minimum_miner_fee));
 Object.defineProperty (Account, 'network_type', property.call (Account, Account._get_network_type));
+Object.defineProperty (Account, 'chain_type', property.call (Account, Account._get_chain_type));
 Object.defineProperty (Account, 'wallet', property.call (Account, Account._get_wallet));
 Object.defineProperty (Account, 'selected_wallet', property.call (Account, Account._get_selected_wallet));
 Object.defineProperty (Account, 'selected_wallet_name', property.call (Account, Account._get_selected_wallet_name));
@@ -3744,8 +3844,8 @@ export var Balance =  __class__ ('Balance', [object], {
 		}
 		else {
 		}
-		if (!(isinstance (network_type, tfnetwork.Type))) {
-			var __except0__ = py_TypeError ('network_type has to be of type tfchain.network.Type, not be of type {}'.format (py_typeof (network_type)));
+		if (!(isinstance (network_type, tfchaintype.NetworkType))) {
+			var __except0__ = py_TypeError ('network_type has to be of type tfchain.chain.NetworkType, not be of type {}'.format (py_typeof (network_type)));
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}

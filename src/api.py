@@ -16,8 +16,9 @@ import tfchain.polyfill.array as jsarr
 
 import tfchain.crypto.mnemonic as bip39
 import tfchain.encoding.siabin as tfsiabin
+import tfchain.encoding.rivbin as tfrivbin
 import tfchain.errors as tferrors
-import tfchain.network as tfnetwork
+import tfchain.chain as tfchaintype
 import tfchain.explorer as tfexplorer
 import tfchain.balance as wbalance
 import tfchain.client as tfclient
@@ -74,12 +75,16 @@ class Account:
             # parse the data if not JSON-decoded yet
             data = jsjson.json_loads(data)
 
-        # ensure the data version is correct, we currently only supported one version (1)
-        if data.version != 1:
-            jslog.warning("data object with invalid version:", data)
-            raise ValueError("account data of version {} is not supported".format(data.version))
-        data = data.data
+        # actual decoding logic depends upon the version
+        if data.version == 1:
+            return Account._deserialize_v1(account_name, password, data.data)
+        if data.version == 2:
+            return Account._deserialize_v2(account_name, password, data.data)
+        jslog.warning("data object with invalid version:", data)
+        raise ValueError("account data of version {} is not supported".format(data.version))
 
+    @classmethod
+    def _deserialize_v1(cls, account_name, password, data):
         # create the encryption key, so we can (try to) decrypt
         symmetric_key = jscrypto.SymmetricKey(password)
         payload = jsjson.json_loads(symmetric_key.decrypt(
@@ -115,6 +120,64 @@ class Account:
         # return the fully restored account
         return account
 
+    @classmethod
+    def _deserialize_v2(cls, account_name, password, data):
+        # get public info
+        pub_info = data['public']
+        pub_account_name = pub_info['account_name']
+        pub_chain_type = pub_info['chain_type']
+        pub_network_type = pub_info['network_type']
+
+        # create the encryption key, so we can (try to) decrypt
+        symmetric_key = jscrypto.SymmetricKey(password)
+        # get private info
+        priv_info = data['private']
+        payload = jsjson.json_loads(symmetric_key.decrypt(
+            priv_info.data, jscrypto.RandomSymmetricEncryptionInput(priv_info.iv, priv_info.salt)))
+
+        # create checksum of public info and ensure it is equal to the checksum defined in the private payload
+        checksum_input = tfrivbin.encode_all(
+            pub_account_name,
+            pub_chain_type,
+            pub_network_type,
+        )
+        checksum = jshex.bytes_to_hex(jscrypto.sha256(checksum_input))
+        if checksum != payload['public_checksum']:
+            raise ValueError("loaded public info's checksum {} for account {} does not match loaded encrypted checksum {}".format(checksum, account_name, payload['public_checksum']))
+
+        # ensure the account name matches the name stored in the passed data
+        if not jsstr.equal(account_name, pub_account_name):
+            raise ValueError("account_name {} is unexpected, does not match account data".format(account_name))
+
+        # restore the account
+        account = cls(account_name, password, opts={
+            'seed': jshex.bytes_from_hex(payload['seed']),
+            'chain': pub_chain_type,
+            'network': pub_network_type,
+            'addresses': payload.get_or('explorer_addresses', None),
+        })
+        # restore all wallets for the account
+        if 'wallets' in payload:
+            wallet_data_objs = payload['wallets'] or []
+            for data in wallet_data_objs:
+                account.wallet_new(data.wallet_name, data.start_index, data.address_count, update=False)
+        # restore all multisig_wallets (at least the fact they are named) for the account
+        if 'multisig_wallets' in payload:
+            ms_wallet_data_objs = payload['multisig_wallets'] or []
+            for data in ms_wallet_data_objs:
+                account.multisig_wallet_new(
+                    name=data.wallet_name,
+                    owners=data.owners,
+                    signatures_required=data.signatures_required,
+                    update=False,
+                )
+        # restore the address book if it is defined
+        if 'address_book' in payload:
+            account._address_book = AddressBook.deserialize(payload['address_book'] or jsobj.new_dict())
+        # return the fully restored account
+        return account
+
+
     def __init__(self, account_name, password, opts=None):
         """
         Create a new TFChain account, identified by a seed and labeled with a human-friendly name.
@@ -125,9 +188,9 @@ class Account:
         :param password: password used to protect the serialized data
         :type password: str
         """
-        # opts: seed=None, network_type=None, explorer_addresses=None
+        # opts: seed=None, chain_type=None, network_type=None, explorer_addresses=None
         # parse opts
-        seed, network_type, explorer_addresses = jsfunc.opts_get(opts, 'seed', 'network', 'addresses')
+        seed, chain_type, network_type, explorer_addresses = jsfunc.opts_get(opts, 'seed', 'chain', 'network', 'addresses')
 
         # validate params
         if not isinstance(account_name, str):
@@ -152,6 +215,9 @@ class Account:
                 seed = mnemonic_to_entropy(mnemonic)
             else:
                 mnemonic = entropy_to_mnemonic(seed)
+
+        # define the chain type
+        self._chain = tfchaintype.Type(chain_type)
 
         # define explorer addresses network type and explorer client
         self.explorer_update(network_type, {
@@ -224,11 +290,12 @@ class Account:
         """
         explorer_addresses = jsfunc.opts_get(opts, 'addresses')
         self._use_default_explorer_addresses = (explorer_addresses == None)
+        npt = self._chain.network_type()
         if self._use_default_explorer_addresses:
             # no explorer addresses are given, get the default ones based on the network type
             if network_type == None:
-                network_type = tfnetwork.Type.STANDARD
-            network_type = tfnetwork.Type(network_type)
+                network_type = npt.default_network_type()
+            network_type = npt(network_type)
             explorer_addresses = network_type.default_explorer_addresses()
             self._explorer_client = tfexplorer.Client(explorer_addresses)
             self._explorer_client = tfclient.TFChainClient(self._explorer_client)
@@ -239,7 +306,7 @@ class Account:
             if network_type == None:
                 raise ValueError("network_type is not given, while explorer addresses are given, this is currently not supported")
         # ensure the network type is using the internal network type
-        network_type = tfnetwork.Type(network_type)
+        network_type = npt(network_type)
         # assign all remaining properties
         self._network_type = network_type
 
@@ -416,6 +483,13 @@ class Account:
         if not self._wallets:
             return None
         return self._wallets[0]
+
+    @property
+    def chain_type(self):
+        """
+        :returns: the (block)chain type in str format
+        """
+        return self._chain.__str__()
 
     @property
     def network_type(self):
@@ -807,24 +881,42 @@ class Account:
                 'owners': wallet.owners,
                 'signatures_required': wallet.signatures_required,
             })
-        payload = {
+        # some information is public available
+        public_payload = {
             'account_name': self.account_name,
+            'chain_type': self.chain_type,
             'network_type': self.network_type,
+        }
+        # create checksum of the public information
+        checksum_input = tfrivbin.encode_all(
+            public_payload['account_name'],
+            public_payload['chain_type'],
+            public_payload['network_type'],
+        )
+        checksum = jshex.bytes_to_hex(jscrypto.sha256(checksum_input))
+        # private payload (including public checksum)
+        private_payload = {
             'explorer_addresses': None if self.default_explorer_addresses_used else self.explorer.explorer_addresses,
             'seed': jshex.bytes_to_hex(self.seed),
             'wallets': None if len(wallets) == 0 else wallets,
             'multisig_wallets': None if len(multisig_wallets) == 0 else multisig_wallets,
             'address_book': None if self._address_book.is_empty else self._address_book.serialize(),
+            'public_checksum': checksum,
         }
-        # encrypt it using the internal symmetric key
-        ct, rsei = self._symmetric_key.encrypt(payload)
+        # encrypt private payload using the internal symmetric key
+        ct, rsei = self._symmetric_key.encrypt(private_payload)
+        # assign private info to payload
+        private_payload = {
+            'data': ct,
+            'salt': rsei.salt,
+            'iv': rsei.init_vector,
+        }
         return {
-            'version': 1,
+            'version': 2,
             'data': {
-                'payload': ct,
-                'salt': rsei.salt,
-                'iv': rsei.init_vector,
-            }
+                'public': public_payload,
+                'private': private_payload,
+            },
         }
 
     def update_account(self, itcb=None):
@@ -1049,10 +1141,8 @@ class SingleSignatureWallet(BaseWallet):
         """
         Create a new wallet.
 
-        :param network_type: the network type used by this wallet
+        :param account: the network type used by this wallet
         :type network_type: tfchain.network.Type
-        :param explorer_client: the explorer client to be used
-        :type explorer_client: explorer.Client
         :param wallet_index: the index of this wallet within the owning wallet
         :type wallet_index: int
         :param wallet_name: the name of this wallet, a human-friendly label
@@ -1484,8 +1574,8 @@ class AccountBalance:
 
 class Balance:
     def __init__(self, network_type, tfbalance=None, addresses_all=None):
-        if not isinstance(network_type, tfnetwork.Type):
-            raise TypeError("network_type has to be of type tfchain.network.Type, not be of type {}".format(type(network_type)))
+        if not isinstance(network_type, tfchaintype.NetworkType):
+            raise TypeError("network_type has to be of type tfchain.chain.NetworkType, not be of type {}".format(type(network_type)))
         self._network_type = network_type
         if tfbalance == None:
             raise ValueError("tfbalance cannot be None")

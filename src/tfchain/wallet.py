@@ -6,7 +6,7 @@ import tfchain.polyfill.crypto as jscrypto
 import tfchain.client as tfclient
 import tfchain.errors as tferrors
 
-from tfchain.network import Type as NetworkType
+from tfchain.chain import NetworkType
 from tfchain.balance import WalletBalance, SingleSigWalletBalance, MultiSigWalletBalance
 from tfchain.encoding.siabin import SiaBinaryEncoder
 
@@ -46,7 +46,7 @@ class TFChainWallet:
 
     def __init__(self, network_type, pairs, client):
         if not isinstance(network_type, NetworkType):
-            raise TypeError("network_type is expected to be a tfchain.network.Type, invalid: {} ({})".format(network_type, type(network_type)))
+            raise TypeError("network_type is expected to be a tfchain.chain.NetworkType, invalid: {} ({})".format(network_type, type(network_type)))
         self._network_type = network_type
         if not jsobj.is_js_arr(pairs) or jsarr.is_empty(pairs):
             raise TypeError("pairs is expected to be a non-empty list/array of SigningKey pairs, not be of type {}".format(type(pairs)))

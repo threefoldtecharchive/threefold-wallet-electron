@@ -260,6 +260,7 @@ const _all = {
     assert.equal(account.account_name, 'ufoo')
     assert.equal(account.password, 'pfoo')
     assert.equal(account.network_type, 'standard')
+    assert.equal(account.chain_type, 'tfchain')
     assert.true(account.default_explorer_addresses_used)
     assert.equal(account.explorer.explorer_addresses, _defs.network.standard.addresses)
     assert.equal(account.wallets.length, 0)
@@ -282,6 +283,7 @@ const _all = {
     assert.equal(account.password, 'pfoo')
     assert.equal(account.mnemonic, mnemonic)
     assert.equal(account.network_type, 'standard')
+    assert.equal(account.chain_type, 'tfchain')
     assert.true(account.default_explorer_addresses_used)
     assert.equal(account.explorer.explorer_addresses, _defs.network.standard.addresses)
     assert.equal(account.wallets.length, 1)
@@ -306,6 +308,7 @@ const _all = {
     assert.equal(account.password, 'pfoo')
     assert.equal(account.mnemonic, mnemonic)
     assert.equal(account.network_type, 'testnet')
+    assert.equal(account.chain_type, 'tfchain')
     assert.true(account.default_explorer_addresses_used)
     assert.equal(account.explorer.explorer_addresses, _defs.network.testnet.addresses)
 
@@ -314,6 +317,7 @@ const _all = {
       addresses: ['https://tfchain.example.org/explorer']
     })
     assert.equal(account.network_type, 'standard')
+    assert.equal(account.chain_type, 'tfchain')
     assert.false(account.default_explorer_addresses_used)
     assert.equal(account.explorer.explorer_addresses, ['https://tfchain.example.org/explorer'])
 
@@ -324,6 +328,7 @@ const _all = {
     assert.equal(account.password, 'pfoo')
     assert.equal(account.mnemonic, mnemonic)
     assert.equal(account.network_type, 'standard')
+    assert.equal(account.chain_type, 'tfchain')
     assert.false(account.default_explorer_addresses_used)
     assert.equal(account.explorer.explorer_addresses, ['https://tfchain.example.org/explorer'])
   },
@@ -338,6 +343,7 @@ const _all = {
     assert.equal(account.wallets.length, 0)
     assert.equal(account.mnemonic, exampleMnemonic)
     assert.equal(account.network_type, 'standard')
+    assert.equal(account.chain_type, 'tfchain')
     assert.true(account.default_explorer_addresses_used)
     assert.equal(account.explorer.explorer_addresses, _defs.network.standard.addresses)
 
@@ -346,6 +352,7 @@ const _all = {
     assert.equal(account.account_name, 'ufoo')
     assert.equal(account.password, 'pfoo')
     assert.equal(account.network_type, 'standard')
+    assert.equal(account.chain_type, 'tfchain')
     assert.true(account.default_explorer_addresses_used)
     assert.equal(account.explorer.explorer_addresses, _defs.network.standard.addresses)
     assert.equal(account.mnemonic, exampleMnemonic)
@@ -359,6 +366,7 @@ const _all = {
     assert.equal(account.account_name, 'ufoo')
     assert.equal(account.password, 'pfoo')
     assert.equal(account.network_type, 'standard')
+    assert.equal(account.chain_type, 'tfchain')
     assert.true(account.default_explorer_addresses_used)
     assert.equal(account.explorer.explorer_addresses, _defs.network.standard.addresses)
     assert.equal(account.mnemonic, exampleMnemonic)
@@ -375,6 +383,7 @@ const _all = {
     assert.equal(account.account_name, 'ufoo')
     assert.equal(account.password, 'pfoo')
     assert.equal(account.network_type, 'testnet')
+    assert.equal(account.chain_type, 'tfchain')
     assert.true(account.default_explorer_addresses_used)
     assert.equal(account.explorer.explorer_addresses, _defs.network.testnet.addresses)
     assert.equal(account.mnemonic, exampleMnemonic)
@@ -389,6 +398,7 @@ const _all = {
     assert.equal(account.account_name, 'ufoo')
     assert.equal(account.password, 'pfoo')
     assert.equal(account.network_type, 'standard')
+    assert.equal(account.chain_type, 'tfchain')
     assert.false(account.default_explorer_addresses_used)
     assert.equal(account.explorer.explorer_addresses, ['https://tfchain.example.org/explorer'])
     assert.equal(account.mnemonic, exampleMnemonic)
@@ -402,6 +412,7 @@ const _all = {
     assert.equal(account.account_name, 'ufoo')
     assert.equal(account.password, 'pfoo')
     assert.equal(account.network_type, 'standard')
+    assert.equal(account.chain_type, 'tfchain')
     assert.true(account.default_explorer_addresses_used)
     assert.equal(account.explorer.explorer_addresses, _defs.network.standard.addresses)
     assert.equal(account.mnemonic, exampleMnemonic)
@@ -422,6 +433,7 @@ const _all = {
     assert.equal(account.account_name, 'ufoo')
     assert.equal(account.password, 'pfoo')
     assert.equal(account.network_type, 'standard')
+    assert.equal(account.chain_type, 'tfchain')
     assert.true(account.default_explorer_addresses_used)
     assert.equal(account.explorer.explorer_addresses, _defs.network.standard.addresses)
     assert.equal(account.mnemonic, exampleMnemonic)
@@ -432,6 +444,83 @@ const _all = {
     mswallets = account.multisig_wallets
     assert.equal(mswallets.length, 1)
     mswallet = mswallets[0]
+    assert.equal(mswallet.wallet_name, 'our_wallet')
+    assert.equal(mswallet.address, '038c830e947d48e7ccb4b6e5e718c564cb08459706bb505456fc166537edcd8da57cec5947ca1b')
+    assert.equal(mswallet.owners, [account.address, '01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0'])
+    assert.equal(mswallet.signatures_required, 1)
+    // ... test address book
+    const contacts = [
+      { name: 'foo_ms', address: '032e619b0dab8386bed3dbd6c4ae670ee7ef878f72602567dfc2621b5caa7e5178d43689aa7aa9' },
+      { name: 'foo_ss', address: '01370af706b547dd4e562a047e6265d7e7750771f9bff633b1a12dbd59b11712c6ef65edb1690d' },
+      { name: 'unknown', address: '000000000000000000000000000000000000000000000000000000000000000000000000000000' }
+    ]
+    assert.equal(account.address_book.contacts.length, contacts.length)
+    account.address_book.contacts.forEach((contact, index) => {
+      const expectedContact = contacts[index]
+      assert.equal(contact.contact_name, expectedContact.name)
+      assert.equal(tfchain.wallet_address_from_recipient(contact.recipient), expectedContact.address)
+    })
+  },
+
+  recoverSerializedV2Accounts: (assert) => {
+    const exampleMnemonic = 'toe soup panther jacket save unique drastic endless inside chimney catch rally joke arch twin guard breeze icon model diet attract height traffic direct'
+
+    // recover account with no wallets (and default standard explorer)
+    let account = tfchain.Account.deserialize('ufoo', 'pfoo', JSON.parse('{"version":2,"data":{"public":{"account_name":"ufoo","chain_type":"tfchain","network_type":"standard"},"private":{"data":"lSLA6vClPKOaldXA33uAburZHcXIc4utsRwrz5SqLMZVD+f4c6ONi4hUm+RXLf/G2pgIzd90kLfkFnfub8yfiVvw+3RFtkL4qHw5D7j44hL6IPzOBoCZp4oFDU4grq4/7W43aWdC3oUc/Z5dmR7zKOPMPcbfAy+jBDb8oCwM/3KW8lf+S1ARwCd5erJBbbIW7HNyiUSjQHH+liWsNAaLoB21s42/kIi6O/zAKcu7+dg3wRwnZIRz7lT+yh80ybMHwhVe1H9yhqikaqtc2cU5ZUqRo6beCbcaEmHufl6TulXVwIE1k7MU3SdAkQiSmcFZWwYfz1+92XuNljT3Ng==","salt":"gfc1WGwRGVo=","iv":"g1rQd097bln4LNldRxxUlQ=="}}}'))
+    assert.equal(account.account_name, 'ufoo')
+    assert.equal(account.password, 'pfoo')
+    assert.equal(account.wallets.length, 0)
+    assert.equal(account.mnemonic, exampleMnemonic)
+    assert.equal(account.network_type, 'standard')
+    assert.equal(account.chain_type, 'tfchain')
+    assert.true(account.default_explorer_addresses_used)
+    assert.equal(account.explorer.explorer_addresses, _defs.network.standard.addresses)
+
+    // recover account with one wallets  (and default standard explorer)
+    account = tfchain.Account.deserialize('ufoo', 'pfoo', JSON.parse('{"version":2,"data":{"public":{"account_name":"ufoo","chain_type":"tfchain","network_type":"standard"},"private":{"data":"uZkYwGbVrNAXNDQQGZh04az7owGKxzbN6w9b6VeS7pyxgBhEJlP84MXZ6aEAhIHLudOmrQrOZ9IwgstXJdG46EqshgxcEoW6oV6s4PctyXomVrfiVJ90INvN+2MV2Uxln4bes9/8UEgZdJELkSvJiquSLt25P7jKZPUBj13sgxK4/VduSYdSxYUsjq4XhTjiemtCcepBgwvi3qW00V6Qun1OEQj/ZaieBGkBjT4bMn1tBqDNoWnv+jLUSVpO7e1B8uCoTEGJH67c3/sTKTafyzED4BqrMV0QyyFMp2SZ2U1KIaFFwsK0snEdPtaMZ1jxHK5p96D5GuJU/uAFrXaC2L5BDdNhbTXAL2NotcITpPdpr4SPzxkzYvEM5OAYSiiGRvEVcFf3fyq3TWnmkrqz9Cm+fij+Yg==","salt":"gfc1WGwRGVo=","iv":"H15FJVUyww4mDP9cTYms8g=="}}}'))
+    assert.equal(account.account_name, 'ufoo')
+    assert.equal(account.password, 'pfoo')
+    assert.equal(account.network_type, 'standard')
+    assert.equal(account.chain_type, 'tfchain')
+    assert.true(account.default_explorer_addresses_used)
+    assert.equal(account.explorer.explorer_addresses, _defs.network.standard.addresses)
+    assert.equal(account.mnemonic, exampleMnemonic)
+    assert.equal(account.wallets.length, 1)
+    assert.equal(account.wallet.wallet_name, 'default')
+    assert.equal(account.wallet.start_index, 1)
+    assert.equal(account.wallet.address_count, 3)
+
+    // recover standard account with custom explorer addresses
+    const serializedAccountWithCustomExplorers = '{"version":2,"data":{"public":{"account_name":"ufoo","chain_type":"tfchain","network_type":"standard"},"private":{"data":"8v4fp8D8amnqQVf8nJM52GFz/ns7SHVFoDpg7dhinGZ88yJ2IIKDlL5ojZMi/gLfh1eHWxkPVf34LPoqAUvZmL5JbGtm6FzosnCI+dGx0/dwsdgxPsR8lWYhbH+HCvTqtpfG8tSGJW73v0pcKt0Mrt9RHqQD0kp1Xwe9bsVJEmsRpZfa4OYrexyuY58ouDI41b/RGcO+HQv6Lz79xnUebecaSrig1kAIoqMUe85Wm3YhnX1XKZYF4vWmDCMmeHH97bkTWn2XPCF+9dGblyn3l3YZlskuzjf26z5b3MCcnOI+EBW0LAoOKNfIAqOIl6PMCWBP/fdByKaLMPsYP2xexpnNRNLADATF0brx1JX9M5G6uEwg36zQJAvuZg9cpmmYJqW8EVFFqRSqi1ybj3sG+d/8m1XMMfttt8I51s805N8cVtX+Y8yZxM1L6J1nzyigFESa446GtCHJUeT7","salt":"gfc1WGwRGVo=","iv":"pzlBs65Ib6IDJxdxEsTDrA=="}}}'
+    account = tfchain.Account.deserialize('ufoo', 'pfoo', JSON.parse(serializedAccountWithCustomExplorers))
+    assert.equal(account.account_name, 'ufoo')
+    assert.equal(account.password, 'pfoo')
+    assert.equal(account.network_type, 'standard')
+    assert.equal(account.chain_type, 'tfchain')
+    assert.false(account.default_explorer_addresses_used)
+    assert.equal(account.explorer.explorer_addresses, ['https://tfchain.example.org/explorer'])
+    assert.equal(account.mnemonic, exampleMnemonic)
+    assert.equal(account.wallets.length, 1)
+    assert.equal(account.wallet.wallet_name, 'default')
+    assert.equal(account.wallet.start_index, 0)
+    assert.equal(account.wallet.address_count, 1)
+
+    // recover testnet account with wallets, multisig wallets and address book stored
+    account = tfchain.Account.deserialize('ufoo', 'pfoo', JSON.parse('{"version":2,"data":{"public":{"account_name":"ufoo","chain_type":"tfchain","network_type":"standard"},"private":{"data":"CFxy5wWSbTyoKcNIY1bR8GBXOUgcRI2GDIIQEWwuSlPU8i/Nit5A/ZIMavOtqFsz6FWxelVWD2PmO00YSB4w5sclyo+xBLZRqwdT6KzoNLVsLyiGwtdm00wqRBUnQkmFfmIT45ilvkAANAPmDK6Ejb+1OXVjUnFL0iUWWOsvDTTKvnZYuuZAqREBTkqYi5iWUm3QpO8zl7LZrjvXVee5Ermin9qKTqC/Tp0kxxqdB0bUNu/fC6n7f3vnTqs94EsU8m2bbEIMOBs7KJZeLPStvTmBHd4ZSidWxto09cJBi0ZUAgJ+0y+jVyMOEUrWlaK7LzCvNfutXnmtCMzJidgptrVvlyF/a4sL7FJ9w+cBX40ajVSTYcYKO3EJQKNgnEZcZI2Tq6ds6/d+hGGmGQF0NV8Vu25uClmpSTYKRHxmW85s9Of1EDe0ctMs7Ls8uZSGxpUCL1SDJdAJ8BgcIgLU/eDFAVjv60g9cGYf7pcvazDRo0BT3rdHu3X2M9z9W/tzhsHz6tEXlGvMMQbEpVWO+kyHoYC0JtGmAgRV03+weiuv5ltTRmTr+xa1DM4031mhbPXuEQR9rtG5T03/ukrUWfI0/kkSsE3AB8ur1c8ugezrENxyJh2IQknpTfT2VkyJ71YAED5QYSNj2Vg6ydA3rzBnXn0xgg7xabTYfXJNx6Vz4pV+peIcGqu2niX8uqrIOq5IneQ4hHdJN5y/8AGURT2xaP6wNiXYEstd6WFZ+TNtnfRIAbqx8tcepnldC70NMD2hA/IyULV5o5IhlQ+lFqxLKX1KzBbTckDJEqvwtaucsO62MfKPYv8sli2Kd5Bux547lDoCthTakwypvKhJO9nsS8GWJnhQdv+8KOHP7xOkJ4G3G6zhktNouAGRYV8obJj42hmktvmoPjEgSofvW3Sc/f/HApCdUMbgomGXI2KQF9GmSeGNkmWoq8of9mr2i9UcUV/oD0b/r537yt1KIC37QkRktLoQLDBTxxAQ8GqLCACxs2nWFQWQTtw2hJyD30UQbjJtsCMahJi1V5b8xkqvuAHqMyNe3zxCBOAPbecP4RkEk45u382u/VXWpsvqpg3CEoC3VWlZ0knH5JXinyU5CGKrNkx3TXhfPwaS0Ho7+0CWhOjZEO+VhBa1uZPhyNf6vliCJ0vaRgIjSrmkbFAITra4wQBiumFgCFEpqKnDMmGyomkBoz7HGidFMvEQvNiswfZqx37VKOyXh6ORs2mogRURzhmgC1MFD/RyNXq0FyocwJ09gX3OfScd30dSFHEhUBgP24y/3m4fAYtuCkxLO/kJo03hmHwLv5X6DHK1cHJBHR2ay3OOtf5WS/vdjtVTTHmJ21Ld8sF/F4KJtuWwWiLL5po=","salt":"gfc1WGwRGVo=","iv":"5FkhYogNQfoBPtseXx7P9g=="}}}'))
+    assert.equal(account.account_name, 'ufoo')
+    assert.equal(account.password, 'pfoo')
+    assert.equal(account.network_type, 'standard')
+    assert.equal(account.chain_type, 'tfchain')
+    assert.true(account.default_explorer_addresses_used)
+    assert.equal(account.explorer.explorer_addresses, _defs.network.standard.addresses)
+    assert.equal(account.mnemonic, exampleMnemonic)
+    assert.equal(account.wallets.length, 1)
+    assert.equal(account.wallet.wallet_name, 'default')
+    assert.equal(account.wallet.start_index, 1)
+    assert.equal(account.wallet.address_count, 3)
+    let mswallets = account.multisig_wallets
+    assert.equal(mswallets.length, 1)
+    let mswallet = mswallets[0]
     assert.equal(mswallet.wallet_name, 'our_wallet')
     assert.equal(mswallet.address, '038c830e947d48e7ccb4b6e5e718c564cb08459706bb505456fc166537edcd8da57cec5947ca1b')
     assert.equal(mswallet.owners, [account.address, '01b73c4e869b6167abe6180ebe7a907f56e0357b4a2f65eb53d22baad84650eb62fce66ba036d0'])

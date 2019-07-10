@@ -11,7 +11,7 @@ import * as transactions from './tfchain.types.transactions.js';
 import * as FulfillmentTypes from './tfchain.types.FulfillmentTypes.js';
 import {SiaBinaryEncoder} from './tfchain.encoding.siabin.js';
 import {MultiSigWalletBalance, SingleSigWalletBalance, WalletBalance} from './tfchain.balance.js';
-import {Type as NetworkType} from './tfchain.network.js';
+import {NetworkType} from './tfchain.chain.js';
 import * as tferrors from './tfchain.errors.js';
 import * as tfclient from './tfchain.client.js';
 import * as jscrypto from './tfchain.polyfill.crypto.js';
@@ -108,7 +108,7 @@ export var TFChainWallet =  __class__ ('TFChainWallet', [object], {
 		else {
 		}
 		if (!(isinstance (network_type, NetworkType))) {
-			var __except0__ = py_TypeError ('network_type is expected to be a tfchain.network.Type, invalid: {} ({})'.format (network_type, py_typeof (network_type)));
+			var __except0__ = py_TypeError ('network_type is expected to be a tfchain.chain.NetworkType, invalid: {} ({})'.format (network_type, py_typeof (network_type)));
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
