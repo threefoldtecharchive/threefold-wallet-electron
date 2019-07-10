@@ -96,9 +96,9 @@ const PdfTransactionList = ({ transactions, startDate, endDate, account }) => {
         </View>
         <Text style={styles.dateTitle}>From: {moment.unix(startDate).format('DD-MM-YYYY')}, Until: {moment.unix(endDate).format('DD-MM-YYYY')}</Text>
         <View style={styles.body}>
-          {transactions.map((tx) => {
+          {transactions.map((tx, index) => {
             return (tx.length > 0 &&
-              <View>
+              <View key={index}>
                 <View style={styles.balance}>
                   <Text>{tx[0].beginBalance.str() && (`Begin balance: ${tx[0].beginBalance.str({ unit: true })}`)}</Text>
                 </View>
@@ -144,7 +144,7 @@ function renderTransactionBody (tx, account) {
   if (tx.inputs.length > 0) {
     return tx.inputs.map(input => {
       return (
-        <View style={styles.txBodyStyle} key={input.identifier}>
+        <View style={styles.txBodyStyle} key={input.recipient}>
           <Text style={styles.receivedAmount}>Amount: + {input.amount.str({ unit: true })}</Text>
           {input.senders.map(sender => {
             return (

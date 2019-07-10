@@ -194,12 +194,12 @@ class ExportToPDF extends Component {
 
   savePdf = () => {
     dialog.showSaveDialog({ title: 'Save transactionlist', defaultPath: this.state.filePath }, (path) => {
+      if (path) {
+        move(this.state.tempFilePath, path, { overwrite: true })
+        toast(`Transactionlist exported to ${path}`)
+        this.props.closeExportModal()
+      }
       if (this._isMounted) {
-        if (path) {
-          move(this.state.tempFilePath, path, { overwrite: true })
-          toast(`Transactionlist exported to ${path}`)
-          this.props.closeExportModal()
-        }
         return this.setState({ generatingPdf: false })
       }
     })
