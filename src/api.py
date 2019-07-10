@@ -229,7 +229,7 @@ class Account:
         self._seed = seed
         self._wallets = [] # start with no wallets, can be created using the `wallet_new` instance method
         self._multisig_wallets = []
-        self._chain_info = ChainInfo()
+        self._chain_info = ChainInfo(self._chain)
         self._selected_wallet = None
         self._address_book = AddressBook()
 
@@ -359,6 +359,7 @@ class Account:
             msbalances = [wallet.balance for wallet in self._multisig_wallets]
         return AccountBalance(
             self.account_name,
+            self._chain,
             balances=balances,
             msbalances=msbalances,
         )
@@ -490,6 +491,13 @@ class Account:
         :returns: the (block)chain type in str format
         """
         return self._chain.__str__()
+
+    @property
+    def chain_currency_unit(self):
+        """
+        :returns: the chain currency unit in str format
+        """
+        return self._chain.currency_unit()
 
     @property
     def network_type(self):
@@ -939,7 +947,7 @@ class Account:
 
     def _update_chain_info(self):
         def cb(info):
-            self._chain_info = ChainInfo(info)
+            self._chain_info = ChainInfo(self._chain, info)
             return None
         return jsasync.chain(self._explorer_client.blockchain_info_get(), cb)
 
@@ -1217,6 +1225,7 @@ class SingleSignatureWallet(BaseWallet):
         if value == None:
             value = wbalance.SingleSigWalletBalance()
         self._balance = SingleSignatureBalance(
+            self._account._chain,
             self._tfwallet.network_type,
             tfbalance=value, 
             addresses_all=self.addresses,
@@ -1329,6 +1338,7 @@ class MultiSignatureWallet(BaseWallet):
         self._balance = MultiSignatureBalance(
             self.owners,
             self.signatures_required,
+            self._account._chain,
             self._account._network_type,
             tfbalance=value, 
             addresses_all=self.addresses,
@@ -1539,41 +1549,60 @@ def _create_signer_cb_for_wallet(wallet, balance=None):
 
 
 class AccountBalance:
-    def __init__(self, account_name, balances=None, msbalances=None):
+    def __init__(self, account_name, chain_type, balances=None, msbalances=None):
         if not isinstance(account_name, str):
             raise TypeError("account_name has to be of type str, not be of type {}".format(type(account_name)))
         self._account_name = account_name
+        if not isinstance(chain_type, tfchaintype.Type):
+            jslog.error('received unexptected chain_type for account balance:', chain_type)
+            raise TypeError("chain_type has to be of type tfchain.chan.Type, not be of type {}".format(type(chain_type)))
+        self._chain_type = chain_type
         balances = [] if balances == None else balances
         msbalances = [] if msbalances == None else msbalances
         self._balances = jsarr.concat(balances, msbalances)
 
     @property
     def coins_unlocked(self):
-        return Currency.sum(*[balance.coins_unlocked for balance in self._balances])
+        c = Currency.sum(*[balance.coins_unlocked for balance in self._balances])
+        c.unit = self._chain_type.currency_unit()
+        return c
 
     @property
     def coins_locked(self):
-        return Currency.sum(*[balance.coins_locked for balance in self._balances])
+        c = Currency.sum(*[balance.coins_locked for balance in self._balances])
+        c.unit = self._chain_type.currency_unit()
+        return c
 
     @property
     def coins_total(self):
-        return self.coins_unlocked.plus(self.coins_locked)
+        c = self.coins_unlocked.plus(self.coins_locked)
+        c.unit = self._chain_type.currency_unit()
+        return c
 
     @property
     def unconfirmed_coins_unlocked(self):
-        return Currency.sum(*[balance.unconfirmed_coins_unlocked for balance in self._balances])
+        c = Currency.sum(*[balance.unconfirmed_coins_unlocked for balance in self._balances])
+        c.unit = self._chain_type.currency_unit()
+        return c
 
     @property
     def unconfirmed_coins_locked(self):
-        return Currency.sum(*[balance.unconfirmed_coins_locked for balance in self._balances])
+        c = Currency.sum(*[balance.unconfirmed_coins_locked for balance in self._balances])
+        c.unit = self._chain_type.currency_unit()
+        return c
 
     @property
     def unconfirmed_coins_total(self):
-        return self.unconfirmed_coins_unlocked.plus(self.unconfirmed_coins_locked)
+        c = self.unconfirmed_coins_unlocked.plus(self.unconfirmed_coins_locked)
+        c.unit = self._chain_type.currency_unit()
+        return c
 
 
 class Balance:
-    def __init__(self, network_type, tfbalance=None, addresses_all=None):
+    def __init__(self, chain_type, network_type, tfbalance=None, addresses_all=None):
+        if not isinstance(chain_type, tfchaintype.Type):
+            raise TypeError("chain_type has to be of type tfchain.chain.Type, not be of type {}".format(type(chain_type)))
+        self._chain_type = chain_type
         if not isinstance(network_type, tfchaintype.NetworkType):
             raise TypeError("network_type has to be of type tfchain.chain.NetworkType, not be of type {}".format(type(network_type)))
         self._network_type = network_type
@@ -1616,33 +1645,45 @@ class Balance:
 
     @property
     def coins_unlocked(self):
-        return Currency(self._tfbalance.available)
+        c = Currency(self._tfbalance.available)
+        c.unit = self._chain_type.currency_unit()
+        return c
 
     @property
     def coins_locked(self):
-        return Currency(self._tfbalance.locked)
+        c = Currency(self._tfbalance.locked)
+        c.unit = self._chain_type.currency_unit()
+        return c
 
     @property
     def coins_total(self):
-        return self.coins_unlocked.plus(self.coins_locked)
+        c = self.coins_unlocked.plus(self.coins_locked)
+        c.unit = self._chain_type.currency_unit()
+        return c
 
     @property
     def unconfirmed_coins_unlocked(self):
-        return Currency(self._tfbalance.unconfirmed)
+        c = Currency(self._tfbalance.unconfirmed)
+        c.unit = self._chain_type.currency_unit()
+        return c
 
     @property
     def unconfirmed_coins_locked(self):
-        return Currency(self._tfbalance.unconfirmed_locked)
+        c = Currency(self._tfbalance.unconfirmed_locked)
+        c.unit = self._chain_type.currency_unit()
+        return c
 
     @property
     def unconfirmed_coins_total(self):
-        return self.unconfirmed_coins_unlocked.plus(self.unconfirmed_coins_locked)
+        c = self.unconfirmed_coins_unlocked.plus(self.unconfirmed_coins_locked)
+        c.unit = self._chain_type.currency_unit()
+        return c
 
     @property
     def transactions(self):
         transactions = []
         for transaction in self._tfbalance.transactions:
-            transactions.append(TransactionView.from_transaction(transaction, self._tfbalance.addresses))
+            transactions.append(TransactionView.from_transaction(transaction, self._chain_type, addresses=self._tfbalance.addresses))
         return transactions
 
 
@@ -1700,7 +1741,7 @@ class BlockView:
     """
 
     @classmethod
-    def from_block(cls, block, addresses=None):
+    def from_block(cls, block, chain_type, addresses=None):
         # gather const information
         height = block.height
         timestamp = block.timestamp
@@ -1708,7 +1749,7 @@ class BlockView:
         # gather transactions
         transactions = []
         for transaction in block.transactions:
-            transactions.append(TransactionView.from_transaction(transaction, addresses=addresses))
+            transactions.append(TransactionView.from_transaction(transaction, chain_type, addresses=addresses))
         # return BlockView
         return cls(identifier, height, timestamp, transactions)
 
@@ -1774,7 +1815,7 @@ class TransactionView:
         return 0
 
     @classmethod
-    def from_transaction(cls, transaction, addresses=None):
+    def from_transaction(cls, transaction, chain_type, addresses=None):
         # gather const information
         identifier = transaction.id
         if transaction.unconfirmed:
@@ -1793,7 +1834,7 @@ class TransactionView:
             return cls(identifier, height, transaction_order, timestamp, blockid, [], [])
 
         # go through all outputs and inputs and keep track of the addresses, locks and amounts
-        aggregator = WalletOutputAggregator(addresses)
+        aggregator = WalletOutputAggregator(chain_type, addresses)
         for co in transaction.coin_outputs:
             if not co.is_fee:
                 aggregator.add_coin_output(
@@ -1931,11 +1972,17 @@ class TransactionView:
 
 
 class WalletOutputAggregator:
-    def __init__(self, addresses):
+    def __init__(self, chain_type, addresses):
+        if not isinstance(chain_type, tfchaintype.Type):
+            jslog.error('received unexptected chain_type for account balance:', chain_type)
+            raise TypeError("chain_type has to be of type tfchain.chan.Type, not be of type {}".format(type(chain_type)))
+        self._chain_type = chain_type
         self._our_addresses = addresses
         self._our_input = Currency()
+        self._our_input.unit = self._chain_type.currency_unit()
         self._our_send_addresses = set()
         self._other_input = Currency()
+        self._other_input.unit = self._chain_type.currency_unit()
         self._other_send_addresses = set()
         self._all_balances = {}
         self._fee_balances = {}
@@ -2009,6 +2056,7 @@ class WalletOutputAggregator:
                     # - if it is negative and from someone else, it's a spenditure of someone else
                     #   and thus not relevant to us
                     continue
+                amount.unit = self._chain_type.currency_unit()
                 if address in self._our_addresses:
                     # incoming money
                     inputs.append(CoinOutputView(
@@ -2032,6 +2080,7 @@ class WalletOutputAggregator:
         # add all fees if required
         if we_sent_coin_outputs:
             for address, amount in jsobj.get_items(self._fee_balances):
+                amount.unit = self._chain_type.currency_unit()
                 outputs.append(CoinOutputView(
                     senders=our_send_addresses,
                     recipient=address,
@@ -2110,10 +2159,13 @@ class ChainInfo:
     at this exact moment, as useful for the TF Desktop Wallet App.
     """
 
-    def __init__(self, tf_chain_info=None):
+    def __init__(self, chain_type, tf_chain_info=None):
         """
         Create a new ChainInfo object.
         """
+        if not isinstance(chain_type, tfchaintype.Type):
+            raise TypeError("chain_type has to be of type tfchain.chan.Type, not be of type {}".format(type(chain_type)))
+        self._chain_type = chain_type
         if tf_chain_info == None:
             tf_chain_info = tfclient.ExplorerBlockchainInfo()
         elif not isinstance(tf_chain_info, tfclient.ExplorerBlockchainInfo):
@@ -2174,12 +2226,11 @@ class ChainInfo:
         :rtype: BlockView
         """
         addresses = jsfunc.opts_get(opts, 'addresses')
-        return BlockView.from_block(self._tf_chain_info.last_block, addresses=addresses)
-
+        return BlockView.from_block(self._tf_chain_info.last_block, self._chain_type, addresses=addresses)
 
 class Currency:
     @staticmethod
-    def _parse_opts(opts):
+    def _parse_opts(opts, default_unit=None):
         # get options
         unit, group, decimal, precision = jsfunc.opts_get_with_defaults(opts, [
             ('unit', None),
@@ -2191,7 +2242,10 @@ class Currency:
         if unit != None and not isinstance(unit, (bool, str)):
             raise TypeError("unit has to be None, a bool or a non-empty str, invalid type: {}".format(type(unit)))
         elif isinstance(unit, bool):
-            unit = 'TFT' if unit else None
+            if unit:
+                unit = default_unit if default_unit != None else ""
+            else:
+                unit = None
         elif jsstr.equal(unit, ''):
             unit = None
         # validate group option
@@ -2273,9 +2327,23 @@ class Currency:
         else:
             self._value = TFCurrency(value=jsdec.Decimal(value))
 
+    @property
+    def unit(self):
+        if self._unit == None:
+            return ""
+        return self._unit
+    @unit.setter
+    def unit(self, value):
+        if value == None:
+            self._unit = None
+        elif isinstance(value, str):
+            self._unit = value if value != "" else None
+        else:
+            raise ValueError("invalid unit cannot be set: {} ({})".format(value, type(value)))
+
     def str(self, opts=None):
         # parse options
-        unit, group, decimal, precision = Currency._parse_opts(opts)
+        unit, group, decimal, precision = Currency._parse_opts(opts, default_unit=self.unit)
         # get integer and whole part
         s = self._value.str(precision=precision)
         if '.' in s:
@@ -2303,7 +2371,7 @@ class Currency:
         else:
             s = jsstr.sprintf("%s%s%s", integer, decimal, fraction)
         # add unit if required
-        if unit != None:
+        if unit != None and unit != "":
             s = jsstr.sprintf("%s %s", s, unit)
         # return it all
         return s
@@ -2311,19 +2379,35 @@ class Currency:
     def plus(self, other):
         if not isinstance(other, Currency):
             return self.plus(Currency(other))
-        return Currency(self._value.plus(other._value))
+        if self.unit != "" and other.unit != "" and self.unit != other.unit:
+            raise ValueError("cannot add currency values of different units ({} != {})".format(self.unit, other.unit))
+        c = Currency(self._value.plus(other._value))
+        c.unit = self.unit if self.unit != "" else other.unit
+        return c
     def minus(self, other):
         if not isinstance(other, Currency):
             return self.minus(Currency(other))
-        return Currency(self._value.minus(other._value))
+        if self.unit != "" and other.unit != "" and self.unit != other.unit:
+            raise ValueError("cannot add currency values of different units ({} != {})".format(self.unit, other.unit))
+        c = Currency(self._value.minus(other._value))
+        c.unit = self.unit if self.unit != "" else other.unit
+        return c
     def times(self, other):
         if not isinstance(other, Currency):
             return self.times(Currency(other))
-        return Currency(self._value.times(other._value))
+        if self.unit != "" and other.unit != "" and self.unit != other.unit:
+            raise ValueError("cannot add currency values of different units ({} != {})".format(self.unit, other.unit))
+        c = Currency(self._value.times(other._value))
+        c.unit = self.unit if self.unit != "" else other.unit
+        return c
     def divided_by(self, other):
         if not isinstance(other, Currency):
             return self.divided_by(Currency(other))
-        return Currency(self._value.divided_by(other._value))
+        if self.unit != "" and other.unit != "" and self.unit != other.unit:
+            raise ValueError("cannot add currency values of different units ({} != {})".format(self.unit, other.unit))
+        c = Currency(self._value.divided_by(other._value))
+        c.unit = self.unit if self.unit != "" else other.unit
+        return c
 
     def equal_to(self, other):
         if not isinstance(other, Currency):
@@ -2351,7 +2435,9 @@ class Currency:
         return self._value.greater_than_or_equal_to(other._value)
 
     def negate(self):
-        return Currency(self._value.negate())
+        c = Currency(self._value.negate())
+        c.unit = self.unit
+        return c
 
 
 class FormattedData(SiaBinaryObjectEncoderBase, RivineBinaryObjectEncoderBase):

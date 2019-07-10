@@ -142,4 +142,9 @@ class Type:
             return TFChainNetworkType
         raise ValueError("invalid network type {}".format(self.value))
 
+    def currency_unit(self):
+        if self.__eq__(Type.TFCHAIN):
+            return "TFT"
+        raise ValueError("invalid network type {}".format(self.value))
+
 Type.TFCHAIN = Type(1)

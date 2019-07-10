@@ -570,6 +570,13 @@ const _all = {
       decimal: ',',
       group: '.',
       unit: true
+    }), '3.949.403,123456789')
+    const cwu = new tfchain.Currency('3949403.123456789')
+    cwu.unit = 'TFT'
+    assert.equal(cwu.str({
+      decimal: ',',
+      group: '.',
+      unit: true
     }), '3.949.403,123456789 TFT')
     assert.equal((new tfchain.Currency(100)).str({
       unit: 'BFR'
