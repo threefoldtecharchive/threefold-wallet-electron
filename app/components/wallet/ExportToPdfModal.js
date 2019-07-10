@@ -81,8 +81,8 @@ class ExportToPDF extends Component {
           if (txIndex >= 1) {
             endBalance = beginBalance.plus(input.amount)
           } else {
-            beginBalance = input.amount
-            endBalance = beginBalance
+            beginBalance = input.amount.from_str('0')
+            endBalance = input.amount
           }
         })
       }
