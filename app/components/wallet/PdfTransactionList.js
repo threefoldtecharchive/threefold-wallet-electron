@@ -144,7 +144,7 @@ function renderTransactionBody (tx, account) {
   if (tx.inputs.length > 0) {
     return tx.inputs.map(input => {
       return (
-        <View style={styles.txBodyStyle}>
+        <View style={styles.txBodyStyle} key={input.identifier}>
           <Text style={styles.receivedAmount}>Amount: + {input.amount.str({ unit: true })}</Text>
           {input.senders.map(sender => {
             return (

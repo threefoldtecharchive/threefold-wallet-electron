@@ -6,7 +6,7 @@ import ReactPDF from '@react-pdf/renderer'
 import PdfTransactionList from './PdfTransactionList'
 import { DateTimePicker } from 'react-widgets'
 import moment from 'moment-timezone'
-import { find, first, last, groupBy, toArray } from 'lodash'
+import { first, last, groupBy, toArray, isEmpty } from 'lodash'
 import { toast } from 'react-toastify'
 import { move } from 'fs-extra-p'
 
@@ -153,7 +153,6 @@ class ExportToPDF extends Component {
 
   checkDateInput = (startDate, endDate) => {
     let { transactions } = this.state
-    let amountOfDays = 0
     if (!startDate) {
       startDate = this.findOldestDate()
     }
@@ -169,11 +168,9 @@ class ExportToPDF extends Component {
       }).filter(Boolean)
     })
 
-    transactions.map(tx => {
-      if (tx.length > 0) {
-        amountOfDays++
-      }
-    })
+    transactions = transactions.filter(t => (!isEmpty(t)))
+
+    const amountOfDays = transactions.length
 
     if (amountOfDays === 0) {
       return this.setState({ noTransactions: true, disableExportButton: true, generatingPdf: false })
@@ -190,7 +187,7 @@ class ExportToPDF extends Component {
       return this.setState({ generatingPdf: false })
     }
 
-    ReactPDF.render(<PdfTransactionList transactions={mappedTransactions} startDate={find(mappedTransactions, (tx) => { return tx.length > 0 })[0].timestamp} endDate={last(last(mappedTransactions)).timestamp} account={this.props.account} />, this.state.tempFilePath)
+    ReactPDF.render(<PdfTransactionList transactions={mappedTransactions} startDate={first(mappedTransactions)[0].timestamp} endDate={last(last(mappedTransactions)).timestamp} account={this.props.account} />, this.state.tempFilePath)
     this.savePdf()
     return this.setState({ noTransactions: false, disableExportButton: false })
   }
