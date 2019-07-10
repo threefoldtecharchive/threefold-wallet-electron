@@ -111,9 +111,22 @@ class Home extends Component {
           return (
             <div key={account.name} className={styles.account} style={{ cursor: 'pointer', width: 300, margin: 'auto', marginTop: 15, marginBottom: 15 }} onClick={() => this.selectAccount(account)}>
               <div className={styles.accountBlockPart}>
-                {account.name}
+                {account.data.version >= 2 ? (
+                  <p>{account.data.data.public.account_name}</p>
+                ) : (
+                  <p>{account.name}</p>
+                )}
               </div>
-              <div className={styles.accountBlockPartLower} />
+              <div className={styles.accountBlockPartLower} >
+                {account.data.version >= 2 ? (
+                  <div>
+                    <p style={{ float: 'left' }}>{account.data.data.public.chain_type}</p>
+                    <p style={{ float: 'right' }}>{account.data.data.public.network_type}</p>
+                  </div>
+                ) : (
+                  <p style={{ float: 'left' }}>tfchain</p>
+                )}
+              </div>
             </div>
           )
         })}

@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 import React, { Component } from 'react'
 import { Form, Button, Input, Icon } from 'semantic-ui-react'
 import routes from '../../constants/routes'
-import { selectAccount, updateAccount, getTransactionsNotifications } from '../../actions'
+import { selectAccount, updateAccount, getTransactionsNotifications, saveAccount } from '../../actions'
 import * as tfchain from '../../tfchain/api'
 import styles from './Home.css'
 
@@ -20,6 +20,9 @@ const mapDispatchToProps = (dispatch) => ({
   },
   GetTransactionsNotifications: (account) => {
     dispatch(getTransactionsNotifications(account))
+  },
+  saveAccount: (account) => {
+    dispatch(saveAccount(account))
   }
 })
 
@@ -43,7 +46,13 @@ class Login extends Component {
       return this.setState({ passwordError: true })
     }
     try {
-      const account = tfchain.Account.deserialize(this.props.account.name, password, this.props.account.data)
+      let account = tfchain.Account.deserialize(this.props.account.name, password, this.props.account.data)
+
+      if (this.props.account.data.version < 2) {
+        account = Object.assign(account, { previous_account_name: account.account_name })
+        this.props.saveAccount(account)
+      }
+
       this.props.SelectAccount(account)
       this.props.updateAccount(account)
       this.props.GetTransactionsNotifications(account)

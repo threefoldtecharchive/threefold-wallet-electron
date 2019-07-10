@@ -126,6 +126,11 @@
   font-family: SF UI Text Bold !important;
 }
 
+.accountBlockPart p {
+  font-family: SF UI Text Bold !important;
+  font-size: 18px;
+}
+
 .accountBlockPartLower {
   width: 300px!important;
   height: 45px!important;
@@ -135,7 +140,12 @@
   text-align: left !important;
   border-bottom-left-radius: 5px!important;
   border-bottom-right-radius: 5px!important;
+}
+
+.accountBlockPartLower p {
   font-family: SF UI Text Light !important;
+  font-size: 16px !important;
+  color: darkgray;
 }
 
 .popup {
