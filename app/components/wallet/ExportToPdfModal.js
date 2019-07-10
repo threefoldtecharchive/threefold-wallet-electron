@@ -163,7 +163,6 @@ class ExportToPDF extends Component {
 
     transactions = transactions.map(tx => {
       return tx.map(t => {
-        console.log(moment.unix(t.timestamp).format('DD/MM/YYYY'))
         if (t.confirmed && t.timestamp >= startDate && t.timestamp <= endDate) {
           return t
         }
@@ -176,13 +175,9 @@ class ExportToPDF extends Component {
       }
     })
 
-    console.log(amountOfDays)
-
     if (amountOfDays === 0) {
       return this.setState({ noTransactions: true, disableExportButton: true, generatingPdf: false })
     }
-
-    console.log(transactions)
 
     return this.setState({ mappedTransactions: transactions, noTransactions: false, disableExportButton: false })
   }
