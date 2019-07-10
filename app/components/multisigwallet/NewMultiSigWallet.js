@@ -211,7 +211,7 @@ class NewMultiSigWallet extends Component {
           <Icon onClick={() => this.props.history.goBack()} style={{ fontSize: 25, marginLeft: 15, marginTop: 5, cursor: 'pointer', zIndex: 5 }} name='chevron circle left' />
           <span onClick={() => this.props.history.goBack()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
         </div>
-        <div style={{ height: '60vh', overflow: 'auto', paddingBottom: 30 }}>
+        <div style={{ paddingBottom: 30 }}>
           <Form error style={{ width: '90%', margin: 'auto', marginTop: 10 }} onKeyDown={this.onKeyDown}>
             <Form.Field error={nameError}>
               <label style={{ float: 'left', color: 'white' }}>Name</label>

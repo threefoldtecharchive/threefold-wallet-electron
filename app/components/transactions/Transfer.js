@@ -28,13 +28,13 @@ class Transfer extends Component {
     ]
 
     return (
-      <div>
+      <div style={{ paddingBottom: 30 }}>
         <div className={styles.pageHeader}>
           <p className={styles.pageHeaderTitle}>Transfer </p>
           <p className={styles.pageHeaderSubtitle}>Transfer tokens to other wallets</p>
         </div>
         <Divider className={styles.pageDivider} />
-        <div style={{ height: '80vh', paddingBottom: 100 }}>
+        <div style={{ paddingBottom: 30 }}>
           <Tab menu={{ inverted: true, attached: true }} panes={panes} style={{ width: '90%', margin: 'auto', height: '100%' }} />
         </div>
       </div>

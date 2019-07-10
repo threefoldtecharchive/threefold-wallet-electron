@@ -7,6 +7,7 @@ import styles from './Home.css'
 import { loadAccounts, selectAccount, resetApp, resetError } from '../../actions'
 import { CopyToClipboard } from 'react-copy-to-clipboard'
 import { toast } from 'react-toastify'
+import { Scrollbars } from 'react-custom-scrollbars'
 const storage = require('electron-json-storage')
 const { shell } = require('electron')
 
@@ -140,13 +141,15 @@ class Home extends Component {
 
   render () {
     return (
-      <div className={styles.container} style={{ overflow: 'scroll', height: '100vh', padding: 40, marginBottom: 30 }} data-tid='container'>
-        <h2 >TF Wallet</h2>
-        {this.renderStackTrace()}
-        <div style={{ marginTop: 60 }}>
-          {this.renderAccounts()}
+      <Scrollbars style={{ height: '100vh' }} renderThumbVertical={props => <div {...props} style={{ backgroundColor: 'grey' }} />}>
+        <div className={styles.container} style={{ paddingBottom: 20 }} data-tid='container'>
+          <h2 >TF Wallet</h2>
+          {this.renderStackTrace()}
+          <div style={{ marginTop: 60 }}>
+            {this.renderAccounts()}
+          </div>
         </div>
-      </div>
+      </Scrollbars>
     )
   }
 }

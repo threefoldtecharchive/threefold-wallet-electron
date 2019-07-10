@@ -8,7 +8,6 @@ import { saveAccount, deleteAccount, updateAccount } from '../../actions'
 import DeleteModal from './DeleteAccountModal'
 import DeleteWalletModal from '../wallet/DeleteWalletModal'
 import ShowSeedModal from './ShowSeedModal'
-import Footer from '../footer'
 import { toast } from 'react-toastify'
 import uuid from 'uuid'
 import { truncate } from 'lodash'
@@ -265,7 +264,7 @@ class AccountSettings extends Component {
   render () {
     const { name, openDeleteModal, deleteName, deleteNameError, openDeleteWalletModal, deleteWalletName, deleteWalletNameError, deleteWalletNameErrorMessage, showSeedModal, nameError } = this.state
     return (
-      <div>
+      <div style={{ paddingBottom: 30 }}>
         <DeleteModal
           open={openDeleteModal}
           closeModal={this.closeDeleteModal}
@@ -293,7 +292,7 @@ class AccountSettings extends Component {
           <p className={styles.pageHeaderSubtitle}>Manage your account and wallet settings</p>
         </div>
         <Divider className={styles.pageDivider} />
-        <div style={{ height: '74vh', overflow: 'auto', paddingBottom: 30, textAlign: 'center' }}>
+        <div style={{ textAlign: 'center' }}>
           <Form error style={{ width: '90%', margin: 'auto', marginTop: 10, marginBottom: 50, height: '17vh' }} onKeyDown={this.onKeyDown}>
             <Form.Field error={nameError}>
               <label style={{ float: 'left', color: 'white' }}>Name</label>
@@ -312,7 +311,6 @@ class AccountSettings extends Component {
             <Button className={styles.acceptButton} size='big' type='submit' onClick={this.saveAccount} style={{ marginTop: 10, margin: 'auto', background: '#015DE1', color: 'white', width: 180 }}>Save</Button>
           </div>
         </div>
-        <Footer />
       </div>
     )
   }
