@@ -193,7 +193,7 @@ function renderTransactionBody (tx, account) {
               </View>
             )
           })}
-          <View style={styles.addresses}>
+          <View style={styles.addresses} key={input.recipient}>
             <Text>
               From: {input.recipient}
             </Text>
@@ -207,7 +207,7 @@ function renderTransactionBody (tx, account) {
   } else if (tx.outputs.length > 0) {
     return tx.outputs.map(out => {
       return (
-        <View style={styles.txBodyStyle}>
+        <View style={styles.txBodyStyle} key={out.recipient}>
           <Text style={styles.sentAmount}>
             Amount:  - {out.amount.str({ unit: true })}
             {out.is_fee ? (<Text>  Fee</Text>) : null}
