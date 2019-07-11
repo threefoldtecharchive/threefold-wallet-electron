@@ -1,7 +1,31 @@
 import React from 'react'
-import { Document, Page, Text, View } from '@react-pdf/renderer'
+import { Document, Page, Text, View, Font } from '@react-pdf/renderer'
 import { find } from 'lodash'
 import moment from 'moment-timezone'
+
+import lightFont from '../../../resources/fonts/SFUIText-Light.woff'
+import boldFont from '../../../resources/fonts/SFUIText-Bold.woff'
+import unifont from '../../../resources/fonts/unifont-12.1.02.ttf'
+
+Font.register({
+  family: 'SF UI Text Light',
+  src: lightFont
+})
+
+Font.register({
+  family: 'SF UI Text Bold',
+  src: boldFont
+})
+
+Font.register({
+  family: 'unifont',
+  src: unifont
+})
+
+Font.registerEmojiSource({
+  format: 'png',
+  url: 'https://twemoji.maxcdn.com/2/72x72/'
+})
 
 const styles = {
   title: {
@@ -15,10 +39,12 @@ const styles = {
   },
   dateTitle: {
     marginTop: 10,
-    fontSize: 14
+    fontSize: 14,
+    fontFamily: 'SF UI Text Bold'
   },
   pageStyle: {
-    padding: 50
+    padding: 50,
+    fontFamily: 'SF UI Text Light'
   },
   body: {
     flexGrow: 1,
@@ -33,6 +59,10 @@ const styles = {
     fontSize: 12
   },
   addresses: {
+    fontSize: 10
+  },
+  eFont: {
+    fontFamily: 'unifont',
     fontSize: 10
   },
   column: {
@@ -52,14 +82,17 @@ const styles = {
   },
   receivedAmount: {
     color: 'green',
-    fontSize: 10
+    fontSize: 10,
+    fontFamily: 'SF UI Text Bold'
   },
   sentAmount: {
     color: 'red',
-    fontSize: 10
+    fontSize: 10,
+    fontFamily: 'SF UI Text Bold'
   },
   date: {
-    fontSize: 10
+    fontSize: 10,
+    fontFamily: 'SF UI Text Bold'
   },
   pageNumber: {
     float: 'right',
@@ -68,12 +101,14 @@ const styles = {
   balance: {
     fontSize: 13,
     flexDirection: 'row',
-    paddingTop: 10
+    paddingTop: 10,
+    fontFamily: 'SF UI Text Bold'
   },
   balanceRight: {
     fontSize: 13,
     flexDirection: 'row-reverse',
-    paddingTop: 10
+    paddingTop: 10,
+    fontFamily: 'SF UI Text Bold'
   },
   endLine: {
     marginTop: 10,
@@ -118,7 +153,7 @@ const PdfTransactionList = ({ transactions, startDate, endDate, account }) => {
                       </View>
                       <View>
                         {t.message ? (
-                          <Text style={styles.addresses}>Message: {t.message}</Text>
+                          <Text style={styles.eFont}>Message: {t.message}</Text>
                         ) : null }
                       </View>
                     </View>
