@@ -283,6 +283,228 @@ Object.defineProperty (TFChainNetworkType, 'value', property.call (TFChainNetwor
 TFChainNetworkType.STANDARD = TFChainNetworkType (0);
 TFChainNetworkType.TESTNET = TFChainNetworkType (1);
 TFChainNetworkType.DEVNET = TFChainNetworkType (2);
+export var GoldChainNetworkType =  __class__ ('GoldChainNetworkType', [NetworkType], {
+	__module__: __name__,
+	get __init__ () {return __get__ (this, function (self, value) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (isinstance (value, GoldChainNetworkType)) {
+			var value = value.value;
+		}
+		else if (isinstance (value, str)) {
+			var value = GoldChainNetworkType.from_str (value).value;
+		}
+		if (!(isinstance (value, int))) {
+			var __except0__ = py_TypeError ('GoldChain network type value was expected to be an int, not be of type {}'.format (py_typeof (value)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		if (value < 1 || value > 2) {
+			var __except0__ = ValueError ('GoldChain network type out of range: {}'.format (value));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		self._value = value;
+	});},
+	get _get_value () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._value;
+	});},
+	get __eq__ () {return __get__ (this, function (self, other) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (isinstance (other, GoldChainNetworkType)) {
+			return self.value == other.value;
+		}
+		return self.value == other;
+	});},
+	get __ne__ () {return __get__ (this, function (self, other) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'other': var other = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return !(self.__eq__ (other));
+	});},
+	get __int__ () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self.value;
+	});},
+	get __str__ () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (self.__eq__ (GoldChainNetworkType.TESTNET)) {
+			return 'testnet';
+		}
+		if (self.__eq__ (GoldChainNetworkType.DEVNET)) {
+			return 'devnet';
+		}
+		var __except0__ = ValueError ('invalid Goldchain network type {}'.format (self.value));
+		__except0__.__cause__ = null;
+		throw __except0__;
+	});},
+	get from_str () {return __getcm__ (this, function (cls, s) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+						case 's': var s = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (!(isinstance (s, str))) {
+			var __except0__ = py_TypeError ('can only convert from a string');
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		var s = jsstr.lower (s);
+		if (__in__ (s, tuple (['testnet', 'test']))) {
+			return GoldChainNetworkType.TESTNET;
+		}
+		if (__in__ (s, tuple (['devnet', 'dev']))) {
+			return GoldChainNetworkType.DEVNET;
+		}
+		var __except0__ = ValueError (s + ' is not a supported GoldChain network type str');
+		__except0__.__cause__ = null;
+		throw __except0__;
+	});},
+	get default_network_type () {return __getcm__ (this, function (cls) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return GoldChainNetworkType.TESTNET;
+	});},
+	get minimum_miner_fee () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (self.__eq__ (GoldChainNetworkType.DEVNET)) {
+			return Currency ('1.0');
+		}
+		return Currency ('0.1');
+	});},
+	get default_explorer_addresses () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (self.__eq__ (GoldChainNetworkType.TESTNET)) {
+			return ['https://explorer.testnet.nbh-digital.com', 'https://explorer2.testnet.nbh-digital.com'];
+		}
+		if (self.__eq__ (GoldChainNetworkType.DEVNET)) {
+			return ['http://localhost:22110'];
+		}
+		var __except0__ = ValueError ('invalid Goldchain network type {}'.format (self.value));
+		__except0__.__cause__ = null;
+		throw __except0__;
+	});}
+});
+Object.defineProperty (GoldChainNetworkType, 'value', property.call (GoldChainNetworkType, GoldChainNetworkType._get_value));;
+GoldChainNetworkType.TESTNET = GoldChainNetworkType (1);
+GoldChainNetworkType.DEVNET = GoldChainNetworkType (2);
 export var Type =  __class__ ('Type', [object], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, value) {
@@ -314,7 +536,7 @@ export var Type =  __class__ ('Type', [object], {
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		if (value < 1 || value > 1) {
+		if (value < 1 || value > 2) {
 			var __except0__ = ValueError ('chain type out of range: {}'.format (value));
 			__except0__.__cause__ = null;
 			throw __except0__;
@@ -407,6 +629,9 @@ export var Type =  __class__ ('Type', [object], {
 		if (self.__eq__ (Type.TFCHAIN)) {
 			return 'tfchain';
 		}
+		if (self.__eq__ (Type.GOLDCHAIN)) {
+			return 'goldchain';
+		}
 		var __except0__ = ValueError ('invalid network type {}'.format (self.value));
 		__except0__.__cause__ = null;
 		throw __except0__;
@@ -435,6 +660,9 @@ export var Type =  __class__ ('Type', [object], {
 		if (s == 'tfchain') {
 			return Type.TFCHAIN;
 		}
+		if (s == 'goldchain') {
+			return Type.GOLDCHAIN;
+		}
 		var __except0__ = ValueError (s + ' is not a supported chain type str');
 		__except0__.__cause__ = null;
 		throw __except0__;
@@ -455,6 +683,9 @@ export var Type =  __class__ ('Type', [object], {
 		}
 		if (self.__eq__ (Type.TFCHAIN)) {
 			return TFChainNetworkType;
+		}
+		if (self.__eq__ (Type.GOLDCHAIN)) {
+			return GoldChainNetworkType;
 		}
 		var __except0__ = ValueError ('invalid network type {}'.format (self.value));
 		__except0__.__cause__ = null;
@@ -477,6 +708,9 @@ export var Type =  __class__ ('Type', [object], {
 		if (self.__eq__ (Type.TFCHAIN)) {
 			return 'TFT';
 		}
+		if (self.__eq__ (Type.GOLDCHAIN)) {
+			return 'GFT';
+		}
 		var __except0__ = ValueError ('invalid network type {}'.format (self.value));
 		__except0__.__cause__ = null;
 		throw __except0__;
@@ -484,5 +718,6 @@ export var Type =  __class__ ('Type', [object], {
 });
 Object.defineProperty (Type, 'value', property.call (Type, Type._get_value));;
 Type.TFCHAIN = Type (1);
+Type.GOLDCHAIN = Type (2);
 
 //# sourceMappingURL=tfchain.chain.map

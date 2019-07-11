@@ -118,6 +118,20 @@ def test_standard_transactions():
     # assert BotTransactionBaseClass.compute_monthly_bot_fees(23) == '161 TFT'
     # assert BotTransactionBaseClass.compute_monthly_bot_fees(24) == '120 TFT'
 
+    # Auth Coin Transactions
+
+    v176_txn_json = jsjson.json_loads('{"version":176,"data":{"nonce":"FoAiO8vN2eU=","authaddresses":["0112210f9efa5441ab705226b0628679ed190eb4588b662991747ea3809d93932c7b41cbe4b732","01450aeb140c58012cb4afb48e068f976272fefa44ffe0991a8a4350a3687558d66c8fc753c37e"],"deauthaddresses":["019e9b6f2d43a44046b62836ce8d75c935ff66cbba1e624b3e9755b98ac176a08dac5267b2c8ee"],"arbitrarydata":"dGVzdC4uLiAxLCAyLi4uIDM=","authfulfillment":{"type":1,"data":{"publickey":"ed25519:d285f92d6d449d9abb27f4c6cf82713cec0696d62b8c123f1627e054dc6d7780","signature":"bdf023fbe7e0efec584d254b111655e1c2f81b9488943c3a712b91d9ad3a140cb0949a8868c5f72e08ccded337b79479114bdb4ed05f94dfddb359e1a6124602"}}}}')
+    v176_txn = tftransactions.from_json(v176_txn_json)
+    jsass.equals(v176_txn.json(), v176_txn_json)
+    jsass.equals(v176_txn.signature_hash_get(0), 'b99fb24c0d7f1976f3b4672142a289094e2d6e323af0d08a7bf5361055fb73c3')
+    jsass.equals(v176_txn.binary_encode(), 'b01680223bcbcdd9e5040112210f9efa5441ab705226b0628679ed190eb4588b662991747ea3809d93932c01450aeb140c58012cb4afb48e068f976272fefa44ffe0991a8a4350a3687558d602019e9b6f2d43a44046b62836ce8d75c935ff66cbba1e624b3e9755b98ac176a08d22746573742e2e2e20312c20322e2e2e203301c401d285f92d6d449d9abb27f4c6cf82713cec0696d62b8c123f1627e054dc6d778080bdf023fbe7e0efec584d254b111655e1c2f81b9488943c3a712b91d9ad3a140cb0949a8868c5f72e08ccded337b79479114bdb4ed05f94dfddb359e1a6124602')
+
+    v177_txn_json = jsjson.json_loads('{"version":177,"data":{"nonce":"1oQFzIwsLs8=","arbitrarydata":"dGVzdC4uLiAxLCAyLi4uIDM=","authcondition":{"type":1,"data":{"unlockhash":"01e78fd5af261e49643dba489b29566db53fa6e195fa0e6aad4430d4f06ce88b73e047fe6a0703"}},"authfulfillment":{"type":1,"data":{"publickey":"ed25519:d285f92d6d449d9abb27f4c6cf82713cec0696d62b8c123f1627e054dc6d7780","signature":"ad59389329ed01c5ee14ce25ae38634c2b3ef694a2bdfa714f73b175f979ba6613025f9123d68c0f11e8f0a7114833c0aab4c8596d4c31671ec8a73923f02305"}}}}')
+    v177_txn = tftransactions.from_json(v177_txn_json)
+    jsass.equals(v177_txn.json(), v177_txn_json)
+    jsass.equals(v177_txn.signature_hash_get(0), '09df686a90c5edd07d4325cf6b2fe7c1f311a29340d45c6a5f898a7fb8c06d96')
+    jsass.equals(v177_txn.binary_encode(), 'b1d68405cc8c2c2ecf22746573742e2e2e20312c20322e2e2e2033014201e78fd5af261e49643dba489b29566db53fa6e195fa0e6aad4430d4f06ce88b7301c401d285f92d6d449d9abb27f4c6cf82713cec0696d62b8c123f1627e054dc6d778080ad59389329ed01c5ee14ce25ae38634c2b3ef694a2bdfa714f73b175f979ba6613025f9123d68c0f11e8f0a7114833c0aab4c8596d4c31671ec8a73923f02305')
+
     # # ERC20 Transactions
 
     # # v208 Transactions are supported

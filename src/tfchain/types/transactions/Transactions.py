@@ -1,6 +1,7 @@
 from tfchain.types.transactions.Base import TransactionBaseClass, TransactionVersion, OpaqueTransaction
 from tfchain.types.transactions.Standard import TransactionV1
 from tfchain.types.transactions.Minting import TransactionV128, TransactionV129
+from tfchain.types.transactions.AuthCoin import TransactionV176, TransactionV177
 # from tfchain.types.transactions.ThreeBot import TransactionV144, TransactionV145, TransactionV146
 # from tfchain.types.transactions.ERC20 import TransactionV208, TransactionV209, TransactionV210
 
@@ -64,6 +65,10 @@ def mint_coin_creation_new():
 #     """
 #     return TransactionV210()
 
+# TODO
+# support creation of auth coin transactions,
+# for now we only support decoding them
+
 def from_json(obj, id=None):
     """
     Create a TFChain transaction from a JSON string or dictionary.
@@ -96,6 +101,10 @@ def from_json(obj, id=None):
         txn = TransactionV128.from_json(obj)
     elif tt == TransactionVersion.MINTER_COIN_CREATION.value:
         txn = TransactionV129.from_json(obj)
+    elif tt == TransactionVersion.COIN_AUTH_ADDRESS_UPDATE.value:
+        txn = TransactionV176.from_json(obj)
+    elif tt == TransactionVersion.COIN_AUTH_CONDITION_UPDATE.value:
+        txn = TransactionV177.from_json(obj)
     elif tt == TransactionVersion.LEGACY.value:
         txn = TransactionV1.legacy_from_json(obj)
 

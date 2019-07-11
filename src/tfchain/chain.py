@@ -174,7 +174,7 @@ class Type:
             value = Type.from_str(value).value
         if not isinstance(value, int):
             raise TypeError("chain type value was expected to be an int, not be of type {}".format(type(value)))
-        if value < 1 or value > 1:
+        if value < 1 or value > 2:
             raise ValueError("chain type out of range: {}".format(value))
         self._value = value
 
