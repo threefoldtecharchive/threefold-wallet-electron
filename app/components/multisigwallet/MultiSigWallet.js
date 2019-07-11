@@ -175,17 +175,41 @@ class Wallet extends Component {
   }
 
   render () {
-    // If refreshed in development and data in store is deleted, route to account.
-    if (!this.props.account.selected_wallet) {
-      this.props.history.push(routes.ACCOUNT)
-      return null
+    const { contactName, contactAddress, openAddModal, ownerAddresses, signatureCount, openAddMultisigModal, openExportModal } = this.state
+
+    if (this.state.openAddModal) {
+      return (
+        <UpdateContactModal
+          contactName={contactName}
+          handleContactNameChange={this.handleContactNameChange}
+          contactAddress={contactAddress}
+          handleAddressChange={this.handleAddressChange}
+          openUpdateModal={openAddModal}
+          closeUpdateModal={this.closeAddModal}
+          updateContact={this.addContact}
+        />
+      )
+    }
+
+    if (this.state.openAddMultisigModal) {
+      return (
+        <UpdateMultiSigContactModal
+          editAddressess={false}
+          contactName={contactName}
+          handleContactNameChange={this.handleContactNameChange}
+          ownerAddresses={ownerAddresses}
+          openUpdateMultisigModal={openAddMultisigModal}
+          closeUpdateMultisigModal={this.closeAddMultisigModal}
+          updateMultiSigContact={this.addMultiSigContact}
+          signatureCount={signatureCount}
+        />
+      )
     }
 
     const { account } = this.props
     const { chain_info: chainConstants } = account
 
     const wallet = this.props.account.selected_wallet
-    const { contactName, contactAddress, openAddModal, ownerAddresses, signatureCount, openAddMultisigModal, openExportModal } = this.state
     const active = true
     const transactions = wallet.balance.transactions
     const hasConfirmedTx = find(transactions, { confirmed: true })
