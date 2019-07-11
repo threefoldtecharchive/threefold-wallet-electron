@@ -6,6 +6,7 @@ import styles from '../home/Home.css'
 import SingleTransaction from './SingleTransaction'
 import MultisigTransaction from './MultisigTransaction'
 import InternalTransaction from './InternalTransaction'
+import uuid from 'uuid'
 
 const tabStyle = {
   background: '#131421',
@@ -22,9 +23,9 @@ class Transfer extends Component {
   render () {
     const hasInternal = this.props.account.wallet_count <= 1
     const panes = [
-      { menuItem: <Button className={'item'}>Single Transaction</Button>, render: () => <Tab.Pane style={tabStyle}><SingleTransaction /></Tab.Pane> },
-      { menuItem: <Button disabled={hasInternal} className={hasInternal ? styles.disableTab : 'item'}>Internal Transaction</Button>, render: () => <Tab.Pane style={tabStyle}><InternalTransaction /></Tab.Pane> },
-      { menuItem: <Button className={'item'}>Multisig Transaction</Button>, render: () => <Tab.Pane style={tabStyle}><MultisigTransaction /></Tab.Pane> }
+      { menuItem: <Button key={uuid.v4()} className={'item'}>Single Transaction</Button>, render: () => <Tab.Pane style={tabStyle}><SingleTransaction /></Tab.Pane> },
+      { menuItem: <Button key={uuid.v4()} disabled={hasInternal} className={hasInternal ? styles.disableTab : 'item'}>Internal Transaction</Button>, render: () => <Tab.Pane style={tabStyle}><InternalTransaction /></Tab.Pane> },
+      { menuItem: <Button key={uuid.v4()} className={'item'}>Multisig Transaction</Button>, render: () => <Tab.Pane style={tabStyle}><MultisigTransaction /></Tab.Pane> }
     ]
 
     return (

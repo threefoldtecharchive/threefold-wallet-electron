@@ -12,6 +12,7 @@ import AddMultiSigContactModal from './AddMultiSigContactModal'
 import UpdateMultiSigContactModal from './UpdateMultiSigContactModal'
 import * as tfchain from '../../tfchain/api'
 import { filter, cloneDeep } from 'lodash'
+import uuid from 'uuid'
 
 const mapStateToProps = state => ({
   account: state.account.state
@@ -72,7 +73,7 @@ class AddressBook extends Component {
                     <br />
                     {contact.recipient[1].map(recep => {
                       return (
-                        <div>
+                        <div key={uuid.v4()}>
                           {recep}
                         </div>
                       )
