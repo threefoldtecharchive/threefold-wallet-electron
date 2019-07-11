@@ -46,7 +46,8 @@ class NewAccount extends Component {
       passwordError: false,
       passwordConfirmationError: false,
       accountCreationErrorMessage: '',
-      accountCreationError: false
+      accountCreationError: false,
+      chainType: 'tfchain'
     }
   }
 
@@ -175,6 +176,13 @@ class NewAccount extends Component {
 
   handleNetworkChange = (e, { value }) => this.setState({ network: value })
 
+  handleChainTypeChange = (e, { value }) => {
+    if (value === 'goldchain') {
+      this.setState({ network: 'testnet' })
+    }
+    this.setState({ chainType: value })
+  }
+
   checkFormValues = () => {
     const { accounts, name, seed, password, passwordConfirmation } = this.state
     let seedError = false
@@ -204,7 +212,7 @@ class NewAccount extends Component {
   }
 
   createAccount = () => {
-    const { seed, name, seedConfirmation, password, network, generateSeed } = this.state
+    const { seed, name, seedConfirmation, password, network, generateSeed, chainType } = this.state
 
     if (generateSeed) {
       if (seedConfirmation === '') {
@@ -229,7 +237,8 @@ class NewAccount extends Component {
       // create account
       const account = new tfchain.Account(name, password, {
         seed: seed,
-        network: network
+        network: network,
+        chain: chainType
       })
       // create wallet
       account.wallet_new('default', 0, 1)
@@ -303,23 +312,49 @@ class NewAccount extends Component {
         <div style={{ paddingBottom: 30 }}>
           <Form error style={{ width: '50%', margin: 'auto', marginTop: 5, marginBottom: 50, fontSize: 18 }} onKeyDown={this.onKeyDown}>
             <Form.Field>
+              <label style={{ float: 'left', color: 'white', marginRight: 20 }}>What chain type do you want to choose? </label>
+              <Popup size='large' position='right center' content='Chain type is the blockchain type your account will connect to. Tfchain is the tfchain blockchain, goldchain is the goldchain blockchain' trigger={<Icon style={{ fontSize: 12 }} name='question circle' />} />
+            </Form.Field>
+            <Form.Field style={{ marginBottom: 20 }}>
+              <div>
+                <Radio style={{ marginRight: 30, color: 'white' }}
+                  label={<label style={{ color: 'white' }}>tfchain</label>}
+                  name='chainRadioGroup'
+                  value='tfchain'
+                  checked={this.state.chainType === 'tfchain'}
+                  onChange={this.handleChainTypeChange}
+                />
+                <Radio style={{ marginRight: 30, color: 'white' }}
+                  label={<label style={{ color: 'white' }}>goldchain</label>}
+                  name='chainRadioGroup'
+                  value='goldchain'
+                  checked={this.state.chainType === 'goldchain'}
+                  onChange={this.handleChainTypeChange}
+                />
+              </div>
+            </Form.Field>
+            <Form.Field>
               <label style={{ float: 'left', color: 'white', marginRight: 20 }}>What network do you want to choose? </label>
               <Popup size='large' position='right center' content='Network type is the network your account will connect to. standard is the production network, others are meant for testing' trigger={<Icon style={{ fontSize: 12 }} name='question circle' />} />
             </Form.Field>
             <Form.Field style={{ marginBottom: 20 }}>
               <div>
-                <Radio style={{ marginRight: 30, color: 'white' }}
-                  label={<label style={{ color: 'white' }}>standard</label>}
-                  name='radioGroup'
-                  value='standard'
-                  checked={this.state.network === 'standard'}
-                  onChange={this.handleNetworkChange}
-                />
+                {this.state.chainType === 'goldchain' ? (
+                  null
+                ) : (
+                  <Radio style={{ marginRight: 30, color: 'white' }}
+                    label={<label style={{ color: 'white' }}>standard</label>}
+                    name='radioGroup'
+                    value='standard'
+                    checked={this.state.network === 'standard'}
+                    onChange={this.handleNetworkChange}
+                  />
+                )}
                 <Radio style={{ marginRight: 30, color: 'white' }}
                   label={<label style={{ color: 'white' }}>testnet</label>}
                   name='radioGroup'
                   value='testnet'
-                  checked={this.state.network === 'testnet'}
+                  checked={this.state.network === 'testnet' || this.state.chainType === 'goldchain'}
                   onChange={this.handleNetworkChange}
                 />
               </div>
