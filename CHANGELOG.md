@@ -1,3 +1,22 @@
+# v0.2.2 (2018.07.11)
+
+Features:
+
+- now supporting chain type and v2 data accounts (first step for goldflow token support).
+- added emoji and unicode support in description of transactions in exported pdf.
+
+Improvements:
+
+- improved look and feel of scrollbars across the application.
+- improved look of exported pdf in transaction history.
+- removed export to pdf function button on multisig wallet page when no transactions are done yet.
+
+Fixes:
+
+- fixed slow name input field when adding contact in transaction history.
+- fixed error when deleting an account.
+- fixed wrong available balance display on transfer page.
+
 # v0.2.1 (2018.07.09)
 
 Features:
