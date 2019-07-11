@@ -102,7 +102,7 @@ class AccountSettings extends Component {
     this.props.deleteAccount(this.props.account)
     this.setState({ deleteNameError: false })
     toast('Account deleted')
-    return this.props.history.push('/home')
+    return this.props.history.push('/')
   }
 
   renderWallets = () => {
