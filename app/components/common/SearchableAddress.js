@@ -63,18 +63,17 @@ class SearchableAddress extends Component {
   filterSearchInput = (value) => {
     this.setState({ addressError: !tfchain.wallet_address_is_valid(value) })
 
-    const re = new RegExp(escapeRegExp(this.state.value), 'i')
+    const re = new RegExp(escapeRegExp(value), 'i')
 
     // enable searching on name or address
     const isMatch = result => (re.test(result.wallet_name) || re.test(result.value) || re.test(result.title) || re.test(result.contact_name))
     const results = filter(this.state.source, isMatch)
 
     this.props.setSearchValue(value)
-
     // If no results, this means the user copied or typed an address that he does not know yet.
     // Pass this address
     if (results.length === 0) {
-      return this.setState({ results, showNoResults: false })
+      return this.setState({ results, showNoResults: false, value })
     }
 
     // If results are found, show a dropdown list with possible selection
@@ -116,7 +115,7 @@ class SearchableAddress extends Component {
             leading: true
           })}
           results={results}
-          value={value || this.props.value}
+          value={this.props.value || value}
           placeholder='address'
           showNoResults={showNoResults}
           minCharacters={0}

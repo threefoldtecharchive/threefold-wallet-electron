@@ -54,8 +54,17 @@ class Wallet extends Component {
       contactAddress: '',
       openAddModal: false,
       ownerAddresses: ['', ''],
-      signatureCount: 2
+      signatureCount: 2,
+      hasConfirmedTx: false
     }
+  }
+
+  componentDidMount () {
+    const wallet = this.props.account.selected_wallet
+    const transactions = wallet.balance.transactions
+
+    const hasConfirmedTx = find(transactions, { confirmed: true })
+    this.setState({ hasConfirmedTx })
   }
 
   // implement goBack ourselfs, if a user has made a transaction and he presses go back then he should route to account
@@ -102,7 +111,8 @@ class Wallet extends Component {
     this.setState({ openAddModal: false })
   }
 
-  addContact = () => {
+  addContact = (blabla) => {
+    console.log(blabla)
     const { contactAddress, contactName } = this.state
     const { account } = this.props
     const { address_book: addressBook } = account
@@ -122,9 +132,9 @@ class Wallet extends Component {
     this.setState({ contactAddress: value })
   }
 
-  handleContactNameChange = ({ target }) => (
+  handleContactNameChange = ({ target }) => {
     this.setState({ contactName: target.value })
-  )
+  }
 
   closeAddMultisigModal = () => {
     this.setState({ openAddMultisigModal: false })
@@ -162,26 +172,10 @@ class Wallet extends Component {
   }
 
   render () {
-    // If refreshed in development and data in store is deleted, route to account.
-    if (!this.props.account.selected_wallet) {
-      this.props.history.push(routes.ACCOUNT)
-      return null
-    }
+    const { contactName, contactAddress, openAddModal, ownerAddresses, signatureCount, openAddMultisigModal, openExportModal, hasConfirmedTx } = this.state
 
-    const { account } = this.props
-    const { chain_info: chainConstants } = account
-    const { contactName, contactAddress, openAddModal, ownerAddresses, signatureCount, openAddMultisigModal, openExportModal } = this.state
-    const wallet = this.props.account.selected_wallet
-    const transactions = wallet.balance.transactions
-
-    const hasConfirmedTx = find(transactions, { confirmed: true })
-
-    return (
-      <div>
-        {openExportModal && <ExportToPdfModal
-          openExportModal={openExportModal}
-          closeExportModal={this.changeStateExportModel}
-        />}
+    if (this.state.openAddModal) {
+      return (
         <UpdateContactModal
           contactName={contactName}
           handleContactNameChange={this.handleContactNameChange}
@@ -191,6 +185,11 @@ class Wallet extends Component {
           closeUpdateModal={this.closeAddModal}
           updateContact={this.addContact}
         />
+      )
+    }
+
+    if (this.state.openAddMultisigModal) {
+      return (
         <UpdateMultiSigContactModal
           editAddressess={false}
           contactName={contactName}
@@ -201,8 +200,20 @@ class Wallet extends Component {
           updateMultiSigContact={this.addMultiSigContact}
           signatureCount={signatureCount}
         />
+      )
+    }
+    const { account } = this.props
+    const { chain_info: chainConstants, selected_wallet: selectedWallet } = account
+    const { transactions } = selectedWallet.balance
+
+    return (
+      <div>
+        {openExportModal && <ExportToPdfModal
+          openExportModal={openExportModal}
+          closeExportModal={this.changeStateExportModel}
+        />}
         <div className={styles.pageHeader}>
-          <p className={styles.pageHeaderTitle}>Wallet {wallet.wallet_name}</p>
+          <p className={styles.pageHeaderTitle}>Wallet {selectedWallet.wallet_name}</p>
           <p className={styles.pageHeaderSubtitle}>Wallet balance and transactions</p>
         </div>
         <Divider className={styles.pageDivider} />

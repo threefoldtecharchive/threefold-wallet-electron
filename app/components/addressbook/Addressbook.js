@@ -181,9 +181,9 @@ class AddressBook extends Component {
     this.setState({ contactAddress: value })
   }
 
-  handleContactNameChange = ({ target }) => (
+  handleContactNameChange = ({ target }) => {
     this.setState({ contactName: target.value })
-  )
+  }
 
   handleNewAddressChange = (value) => {
     this.setState({ newContactAddress: value })
