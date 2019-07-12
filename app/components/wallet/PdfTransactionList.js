@@ -3,25 +3,6 @@ import { Document, Page, Text, View, Font } from '@react-pdf/renderer'
 import { find } from 'lodash'
 import moment from 'moment-timezone'
 
-import lightFont from '../../../resources/fonts/SFUIText-Light.woff'
-import boldFont from '../../../resources/fonts/SFUIText-Bold.woff'
-import unifont from '../../../resources/fonts/unifont-12.1.02.ttf'
-
-Font.register({
-  family: 'SF UI Text Light',
-  src: lightFont
-})
-
-Font.register({
-  family: 'SF UI Text Bold',
-  src: boldFont
-})
-
-Font.register({
-  family: 'unifont',
-  src: unifont
-})
-
 Font.registerEmojiSource({
   format: 'png',
   url: 'https://twemoji.maxcdn.com/2/72x72/'
@@ -39,12 +20,10 @@ const styles = {
   },
   dateTitle: {
     marginTop: 10,
-    fontSize: 14,
-    fontFamily: 'SF UI Text Bold'
+    fontSize: 14
   },
   pageStyle: {
-    padding: 50,
-    fontFamily: 'SF UI Text Light'
+    padding: 50
   },
   body: {
     flexGrow: 1,
@@ -62,7 +41,6 @@ const styles = {
     fontSize: 10
   },
   eFont: {
-    fontFamily: 'unifont',
     fontSize: 10
   },
   column: {
@@ -82,17 +60,14 @@ const styles = {
   },
   receivedAmount: {
     color: 'green',
-    fontSize: 10,
-    fontFamily: 'SF UI Text Bold'
+    fontSize: 10
   },
   sentAmount: {
     color: 'red',
-    fontSize: 10,
-    fontFamily: 'SF UI Text Bold'
+    fontSize: 10
   },
   date: {
-    fontSize: 10,
-    fontFamily: 'SF UI Text Bold'
+    fontSize: 10
   },
   pageNumber: {
     float: 'right',
@@ -101,14 +76,12 @@ const styles = {
   balance: {
     fontSize: 13,
     flexDirection: 'row',
-    paddingTop: 10,
-    fontFamily: 'SF UI Text Bold'
+    paddingTop: 10
   },
   balanceRight: {
     fontSize: 13,
     flexDirection: 'row-reverse',
-    paddingTop: 10,
-    fontFamily: 'SF UI Text Bold'
+    paddingTop: 10
   },
   endLine: {
     marginTop: 10,
