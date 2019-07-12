@@ -31,7 +31,8 @@ class WalletReceive extends Component {
       selectedWallet,
       selectedAddress,
       amount: 0,
-      isOpen: false
+      isOpen: false,
+      isGoldChain: this.props.account.chain_type === 'goldchain'
     }
   }
 
@@ -86,11 +87,72 @@ class WalletReceive extends Component {
     )
   }
 
-  render () {
+  renderWalletReceive = () => {
+    const { selectedAddress, isGoldChain, selectedWallet, amount } = this.state
     const walletsOptions = this.mapWalletsToDropdownOption()
     const addressOptions = this.mapAddressesToDropdownOption()
-    const { amount, selectedAddress, selectedWallet } = this.state
+    if (isGoldChain) {
+      const wallets = this.props.account.wallets
+      console.log(wallets)
+      return wallets.map(w => {
+        return (
+          <Segment inverted style={{ margin: 'auto', width: '90%' }}>
+            <h3>Wallet {w.wallet_name}</h3>
+            <Divider />
+            {w.addresses.map(a => {
+              return (
+                <div style={{ display: 'flex', marginTop: 20 }}>
+                  <p style={{ fontSize: 12 }}>{a}</p>
+                  <CopyToClipboard text={a}
+                    onCopy={() => this.setState({ copied: true })}>
+                    <Label onClick={() => toast('Copied to clipboard')} style={{ display: 'block', margin: 'auto', marginRight: 0, width: 200, cursor: 'pointer' }}><Icon name='clipboard' /> copy address to clipboard</Label>
+                  </CopyToClipboard>
+                </div>
+              )
+            })}
+          </Segment>
+        )
+      })
+    } else {
+      return (
+        <Form style={{ margin: 'auto', width: '90%' }}>
+          <Form.Field style={{ textAlign: 'center' }}>
+            <label style={{ color: 'white', fontFamily: 'SF UI Text Light', fontSize: 18 }}>Wallet</label>
+            <Dropdown
+              placeholder='Select Wallet'
+              selection
+              options={walletsOptions}
+              onChange={this.selectWallet}
+              value={selectedWallet.wallet_name}
+            />
+          </Form.Field>
+          <Form.Field style={{ textAlign: 'center' }}>
+            <label style={{ color: 'white', fontFamily: 'SF UI Text Light', fontSize: 16 }}>Address</label>
+            <Dropdown
+              placeholder='Select Address'
+              fluid
+              selection
+              options={addressOptions}
+              onChange={this.selectAddress}
+              value={selectedWallet.address}
+            />
+          </Form.Field>
+          <Form.Field>
+            {this.renderQRCode()}
+            <CopyToClipboard text={selectedAddress}
+              onCopy={() => this.setState({ copied: true })}>
+              <Label onClick={() => toast('Copied to clipboard')} style={{ display: 'block', margin: 'auto', width: 200, cursor: 'pointer' }}><Icon name='clipboard' /> copy address to clipboard</Label>
+            </CopyToClipboard>
+          </Form.Field>
+          <Form.Field style={{ textAlign: 'center' }}>
+            <Input style={{ width: 300, margin: 'auto' }} type='number' label='amount' onChange={this.handleAmountChange} value={amount} />
+          </Form.Field>
+        </Form>
+      )
+    }
+  }
 
+  render () {
     return (
       <div >
         <div className={styles.pageHeader}>
@@ -99,39 +161,7 @@ class WalletReceive extends Component {
         </div>
         <Divider className={styles.pageDivider} />
         <div style={{ margin: 'auto', paddingBottom: 30 }}>
-          <Form style={{ margin: 'auto', width: '90%' }}>
-            <Form.Field style={{ textAlign: 'center' }}>
-              <label style={{ color: 'white', fontFamily: 'SF UI Text Light', fontSize: 18 }}>Wallet</label>
-              <Dropdown
-                placeholder='Select Wallet'
-                selection
-                options={walletsOptions}
-                onChange={this.selectWallet}
-                value={selectedWallet.wallet_name}
-              />
-            </Form.Field>
-            <Form.Field style={{ textAlign: 'center' }}>
-              <label style={{ color: 'white', fontFamily: 'SF UI Text Light', fontSize: 16 }}>Address</label>
-              <Dropdown
-                placeholder='Select Address'
-                fluid
-                selection
-                options={addressOptions}
-                onChange={this.selectAddress}
-                value={selectedWallet.address}
-              />
-            </Form.Field>
-            <Form.Field>
-              {this.renderQRCode()}
-              <CopyToClipboard text={selectedAddress}
-                onCopy={() => this.setState({ copied: true })}>
-                <Label onClick={() => toast('Copied to clipboard')} style={{ display: 'block', margin: 'auto', width: 200, cursor: 'pointer' }}><Icon name='clipboard' /> copy address to clipboard</Label>
-              </CopyToClipboard>
-            </Form.Field>
-            <Form.Field style={{ textAlign: 'center' }}>
-              <Input style={{ width: 300, margin: 'auto' }} type='number' label='amount' onChange={this.handleAmountChange} value={amount} />
-            </Form.Field>
-          </Form>
+          {this.renderWalletReceive()}
         </div>
       </div>
     )
