@@ -1,5 +1,11 @@
 # v0.2.2 (2018.07.11)
 
+Fixes:
+
+- fixed pdf export (reverted layout and unicode translation).
+
+# v0.2.2 (2018.07.11)
+
 Features:
 
 - now supporting chain type and v2 data accounts (first step for goldflow token support).
