@@ -53,7 +53,8 @@ class Account extends Component {
     this.state = {
       wallets: this.props.account.wallets,
       intervalId: undefined,
-      balanceValues: undefined
+      balanceValues: undefined,
+      isGoldChain: this.props.account.chain_type === 'goldchain'
     }
   }
 
@@ -88,15 +89,19 @@ class Account extends Component {
           {this.renderCreateWalletCard(false)}
         </Card.Group>
         {isOneOrMoreUnconfirmed ? (<p style={{ fontSize: 12, marginBottom: 30, marginLeft: 25 }}>Wallet balance amounts with (*) have unconfirmed balances</p>) : null}
-        <div style={{ background: 'linear-gradient(90deg, rgba(251,100,164,1) 0%, rgba(244,154,93,1) 100%)', width: '100%', textAlign: 'center', height: 50, paddingTop: 15, borderRadius: 2, marginTop: 20 }}>
-          <p style={{ fontFamily: 'SF UI Text Bold', fontSize: 16, textTransform: 'uppercase' }}>Multisig Wallets</p>
-        </div>
-        <Card.Group style={{ paddingLeft: 50, paddingRight: 50, paddingTop: 30 }}>
-          {multiSigWallets.map(w => {
-            return this.renderWalletContent(w)
-          })}
-          {this.renderCreateWalletCard(true)}
-        </Card.Group >
+        {this.state.isGoldChain ? (null) : (
+          <React.Fragment>
+            <div style={{ background: 'linear-gradient(90deg, rgba(251,100,164,1) 0%, rgba(244,154,93,1) 100%)', width: '100%', textAlign: 'center', height: 50, paddingTop: 15, borderRadius: 2, marginTop: 20 }}>
+              <p style={{ fontFamily: 'SF UI Text Bold', fontSize: 16, textTransform: 'uppercase' }}>Multisig Wallets</p>
+            </div>
+            <Card.Group style={{ paddingLeft: 50, paddingRight: 50, paddingTop: 30 }}>
+              {multiSigWallets.map(w => {
+                return this.renderWalletContent(w)
+              })}
+              {this.renderCreateWalletCard(true)}
+            </Card.Group >
+          </React.Fragment>
+        )}
       </div>
     )
   }

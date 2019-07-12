@@ -20,13 +20,23 @@ const mapStateToProps = state => ({
 })
 
 class Transfer extends Component {
+  constructor (props) {
+    super(props)
+    this.state = {
+      isGoldChain: this.props.account.chain_type === 'goldchain'
+    }
+  }
+
   render () {
     const hasInternal = this.props.account.wallet_count <= 1
-    const panes = [
+    let panes = [
       { menuItem: <Button key={uuid.v4()} className={'item'}>Single Transaction</Button>, render: () => <Tab.Pane style={tabStyle}><SingleTransaction /></Tab.Pane> },
-      { menuItem: <Button key={uuid.v4()} disabled={hasInternal} className={hasInternal ? styles.disableTab : 'item'}>Internal Transaction</Button>, render: () => <Tab.Pane style={tabStyle}><InternalTransaction /></Tab.Pane> },
-      { menuItem: <Button key={uuid.v4()} className={'item'}>Multisig Transaction</Button>, render: () => <Tab.Pane style={tabStyle}><MultisigTransaction /></Tab.Pane> }
+      { menuItem: <Button key={uuid.v4()} disabled={hasInternal} className={hasInternal ? styles.disableTab : 'item'}>Internal Transaction</Button>, render: () => <Tab.Pane style={tabStyle}><InternalTransaction /></Tab.Pane> }
     ]
+
+    if (!this.state.isGoldChain) {
+      panes.push({ menuItem: <Button key={uuid.v4()} className={'item'}>Multisig Transaction</Button>, render: () => <Tab.Pane style={tabStyle}><MultisigTransaction /></Tab.Pane> })
+    }
 
     return (
       <div style={{ paddingBottom: 30 }}>
