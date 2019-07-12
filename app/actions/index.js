@@ -1,4 +1,5 @@
 import { toast } from 'react-toastify'
+import { sendNotification } from '../utils/notify'
 let blockId
 
 export const addAccount = function (account) {
@@ -49,9 +50,11 @@ export const getTransactionsNotifications = function (account) {
           if (block.transactions.length > 0) {
             block.transactions.forEach(tx => {
               if (tx.inputs.length > 0) {
-                toast('Incomming transaction received')
+                sendNotification('Transaction', 'Incoming transaction received')
+                toast('Incoming transaction received')
               }
               if (tx.outputs.length > 0) {
+                sendNotification('Transaction', 'Outgoing transaction received')
                 toast('Outgoing transaction received')
               }
             })
