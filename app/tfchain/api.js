@@ -245,6 +245,7 @@ export var Account =  __class__ ('Account', [object], {
 		self._chain_info = ChainInfo (self._chain);
 		self._selected_wallet = null;
 		self._address_book = AddressBook ();
+		self._address_auth_state = dict ({});
 		self._loaded = false;
 		self._intermezzo_update_count = 0;
 	});},
@@ -617,8 +618,90 @@ export var Account =  __class__ ('Account', [object], {
 				throw __except0__;
 			}
 		}
-		var address = jsfunc.opts_get (opts, ['address']);
+		var address = jsfunc.opts_get (opts, 'address');
 		return wallet.recipient_get (__kwargtrans__ ({opts: dict ({'address': address})}));
+	});},
+	get coin_auth_status_for_account_get () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var addresses = self.addresses_get (__kwargtrans__ ({opts: dict ({'singlesig': true, 'multisig': false})}));
+		return self._coin_auth_status_for_addresses (addresses);
+	});},
+	get coin_auth_status_for_wallet_get () {return __get__ (this, function (self, opts) {
+		if (typeof opts == 'undefined' || (opts != null && opts.hasOwnProperty ("__kwargtrans__"))) {;
+			var opts = null;
+		};
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'opts': var opts = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var __left0__ = jsfunc.opts_get_with_defaults (opts, [tuple (['name', null]), tuple (['address', null])]);
+		var py_name = __left0__ [0];
+		var address = __left0__ [1];
+		var wallet = self.wallet_get (__kwargtrans__ ({opts: dict ({'name': py_name, 'address': address, 'singlesig': true, 'multisig': false})}));
+		if (wallet == null) {
+			return dict ({});
+		}
+		return self._coin_auth_status_for_addresses (wallet.addresses);
+	});},
+	get coin_auth_status_for_address_get () {return __get__ (this, function (self, address) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'address': var address = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._coin_auth_status_for_addresses ([address]) [address];
+	});},
+	get _coin_auth_status_for_addresses () {return __get__ (this, function (self, addresses) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'addresses': var addresses = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var d = dict ({});
+		for (var address of addresses) {
+			d [address] = (__in__ (address, self._address_auth_state) ? self._address_auth_state [address] : false);
+		}
+		return d;
 	});},
 	get wallet_get () {return __get__ (this, function (self, opts) {
 		if (typeof opts == 'undefined' || (opts != null && opts.hasOwnProperty ("__kwargtrans__"))) {;
@@ -1741,7 +1824,7 @@ export var Account =  __class__ ('Account', [object], {
 			};
 			var itcb = stub_cb;
 		}
-		return jsasync.chain (self._update_chain_info (), self._update_singlesig_wallet_balances (itcb), self._update_known_multisig_wallet_balances (itcb), self._collect_unknown_multisig_wallet_balances (itcb), cb_return_self);
+		return jsasync.chain (self._update_chain_info (), self._update_singlesig_wallet_balances (itcb), self._update_known_multisig_wallet_balances (itcb), self._collect_unknown_multisig_wallet_balances (itcb), self._update_goldchain_specific_info, cb_return_self);
 	});},
 	get _update_chain_info () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -2002,6 +2085,43 @@ export var Account =  __class__ ('Account', [object], {
 			return jsasync.chain (jsasync.promise_pool_new (generator, __kwargtrans__ ({cb: cb})), sort_multisig_wallets);
 		};
 		return body;
+	});},
+	get _update_goldchain_specific_info () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (self._chain.__ne__ (tfchaintype.Type.GOLDCHAIN)) {
+			return null;
+		}
+		var addresses = self.addresses_get (__kwargtrans__ ({opts: dict ({'singlesig': true, 'multisig': false})}));
+		var cb = function (result) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'result': var result = __allkwargs0__ [__attrib0__]; break;
+						}
+					}
+				}
+			}
+			else {
+			}
+			self._address_auth_state = result;
+			return null;
+		};
+		return jsasync.chain (self._explorer_client.authcoin.auth_status_get (__kwargtrans__ ({addresses: addresses})), cb);
 	});},
 	get _update_unconfirmed_account_balance_from_transactions () {return __get__ (this, function (self, transactions) {
 		if (arguments.length) {
@@ -2661,7 +2781,7 @@ export var SingleSignatureWallet =  __class__ ('SingleSignatureWallet', [BaseWal
 		}
 		else {
 		}
-		var address = jsfunc.opts_get (opts, ['address']);
+		var address = jsfunc.opts_get (opts, 'address');
 		if (address == null) {
 			return self.address;
 		}
@@ -2988,7 +3108,7 @@ export var MultiSignatureWallet =  __class__ ('MultiSignatureWallet', [BaseWalle
 		}
 		else {
 		}
-		var address = jsfunc.opts_get (opts, ['address']);
+		var address = jsfunc.opts_get (opts, 'address');
 		if (address != null) {
 			if (!(wallet_address_is_valid (address, __kwargtrans__ ({opts: dict ({'multisig': true})})))) {
 				var __except0__ = py_TypeError ('address is invalid: {} ({})'.format (address, py_typeof (address)));

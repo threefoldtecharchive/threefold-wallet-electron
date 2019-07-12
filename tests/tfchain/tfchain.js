@@ -41,6 +41,7 @@ const _all = {
     assert.equal(newAccount.password, 'bar')
     assert.equal(newAccount.mnemonic.split(' ').length, 24)
     assert.equal(newAccount.network_type, 'standard')
+    assert.equal(newAccount.chain_type, 'tfchain')
     assert.true(newAccount.default_explorer_addresses_used)
     assert.equal(newAccount.explorer.explorer_addresses, _defs.network.standard.addresses)
     assert.equal(newAccount.wallets.length, 0) // wallets are not created by default
@@ -57,6 +58,7 @@ const _all = {
     assert.equal(recoveredAccount.mnemonic, exampleMnemonic)
     assert.equal(recoveredAccount.seed, exampleEntropy)
     assert.equal(newAccount.network_type, 'standard')
+    assert.equal(newAccount.chain_type, 'tfchain')
     assert.equal(newAccount.minimum_miner_fee.str(), '0.1')
     assert.true(newAccount.default_explorer_addresses_used)
     assert.equal(newAccount.explorer.explorer_addresses, _defs.network.standard.addresses)
@@ -93,6 +95,10 @@ const _all = {
     assert.equal(recoveredAccount.wallet_for_address('010e0adfb04322e91dfee62ce402e17600862c82c82682e6a7b925b572689e531a24cd002c59f2').wallet_name, 'default')
     assert.equal(recoveredAccount.wallet_for_address('0168341e75d73597807321629d3895eec00aafabba9fc9ef68a6c4279ecfca9708f4dbd5a969f7').wallet_name, 'default')
     assert.equal(recoveredAccount.wallet_for_address('011a3ae574a1081eca8cc5e7c6eae6ed1657a82b4f741413951d8a2313ee8a60eb1f35a6028ede').wallet_name, 'default')
+
+    // goldchain specific stuff is disabled for tfchain accounts, but won't make the app crash if called
+    assert.false(recoveredAccount.coin_auth_status_for_account_get()[recoveredAccount.address])
+    assert.false(recoveredAccount.coin_auth_status_for_address_get(recoveredAccount.address))
 
     // delete an existing account
     recoveredAccount.wallet_delete(0, 'default')
@@ -240,6 +246,7 @@ const _all = {
     assert.equal(account.account_name, 'ufoo')
     assert.equal(account.password, 'pfoo')
     assert.equal(account.network_type, 'standard')
+    assert.equal(account.chain_type, 'tfchain')
     assert.true(account.default_explorer_addresses_used)
     assert.equal(account.explorer.explorer_addresses, _defs.network.standard.addresses)
     assert.equal(account.wallets.length, 0)

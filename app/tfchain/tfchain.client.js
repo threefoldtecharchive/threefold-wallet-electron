@@ -14,6 +14,7 @@ import * as jslog from './tfchain.polyfill.log.js';
 import * as jsarr from './tfchain.polyfill.array.js';
 import * as jsdate from './tfchain.polyfill.date.js';
 import * as jsasync from './tfchain.polyfill.asynchronous.js';
+import * as jsjson from './tfchain.polyfill.encoding.json.js';
 import * as jsstr from './tfchain.polyfill.encoding.str.js';
 import * as jsobj from './tfchain.polyfill.encoding.object.js';
 var __name__ = 'tfchain.client';
@@ -41,6 +42,7 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 		}
 		self._explorer_client = explorer_client;
 		self._minter = TFChainMinterClient (self);
+		self._authcoin = RivineAuthCoinClient (self);
 	});},
 	get _get_minter () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -57,6 +59,22 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 		else {
 		}
 		return self._minter;
+	});},
+	get _get_authcoin () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._authcoin;
 	});},
 	get _get_explorer_addresses () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -1064,7 +1082,10 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 		}
 		return transaction;
 	});},
-	get explorer_get () {return __get__ (this, function (self, endpoint) {
+	get explorer_get () {return __get__ (this, function (self, endpoint, data) {
+		if (typeof data == 'undefined' || (data != null && data.hasOwnProperty ("__kwargtrans__"))) {;
+			var data = null;
+		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -1073,13 +1094,14 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
 						case 'endpoint': var endpoint = __allkwargs0__ [__attrib0__]; break;
+						case 'data': var data = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
 		}
 		else {
 		}
-		return self._explorer_client.data_get (endpoint);
+		return self._explorer_client.data_get (endpoint, __kwargtrans__ ({data: data}));
 	});},
 	get explorer_post () {return __get__ (this, function (self, endpoint, data) {
 		if (arguments.length) {
@@ -1118,6 +1140,7 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 	});}
 });
 Object.defineProperty (TFChainClient, 'explorer_addresses', property.call (TFChainClient, TFChainClient._get_explorer_addresses));
+Object.defineProperty (TFChainClient, 'authcoin', property.call (TFChainClient, TFChainClient._get_authcoin));
 Object.defineProperty (TFChainClient, 'minter', property.call (TFChainClient, TFChainClient._get_minter));;
 export var _assign_block_properties_to_transacton = function (txn, block) {
 	if (arguments.length) {
@@ -2132,6 +2155,233 @@ export var TFChainMinterClient =  __class__ ('TFChainMinterClient', [object], {
 			}
 		};
 		return jsasync.chain (self._client.explorer_get (__kwargtrans__ ({endpoint: endpoint})), cb);
+	});}
+});
+export var RivineAuthCoinClient =  __class__ ('RivineAuthCoinClient', [object], {
+	__module__: __name__,
+	get __init__ () {return __get__ (this, function (self, client) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'client': var client = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (!(isinstance (client, TFChainClient))) {
+			var __except0__ = py_TypeError ('client is expected to be a TFChainClient');
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		self._client = client;
+	});},
+	get condition_get () {return __get__ (this, function (self, height) {
+		if (typeof height == 'undefined' || (height != null && height.hasOwnProperty ("__kwargtrans__"))) {;
+			var height = null;
+		};
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'height': var height = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var endpoint = '/explorer/authcoin/condition';
+		if (height != null) {
+			if (!(isinstance (height, tuple ([int, str])))) {
+				var __except0__ = py_TypeError ('invalid block height given');
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
+			if (isinstance (height, str)) {
+				var height = jsstr.to_int (height);
+			}
+			endpoint += '/{}'.format (height);
+		}
+		var cb = function (result) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'result': var result = __allkwargs0__ [__attrib0__]; break;
+						}
+					}
+				}
+			}
+			else {
+			}
+			var __left0__ = result;
+			var _ = __left0__ [0];
+			var resp = __left0__ [1];
+			try {
+				return ConditionTypes.from_json (__kwargtrans__ ({obj: resp ['authcondition']}));
+			}
+			catch (__except0__) {
+				if (isinstance (__except0__, KeyError)) {
+					var exc = __except0__;
+					var __except1__ = tferrors.ExplorerInvalidResponse (str (exc), endpoint, resp);
+					__except1__.__cause__ = exc;
+					throw __except1__;
+				}
+				else {
+					throw __except0__;
+				}
+			}
+		};
+		return jsasync.chain (self._client.explorer_get (__kwargtrans__ ({endpoint: endpoint})), cb);
+	});},
+	get auth_status_get () {return __get__ (this, function (self, addresses, height) {
+		if (typeof height == 'undefined' || (height != null && height.hasOwnProperty ("__kwargtrans__"))) {;
+			var height = null;
+		};
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'addresses': var addresses = __allkwargs0__ [__attrib0__]; break;
+						case 'height': var height = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var endpoint_get = function (address) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'address': var address = __allkwargs0__ [__attrib0__]; break;
+						}
+					}
+				}
+			}
+			else {
+			}
+			var endpoint = '/explorer/authcoin/address/{}'.format (address);
+			if (height != null) {
+				if (!(isinstance (height, tuple ([int, str])))) {
+					var __except0__ = py_TypeError ('invalid block height given');
+					__except0__.__cause__ = null;
+					throw __except0__;
+				}
+				if (isinstance (height, str)) {
+					var height = jsstr.to_int (height);
+				}
+				endpoint += '/{}'.format (height);
+			}
+			return endpoint;
+		};
+		var addresses = (function () {
+			var __accu0__ = [];
+			for (var address of addresses) {
+				__accu0__.append ((isinstance (addresses, str) ? address : address.__str__ ()));
+			}
+			return __accu0__;
+		}) ();
+		var address_cb_new = function (endpoint, address) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'endpoint': var endpoint = __allkwargs0__ [__attrib0__]; break;
+							case 'address': var address = __allkwargs0__ [__attrib0__]; break;
+						}
+					}
+				}
+			}
+			else {
+			}
+			var cb = function (result) {
+				if (arguments.length) {
+					var __ilastarg0__ = arguments.length - 1;
+					if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+						var __allkwargs0__ = arguments [__ilastarg0__--];
+						for (var __attrib0__ in __allkwargs0__) {
+							switch (__attrib0__) {
+								case 'result': var result = __allkwargs0__ [__attrib0__]; break;
+							}
+						}
+					}
+				}
+				else {
+				}
+				try {
+					var __left0__ = result;
+					var _ = __left0__ [0];
+					var result = __left0__ [1];
+					return tuple ([address, result.get_or ('auth', false)]);
+				}
+				catch (__except0__) {
+					if (isinstance (__except0__, KeyError)) {
+						var exc = __except0__;
+						var __except1__ = tferrors.ExplorerInvalidResponse (str (exc), endpoint, result);
+						__except1__.__cause__ = exc;
+						throw __except1__;
+					}
+					else {
+						throw __except0__;
+					}
+				}
+			};
+			return cb;
+		};
+		var generator = function* () {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+					}
+				}
+			}
+			else {
+			}
+			for (var address of addresses) {
+				var endpoint = endpoint_get (address);
+				var address_cb = address_cb_new (endpoint, address);
+				yield jsasync.chain (self._client.explorer_get (__kwargtrans__ ({endpoint: endpoint})), address_cb);
+			}
+			};
+		var aggregate = function (results) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'results': var results = __allkwargs0__ [__attrib0__]; break;
+						}
+					}
+				}
+			}
+			else {
+			}
+			return dict (results);
+		};
+		return jsasync.chain (jsasync.promise_pool_new (generator), aggregate);
 	});}
 });
 

@@ -233,6 +233,9 @@ class Account:
         self._selected_wallet = None
         self._address_book = AddressBook()
 
+        # goldchain-specific account cache
+        self._address_auth_state = {}
+
         # loaded state
         self._loaded = False
 
@@ -386,10 +389,41 @@ class Account:
             wallet = self.wallet
             if wallet == None:
                 raise tferrors.NotFoundError("no wallets found, and no single-signature wallets to select")
-        address = jsfunc.opts_get(opts, ['address'])
+        address = jsfunc.opts_get(opts, 'address')
         return wallet.recipient_get(opts={
             'address': address,
         })
+
+    def coin_auth_status_for_account_get(self):
+        addresses = self.addresses_get(opts={
+            'singlesig': True,
+            'multisig': False,
+        })
+        return self._coin_auth_status_for_addresses(addresses)
+
+    def coin_auth_status_for_wallet_get(self, opts=None):
+        name, address = jsfunc.opts_get_with_defaults(opts, [
+            ('name', None),
+            ('address', None),
+        ])
+        wallet = self.wallet_get(opts={
+            'name': name,
+            'address': address,
+            'singlesig': True,
+            'multisig': False,
+        })
+        if wallet == None:
+            return {}
+        return self._coin_auth_status_for_addresses(wallet.addresses)
+
+    def coin_auth_status_for_address_get(self, address):
+        return self._coin_auth_status_for_addresses([address])[address]
+
+    def _coin_auth_status_for_addresses(self, addresses):
+        d = {}
+        for address in addresses:
+            d[address] = self._address_auth_state[address] if address in self._address_auth_state else False
+        return d
 
     def wallet_get(self, opts=None):
         # get opts
@@ -942,6 +976,7 @@ class Account:
             self._update_singlesig_wallet_balances(itcb),
             self._update_known_multisig_wallet_balances(itcb),
             self._collect_unknown_multisig_wallet_balances(itcb),
+            self._update_goldchain_specific_info, # runs only for goldchain
             cb_return_self
         )
 
@@ -999,6 +1034,18 @@ class Account:
                 sort_multisig_wallets,
             )
         return body
+
+    def _update_goldchain_specific_info(self):
+        if self._chain.__ne__(tfchaintype.Type.GOLDCHAIN):
+            return None
+        addresses = self.addresses_get(opts={
+            'singlesig': True,
+            'multisig': False,
+        })
+        def cb(result):
+            self._address_auth_state = result
+            return None
+        return jsasync.chain(self._explorer_client.authcoin.auth_status_get(addresses=addresses), cb)
 
     def _update_unconfirmed_account_balance_from_transactions(self, transactions):
         for transaction in transactions:
@@ -1207,7 +1254,7 @@ class SingleSignatureWallet(BaseWallet):
         return False
 
     def recipient_get(self, opts=None):
-        address = jsfunc.opts_get(opts, ['address'])
+        address = jsfunc.opts_get(opts, 'address')
         if address == None:
             return self.address
         if not wallet_address_is_valid(address, opts={'multisig': False}):
@@ -1307,7 +1354,7 @@ class MultiSignatureWallet(BaseWallet):
         return True
 
     def recipient_get(self, opts=None):
-        address = jsfunc.opts_get(opts, ['address'])
+        address = jsfunc.opts_get(opts, 'address')
         if address != None:
             if not wallet_address_is_valid(address, opts={'multisig': True}):
                 raise TypeError("address is invalid: {} ({})".format(address, type(address)))
