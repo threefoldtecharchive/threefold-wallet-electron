@@ -25,7 +25,6 @@ const iconStyle = {
 }
 
 const mapStateToProps = state => {
-  console.log(state)
   return {
     currentLocation: state.router.location.pathname
   }
@@ -37,7 +36,6 @@ class App extends Component {
   }
 
   render () {
-    console.log(this.props)
     const { children, currentLocation } = this.props
     return (
       <React.Fragment>
