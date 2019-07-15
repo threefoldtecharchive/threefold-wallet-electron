@@ -62,10 +62,6 @@ class Account extends Component {
 
   componentDidMount () {
     this.props.account.select_wallet(null)
-    const _this = this
-    setInterval(function () {
-      _this.props.increaseNotificationCount()
-    }, 5000)
   }
 
   handleWalletClick = (wallet) => {

@@ -49,18 +49,18 @@ export const getTransactionsNotifications = function (account) {
           if (block.transactions.length > 0) {
             block.transactions.forEach(tx => {
               if (tx.inputs.length > 0) {
-                console.log('blabla')
                 dispatch({
-                  type: 'INCREASE_NOTIFICATION_COUNT'
+                  type: 'INCREASE_NOTIFICATION_COUNT',
+                  title: 'Transaction',
+                  description: 'Incoming transaction received'
                 })
-                // sendNotification('Transaction', 'Incoming transaction received')
                 toast('Incoming transaction received')
               }
               if (tx.outputs.length > 0) {
-                console.log('blabla')
-                // sendNotification('Transaction', 'Outgoing transaction received')
                 dispatch({
-                  type: 'INCREASE_NOTIFICATION_COUNT'
+                  type: 'INCREASE_NOTIFICATION_COUNT',
+                  title: 'Transaction',
+                  description: 'Outgoing transaction received'
                 })
                 toast('Outgoing transaction received')
               }
