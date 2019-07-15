@@ -4,7 +4,6 @@ export const notifications = (state = initalState, action) => {
   switch (action.type) {
     case 'INCREASE_NOTIFICATION_COUNT':
       const newCount = state.count + 1
-      console.log('--newCount--', newCount)
       return {
         count: newCount,
         title: action.title,

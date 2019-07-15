@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 import React, { Component } from 'react'
 import { Segment, Icon, Divider, Card, Loader, Dimmer, Grid } from 'semantic-ui-react'
 import routes from '../../constants/routes'
-import { updateAccount, increaseNotificationCount } from '../../actions'
+import { updateAccount } from '../../actions'
 import styles from '../home/Home.css'
 import { truncate } from 'lodash'
 
@@ -44,9 +44,6 @@ const mapStateToProps = state => {
 const mapDispatchToProps = (dispatch) => ({
   updateAccount: (account) => {
     dispatch(updateAccount(account))
-  },
-  increaseNotificationCount: () => {
-    dispatch(increaseNotificationCount())
   }
 })
 
