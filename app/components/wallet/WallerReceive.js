@@ -93,11 +93,13 @@ class WalletReceive extends Component {
     const addressOptions = this.mapAddressesToDropdownOption()
     if (isGoldChain) {
       const wallets = this.props.account.wallets
-      console.log(wallets)
       return wallets.map(w => {
         return (
           <Segment inverted style={{ margin: 'auto', width: '90%' }}>
-            <h3>Wallet {w.wallet_name}</h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <h3>Wallet {w.wallet_name}</h3>
+              <p className={'gradient-text'} style={{ fontSize: 12 }}>{this.props.account.coin_auth_status_for_address_get(w.address) ? 'Authorized' : 'Unauthorized'}</p>
+            </div>
             <Divider />
             {w.addresses.map(a => {
               return (
@@ -153,11 +155,12 @@ class WalletReceive extends Component {
   }
 
   render () {
+    const { isGoldChain } = this.state
     return (
       <div >
         <div className={styles.pageHeader}>
           <p className={styles.pageHeaderTitle}>Receive </p>
-          <p className={styles.pageHeaderSubtitle}>Receive tokens by scanning the QR code</p>
+          <p className={styles.pageHeaderSubtitle}>Receive tokens by {isGoldChain ? ' sharing the address' : 'scanning the QR code' }</p>
         </div>
         <Divider className={styles.pageDivider} />
         <div style={{ margin: 'auto', paddingBottom: 30 }}>
