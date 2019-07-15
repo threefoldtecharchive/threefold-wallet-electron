@@ -1,9 +1,8 @@
-export const notifications = (state = [], action) => {
+export const notifications = (state = 0, action) => {
   switch (action.type) {
     case 'INCREASE_NOTIFICATION_COUNT':
-      return {
-        state: state + 1
-      }
+      state = parseInt(state + 1)
+      return state
     case 'RESET_NOTIFICATION_COUNT':
       return []
     case 'RESET_APP':

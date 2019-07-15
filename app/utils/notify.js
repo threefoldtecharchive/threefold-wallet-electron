@@ -1,22 +1,19 @@
 import notifier from 'node-notifier'
 import { remote } from 'electron'
-import { configureStore } from '../store/configureStore'
-import { increaseNotificationCount, resetNotificationCount } from '../actions/index'
+// import { increaseNotificationCount, resetNotificationCount } from '../actions/index'
 
 function getWindow () {
   return remote.getCurrentWindow()
 }
 
 export function resetAmountOfNotifications () {
-  configureStore().dispatch(resetNotificationCount)
+  // store.dispatch(resetNotificationCount)
+  // amountOfNotifications = 0
 }
 
 function sendNotify (title, message) {
   if (!getWindow()) return
   if (!getWindow().isFocused()) {
-    console.log(configureStore().getState().notifications)
-
-    configureStore().dispatch(increaseNotificationCount)
     // amountOfNotifications++
     sendOverlay(title, message)
   }
@@ -43,13 +40,13 @@ function createContext (text) {
   return canvas
 }
 
-function sendWindowsOverlay (title, message) {
+function sendWindowsOverlay (notifications) {
+  console.log('---amountOfNotifications---', notifications)
+  const amountOfNotifications = notifications.length
   if (!getWindow()) return
-  const amountOfNotifications = configureStore().getState().notifications
-
   if (amountOfNotifications > 0) {
     getWindow().setOverlayIcon(createIcon(amountOfNotifications.toString()), amountOfNotifications.toString())
-    notifier.notify({ appID: 'org.develar.TFT-Wallet', title: title, message: message }, () => {
+    notifier.notify({ appID: 'org.develar.TFT-Wallet', title: '', message: '' }, () => {
       getWindow().flashFrame(true)
     })
   } else {
@@ -57,11 +54,10 @@ function sendWindowsOverlay (title, message) {
   }
 }
 
-function renderMacOverlay () {
+function renderMacOverlay (notifications) {
   if (!remote) return
-  const amountOfNotifications = configureStore().getState().notifications
-
-  console.log('---amountOfNotifications---', amountOfNotifications)
+  console.log('---amountOfNotifications---', notifications)
+  const amountOfNotifications = notifications.length
   if (amountOfNotifications > 0) {
     remote.app.dock.show()
     remote.app.dock.bounce('informational')
@@ -77,17 +73,24 @@ export function renderLinuxOverlay () {
   return null
 }
 
-export function sendOverlay (title, message) {
+export function sendOverlay (notifications) {
   switch (process.platform) {
-    case 'darwin': renderMacOverlay()
+    case 'darwin': renderMacOverlay(notifications)
       break
-    case 'linux': renderLinuxOverlay()
+    case 'linux': renderLinuxOverlay(notifications)
       break
-    case 'win32': sendWindowsOverlay(title, message)
+    case 'win32': sendWindowsOverlay(notifications)
       break
     default:
       return null
   }
+}
+
+export const customMiddleWare = store => next => action => {
+  if (action.type === 'INCREASE_NOTIFICATION_COUNT') {
+    sendOverlay(store.getState().notifications)
+  }
+  next(action)
 }
 
 export function sendNotification (title, message) {

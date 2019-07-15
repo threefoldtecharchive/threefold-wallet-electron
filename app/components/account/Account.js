@@ -3,10 +3,9 @@ import { connect } from 'react-redux'
 import React, { Component } from 'react'
 import { Segment, Icon, Divider, Card, Loader, Dimmer, Grid } from 'semantic-ui-react'
 import routes from '../../constants/routes'
-import { updateAccount } from '../../actions'
+import { updateAccount, increaseNotificationCount } from '../../actions'
 import styles from '../home/Home.css'
 import { truncate } from 'lodash'
-import { sendNotification } from '../../utils/notify'
 
 const cardStyle = {
   margin: 'auto',
@@ -45,6 +44,9 @@ const mapStateToProps = state => {
 const mapDispatchToProps = (dispatch) => ({
   updateAccount: (account) => {
     dispatch(updateAccount(account))
+  },
+  increaseNotificationCount: () => {
+    dispatch(increaseNotificationCount())
   }
 })
 
@@ -60,8 +62,9 @@ class Account extends Component {
 
   componentDidMount () {
     this.props.account.select_wallet(null)
+    const _this = this
     setInterval(function () {
-      sendNotification('blabla', 'blabla')
+      _this.props.increaseNotificationCount()
     }, 5000)
   }
 

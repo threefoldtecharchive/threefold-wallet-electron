@@ -4,6 +4,7 @@ import { createHashHistory } from 'history'
 import { routerMiddleware, routerActions } from 'connected-react-router'
 import { createLogger } from 'redux-logger'
 import createRootReducer from '../reducers'
+import { customMiddleWare } from '../utils/notify'
 
 const history = createHashHistory()
 
@@ -16,6 +17,8 @@ const configureStore = () => {
 
   // Thunk Middleware
   middleware.push(thunk)
+
+  middleware.push(customMiddleWare)
 
   // Logging Middleware
   const logger = createLogger({
@@ -64,4 +67,6 @@ const configureStore = () => {
   return store
 }
 
-export default { configureStore, history }
+const store = configureStore()
+
+export default { store, history }
