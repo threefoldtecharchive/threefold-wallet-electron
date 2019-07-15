@@ -1,5 +1,6 @@
 // @flow
 import React, { Component } from 'react'
+import { connect } from 'react-redux'
 import { Scrollbars } from 'react-custom-scrollbars'
 import { withRouter } from 'react-router-dom'
 import { Grid, Menu, Icon, Divider } from 'semantic-ui-react'
@@ -23,20 +24,19 @@ const iconStyle = {
   marginRight: 20
 }
 
-class App extends Component {
-  constructor (props) {
-    super(props)
-    this.state = {}
+const mapStateToProps = state => {
+  return {
+    currentLocation: state.router.location.pathname
   }
+}
 
+class App extends Component {
   handleItemClick = (e, { name }) => {
-    this.setState({ activeItem: routes[name] })
     this.props.history.push(routes[name])
   }
 
   render () {
-    const { children } = this.props
-    const { activeItem } = this.state
+    const { children, currentLocation } = this.props
     return (
       <React.Fragment>
         <Grid style={{ height: 'calc(100vh - 50px)', marginBottom: 0 }}>
@@ -51,7 +51,7 @@ class App extends Component {
                   <Menu.Item
                     style={menuItemStyle}
                     name={'ACCOUNT'}
-                    active={activeItem === routes.ACCOUNT}
+                    active={currentLocation === routes.ACCOUNT}
                     onClick={this.handleItemClick}
                   >
                     <Icon style={iconStyle} name='grid layout' />
@@ -60,7 +60,7 @@ class App extends Component {
                   <Menu.Item
                     style={menuItemStyle}
                     name={'TRANSFER'}
-                    active={activeItem === routes.TRANSFER}
+                    active={currentLocation === routes.TRANSFER}
                     onClick={this.handleItemClick}
                   >
                     <Icon style={iconStyle} name='send' />
@@ -69,7 +69,7 @@ class App extends Component {
                   <Menu.Item
                     style={menuItemStyle}
                     name={'WALLET_RECEIVE'}
-                    active={activeItem === routes.WALLET_RECEIVE}
+                    active={currentLocation === routes.WALLET_RECEIVE}
                     onClick={this.handleItemClick}
                   >
                     <Icon style={iconStyle} name='arrow circle left' />
@@ -78,7 +78,7 @@ class App extends Component {
                   <Menu.Item
                     style={menuItemStyle}
                     name={'SIGN_TRANSACTIONS'}
-                    active={activeItem === routes.SIGN_TRANSACTIONS}
+                    active={currentLocation === routes.SIGN_TRANSACTIONS}
                     onClick={this.handleItemClick}
                   >
                     <Icon style={iconStyle} name='check circle' />
@@ -88,7 +88,7 @@ class App extends Component {
                   <Menu.Item
                     style={menuItemStyle}
                     name={'ACCOUNT_SETTINGS'}
-                    active={activeItem === routes.ACCOUNT_SETTINGS}
+                    active={currentLocation === routes.ACCOUNT_SETTINGS}
                     onClick={this.handleItemClick}
                   >
                     <Icon style={iconStyle} name='settings' />
@@ -97,7 +97,7 @@ class App extends Component {
                   <Menu.Item
                     style={menuItemStyle}
                     name={'ADDRESS_BOOK'}
-                    active={activeItem === routes.ADDRESS_BOOK}
+                    active={currentLocation === routes.ADDRESS_BOOK}
                     onClick={this.handleItemClick}
                   >
                     <Icon style={iconStyle} name='address book' />
@@ -106,7 +106,7 @@ class App extends Component {
                   <Menu.Item
                     style={menuItemStyle}
                     name={'HOME'}
-                    active={activeItem === routes.HOME}
+                    active={currentLocation === routes.HOME}
                     onClick={this.handleItemClick}
                   >
                     <Icon style={iconStyle} name='sign-out' />
@@ -129,4 +129,7 @@ class App extends Component {
   }
 }
 
-export default withRouter(App)
+export default connect(
+  mapStateToProps,
+  null
+)(withRouter(App))
