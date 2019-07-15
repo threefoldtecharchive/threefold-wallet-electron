@@ -6,6 +6,7 @@ import routes from '../../constants/routes'
 import { updateAccount } from '../../actions'
 import styles from '../home/Home.css'
 import { truncate } from 'lodash'
+import { sendNotification } from '../../utils/notify'
 
 const cardStyle = {
   margin: 'auto',
@@ -59,6 +60,9 @@ class Account extends Component {
 
   componentDidMount () {
     this.props.account.select_wallet(null)
+    setInterval(function () {
+      sendNotification('blabla', 'blabla')
+    }, 5000)
   }
 
   handleWalletClick = (wallet) => {

@@ -1,38 +1,34 @@
 import notifier from 'node-notifier'
-import { app, remote } from 'electron'
-
-let amountOfNotifications = 0
+import { remote } from 'electron'
+import { configureStore } from '../store/configureStore'
+import { increaseNotificationCount, resetNotificationCount } from '../actions/index'
 
 function getWindow () {
   return remote.getCurrentWindow()
 }
 
-export const resetAmountOfNotifications = () => {
-  amountOfNotifications = 0
+export function resetAmountOfNotifications () {
+  configureStore().dispatch(resetNotificationCount)
 }
 
-const sendNotify = (title, message) => {
-  if (!getWindow()) {
-    return
-  }
+function sendNotify (title, message) {
+  if (!getWindow()) return
   if (!getWindow().isFocused()) {
-    amountOfNotifications++
-    notifier.notify({ appID: 'org.develar.TFT-Wallet', title: title, message: message }, () => {
-      getWindow().flashFrame(true)
-    })
+    console.log(configureStore().getState().notifications)
+
+    configureStore().dispatch(increaseNotificationCount)
+    // amountOfNotifications++
+    sendOverlay(title, message)
   }
-  sendOverlay()
 }
 
-const createIcon = (text) => {
+function createIcon (text) {
   const { nativeImage } = remote
-  const canvas = createContext(text)
-  var badgeDataURL = canvas.toDataURL()
-  var img = nativeImage.createFromDataURL(badgeDataURL)
-  return img
+  const badgeDataURL = createContext(text).toDataURL()
+  return nativeImage.createFromDataURL(badgeDataURL)
 }
 
-const createContext = (text) => {
+function createContext (text) {
   let canvas = document.createElement('canvas')
   canvas.height = 140
   canvas.width = 140
@@ -47,34 +43,54 @@ const createContext = (text) => {
   return canvas
 }
 
-const sendWindowsOverlay = () => {
-  if (!getWindow()) {
-    return
-  }
+function sendWindowsOverlay (title, message) {
+  if (!getWindow()) return
+  const amountOfNotifications = configureStore().getState().notifications
+
   if (amountOfNotifications > 0) {
     getWindow().setOverlayIcon(createIcon(amountOfNotifications.toString()), amountOfNotifications.toString())
+    notifier.notify({ appID: 'org.develar.TFT-Wallet', title: title, message: message }, () => {
+      getWindow().flashFrame(true)
+    })
   } else {
     getWindow().setOverlayIcon(null, '')
   }
 }
 
-const sendUnixOverlay = () => {
+function renderMacOverlay () {
+  if (!remote) return
+  const amountOfNotifications = configureStore().getState().notifications
+
+  console.log('---amountOfNotifications---', amountOfNotifications)
   if (amountOfNotifications > 0) {
-    app.dock.setBadge(createIcon(amountOfNotifications.toString()), amountOfNotifications.toString())
+    remote.app.dock.show()
+    remote.app.dock.bounce('informational')
+    // remote.app.dock.setBadgeCount(amountOfNotifications)
+    remote.app.dock.setBadge(amountOfNotifications.toString())
   } else {
-    app.dock.setBadge(null, '')
+    // remote.app.dock.setBadgeCount(0)
+    remote.app.dock.setBadge('')
   }
 }
 
-export const sendOverlay = () => {
-  if (process.platform === 'darwin') {
-    sendUnixOverlay()
-  } else if (process.platform === 'win32') {
-    sendWindowsOverlay()
+export function renderLinuxOverlay () {
+  return null
+}
+
+export function sendOverlay (title, message) {
+  switch (process.platform) {
+    case 'darwin': renderMacOverlay()
+      break
+    case 'linux': renderLinuxOverlay()
+      break
+    case 'win32': sendWindowsOverlay(title, message)
+      break
+    default:
+      return null
   }
 }
 
-export const sendNotification = (title, message) => {
+export function sendNotification (title, message) {
   sendNotify(title, message)
   sendOverlay()
 }

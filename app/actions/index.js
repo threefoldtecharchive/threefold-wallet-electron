@@ -50,10 +50,12 @@ export const getTransactionsNotifications = function (account) {
           if (block.transactions.length > 0) {
             block.transactions.forEach(tx => {
               if (tx.inputs.length > 0) {
+                console.log('blabla')
                 sendNotification('Transaction', 'Incoming transaction received')
                 toast('Incoming transaction received')
               }
               if (tx.outputs.length > 0) {
+                console.log('blabla')
                 sendNotification('Transaction', 'Outgoing transaction received')
                 toast('Outgoing transaction received')
               }
@@ -122,5 +124,17 @@ export const setError = function (error) {
 export const resetError = function () {
   return {
     type: 'RESET_ERROR'
+  }
+}
+
+export const increaseNotificationCount = function () {
+  return {
+    type: 'INCREASE_NOTIFICATION_COUNT'
+  }
+}
+
+export const resetNotificationCount = function () {
+  return {
+    type: 'RESET_NOTIFICATION_COUNT'
   }
 }
