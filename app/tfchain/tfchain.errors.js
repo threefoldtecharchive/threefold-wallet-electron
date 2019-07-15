@@ -183,6 +183,12 @@ export var ExplorerNoContent =  __class__ ('ExplorerNoContent', [ExplorerUserErr
 export var ExplorerBadRequest =  __class__ ('ExplorerBadRequest', [ExplorerUserError], {
 	__module__: __name__,
 });
+export var ExplorerForbidden =  __class__ ('ExplorerForbidden', [ExplorerUserError], {
+	__module__: __name__,
+});
+export var ExplorerClientError =  __class__ ('ExplorerClientError', [ExplorerUserError], {
+	__module__: __name__,
+});
 export var ExplorerServerError =  __class__ ('ExplorerServerError', [ExplorerError], {
 	__module__: __name__,
 });

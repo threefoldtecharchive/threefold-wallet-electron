@@ -96,8 +96,12 @@ class Client:
                 return (result.address, jsobj.as_dict(result.data))
             if result.code == 204 or (result.code == 400 and ('unrecognized hash' in result.data or 'not found' in result.data)):
                 raise tferrors.ExplorerNoContent("GET: no content available (code: 204)", endpoint)
-            if result.code == 400: # are there other error codes?
+            if result.code == 400:
                 raise tferrors.ExplorerBadRequest("error (code: {}): {}".format(result.code, result.data), endpoint)
+            if result.code == 403:
+                raise tferrors.ExplorerForbidden("error (code: {}): {}".format(result.code, result.data), endpoint)
+            if result.code // 100 == 4:
+                raise tferrors.ExplorerClientError("client error (code: {}): {}".format(result.code, result.data), endpoint)
             raise tferrors.ExplorerServerError("error (code: {}): {}".format(result.code, result.data), endpoint)
 
         address = self._consensus_addresses[indices[0]]

@@ -107,6 +107,16 @@ class ExplorerBadRequest(ExplorerUserError):
     ExplorerBadRequest error
     """
 
+class ExplorerForbidden(ExplorerUserError):
+    """
+    ExplorerForbidden error
+    """
+
+class ExplorerClientError(ExplorerUserError):
+    """
+    Generic 4xx User Error
+    """
+
 class ExplorerServerError(ExplorerError):
     """
     ExplorerServerError error
