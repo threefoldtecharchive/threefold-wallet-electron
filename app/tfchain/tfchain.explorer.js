@@ -447,6 +447,16 @@ export var Client =  __class__ ('Client', [object], {
 				__except0__.__cause__ = null;
 				throw __except0__;
 			}
+			if (result.code == 403) {
+				var __except0__ = tferrors.ExplorerForbidden ('error (code: {}): {}'.format (result.code, result.data), endpoint);
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
+			if (Math.floor (result.code / 100) == 4) {
+				var __except0__ = tferrors.ExplorerClientError ('client error (code: {}): {}'.format (result.code, result.data), endpoint);
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
 			var __except0__ = tferrors.ExplorerServerPostError ('POST: unexpected error (code: {}): {}'.format (result.code, result.data), endpoint, __kwargtrans__ ({data: data}));
 			__except0__.__cause__ = null;
 			throw __except0__;

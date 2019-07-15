@@ -173,6 +173,10 @@ class Client:
             if result.code == 400: # are there other error codes?
                 jslog.warning("invalid data object posted to {}:".format(endpoint), s)
                 raise tferrors.ExplorerBadRequest("error (code: {}): {}".format(result.code, result.data), endpoint)
+            if result.code == 403:
+                raise tferrors.ExplorerForbidden("error (code: {}): {}".format(result.code, result.data), endpoint)
+            if result.code // 100 == 4:
+                raise tferrors.ExplorerClientError("client error (code: {}): {}".format(result.code, result.data), endpoint)
             raise tferrors.ExplorerServerPostError("POST: unexpected error (code: {}): {}".format(result.code, result.data), endpoint, data=data)
         
         address = self._consensus_addresses[indices[0]]
