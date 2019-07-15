@@ -4,6 +4,13 @@ import { store } from '../store/configureStore'
 
 remote.app.on('browser-window-focus', () => {
   resetAmountOfNotifications()
+  getWindow().flashFrame(false)
+  sendOverlay({ count: 0 })
+})
+
+remote.app.on('browser-window-blur', () => {
+  resetAmountOfNotifications()
+  getWindow().flashFrame(false)
   sendOverlay({ count: 0 })
 })
 
@@ -31,7 +38,7 @@ export function sendOverlay () {
 
 function renderWindowsOverlay (notifications) {
   if (!getWindow()) return
-  if (notifications.count > 0) {
+  if (notifications.count > 0 && !getWindow().isFocused()) {
     getWindow().setOverlayIcon(createIcon(notifications.count.toString()), notifications.count.toString())
     notifier.notify({ appID: 'org.develar.TFT-Wallet', title: notifications.title, message: notifications.message }, () => {
       getWindow().flashFrame(true)
