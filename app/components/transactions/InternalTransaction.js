@@ -1,7 +1,7 @@
 // @flow
 import { connect } from 'react-redux'
 import React, { Component } from 'react'
-import { Form, Dropdown, Loader, Dimmer } from 'semantic-ui-react'
+import { Form, Dropdown, Loader, Dimmer, Message } from 'semantic-ui-react'
 import { toast } from 'react-toastify'
 import { updateAccount, setTransactionJson } from '../../actions'
 import moment from 'moment'
@@ -53,40 +53,50 @@ class InternalTransaction extends Component {
     this.setState({ destination: value })
   }
 
+  dismissError = () => {
+    this.setState({ errorMessage: undefined })
+  }
+
   renderDestinationForm = () => {
     const { transactionType } = this.state
     if (transactionType === TransactionTypes.INTERNAL) {
-      const { walletsOptions, addressOptions, selectedWalletRecipient, selectedRecipientAddress } = this.state
+      const { walletsOptions, addressOptions, selectedWalletRecipient, selectedRecipientAddress, errorMessage } = this.state
       return (
-        <Form style={{ width: '90%', margin: 'auto' }}>
-          <Form.Field style={{ marginTop: 10 }}>
-            <label style={{ color: 'white' }}>Select your destination wallet *</label>
-            <Dropdown
-              placeholder='Select Wallet'
-              fluid
-              selection
-              search
-              options={walletsOptions}
-              onChange={this.selectWalletRecipient}
-              value={selectedWalletRecipient.wallet_name === '' ? selectedWalletRecipient.address : selectedWalletRecipient.wallet_name}
-            />
-          </Form.Field>
-          { selectedWalletRecipient.is_multisig ? (null) : (
-            <Form.Field>
-              <label style={{ color: 'white' }}>Destination Address *</label>
+        <div>
+          {errorMessage && <Message style={{ width: '90%', margin: 'auto' }} error onDismiss={this.dismissError}>
+            <Message.Header>Transaction failed</Message.Header>
+            <p style={{ fontSize: 13 }}>{errorMessage}</p>
+          </Message>}
+          <Form style={{ width: '90%', margin: 'auto' }}>
+            <Form.Field style={{ marginTop: 10 }}>
+              <label style={{ color: 'white' }}>Select your destination wallet *</label>
               <Dropdown
-                style={{ marginBottom: 20, marginTop: 10 }}
-                placeholder='Select Address'
+                placeholder='Select Wallet'
                 fluid
                 selection
                 search
-                options={addressOptions}
-                onChange={this.selectAddress}
-                value={selectedRecipientAddress}
+                options={walletsOptions}
+                onChange={this.selectWalletRecipient}
+                value={selectedWalletRecipient.wallet_name === '' ? selectedWalletRecipient.address : selectedWalletRecipient.wallet_name}
               />
             </Form.Field>
-          )}
-        </Form>
+            { selectedWalletRecipient.is_multisig ? (null) : (
+              <Form.Field>
+                <label style={{ color: 'white' }}>Destination Address *</label>
+                <Dropdown
+                  style={{ marginBottom: 20, marginTop: 10 }}
+                  placeholder='Select Address'
+                  fluid
+                  selection
+                  search
+                  options={addressOptions}
+                  onChange={this.selectAddress}
+                  value={selectedRecipientAddress}
+                />
+              </Form.Field>
+            )}
+          </Form>
+        </div>
       )
     }
   }
@@ -305,7 +315,7 @@ class InternalTransaction extends Component {
       toast.error('sending transaction failed')
       console.warn('failed to send internal transaction', JSON.stringify(builder.transaction.json()))
       const errorMessage = typeof error.__str__ === 'function' ? error.__str__() : error.toString()
-      this.setState({ loader: false, errorMessage: errorMessage })
+      this.setState({ loader: false, errorMessage: errorMessage, openConfirmationModal: false })
     })
   }
 
