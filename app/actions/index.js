@@ -37,48 +37,47 @@ export const selectAccount = function (account) {
 }
 
 export const getTransactionsNotifications = function (account) {
-  if (account && !(account instanceof Array)) {
-    return dispatch => {
-      const { chain_info: chaininfo } = account
+  console.log('---getting notifications---', account)
 
-      account.wallets.map(w => {
-        const block = chaininfo.last_block_get({
-          addresses: w.addresses
-        })
-        if (blockId !== block.identifier) {
-          if (block.transactions.length > 0) {
-            block.transactions.forEach(tx => {
-              if (tx.inputs.length > 0) {
-                dispatch({
-                  type: 'INCREASE_NOTIFICATION_COUNT',
-                  title: 'Transaction',
-                  description: 'Incoming transaction received'
-                })
-                toast('Incoming transaction received')
-              }
-              if (tx.outputs.length > 0) {
-                dispatch({
-                  type: 'INCREASE_NOTIFICATION_COUNT',
-                  title: 'Transaction',
-                  description: 'Outgoing transaction received'
-                })
-                toast('Outgoing transaction received')
-              }
-            })
-          }
+  console.log('doing something?')
+  return dispatch => {
+    const { chain_info: chaininfo } = account
+    account.wallets.map(w => {
+      const block = chaininfo.last_block_get({
+        addresses: w.addresses
+      })
+      console.log('saved blockid: ', blockId)
+      console.log('blockid from tx: ', block.identifier)
+      if (blockId !== block.identifier) {
+        if (block.transactions.length > 0) {
+          console.log('wallet with name: ', w.wallet_name)
+          console.log('--txs---', block.transactions)
+          block.transactions.forEach(tx => {
+            if (tx.inputs.length > 0) {
+              dispatch({
+                type: 'INCREASE_NOTIFICATION_COUNT',
+                title: 'Transaction',
+                description: 'Incoming transaction received'
+              })
+              toast('Incoming transaction received')
+            }
+            if (tx.outputs.length > 0) {
+              dispatch({
+                type: 'INCREASE_NOTIFICATION_COUNT',
+                title: 'Transaction',
+                description: 'Outgoing transaction received'
+              })
+              toast('Outgoing transaction received')
+            }
+          })
         }
-        blockId = block.identifier
-      })
-      dispatch({
-        type: 'GET_TX_FOR_WALLET',
-        tx: null
-      })
-    }
-  } else {
-    return {
+      }
+      blockId = block.identifier
+    })
+    dispatch({
       type: 'GET_TX_FOR_WALLET',
       tx: null
-    }
+    })
   }
 }
 
@@ -101,6 +100,7 @@ export const updateAccount = function (account) {
         type: 'UPDATE_ACCOUNT',
         account: acc
       })
+      getTransactionsNotifications(acc)
     })
   }
 }
