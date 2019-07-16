@@ -27,10 +27,9 @@ export function sendOverlay () {
   switch (process.platform) {
     case 'darwin': renderMacOverlay(notifications)
       break
-    case 'linux': renderLinuxOverlay(notifications)
-      break
     case 'win32': renderWindowsOverlay(notifications)
       break
+    case 'linux': return null
     default:
       return null
   }
@@ -77,16 +76,6 @@ function renderMacOverlay (notifications) {
     remote.app.dock.setBadge(notifications.count.toString())
   } else {
     remote.app.dock.setBadge('')
-  }
-}
-
-export function renderLinuxOverlay (notifications) {
-  if (!remote) return
-  if (notifications.count > 0) {
-    remote.app.show()
-    remote.app.setBadgeCount(notifications.count.toString())
-  } else {
-    remote.app.setBadgeCount(0)
   }
 }
 
