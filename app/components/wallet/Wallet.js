@@ -208,10 +208,10 @@ class Wallet extends Component {
     const { transactions } = selectedWallet.balance
 
     let authorizedText = (
-      <p style={{ position: 'fixed', right: '4%' }} className={styles.pageHeaderAuthorized}>Authorized</p>
+      <p style={{ position: 'fixed', right: '4%' }} className={styles.pageHeaderAuthorized}>Unauthorized</p>
     )
     if (authorized) {
-      authorizedText = (<p style={{ position: 'fixed', right: '4%' }} className={styles.pageHeaderAuthorized}>Unauthorized</p>)
+      authorizedText = (<p style={{ position: 'fixed', right: '4%' }} className={styles.pageHeaderAuthorized}>Authorized</p>)
     }
 
     return (
