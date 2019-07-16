@@ -132,14 +132,19 @@ class Account extends Component {
         marginRight: 0
       }
 
+      let authorizedText = (
+        <p className={'gradient-text'} style={authorizedStyle}>Unauthorized</p>
+      )
+      if (authorized) {
+        authorizedText = (<p className={'gradient-text'} style={authorizedStyle}>authorized</p>)
+      }
+
       content = (
         <Card.Content>
           <div>
-            {authorized ? (
-              <p className={'gradient-text'} style={authorizedStyle}>authorized</p>
-            ) : (
-              <p className={'gradient-text'} style={authorizedStyle}>Unauthorized</p>
-            )}
+            {this.state.isGoldChain ? (
+              authorizedText
+            ) : (null)}
             {w.is_multisig ? (
               <Card.Description style={{ position: 'absolute', top: 10, right: 5, left: 310, color: 'white' }}>
                 <p style={{ fontSize: 14 }}>{w.signatures_required}/{w.owners.length}</p>

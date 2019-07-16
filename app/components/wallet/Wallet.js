@@ -56,7 +56,8 @@ class Wallet extends Component {
       ownerAddresses: ['', ''],
       signatureCount: 2,
       hasConfirmedTx: false,
-      authorized: this.props.account.coin_auth_status_for_address_get(this.props.account.selected_wallet.address)
+      authorized: this.props.account.coin_auth_status_for_address_get(this.props.account.selected_wallet.address),
+      isGoldChain: this.props.account.chain_type === 'goldchain'
     }
   }
 
@@ -172,7 +173,7 @@ class Wallet extends Component {
   }
 
   render () {
-    const { contactName, contactAddress, openAddModal, ownerAddresses, signatureCount, openAddMultisigModal, openExportModal, hasConfirmedTx } = this.state
+    const { contactName, contactAddress, openAddModal, ownerAddresses, signatureCount, openAddMultisigModal, openExportModal, hasConfirmedTx, isGoldChain, authorized } = this.state
 
     if (this.state.openAddModal) {
       return (
@@ -206,6 +207,13 @@ class Wallet extends Component {
     const { chain_info: chainConstants, selected_wallet: selectedWallet } = account
     const { transactions } = selectedWallet.balance
 
+    let authorizedText = (
+      <p style={{ position: 'fixed', right: '4%' }} className={styles.pageHeaderAuthorized}>Authorized</p>
+    )
+    if (authorized) {
+      authorizedText = (<p style={{ position: 'fixed', right: '4%' }} className={styles.pageHeaderAuthorized}>Unauthorized</p>)
+    }
+
     return (
       <div>
         {openExportModal && <ExportToPdfModal
@@ -215,11 +223,9 @@ class Wallet extends Component {
         <div className={styles.pageHeader}>
           <div style={{ display: 'flex' }}>
             <p className={styles.pageHeaderTitle}>Wallet {selectedWallet.wallet_name}</p>
-            {this.state.authorized ? (
-              <p style={{ position: 'fixed', right: '4%' }} className={styles.pageHeaderAuthorized}>Authorized</p>
-            ) : (
-              <p style={{ position: 'fixed', right: '4%' }} className={styles.pageHeaderAuthorized}>Unauthorized</p>
-            )}
+            {isGoldChain ? (
+              authorizedText
+            ) : (null)}
           </div>
           <p className={styles.pageHeaderSubtitle}>Wallet balance and transactions</p>
         </div>
