@@ -1,3 +1,21 @@
+# v0.3.0 (2018.07.16)
+
+Features:
+
+- renamed the app to  `threefold-wallet`.
+- goldchain support enabled, users can now create goldchain testnet accounts.
+- goldchain wallets show if addresses are authorized or not.
+- notifications for macOS and windows. If the app is not focussed and incoming or outgoing transactions are received, the user will receive a system notification.
+- displaying chain-name in the footer of the application.
+
+Improvements:
+
+- export transaction list to pdf now fills in extension `.pdf` on windows.
+
+Fixes:
+
+- fixed displaying current route when navigating.
+
 # v0.2.2 (2018.07.11)
 
 Features:
