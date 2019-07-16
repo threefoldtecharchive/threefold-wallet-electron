@@ -43,7 +43,8 @@ class AddressBook extends Component {
       signatureCount: 2,
       ownerAddressErrors: [false, false],
       ownerAddresses: ['', ''],
-      signatureCountError: false
+      signatureCountError: false,
+      isGoldChain: this.props.account.chain_type === 'goldchain'
     }
   }
 
@@ -324,7 +325,9 @@ class AddressBook extends Component {
           </Segment>
           <div style={{ display: 'flex', float: 'right', marginRight: '5%' }}>
             <Button onClick={this.openAddModal} className={styles.acceptButton} style={{ marginTop: 40, marginRight: 20 }} size='big'>Create contact</Button>
-            <Button onClick={this.openAddMultiSigModal} className={styles.acceptButton} style={{ marginTop: 40 }} size='big'>Create multisig contact</Button>
+            {this.state.isGoldChain ? (null) : (
+              <Button onClick={this.openAddMultiSigModal} className={styles.acceptButton} style={{ marginTop: 40 }} size='big'>Create multisig contact</Button>
+            )}
           </div>
         </div>
       </div>
