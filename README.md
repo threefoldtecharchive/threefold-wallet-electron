@@ -1,14 +1,14 @@
-# TFChain Electron Wallet
+# Threefold Electron Wallet
 
 > :information_source: [More information about this desktop application and its positioning as a product.](about.md)
 
-A desktop application that allows you to manage all your TFChain wallets. Each wallet is linked to an account, and an account is identified by a seed (mnemonic phrase). An account can have multiple wallets. Each wallet can have up to `8` addresses and requires a minimum `1` address (the default).
+A desktop application that allows you to manage all your Threefold wallets. Each wallet is linked to an account, and an account is identified by a seed (mnemonic phrase). An account can have multiple wallets. Each wallet can have up to `8` addresses and requires a minimum `1` address (the default).
 
-The mnemonic phrase (used as seed for an account) is compatible with [the TFChain mobile application](https://github.com/threefoldfoundation/tf_app), JumpscaleX light client and official TFChain binary tools. This allows you to recover your wallets created in these clients as an account of this client. Accounts created with this client can also recovered with the other clients. Do note that the [the TFChain mobile application](https://github.com/threefoldfoundation/tf_app) and JumpscaleX light client will only recover the default wallet of your account. In these other clients there is also no concept of account, but just a single wallet. The JumpscaleX light client does allow you to load as many addresses as you want in a single wallet, the [the TFChain mobile application](https://github.com/threefoldfoundation/tf_app) is limited to just one address of just one wallet.
+The mnemonic phrase (used as seed for an account) is compatible with [the Threefold mobile application](https://github.com/threefoldfoundation/tf_app), JumpscaleX light client and official Threefold binary tools. This allows you to recover your wallets created in these clients as an account of this client. Accounts created with this client can also recovered with the other clients. Do note that the [the Threefold mobile application](https://github.com/threefoldfoundation/tf_app) and JumpscaleX light client will only recover the default wallet of your account. In these other clients there is also no concept of account, but just a single wallet. The JumpscaleX light client does allow you to load as many addresses as you want in a single wallet, the [the Threefold mobile application](https://github.com/threefoldfoundation/tf_app) is limited to just one address of just one wallet.
 
 > :warning: This project is currently still in alpha-mode. No direct support is offered at this point.
 > Do feel free to report issues if you encounter a problem or have suggestions.
-> Pull requests are also welcome. As this is also not an official TFChain product, it is not expected
+> Pull requests are also welcome. As this is also not an official Threefold product, it is not expected
 > that direct support will ever be offered. It might also mean that while some features could be useful for this App,
 > it won't be added due to time constraints.
 
@@ -20,15 +20,15 @@ The mnemonic phrase (used as seed for an account) is compatible with [the TFChai
 
 ## Download
 
-![GitHub release](https://img.shields.io/github/release-pre/threefoldfoundation/tfchain-wallet-electron.svg)
+![GitHub release](https://img.shields.io/github/release-pre/threefoldtech/threefold-wallet-electron.svg)
 
-- [Windows Installer](https://github.com/threefoldfoundation/tfchain-wallet-electron/releases/download/v0.2.2/TFT-Wallet.Setup.0.2.2.exe)
+- [Windows Installer](https://github.com/threefoldtech/threefold-wallet-electron/releases/download/v0.2.2/TFT-Wallet.Setup.0.2.2.exe)
   - Windows 7 or later
   - ia32 (x86) and x64 (amd64)
-- [macOS Installer](https://github.com/threefoldfoundation/tfchain-wallet-electron/releases/download/v0.2.2/TFT-Wallet-0.2.2.dmg)
+- [macOS Installer](https://github.com/threefoldtech/threefold-wallet-electron/releases/download/v0.2.2/TFT-Wallet-0.2.2.dmg)
   - 10.10 (Yosemite) or later
   - 64-bit only
-- [Linux Installer](https://github.com/threefoldfoundation/tfchain-wallet-electron/releases/download/v0.2.2/TFT-Wallet.0.2.2.AppImage)
+- [Linux Installer](https://github.com/threefoldtech/threefold-wallet-electron/releases/download/v0.2.2/TFT-Wallet.0.2.2.AppImage)
   - Fedora 21, Debian 8 or Ubuntu 12.04 and newer
   - ia32 (i686), x64 (amd64), armv7l (ARM v7)
 
