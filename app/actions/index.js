@@ -1,4 +1,5 @@
 import { toast } from 'react-toastify'
+import { store } from '../store/configureStore'
 let blockId
 
 export const addAccount = function (account) {
@@ -37,39 +38,39 @@ export const selectAccount = function (account) {
 }
 
 export const getTransactionsNotifications = function (account) {
-  if (account && !(account instanceof Array)) {
-    return dispatch => {
-      const { chain_info: chaininfo } = account
-
-      account.wallets.map(w => {
-        const block = chaininfo.last_block_get({
-          addresses: w.addresses
-        })
-        if (blockId !== block.identifier) {
-          if (block.transactions.length > 0) {
-            block.transactions.forEach(tx => {
-              if (tx.inputs.length > 0) {
-                toast('Incomming transaction received')
-              }
-              if (tx.outputs.length > 0) {
-                toast('Outgoing transaction received')
-              }
+  const { chain_info: chaininfo } = account
+  account.wallets.map(w => {
+    const block = chaininfo.last_block_get({
+      addresses: w.addresses
+    })
+    if (blockId !== block.identifier) {
+      if (block.transactions.length > 0) {
+        block.transactions.forEach(tx => {
+          if (tx.inputs.length > 0) {
+            store.dispatch({
+              type: 'INCREASE_NOTIFICATION_COUNT',
+              title: 'Transaction',
+              description: 'Incoming transaction received'
             })
+            toast('Incoming transaction received')
           }
-        }
-        blockId = block.identifier
-      })
-      dispatch({
-        type: 'GET_TX_FOR_WALLET',
-        tx: null
-      })
+          if (tx.outputs.length > 0) {
+            store.dispatch({
+              type: 'INCREASE_NOTIFICATION_COUNT',
+              title: 'Transaction',
+              description: 'Outgoing transaction received'
+            })
+            toast('Outgoing transaction received')
+          }
+        })
+      }
     }
-  } else {
-    return {
-      type: 'GET_TX_FOR_WALLET',
-      tx: null
-    }
-  }
+    blockId = block.identifier
+  })
+  store.dispatch({
+    type: 'GET_TX_FOR_WALLET',
+    tx: null
+  })
 }
 
 export const resetApp = function () {
@@ -91,6 +92,7 @@ export const updateAccount = function (account) {
         type: 'UPDATE_ACCOUNT',
         account: acc
       })
+      getTransactionsNotifications(acc)
     })
   }
 }
@@ -119,5 +121,17 @@ export const setError = function (error) {
 export const resetError = function () {
   return {
     type: 'RESET_ERROR'
+  }
+}
+
+export const increaseNotificationCount = function () {
+  return {
+    type: 'INCREASE_NOTIFICATION_COUNT'
+  }
+}
+
+export const resetNotificationCount = function () {
+  return {
+    type: 'RESET_NOTIFICATION_COUNT'
   }
 }

@@ -55,7 +55,7 @@ class Login extends Component {
 
       this.props.SelectAccount(account)
       this.props.updateAccount(account)
-      this.props.GetTransactionsNotifications(account)
+      // this.props.GetTransactionsNotifications(account)
       return this.props.history.push('/account')
     } catch (error) {
       console.log(error)

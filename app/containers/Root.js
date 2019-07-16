@@ -75,7 +75,7 @@ class Root extends Component {
       const { account } = this.props
       if (account && !(account instanceof Array)) {
         this.props.updateAccount(account)
-        this.props.getTransactionsNotifications(account)
+        // this.props.getTransactionsNotifications(account)
       }
     }, 60000)
   }
