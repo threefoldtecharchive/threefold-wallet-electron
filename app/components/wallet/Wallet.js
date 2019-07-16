@@ -55,7 +55,8 @@ class Wallet extends Component {
       openAddModal: false,
       ownerAddresses: ['', ''],
       signatureCount: 2,
-      hasConfirmedTx: false
+      hasConfirmedTx: false,
+      authorized: this.props.account.coin_auth_status_for_address_get(this.props.account.selected_wallet.address)
     }
   }
 
@@ -111,8 +112,7 @@ class Wallet extends Component {
     this.setState({ openAddModal: false })
   }
 
-  addContact = (blabla) => {
-    console.log(blabla)
+  addContact = () => {
     const { contactAddress, contactName } = this.state
     const { account } = this.props
     const { address_book: addressBook } = account
@@ -213,7 +213,14 @@ class Wallet extends Component {
           closeExportModal={this.changeStateExportModel}
         />}
         <div className={styles.pageHeader}>
-          <p className={styles.pageHeaderTitle}>Wallet {selectedWallet.wallet_name}</p>
+          <div style={{ display: 'flex' }}>
+            <p className={styles.pageHeaderTitle}>Wallet {selectedWallet.wallet_name}</p>
+            {this.state.authorized ? (
+              <p style={{ position: 'fixed', right: '4%' }} className={styles.pageHeaderAuthorized}>Authorized</p>
+            ) : (
+              <p style={{ position: 'fixed', right: '4%' }} className={styles.pageHeaderAuthorized}>Unauthorized</p>
+            )}
+          </div>
           <p className={styles.pageHeaderSubtitle}>Wallet balance and transactions</p>
         </div>
         <Divider className={styles.pageDivider} />

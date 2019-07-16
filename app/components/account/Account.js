@@ -107,6 +107,7 @@ class Account extends Component {
   }
 
   renderWalletContent = (w) => {
+    const authorized = this.props.account.coin_auth_status_for_address_get(w.address)
     let content = null
     if (w.is_loaded) {
       let unlockedBalance = `${w.balance.coins_unlocked.str({ precision: 3, unit: true })}`
@@ -122,9 +123,23 @@ class Account extends Component {
         lockedBalance = `${totalLockedBalance.str({ precision: 3, unit: true })} *`
       }
 
+      const authorizedStyle = {
+        position: 'relative',
+        float: 'right',
+        fontSize: 12,
+        top: -20,
+        right: 5,
+        marginRight: 0
+      }
+
       content = (
         <Card.Content>
           <div>
+            {authorized ? (
+              <p className={'gradient-text'} style={authorizedStyle}>authorized</p>
+            ) : (
+              <p className={'gradient-text'} style={authorizedStyle}>Unauthorized</p>
+            )}
             {w.is_multisig ? (
               <Card.Description style={{ position: 'absolute', top: 10, right: 5, left: 310, color: 'white' }}>
                 <p style={{ fontSize: 14 }}>{w.signatures_required}/{w.owners.length}</p>

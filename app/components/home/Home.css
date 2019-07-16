@@ -23,6 +23,12 @@
   margin-bottom: 0px;
 }
 
+.pageHeaderAuthorized {
+  font-family: 'SF UI Text Bold';
+  font-size: 18px;
+  margin-bottom: 0px;
+}
+
 .pageHeaderSubtitle {
   font-family: 'SF UI Text Regular';
   font-size: 20px;
