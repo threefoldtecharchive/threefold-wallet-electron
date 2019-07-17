@@ -1,7 +1,7 @@
 // @flow
 import { connect } from 'react-redux'
 import React, { Component } from 'react'
-import { Form, Loader, Dimmer, Checkbox } from 'semantic-ui-react'
+import { Form, Loader, Dimmer, Checkbox, Message } from 'semantic-ui-react'
 import { toast } from 'react-toastify'
 import { updateAccount, setTransactionJson, saveAccount } from '../../actions'
 import * as tfchain from '../../tfchain/api'
@@ -73,23 +73,33 @@ class SingleTransaction extends Component {
     this.setState({ destination })
   }
 
+  dismissError = () => {
+    this.setState({ errorMessage: undefined })
+  }
+
   renderDestinationForm = () => {
-    const { enableSave } = this.state
+    const { enableSave, errorMessage } = this.state
     return (
-      <Form style={{ width: '90%', margin: 'auto' }}>
-        <Form.Field style={{ marginTop: 10, marginBottom: 20 }}>
-          <label style={{ color: 'white' }}>Destination address *</label>
-          <SearchableAddress
-            setSearchValue={this.setSearchValue}
-            icon='send'
-          />
-        </Form.Field>
-        {enableSave ? (
-          <Form.Field style={{ float: 'right' }}>
-            <Checkbox label={<label style={{ color: 'white' }}>Save recipient to contacts</label>} onChange={this.openSaveModal} />
+      <div>
+        {errorMessage && <Message style={{ width: '90%', margin: 'auto' }} error onDismiss={this.dismissError}>
+          <Message.Header>Transaction failed</Message.Header>
+          <p style={{ fontSize: 13 }}>{errorMessage}</p>
+        </Message>}
+        <Form style={{ width: '90%', margin: 'auto' }}>
+          <Form.Field style={{ marginTop: 10, marginBottom: 20 }}>
+            <label style={{ color: 'white' }}>Destination address *</label>
+            <SearchableAddress
+              setSearchValue={this.setSearchValue}
+              icon='send'
+            />
           </Form.Field>
-        ) : null}
-      </Form>
+          {enableSave ? (
+            <Form.Field style={{ float: 'right' }}>
+              <Checkbox label={<label style={{ color: 'white' }}>Save recipient to contacts</label>} onChange={this.openSaveModal} />
+            </Form.Field>
+          ) : null}
+        </Form>
+      </div>
     )
   }
 
@@ -191,7 +201,7 @@ class SingleTransaction extends Component {
       toast.error('sending transaction failed')
       console.warn('failed to send single-signature transaction', JSON.stringify(builder.transaction.json()))
       const errorMessage = typeof error.__str__ === 'function' ? error.__str__() : error.toString()
-      this.setState({ loader: false, errorMessage: errorMessage })
+      this.setState({ loader: false, errorMessage: errorMessage, openConfirmationModal: false })
     })
   }
 
