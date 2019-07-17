@@ -240,7 +240,7 @@ class Wallet extends Component {
             <Icon onClick={() => this.goBack()} style={{ fontSize: 25, marginLeft: 15, marginTop: 5, cursor: 'pointer', zIndex: 5 }} name='chevron circle left' />
             <span onClick={() => this.goBack()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
           </div>
-          {!this.state.authorized && this.state.showError && <Message style={{ width: '90%', margin: 'auto', marginTop: 10, marginBottom: 10 }} error onDismiss={this.dismissError}>
+          {!this.state.authorized && this.state.showError && this.state.isGoldChain && <Message style={{ width: '90%', margin: 'auto', marginTop: 10, marginBottom: 10 }} error onDismiss={this.dismissError}>
             <Message.Header>Not all addresses are authorized</Message.Header>
             <p style={{ fontSize: 13, cursor: 'pointer', color: 'blue', textDecoration: 'underline' }} onClick={() => this.props.history.push('/walletreceive')}>Show me Unauthorized addresses</p>
           </Message>}
