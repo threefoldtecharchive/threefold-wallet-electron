@@ -4,7 +4,7 @@ import React, { Component } from 'react'
 import { Icon, Input, Divider, Dropdown, Segment, Label, Form, Message } from 'semantic-ui-react'
 import styles from '../home/Home.css'
 import QRCode from 'qrcode.react'
-import { flatten } from 'lodash'
+import { flatten, filter } from 'lodash'
 import { CopyToClipboard } from 'react-copy-to-clipboard'
 import { toast } from 'react-toastify'
 const { shell } = require('electron')
@@ -95,28 +95,31 @@ class WalletReceive extends Component {
     if (isGoldChain) {
       const wallets = this.props.account.wallets
       return wallets.map(w => {
-        const authorized = this.props.account.coin_auth_status_for_address_get(w.address)
+        const isWalletAuthorized = filter(this.props.account.coin_auth_status_for_wallet_get({ name: w.wallet_name }), x => x === false).length === 0
         return (
           <Segment key={w.wallet_name} inverted style={{ margin: 'auto', width: '90%' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <h3>Wallet {w.wallet_name}</h3>
-              {authorized ? <p className={'gradient-text'} style={{ fontSize: 12 }}>Authorized</p>
+              {isWalletAuthorized ? <p className={'gradient-text'} style={{ fontSize: 12 }}>Authorized</p>
                 : <p className={'orange-gradient-text'} style={{ fontSize: 12 }}>Unauthorized</p>}
             </div>
             <Divider />
-            {!authorized && <Message style={{ width: '100%', margin: 'auto', marginTop: 10, marginBottom: 10 }} error>
-              <Message.Header>This wallet is not authorized. To authorize these wallet addresses, paste the address on the authorization page.</Message.Header>
-              <p style={{ fontSize: 13, cursor: 'pointer', color: 'blue', textDecoration: 'underline' }} onClick={() => shell.openExternal(`https://faucet.testnet.nbh-digital.com/`)}>https://faucet.testnet.nbh-digital.com/</p>
-            </Message>}
             {w.addresses.map(a => {
+              const authorized = this.props.account.coin_auth_status_for_address_get(a)
               return (
-                <div key={a} style={{ display: 'flex', marginTop: 20 }}>
-                  <p style={{ fontSize: 12 }}>{a}</p>
-                  <CopyToClipboard text={a}
-                    onCopy={() => this.setState({ copied: true })}>
-                    <Label onClick={() => toast('Copied to clipboard')} style={{ display: 'block', margin: 'auto', marginRight: 0, width: 200, cursor: 'pointer' }}><Icon name='clipboard' /> copy address to clipboard</Label>
-                  </CopyToClipboard>
-                </div>
+                <React.Fragment>
+                  <div key={a} style={{ display: 'flex', marginTop: 20 }}>
+                    <p style={{ fontSize: 12 }}>{a}</p>
+                    <CopyToClipboard text={a}
+                      onCopy={() => this.setState({ copied: true })}>
+                      <Label onClick={() => toast('Copied to clipboard')} style={{ display: 'block', margin: 'auto', marginRight: 0, width: 200, cursor: 'pointer' }}><Icon name='clipboard' /> copy address to clipboard</Label>
+                    </CopyToClipboard>
+                  </div>
+                  {!authorized && <Message style={{ width: '100%', margin: 'auto', marginTop: 10, marginBottom: 10 }} error>
+                    <Message.Header>This addres is not authorized. To authorize this address, paste the address on the authorization page.</Message.Header>
+                    <p style={{ fontSize: 13, cursor: 'pointer', color: 'blue', textDecoration: 'underline' }} onClick={() => shell.openExternal(`https://faucet.testnet.nbh-digital.com/`)}>https://faucet.testnet.nbh-digital.com/</p>
+                  </Message>}
+                </React.Fragment>
               )
             })}
           </Segment>

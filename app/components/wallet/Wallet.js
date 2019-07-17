@@ -9,7 +9,7 @@ import TransactionsList from './TransactionList'
 import { saveAccount, updateAccount } from '../../actions'
 import UpdateContactModal from '../addressbook/UpdateContactModal'
 import UpdateMultiSigContactModal from '../addressbook/UpdateMultiSigContactModal'
-import { find } from 'lodash'
+import { find, filter } from 'lodash'
 import ExportToPdfModal from './ExportToPdfModal'
 import { toast } from 'react-toastify'
 
@@ -57,7 +57,7 @@ class Wallet extends Component {
       signatureCount: 2,
       hasConfirmedTx: false,
       showError: true,
-      authorized: this.props.account.coin_auth_status_for_address_get(this.props.account.selected_wallet.address),
+      authorized: filter(this.props.account.coin_auth_status_for_wallet_get({ name: this.props.account.selected_wallet.wallet_name }), x => x === false).length === 0,
       isGoldChain: this.props.account.chain_type === 'goldchain'
     }
   }
