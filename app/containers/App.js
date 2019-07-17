@@ -26,7 +26,8 @@ const iconStyle = {
 
 const mapStateToProps = state => {
   return {
-    currentLocation: state.router.location.pathname
+    currentLocation: state.router.location.pathname,
+    account: state.account.state
   }
 }
 
@@ -37,6 +38,8 @@ class App extends Component {
 
   render () {
     const { children, currentLocation } = this.props
+    const isGoldChain = this.props.account.chain_type === 'goldchain'
+
     return (
       <React.Fragment>
         <Grid style={{ height: 'calc(100vh - 50px)', marginBottom: 0 }}>
@@ -75,15 +78,17 @@ class App extends Component {
                     <Icon style={iconStyle} name='arrow circle left' />
                     <span>Receive</span>
                   </Menu.Item>
-                  <Menu.Item
-                    style={menuItemStyle}
-                    name={'SIGN_TRANSACTIONS'}
-                    active={currentLocation === routes.SIGN_TRANSACTIONS}
-                    onClick={this.handleItemClick}
-                  >
-                    <Icon style={iconStyle} name='check circle' />
-                    <span>Sign Transaction</span>
-                  </Menu.Item>
+                  {isGoldChain ? (null) : (
+                    <Menu.Item
+                      style={menuItemStyle}
+                      name={'SIGN_TRANSACTIONS'}
+                      active={currentLocation === routes.SIGN_TRANSACTIONS}
+                      onClick={this.handleItemClick}
+                    >
+                      <Icon style={iconStyle} name='check circle' />
+                      <span>Sign Transaction</span>
+                    </Menu.Item>
+                  )}
                   <Divider style={{ margin: 0 }} />
                   <Menu.Item
                     style={menuItemStyle}
