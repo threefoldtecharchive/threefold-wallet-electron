@@ -78,6 +78,14 @@ a:hover {
   cursor: pointer;
 }
 
+.orange-gradient-text {
+  background: linear-gradient(90deg, rgba(251,100,164,1) 0%, rgba(244,154,93,1) 100%) !important;
+  color: linear-gradient(90deg, rgba(251,100,164,1) 0%, rgba(244,154,93,1) 100%) !important;
+	-webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  font-family: SF UI Text Bold;
+}
+
 .ui.vertical.menu .active.item span {
   background: linear-gradient(to right, #7f88df 0%, #49d2d8 100%) !important;
   color: linear-gradient(to right, #7f88df 0%, #49d2d8 100%) !important;

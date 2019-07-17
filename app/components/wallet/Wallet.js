@@ -1,7 +1,7 @@
 // @flow
 import { connect } from 'react-redux'
 import React, { Component } from 'react'
-import { Segment, Icon, Divider, Button } from 'semantic-ui-react'
+import { Segment, Icon, Divider, Button, Message } from 'semantic-ui-react'
 import routes from '../../constants/routes'
 import styles from '../home/Home.css'
 import BalanceGrid from './BalanceGrid'
@@ -56,6 +56,7 @@ class Wallet extends Component {
       ownerAddresses: ['', ''],
       signatureCount: 2,
       hasConfirmedTx: false,
+      showError: true,
       authorized: this.props.account.coin_auth_status_for_address_get(this.props.account.selected_wallet.address),
       isGoldChain: this.props.account.chain_type === 'goldchain'
     }
@@ -172,6 +173,10 @@ class Wallet extends Component {
     )
   }
 
+  dismissError = () => {
+    this.setState({ showError: false })
+  }
+
   render () {
     const { contactName, contactAddress, openAddModal, ownerAddresses, signatureCount, openAddMultisigModal, openExportModal, hasConfirmedTx, isGoldChain, authorized } = this.state
 
@@ -208,10 +213,10 @@ class Wallet extends Component {
     const { transactions } = selectedWallet.balance
 
     let authorizedText = (
-      <p style={{ position: 'fixed', right: '4%' }} className={styles.pageHeaderAuthorized}>Unauthorized</p>
+      <p style={{ position: 'fixed', right: '4%' }} className={[styles.pageHeaderAuthorized]}>Unauthorized</p>
     )
     if (authorized) {
-      authorizedText = (<p style={{ position: 'fixed', right: '4%' }} className={styles.pageHeaderAuthorized}>Authorized</p>)
+      authorizedText = (<p style={{ position: 'fixed', right: '4%' }} className={[styles.pageHeaderAuthorized]}>Authorized</p>)
     }
 
     return (
@@ -235,6 +240,10 @@ class Wallet extends Component {
             <Icon onClick={() => this.goBack()} style={{ fontSize: 25, marginLeft: 15, marginTop: 5, cursor: 'pointer', zIndex: 5 }} name='chevron circle left' />
             <span onClick={() => this.goBack()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
           </div>
+          {!this.state.authorized && this.state.showError && <Message style={{ width: '90%', margin: 'auto', marginTop: 10, marginBottom: 10 }} error onDismiss={this.dismissError}>
+            <Message.Header>Not all addresses are authorized</Message.Header>
+            <p style={{ fontSize: 13, cursor: 'pointer', color: 'blue', textDecoration: 'underline' }} onClick={() => this.props.history.push('/walletreceive')}>Show me Unauthorized addresses</p>
+          </Message>}
           <div style={{ paddingBottom: 20, marginTop: 10 }}>
             {this.renderWalletBalanceGrid()}
             <Segment style={{ width: '90%', height: '45vh', overflow: 'auto', overflowY: 'scroll', margin: 'auto', background: '#29272E', marginTop: 20 }}>

@@ -133,7 +133,7 @@ class Account extends Component {
       }
 
       let authorizedText = (
-        <p className={'gradient-text'} style={authorizedStyle}>Unauthorized</p>
+        <p className={'orange-gradient-text'} style={authorizedStyle}>Unauthorized</p>
       )
       if (authorized) {
         authorizedText = (<p className={'gradient-text'} style={authorizedStyle}>authorized</p>)
