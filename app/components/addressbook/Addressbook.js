@@ -53,7 +53,7 @@ class AddressBook extends Component {
     const { address_book: addressBook } = account
     if (addressBook.contact_names.length === 0) {
       return (
-        <h2>No contacts yet! Create one</h2>
+        <h2 style={{ fontSize: 20 }}>No contacts yet! Create one</h2>
       )
     } else {
       return (

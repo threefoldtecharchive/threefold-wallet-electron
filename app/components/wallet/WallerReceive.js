@@ -95,7 +95,7 @@ class WalletReceive extends Component {
       const wallets = this.props.account.wallets
       return wallets.map(w => {
         return (
-          <Segment inverted style={{ margin: 'auto', width: '90%' }}>
+          <Segment key={w.wallet_name} inverted style={{ margin: 'auto', width: '90%' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <h3>Wallet {w.wallet_name}</h3>
               <p className={'gradient-text'} style={{ fontSize: 12 }}>{this.props.account.coin_auth_status_for_address_get(w.address) ? 'Authorized' : 'Unauthorized'}</p>
@@ -103,7 +103,7 @@ class WalletReceive extends Component {
             <Divider />
             {w.addresses.map(a => {
               return (
-                <div style={{ display: 'flex', marginTop: 20 }}>
+                <div key={a} style={{ display: 'flex', marginTop: 20 }}>
                   <p style={{ fontSize: 12 }}>{a}</p>
                   <CopyToClipboard text={a}
                     onCopy={() => this.setState({ copied: true })}>
