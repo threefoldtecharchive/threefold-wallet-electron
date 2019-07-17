@@ -8,8 +8,12 @@ import { loadAccounts, selectAccount, resetApp, resetError } from '../../actions
 import { CopyToClipboard } from 'react-copy-to-clipboard'
 import { toast } from 'react-toastify'
 import { Scrollbars } from 'react-custom-scrollbars'
-const storage = require('electron-json-storage')
+import { copySync, emptyDirSync } from 'fs-extra-p'
+import { readdir } from 'fs'
 const { shell } = require('electron')
+
+const storage = require('electron-json-storage')
+const path = require('path')
 
 const mapStateToProps = state => ({
   accounts: state.accounts,
@@ -39,12 +43,35 @@ class Home extends Component {
     }
   }
 
-  componentWillMount () {
+  async componentWillMount () {
     // Reset redux store
     this.props.resetApp()
 
+    // Only in production migrate old accounts to a new location
+    // We do this because we changed the name of our application
+    // Will only happen once on startup in production, we look if there are any files in the old datapath
+    // if so, copy them to the new datapath
+    const dataPath = path.join(storage.getDefaultDataPath(), '/tfchain/accounts')
+    if (process.env.NODE_ENV === 'production') {
+      const v1DataPath = dataPath.replace('ThreefoldWallet', 'TFChainWallet')
+      readdir(v1DataPath, function (err, files) {
+        if (err) {
+          console.log(err)
+        } else {
+          if (files.length > 0) {
+            try {
+              copySync(v1DataPath, dataPath, { overwrite: true })
+              emptyDirSync(v1DataPath)
+            } catch (error) {
+              console.log(error)
+            }
+          }
+        }
+      })
+    }
+
+    storage.setDataPath(dataPath)
     const _this = this
-    const loadAccountsFromStorage = this.props.loadAccounts
     storage.getAll(function (err, data) {
       if (err) throw err
       let accounts = []
@@ -55,7 +82,6 @@ class Home extends Component {
         })
       }
       _this.setState({ accounts })
-      loadAccountsFromStorage(accounts)
     })
   }
 

@@ -19,7 +19,9 @@ function getWindow () {
 }
 
 export function resetAmountOfNotifications () {
-  store.dispatch({ type: 'RESET_NOTIFICATION_COUNT' })
+  if (store) {
+    store.dispatch({ type: 'RESET_NOTIFICATION_COUNT' })
+  }
 }
 
 export function sendOverlay () {
@@ -80,6 +82,7 @@ function renderMacOverlay (notifications) {
 }
 
 export const customMiddleWare = store => next => action => {
+  if (!action) return
   next(action)
   if (action.type === 'INCREASE_NOTIFICATION_COUNT') {
     sendOverlay(store.getState().notifications)

@@ -409,6 +409,8 @@ class MultisigTransaction extends Component {
     return this.openConfirmationModal()
   }
 
+  mapDestinationDropdown = (wallet) => {}
+
   render () {
     if (this.state.loader) {
       return (
@@ -461,7 +463,7 @@ class MultisigTransaction extends Component {
         />
         {this.renderAddressBook()}
         {this.renderDestinationForm()}
-        <TransactionBodyForm handleSubmit={this.handleSubmit} enableSubmit={this.state.enableSubmit} />
+        <TransactionBodyForm handleSubmit={this.handleSubmit} enableSubmit={this.state.enableSubmit} mapDestinationDropdown={this.mapDestinationDropdown} />
       </div>
     )
   }

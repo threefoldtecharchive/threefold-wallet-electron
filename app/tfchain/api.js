@@ -2913,7 +2913,26 @@ export var SingleSignatureWallet =  __class__ ('SingleSignatureWallet', [BaseWal
 			self.balance = balance;
 			self._loaded = true;
 		};
-		return jsasync.chain (self._tfwallet.balance_get (account.chain_info._tf_chain_info), cb);
+		var log_err = function (err) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'err': var err = __allkwargs0__ [__attrib0__]; break;
+						}
+					}
+				}
+			}
+			else {
+			}
+			jslog.error ('error occured while updating balance of wallet {} with addresses {}: {}'.format (self.wallet_name, self.addresses, err));
+			var __except0__ = err;
+			__except0__.__cause__ = null;
+			throw __except0__;
+		};
+		return jsasync.chain (jsasync.catch_promise (self._tfwallet.balance_get (account.chain_info._tf_chain_info), log_err), cb);
 	});},
 	get _update_unconfirmed_balance_from_transaction () {return __get__ (this, function (self, transaction) {
 		if (arguments.length) {
@@ -3397,7 +3416,26 @@ export var MultiSignatureWallet =  __class__ ('MultiSignatureWallet', [BaseWalle
 			self.balance = result.balance (account.chain_info._tf_chain_info);
 			self._loaded = true;
 		};
-		return jsasync.chain (account._explorer_client.unlockhash_get (self.address), cb);
+		var log_err = function (err) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'err': var err = __allkwargs0__ [__attrib0__]; break;
+						}
+					}
+				}
+			}
+			else {
+			}
+			jslog.error ('error occured while updating balance of multisig wallet {} with address {}: {}'.format (self.wallet_name, self.address, err));
+			var __except0__ = err;
+			__except0__.__cause__ = null;
+			throw __except0__;
+		};
+		return jsasync.chain (jsasync.catch_promise (account._explorer_client.unlockhash_get (self.address), log_err), cb);
 	});},
 	get _update_unconfirmed_balance_from_transaction () {return __get__ (this, function (self, transaction) {
 		if (arguments.length) {

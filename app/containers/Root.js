@@ -7,12 +7,6 @@ import { loadAccounts, updateAccount, getTransactionsNotifications, setError } f
 import Moment from 'moment'
 import momentLocalizer from 'react-widgets-moment'
 
-const os = require('os')
-const storage = require('electron-json-storage')
-const path = require('path')
-
-storage.setDataPath(os.tmpdir())
-
 const mapStateToProps = state => ({
   account: state.account.state
 })
@@ -47,28 +41,9 @@ class Root extends Component {
     this.setState({ errorOccurred: true })
   }
 
-  componentWillMount () {
-    // Configure storage
-    const dataPath = storage.getDefaultDataPath()
-    const newPath = path.join(dataPath, '/tfchain/accounts')
-    storage.setDataPath(newPath)
-
+  async componentWillMount () {
     Moment.locale()
     momentLocalizer()
-
-    // Load in accounts and put them in store
-    const loadAccountsFromStorage = this.props.loadAccounts
-    storage.getAll(function (err, data) {
-      if (err) throw err
-      let accounts = []
-      for (let [key, value] of Object.entries(data)) {
-        accounts.push({
-          data: value,
-          name: key
-        })
-      }
-      loadAccountsFromStorage(accounts)
-    })
 
     // Refresh account balance every 1 minutes
     this.intervalID = setInterval(() => {

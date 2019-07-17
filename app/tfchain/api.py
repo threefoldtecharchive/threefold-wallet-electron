@@ -1298,7 +1298,13 @@ class SingleSignatureWallet(BaseWallet):
         def cb(balance):
             self.balance = balance
             self._loaded = True
-        return jsasync.chain(self._tfwallet.balance_get(account.chain_info._tf_chain_info), cb)
+        def log_err(err):
+            jslog.error("error occured while updating balance of wallet {} with addresses {}: {}".format(self.wallet_name, self.addresses, err))
+            raise err
+        return jsasync.chain(
+            jsasync.catch_promise(self._tfwallet.balance_get(account.chain_info._tf_chain_info), log_err),
+            cb,
+        )
 
     def _update_unconfirmed_balance_from_transaction(self, transaction):
         addresses = self.addresses
@@ -1438,7 +1444,13 @@ class MultiSignatureWallet(BaseWallet):
         def cb(result):
             self.balance = result.balance(account.chain_info._tf_chain_info)
             self._loaded = True
-        return jsasync.chain(account._explorer_client.unlockhash_get(self.address), cb)
+        def log_err(err):
+            jslog.error("error occured while updating balance of multisig wallet {} with address {}: {}".format(self.wallet_name, self.address, err))
+            raise err
+        return jsasync.chain(
+            jsasync.catch_promise(account._explorer_client.unlockhash_get(self.address), log_err),
+            cb,
+        )
 
     def _update_unconfirmed_balance_from_transaction(self, transaction):
         address = self.address

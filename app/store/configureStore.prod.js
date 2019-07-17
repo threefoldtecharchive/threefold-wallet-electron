@@ -9,7 +9,7 @@ import { customMiddleWare } from '../utils/notify'
 const history = createHashHistory()
 const rootReducer = createRootReducer(history)
 const router = routerMiddleware(history)
-const enhancer = applyMiddleware(thunk, router, customMiddleWare)
+const enhancer = applyMiddleware(thunk, customMiddleWare, router)
 
 const store = createStore(rootReducer, enhancer)
 

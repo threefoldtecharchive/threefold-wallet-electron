@@ -293,8 +293,8 @@ class NewAccount extends Component {
   render () {
     const { name, generateSeed, seedError, nameError, seedConfirmation, seedConfirmationError, openConfirmationModal, password, confirmationPassword, passwordError, passwordConfirmationError, accountCreationError, accountCreationErrorMessage } = this.state
 
-    return (
-      <div style={{ paddingBottom: 30 }}>
+    if (openConfirmationModal) {
+      return (
         <SeedConfirmationModal
           open={openConfirmationModal}
           closeModal={this.closeConfirmationModal}
@@ -305,6 +305,11 @@ class NewAccount extends Component {
           accountCreationError={accountCreationError}
           accountCreationErrorMessage={accountCreationErrorMessage}
         />
+      )
+    }
+
+    return (
+      <div style={{ paddingBottom: 30 }}>
         <div className={styles.pageHeader}>
           <p style={{ fontFamily: 'SF UI Text Bold', fontSize: 25, marginBottom: 0 }}>New Account</p>
         </div>

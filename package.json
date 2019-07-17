@@ -61,8 +61,8 @@
   },
   "main": "./app/main.prod.js",
   "build": {
-    "productName": "TFT-Wallet",
-    "appId": "org.develar.TFT-Wallet",
+    "productName": "Threefold-Wallet",
+    "appId": "org.develar.Threefold-Wallet",
     "files": [
       "app/dist/",
       "app/app.html",
