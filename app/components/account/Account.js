@@ -106,8 +106,21 @@ class Account extends Component {
     )
   }
 
+  renderAuthorizedText = (wallet) => {
+    const authorizedStyle = {
+      position: 'relative',
+      float: 'right',
+      fontSize: 12,
+      top: -20,
+      right: 5,
+      marginRight: 0
+    }
+
+    const authorized = filter(this.props.account.coin_auth_status_for_wallet_get({ name: wallet.wallet_name }), x => x === false).length === 0
+    return authorized ? (<p className={'gradient-text'} style={authorizedStyle}>authorized</p>) : (<p className={'orange-gradient-text'} style={authorizedStyle}>Unauthorized</p>)
+  }
+
   renderWalletContent = (w) => {
-    const authorized = filter(this.props.account.coin_auth_status_for_wallet_get({ name: w.wallet_name }), x => x === false).length === 0
     let content = null
     if (w.is_loaded) {
       let unlockedBalance = `${w.balance.coins_unlocked.str({ precision: 3, unit: true })}`
@@ -123,29 +136,12 @@ class Account extends Component {
         lockedBalance = `${totalLockedBalance.str({ precision: 3, unit: true })} *`
       }
 
-      const authorizedStyle = {
-        position: 'relative',
-        float: 'right',
-        fontSize: 12,
-        top: -20,
-        right: 5,
-        marginRight: 0
-      }
-
-      let authorizedText = (
-        <p className={'orange-gradient-text'} style={authorizedStyle}>Unauthorized</p>
-      )
-      if (authorized) {
-        authorizedText = (<p className={'gradient-text'} style={authorizedStyle}>authorized</p>)
-      }
-
       content = (
         <Card.Content>
           <div>
             {this.state.isGoldChain ? (
-              authorizedText
-            ) : (null)}
-            {w.is_multisig ? (
+              this.renderAuthorizedText(w)
+            ) : w.is_multisig ? (
               <Card.Description style={{ position: 'absolute', top: 10, right: 5, left: 310, color: 'white' }}>
                 <p style={{ fontSize: 14 }}>{w.signatures_required}/{w.owners.length}</p>
               </Card.Description>
@@ -166,21 +162,20 @@ class Account extends Component {
           </div>
         </Card.Content>
       )
-
-      let onClick = () => this.handleWalletClick(w)
-      if (w.is_multisig) {
-        onClick = () => this.handleMultiSigWalletClick(w)
-      }
-
-      return (
-        <Card key={w.wallet_name || w.address} style={cardStyle} onClick={onClick}>
-          <Dimmer active={content == null}>
-            <Loader />
-          </Dimmer>
-          {content}
-        </Card>
-      )
     }
+    let onClick = () => this.handleWalletClick(w)
+    if (w.is_multisig) {
+      onClick = () => this.handleMultiSigWalletClick(w)
+    }
+
+    return (
+      <Card key={w.wallet_name || w.address} style={cardStyle} onClick={onClick}>
+        <Dimmer active={content == null}>
+          <Loader />
+        </Dimmer>
+        {content}
+      </Card>
+    )
   }
 
   renderCreateWalletCard = (isMultisig) => {
