@@ -105,7 +105,7 @@ class WalletReceive extends Component {
             </div>
             <Divider />
             {!authorized && <Message style={{ width: '100%', margin: 'auto', marginTop: 10, marginBottom: 10 }} error>
-              <Message.Header>This wallet is not authorized. To authorise these wallet addresses, paste the address on the authorization page.</Message.Header>
+              <Message.Header>This wallet is not authorized. To authorize these wallet addresses, paste the address on the authorization page.</Message.Header>
               <p style={{ fontSize: 13, cursor: 'pointer', color: 'blue', textDecoration: 'underline' }} onClick={() => shell.openExternal(`https://faucet.testnet.nbh-digital.com/`)}>https://faucet.testnet.nbh-digital.com/</p>
             </Message>}
             {w.addresses.map(a => {
