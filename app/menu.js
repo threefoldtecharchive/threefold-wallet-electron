@@ -8,7 +8,7 @@ export default class MenuBuilder {
 
   buildMenu () {
     if (
-      process.env.NODE_ENV === 'production' ||
+      process.env.NODE_ENV === 'development' ||
       process.env.DEBUG_PROD === 'true'
     ) {
       this.setupDevelopmentEnvironment()
@@ -160,7 +160,7 @@ export default class MenuBuilder {
     }
 
     const subMenuView =
-      process.env.NODE_ENV === 'production' ? subMenuViewDev : subMenuViewProd
+      process.env.NODE_ENV === 'development' ? subMenuViewDev : subMenuViewProd
 
     return [subMenuAbout, subMenuEdit, subMenuView, subMenuWindow, subMenuHelp]
   }
