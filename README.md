@@ -2,7 +2,7 @@
 
 > :information_source: [More information about this desktop application and its positioning as a product.](about.md)
 
-A desktop application that allows you to manage all your Threefold wallets. Each wallet is linked to an account, and an account is identified by a seed (mnemonic phrase). An account can have multiple wallets. Each wallet can have up to `8` addresses and requires a minimum `1` address (the default).
+A desktop application that allows you to manage all your Threefold wallets. We support two types of tokens, Threefold token (TFT) and Goldchain token (GFT). Each wallet is linked to an account, and an account is identified by a seed (mnemonic phrase). An account can have multiple wallets. Each wallet can have up to `8` addresses and requires a minimum `1` address (the default).
 
 The mnemonic phrase (used as seed for an account) is compatible with [the Threefold mobile application](https://github.com/threefoldfoundation/tf_app), JumpscaleX light client and official Threefold binary tools. This allows you to recover your wallets created in these clients as an account of this client. Accounts created with this client can also recovered with the other clients. Do note that the [the Threefold mobile application](https://github.com/threefoldfoundation/tf_app) and JumpscaleX light client will only recover the default wallet of your account. In these other clients there is also no concept of account, but just a single wallet. The JumpscaleX light client does allow you to load as many addresses as you want in a single wallet, the [the Threefold mobile application](https://github.com/threefoldfoundation/tf_app) is limited to just one address of just one wallet.
 
@@ -22,13 +22,13 @@ The mnemonic phrase (used as seed for an account) is compatible with [the Threef
 
 ![GitHub release](https://img.shields.io/github/release-pre/threefoldtech/threefold-wallet-electron.svg)
 
-- [Windows Installer](https://github.com/threefoldtech/threefold-wallet-electron/releases/download/v0.2.2/TFT-Wallet.Setup.0.2.2.exe)
+- [Windows Installer](https://github.com/threefoldtech/threefold-wallet-electron/releases/download/v0.3.0/TFT-Wallet.Setup.0.3.0.exe)
   - Windows 7 or later
   - ia32 (x86) and x64 (amd64)
-- [macOS Installer](https://github.com/threefoldtech/threefold-wallet-electron/releases/download/v0.2.2/TFT-Wallet-0.2.2.dmg)
+- [macOS Installer](https://github.com/threefoldtech/threefold-wallet-electron/releases/download/v0.3.0/TFT-Wallet-0.3.0.dmg)
   - 10.10 (Yosemite) or later
   - 64-bit only
-- [Linux Installer](https://github.com/threefoldtech/threefold-wallet-electron/releases/download/v0.2.2/TFT-Wallet.0.2.2.AppImage)
+- [Linux Installer](https://github.com/threefoldtech/threefold-wallet-electron/releases/download/v0.3.0/TFT-Wallet.0.3.0.AppImage)
   - Fedora 21, Debian 8 or Ubuntu 12.04 and newer
   - ia32 (i686), x64 (amd64), armv7l (ARM v7)
 
@@ -71,10 +71,9 @@ Index:
 ![screenshot of account creation page](/docs/images/scrshot_account_new.png)
 
 > This page allows you to create a new account and store it on your local disk:
-> - an account is linked to a TFChain network (this cannot be changed once the account is created):
->   - `standard` is the regular network and works with real money (TFT);
->   - `testnet` is the test network, works with test tokens, useful to play with the TFChain technology and test new features;
->   - `devnet` is for developers only
+> - an account is linked to a TFChain or Goldchain network (this cannot be changed once the account is created):
+>   - `standard` is the regular network and works with real money (TFT / GFT);
+>   - `testnet` is the test network, works with test tokens, useful to play with the TFChain or Goldchain technology and test new features;
 > - Account name is a label for you to know what account is what;
 > - Password is used to encrypt your stored account (and its info);
 > - The seed (mnemonic phrase) is a 24-word list that is used as the input for all your wallet's keys. Choose to generate a seed for you to create a new account;
@@ -82,7 +81,7 @@ Index:
 
 #### Account Recovery
 
-![screenshot of account recovery page](/docs/images/scrshot_account_recover.png)
+![screenshot of account recovery page](/docs/images/scrshot_account_new.png)
 
 > Similar to [account creation](#account-creation), except that you'll provide the seed (mnemonic phrase, a 24-word list) yourself, instead of opting to generate one.
 
@@ -129,7 +128,7 @@ Index:
 > Allows you to transfer tokens from one wallet to another. The destination can be a regular (personal) wallet, multi-signature wallet as well as one of your own wallets.
 > Depending on which destination wallet you want to send you, you'll need to select the correct tab.
 >
-> You cannot transfer 0 tokens or more tokens (+ the minimum transaction fee of `0.1 TFT`) than available in your account.
+> You cannot transfer 0 tokens or more tokens (+ the minimum transaction fee of `0.1 TFT or 0.1 GFT`) than available in your account.
 >
 > Optionally you can attach a timelock to your transfer, meaning the transfered funds are locked in the destination wallet until the specified date (and time). If no time is specified `00:00` is used. Note that the funds will immediately be taken from your wallet and sent to the destination wallet.
 
