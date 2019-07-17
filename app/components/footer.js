@@ -49,11 +49,13 @@ class Footer extends Component {
             <Icon name='circle' style={{ color: 'red', marginLeft: 10 }} />
             <label>not connected</label>
           </div>
-          : <div>
-            <Icon name='circle' style={{ color: 'green', marginLeft: 10 }} />
-            <label><a onClick={() => shell.openExternal(`${chainConstants.explorer_address}`)}>connected to {chainConstants.chain_name} {chainConstants.chain_network}</a></label>
-            <label style={{ position: 'absolute', right: 450 }}><a onClick={() => shell.openExternal(`${chainConstants.explorer_address}/block.html?height=${chainConstants.chain_height}`)}><Icon name='h square' /> {chainConstants.chain_height} @ {date} {tz}</a></label>
-            <label style={{ position: 'absolute', right: 50 }}>version {pjson.version}</label>
+          : <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <div>
+              <Icon name='circle' style={{ color: 'green', marginLeft: 10 }} />
+              <label><a onClick={() => shell.openExternal(`${chainConstants.explorer_address}`)}>connected to {chainConstants.chain_name} {chainConstants.chain_network}</a></label>
+            </div>
+            <label><a onClick={() => shell.openExternal(`${chainConstants.explorer_address}/block.html?height=${chainConstants.chain_height}`)}><Icon name='h square' /> {chainConstants.chain_height} @ {date} {tz}</a></label>
+            <label>version {pjson.version}</label>
           </div>
         }
       </div>
