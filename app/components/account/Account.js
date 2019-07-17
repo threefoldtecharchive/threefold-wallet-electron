@@ -5,7 +5,7 @@ import { Segment, Icon, Divider, Card, Loader, Dimmer, Grid } from 'semantic-ui-
 import routes from '../../constants/routes'
 import { updateAccount } from '../../actions'
 import styles from '../home/Home.css'
-import { truncate } from 'lodash'
+import { truncate, filter } from 'lodash'
 
 const cardStyle = {
   margin: 'auto',
@@ -107,7 +107,7 @@ class Account extends Component {
   }
 
   renderWalletContent = (w) => {
-    const authorized = this.props.account.coin_auth_status_for_address_get(w.address)
+    const authorized = filter(this.props.account.coin_auth_status_for_wallet_get({ name: w.wallet_name }), x => x === false).length === 0
     let content = null
     if (w.is_loaded) {
       let unlockedBalance = `${w.balance.coins_unlocked.str({ precision: 3, unit: true })}`
@@ -133,7 +133,7 @@ class Account extends Component {
       }
 
       let authorizedText = (
-        <p className={'gradient-text'} style={authorizedStyle}>Unauthorized</p>
+        <p className={'orange-gradient-text'} style={authorizedStyle}>Unauthorized</p>
       )
       if (authorized) {
         authorizedText = (<p className={'gradient-text'} style={authorizedStyle}>authorized</p>)
