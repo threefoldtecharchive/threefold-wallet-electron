@@ -50,17 +50,17 @@ export const getTransactionsNotifications = function (account) {
             store.dispatch({
               type: 'INCREASE_NOTIFICATION_COUNT',
               title: 'Transaction',
-              description: 'Incoming transaction received'
+              description: 'Incoming transaction'
             })
-            toast('Incoming transaction received')
+            toast('Incoming transaction')
           }
           if (tx.outputs.length > 0) {
             store.dispatch({
               type: 'INCREASE_NOTIFICATION_COUNT',
               title: 'Transaction',
-              description: 'Outgoing transaction received'
+              description: 'Outgoing transaction'
             })
-            toast('Outgoing transaction received')
+            toast('Outgoing transaction')
           }
         })
       }
