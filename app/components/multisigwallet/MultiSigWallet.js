@@ -290,12 +290,24 @@ class Wallet extends Component {
 // NOTE: should we also link to wallet (when we have wallet name)??!?!
 function _addressDisplayElement (address, account) {
   const chainInfo = account.chain_info
-  const wallet = account.wallet_for_address(address)
 
+  const { address_book: addressBook } = account
+  const { contacts } = addressBook
+
+  const wallet = account.wallet_for_address(address)
   if (wallet && wallet.wallet_name) {
-    return <span><a style={{ color: 'white', fontSize: 12, fontFamily: 'Menlo-Regular' }} onClick={() => shell.openExternal(`${chainInfo.explorer_address}/hash.html?hash=${address}`)}>{address}</a> <Icon style={{ cursor: 'pointer', marginLeft: 5 }} name='external alternate' onClick={() => shell.openExternal(`${chainInfo.explorer_address}/hash.html?hash=${address}`)} /> (wallet {`${wallet.wallet_name}`})</span>
+    return <span><span style={{ color: 'white', fontSize: 12, fontFamily: 'Menlo-Regular' }}>{address}</span><Icon style={{ cursor: 'pointer', marginLeft: 5 }} name='external alternate' onClick={() => shell.openExternal(`${chainInfo.explorer_address}/hash.html?hash=${address}`)} /> (wallet {`${wallet.wallet_name}`})</span>
   }
-  return <span><a style={{ color: 'white', fontSize: 12, fontFamily: 'Menlo-Regular' }} onClick={() => shell.openExternal(`${chainInfo.explorer_address}/hash.html?hash=${address}`)}>{address}</a> <Icon style={{ cursor: 'pointer', marginLeft: 5 }} name='external alternate' onClick={() => shell.openExternal(`${chainInfo.explorer_address}/hash.html?hash=${address}`)} /></span>
+
+  // Filter out multisig contacts
+  const singleContacts = contacts.filter(contact => !(contact.recipient instanceof Array))
+  // Check if address to display is a contact from addressboek
+  const contact = find(singleContacts, contact => contact.recipient === address)
+  if (contact) {
+    return <span><span style={{ color: 'white', fontSize: 12, fontFamily: 'Menlo-Regular' }}>{address}</span><Icon style={{ cursor: 'pointer', marginLeft: 5 }} name='external alternate' onClick={() => shell.openExternal(`${chainInfo.explorer_address}/hash.html?hash=${address}`)} /> (contact {`${contact.contact_name}`})</span>
+  }
+
+  return <span><span style={{ color: 'white', fontSize: 12, fontFamily: 'Menlo-Regular' }}>{address}</span><Icon style={{ cursor: 'pointer', marginLeft: 5 }} name='external alternate' onClick={() => shell.openExternal(`${chainInfo.explorer_address}/hash.html?hash=${address}`)} /></span>
 }
 
 export default connect(
