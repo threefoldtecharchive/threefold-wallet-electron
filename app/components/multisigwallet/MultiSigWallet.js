@@ -92,7 +92,8 @@ class Wallet extends Component {
   }
 
   renderOwnerList = () => {
-    const { owners } = this.props.account.selected_wallet
+    const wallet = this.props.account.selected_wallet
+    const { owners, address } = wallet
     if (owners.length === 0 || !owners) {
       return null
     }
@@ -104,12 +105,23 @@ class Wallet extends Component {
       )
     })
     return (
-      <List style={{ marginLeft: 20, overflow: 'auto', color: 'white' }} divided relaxed>
-        <List.Header style={{ marginBottom: 10 }}>
-          Owners
-        </List.Header>
-        {ownerList}
-      </List>
+      <div>
+        <div style={{ marginLeft: 20, overflow: 'auto', color: 'white' }}>
+          <div style={{ marginBottom: 10 }}>
+            <p style={{ fontSize: 18 }}>MultiSig Address <span style={{ fontSize: 12 }}>({wallet.signatures_required > 1 ? 'Signatures ' : 'Signature '} required: {wallet.signatures_required})</span></p>
+          </div>
+          <div>
+            <p style={{ color: 'white', fontSize: 14 }}>{_addressDisplayElement(address, this.props.account)}</p>
+          </div>
+        </div>
+
+        <List style={{ marginLeft: 20, overflow: 'auto', color: 'white' }} divided relaxed>
+          <List.Header style={{ marginBottom: 10 }}>
+            Owners
+          </List.Header>
+          {ownerList}
+        </List>
+      </div>
     )
   }
 
@@ -258,7 +270,7 @@ class Wallet extends Component {
                 </div>
                 <div style={{ paddingBottom: 20, marginTop: 10 }}>
                   {this.renderWalletBalanceGrid()}
-                  <Segment style={{ width: '90%', height: 100, overflow: 'auto', overflowY: 'scroll', margin: 'auto', background: '#29272E', marginTop: 20 }}>
+                  <Segment style={{ width: '90%', height: '100%', overflow: 'auto', overflowY: 'scroll', margin: 'auto', background: '#29272E', marginTop: 20 }}>
                     {this.renderOwnerList()}
                   </Segment>
                   <Segment style={{ width: '90%', height: '40vh', overflow: 'auto', overflowY: 'scroll', margin: 'auto', background: '#29272E', marginTop: 20 }}>
@@ -281,9 +293,9 @@ function _addressDisplayElement (address, account) {
   const wallet = account.wallet_for_address(address)
 
   if (wallet && wallet.wallet_name) {
-    return <span><a style={{ color: 'white', fontSize: 12, fontFamily: 'Menlo-Regular' }} onClick={() => shell.openExternal(`${chainInfo.explorer_address}/hash.html?hash=${address}`)}>{address}</a> (wallet {`${wallet.wallet_name}`})</span>
+    return <span><a style={{ color: 'white', fontSize: 12, fontFamily: 'Menlo-Regular' }} onClick={() => shell.openExternal(`${chainInfo.explorer_address}/hash.html?hash=${address}`)}>{address}</a> <Icon style={{ cursor: 'pointer', marginLeft: 5 }} name='external alternate' onClick={() => shell.openExternal(`${chainInfo.explorer_address}/hash.html?hash=${address}`)} /> (wallet {`${wallet.wallet_name}`})</span>
   }
-  return <span><a style={{ color: 'white', fontSize: 12, fontFamily: 'Menlo-Regular' }} onClick={() => shell.openExternal(`${chainInfo.explorer_address}/hash.html?hash=${address}`)}>{address}</a></span>
+  return <span><a style={{ color: 'white', fontSize: 12, fontFamily: 'Menlo-Regular' }} onClick={() => shell.openExternal(`${chainInfo.explorer_address}/hash.html?hash=${address}`)}>{address}</a> <Icon style={{ cursor: 'pointer', marginLeft: 5 }} name='external alternate' onClick={() => shell.openExternal(`${chainInfo.explorer_address}/hash.html?hash=${address}`)} /></span>
 }
 
 export default connect(

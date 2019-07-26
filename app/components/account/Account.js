@@ -163,9 +163,14 @@ class Account extends Component {
         </Card.Content>
       )
     }
-    let onClick = () => this.handleWalletClick(w)
-    if (w.is_multisig) {
-      onClick = () => this.handleMultiSigWalletClick(w)
+    let onClick = () => {
+      if (w.is_loaded) {
+        if (w.isMultisig) {
+          this.handleMultiSigWalletClick(w)
+        } else {
+          this.handleWalletClick(w)
+        }
+      }
     }
 
     return (
