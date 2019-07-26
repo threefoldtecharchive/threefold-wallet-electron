@@ -122,7 +122,12 @@ class Account extends Component {
 
   renderWalletContent = (w) => {
     let content = null
+    let onClick = null
     if (w.is_loaded) {
+      onClick = () => this.handleWalletClick(w)
+      if (w.is_multisig) {
+        onClick = () => this.handleMultiSigWalletClick(w)
+      }
       let unlockedBalance = `${w.balance.coins_unlocked.str({ precision: 3, unit: true })}`
       let lockedBalance = `${w.balance.coins_locked.str({ precision: 3, unit: true })}`
 
@@ -162,15 +167,6 @@ class Account extends Component {
           </div>
         </Card.Content>
       )
-    }
-    let onClick = () => {
-      if (w.is_loaded) {
-        if (w.isMultisig) {
-          this.handleMultiSigWalletClick(w)
-        } else {
-          this.handleWalletClick(w)
-        }
-      }
     }
 
     return (
