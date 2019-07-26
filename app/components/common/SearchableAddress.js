@@ -7,7 +7,8 @@ import * as tfchain from '../../tfchain/api'
 const initialState = { results: [], addressError: false, showNoResults: true }
 
 const mapStateToProps = state => ({
-  account: state.account.state
+  account: state.account.state,
+  form: state.form
 })
 
 class SearchableAddress extends Component {
@@ -76,22 +77,26 @@ class SearchableAddress extends Component {
       return this.setState({ results, showNoResults: false, value })
     }
 
+    this.props.setValue(value)
+
     // If results are found, show a dropdown list with possible selection
     this.setState({
-      results,
-      value
+      results
     })
   }
 
   handleOnFocus = (e) => {
-    const { value, source } = this.state
+    const { source } = this.state
+    const { value } = this.props
 
     if (value) {
       return this.filterSearchInput(value)
     }
 
+    const result = source.filter(w => w.value !== this.props.form.transactionForm.values.selectedWallet.address)
+
     this.setState({
-      showNoResults: false, results: source
+      showNoResults: false, results: result
     })
   }
 
@@ -102,8 +107,7 @@ class SearchableAddress extends Component {
   }
 
   render () {
-    const { value, results, addressError, showNoResults } = this.state
-
+    const { results, addressError, showNoResults } = this.state
     return (
       <div>
         <Search
@@ -115,7 +119,7 @@ class SearchableAddress extends Component {
             leading: true
           })}
           results={results}
-          value={this.props.value || value}
+          value={this.props.value}
           placeholder='address'
           showNoResults={showNoResults}
           minCharacters={0}

@@ -79,7 +79,7 @@ class Login extends Component {
           <h2>Sign in to account: {this.props.account.name}</h2>
           <Form style={{ width: '50%', margin: 'auto', marginTop: 40 }} onSubmit={this.login}>
             <Form.Field error={passwordError}>
-              <Input onKeyDown={this.onKeyDown} type='password' style={{ width: '50%' }} icon={<Icon name='key' style={{ color: '#0e72f5' }} />} iconPosition='left' placeholder='password' value={password} onChange={this.handlePasswordChange} />
+              <Input onKeyDown={this.onKeyDown} type='password' autoFocus style={{ width: '50%' }} icon={<Icon name='key' style={{ color: '#0e72f5' }} />} iconPosition='left' placeholder='password' value={password} onChange={this.handlePasswordChange} />
             </Form.Field>
             <div style={{ marginTop: 50 }}>
               <Button className={styles.cancelButton} size='big' onClick={() => this.props.history.push(routes.HOME)} style={{ marginRight: 15 }}>Cancel</Button>

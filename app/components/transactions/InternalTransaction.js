@@ -379,12 +379,11 @@ class InternalTransaction extends Component {
         </Dimmer>
       )
     }
-
-    if (this.state.openConfirmationModal) {
-      const { openConfirmationModal, transactionType, destination, selectedWalletRecipient, selectedRecipientAddress, description } = this.state
-      const { amount, datetime, selectedWallet } = this.state
-      return (
-        <TransactionConfirmationModal
+    const { openConfirmationModal, transactionType, destination, selectedWalletRecipient, selectedRecipientAddress, description, enableSubmit } = this.state
+    const { amount, datetime, selectedWallet } = this.state
+    return (
+      <div>
+        {openConfirmationModal && <TransactionConfirmationModal
           open={openConfirmationModal}
           closeModal={this.closeConfirmationModal}
           confirmTransaction={this.confirmTransaction}
@@ -397,14 +396,10 @@ class InternalTransaction extends Component {
           timestamp={datetime}
           minimumMinerFee={this.props.account.minimum_miner_fee}
           description={description}
-        />
-      )
-    }
+        />}
 
-    return (
-      <div>
         {this.renderDestinationForm()}
-        <TransactionBodyForm handleSubmit={this.handleSubmit} mapDestinationDropdown={this.mapDestinationDropdown} enableSubmit={this.state.enableSubmit} />
+        <TransactionBodyForm handleSubmit={this.handleSubmit} mapDestinationDropdown={this.mapDestinationDropdown} enableSubmit={enableSubmit} />
       </div>
     )
   }
