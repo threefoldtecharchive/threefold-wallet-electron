@@ -81,7 +81,7 @@ class SingleTransaction extends Component {
   }
 
   renderDestinationForm = () => {
-    const { enableSave, errorMessage } = this.state
+    const { enableSave, errorMessage, destination } = this.state
     return (
       <div>
         {errorMessage && <Message style={{ width: '90%', margin: 'auto' }} error onDismiss={this.dismissError}>
@@ -92,6 +92,7 @@ class SingleTransaction extends Component {
           <Form.Field style={{ marginTop: 10, marginBottom: 20 }}>
             <label style={{ color: 'white' }}>Destination address *</label>
             <SearchableAddress
+              value={destination}
               setSearchValue={this.setSearchValue}
               icon='send'
             />
@@ -236,7 +237,11 @@ class SingleTransaction extends Component {
     return this.openConfirmationModal()
   }
 
-  mapDestinationDropdown = (wallet) => {}
+  mapDestinationDropdown = (wallet) => {
+    if (wallet.address === this.state.destination) {
+      return this.setState({ destination: '' })
+    }
+  }
 
   render () {
     if (this.state.loader) {
