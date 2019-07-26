@@ -1084,39 +1084,36 @@ class RivineAuthCoinClient():
 
         @param height: if defined the block height at which to look up the (coin) auth condition (if none latest block will be used)
         """
+        if not addresses:
+            return jsasync.promise_new(lambda _: {})
+
         # define the endpoint
-        def endpoint_get(address):
-            endpoint = "/explorer/authcoin/address/{}".format(address)
-            if height != None:
-                if not isinstance(height, (int, str)):
-                    raise TypeError("invalid block height given")
-                if isinstance(height, str):
-                    height = jsstr.to_int(height)
-                endpoint += "/{}".format(height)
-            return endpoint
+        concatChar = "?"
+        endpoint = "/explorer/authcoin/status"
+        for address in addresses:
+            endpoint += "{}addr={}".format(concatChar, address)
+            concatChar = "&"
+        if height != None:
+            if not isinstance(height, (int, str)):
+                raise TypeError("invalid block height given")
+            if isinstance(height, str):
+                height = jsstr.to_int(height)
+            endpoint += "&height={}".format(height)
 
-        addresses = [address if isinstance(addresses, str) else address.__str__() for address in addresses]
-
-        def address_cb_new(endpoint, address):
-            def cb(result):
-                try:
-                    _, result = result
-                    return (address, result.get_or('auth', False))
-                except KeyError as exc:
-                    # return a KeyError as an invalid Explorer Response
-                    raise tferrors.ExplorerInvalidResponse(str(exc), endpoint, result) from exc
-            return cb
+        def addresses_cb(result):
+            try:
+                _, result = result
+                s = result['auths']
+                r = {}
+                for index, addr in enumerate(addresses):
+                    r[addr] = s[index]
+                return r
+            except KeyError as exc:
+                # return a KeyError as an invalid Explorer Response
+                raise tferrors.ExplorerInvalidResponse(str(exc), endpoint, result) from exc
 
         # get + parse the auth auth address status map as a promise
-        def generator():
-            for address in addresses:
-                endpoint = endpoint_get(address)
-                address_cb = address_cb_new(endpoint, address)
-                yield jsasync.chain(self._client.explorer_get(endpoint=endpoint), address_cb)
-        def aggregate(results):
-            return dict(results)
-        return jsasync.chain(jsasync.promise_pool_new(generator), aggregate)
-
+        return jsasync.chain(self._client.explorer_get(endpoint=endpoint), addresses_cb)
 
 # class ThreeBotRecord():
 #     """

@@ -2264,124 +2264,79 @@ export var RivineAuthCoinClient =  __class__ ('RivineAuthCoinClient', [object], 
 		}
 		else {
 		}
-		var endpoint_get = function (address) {
-			if (arguments.length) {
-				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-					var __allkwargs0__ = arguments [__ilastarg0__--];
-					for (var __attrib0__ in __allkwargs0__) {
-						switch (__attrib0__) {
-							case 'address': var address = __allkwargs0__ [__attrib0__]; break;
-						}
-					}
-				}
-			}
-			else {
-			}
-			var endpoint = '/explorer/authcoin/address/{}'.format (address);
-			if (height != null) {
-				if (!(isinstance (height, tuple ([int, str])))) {
-					var __except0__ = py_TypeError ('invalid block height given');
-					__except0__.__cause__ = null;
-					throw __except0__;
-				}
-				if (isinstance (height, str)) {
-					var height = jsstr.to_int (height);
-				}
-				endpoint += '/{}'.format (height);
-			}
-			return endpoint;
-		};
-		var addresses = (function () {
-			var __accu0__ = [];
-			for (var address of addresses) {
-				__accu0__.append ((isinstance (addresses, str) ? address : address.__str__ ()));
-			}
-			return __accu0__;
-		}) ();
-		var address_cb_new = function (endpoint, address) {
-			if (arguments.length) {
-				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-					var __allkwargs0__ = arguments [__ilastarg0__--];
-					for (var __attrib0__ in __allkwargs0__) {
-						switch (__attrib0__) {
-							case 'endpoint': var endpoint = __allkwargs0__ [__attrib0__]; break;
-							case 'address': var address = __allkwargs0__ [__attrib0__]; break;
-						}
-					}
-				}
-			}
-			else {
-			}
-			var cb = function (result) {
+		if (!(addresses)) {
+			return jsasync.promise_new ((function __lambda__ (_) {
 				if (arguments.length) {
 					var __ilastarg0__ = arguments.length - 1;
 					if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
 						var __allkwargs0__ = arguments [__ilastarg0__--];
 						for (var __attrib0__ in __allkwargs0__) {
 							switch (__attrib0__) {
-								case 'result': var result = __allkwargs0__ [__attrib0__]; break;
+								case '_': var _ = __allkwargs0__ [__attrib0__]; break;
 							}
 						}
 					}
 				}
 				else {
 				}
-				try {
-					var __left0__ = result;
-					var _ = __left0__ [0];
-					var result = __left0__ [1];
-					return tuple ([address, result.get_or ('auth', false)]);
-				}
-				catch (__except0__) {
-					if (isinstance (__except0__, KeyError)) {
-						var exc = __except0__;
-						var __except1__ = tferrors.ExplorerInvalidResponse (str (exc), endpoint, result);
-						__except1__.__cause__ = exc;
-						throw __except1__;
-					}
-					else {
-						throw __except0__;
-					}
-				}
-			};
-			return cb;
-		};
-		var generator = function* () {
-			if (arguments.length) {
-				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-					var __allkwargs0__ = arguments [__ilastarg0__--];
-					for (var __attrib0__ in __allkwargs0__) {
-					}
-				}
+				return dict ({});
+			}));
+		}
+		var concatChar = '?';
+		var endpoint = '/explorer/authcoin/status';
+		for (var address of addresses) {
+			endpoint += '{}addr={}'.format (concatChar, address);
+			var concatChar = '&';
+		}
+		if (height != null) {
+			if (!(isinstance (height, tuple ([int, str])))) {
+				var __except0__ = py_TypeError ('invalid block height given');
+				__except0__.__cause__ = null;
+				throw __except0__;
 			}
-			else {
+			if (isinstance (height, str)) {
+				var height = jsstr.to_int (height);
 			}
-			for (var address of addresses) {
-				var endpoint = endpoint_get (address);
-				var address_cb = address_cb_new (endpoint, address);
-				yield jsasync.chain (self._client.explorer_get (__kwargtrans__ ({endpoint: endpoint})), address_cb);
-			}
-			};
-		var aggregate = function (results) {
+			endpoint += '&height={}'.format (height);
+		}
+		var addresses_cb = function (result) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
 				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
 					var __allkwargs0__ = arguments [__ilastarg0__--];
 					for (var __attrib0__ in __allkwargs0__) {
 						switch (__attrib0__) {
-							case 'results': var results = __allkwargs0__ [__attrib0__]; break;
+							case 'result': var result = __allkwargs0__ [__attrib0__]; break;
 						}
 					}
 				}
 			}
 			else {
 			}
-			return dict (results);
+			try {
+				var __left0__ = result;
+				var _ = __left0__ [0];
+				var result = __left0__ [1];
+				var s = result ['auths'];
+				var r = dict ({});
+				for (var [index, addr] of enumerate (addresses)) {
+					r [addr] = s [index];
+				}
+				return r;
+			}
+			catch (__except0__) {
+				if (isinstance (__except0__, KeyError)) {
+					var exc = __except0__;
+					var __except1__ = tferrors.ExplorerInvalidResponse (str (exc), endpoint, result);
+					__except1__.__cause__ = exc;
+					throw __except1__;
+				}
+				else {
+					throw __except0__;
+				}
+			}
 		};
-		return jsasync.chain (jsasync.promise_pool_new (generator), aggregate);
+		return jsasync.chain (self._client.explorer_get (__kwargtrans__ ({endpoint: endpoint})), addresses_cb);
 	});}
 });
 
