@@ -419,11 +419,10 @@ class MultisigTransaction extends Component {
         </Dimmer>
       )
     }
-
-    if (this.state.openConfirmationModal) {
-      const { openConfirmationModal, transactionType, destination, selectedWalletRecipient, selectedRecipientAddress, ownerAddresses, signatureCount, description } = this.state
-      const { amount, datetime, selectedWallet } = this.state
-      return (
+    const { openConfirmationModal, transactionType, destination, selectedWalletRecipient, selectedRecipientAddress, ownerAddresses, signatureCount, description, contactName, enableSubmit, signatureCountError, openAddMultiSigModal } = this.state
+    const { amount, datetime, selectedWallet } = this.state
+    return (
+      <div>
         <TransactionConfirmationModal
           open={openConfirmationModal}
           closeModal={this.closeConfirmationModal}
@@ -440,13 +439,6 @@ class MultisigTransaction extends Component {
           minimumMinerFee={this.props.account.minimum_miner_fee}
           description={description}
         />
-      )
-    }
-
-    const { contactName, ownerAddresses, signatureCount, signatureCountError, openAddMultiSigModal } = this.state
-
-    return (
-      <div>
         <UpdateMultiSigContactModal
           contactName={contactName}
           handleContactNameChange={this.handleContactNameChange}
@@ -463,7 +455,7 @@ class MultisigTransaction extends Component {
         />
         {this.renderAddressBook()}
         {this.renderDestinationForm()}
-        <TransactionBodyForm handleSubmit={this.handleSubmit} enableSubmit={this.state.enableSubmit} mapDestinationDropdown={this.mapDestinationDropdown} />
+        <TransactionBodyForm handleSubmit={this.handleSubmit} enableSubmit={enableSubmit} mapDestinationDropdown={this.mapDestinationDropdown} />
       </div>
     )
   }

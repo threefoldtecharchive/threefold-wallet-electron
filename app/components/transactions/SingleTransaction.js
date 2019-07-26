@@ -243,12 +243,11 @@ class SingleTransaction extends Component {
         </Dimmer>
       )
     }
-
-    if (this.state.openConfirmationModal) {
-      const { openConfirmationModal, transactionType, destination, selectedWalletRecipient, selectedRecipientAddress, description } = this.state
-      const { amount, datetime, selectedWallet } = this.state
-      return (
-        <TransactionConfirmationModal
+    const { openConfirmationModal, transactionType, destination, selectedWalletRecipient, selectedRecipientAddress, description, contactName, openSaveModal, enableSubmit } = this.state
+    const { amount, datetime, selectedWallet } = this.state
+    return (
+      <div>
+        {openConfirmationModal && <TransactionConfirmationModal
           open={openConfirmationModal}
           closeModal={this.closeConfirmationModal}
           confirmTransaction={this.confirmTransaction}
@@ -261,13 +260,8 @@ class SingleTransaction extends Component {
           timestamp={datetime}
           minimumMinerFee={this.props.account.minimum_miner_fee}
           description={description}
-        />
-      )
-    }
+        />}
 
-    const { contactName, destination, openSaveModal } = this.state
-    return (
-      <div>
         <UpdateContactModal
           contactName={contactName}
           handleContactNameChange={this.handleContactNameChange}
@@ -278,7 +272,7 @@ class SingleTransaction extends Component {
           updateContact={this.addContact}
         />
         {this.renderDestinationForm()}
-        <TransactionBodyForm handleSubmit={this.handleSubmit} enableSubmit={this.state.enableSubmit} mapDestinationDropdown={this.mapDestinationDropdown} />
+        <TransactionBodyForm handleSubmit={this.handleSubmit} enableSubmit={enableSubmit} mapDestinationDropdown={this.mapDestinationDropdown} />
       </div>
     )
   }
