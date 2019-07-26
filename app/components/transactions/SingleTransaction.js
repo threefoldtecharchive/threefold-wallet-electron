@@ -64,11 +64,14 @@ class SingleTransaction extends Component {
       this.setState({ enableSubmit: false, enableSave: false })
     } else if (selectedWallet && selectedWallet.is_address_owned_by_wallet(destination)) {
       sendToSelfError = true
-      destinationError = true
     }
 
     if (!destinationError && !sendToSelfError) {
       this.setState({ enableSave: true, enableSubmit: true })
+    }
+
+    if (destinationError || sendToSelfError) {
+      this.setState({ enableSubmit: false })
     }
     this.setState({ destination })
   }
