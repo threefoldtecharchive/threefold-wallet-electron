@@ -1,9 +1,10 @@
 import { connect } from 'react-redux'
 import React, { Component } from 'react'
-import { debounce, flatten, escapeRegExp, filter } from 'lodash'
+import { debounce, flatten } from 'lodash'
 import { Search, Message, Icon } from 'semantic-ui-react'
 import * as tfchain from '../../tfchain/api'
 import routes from '../../constants/routes.json'
+import fuzzysort from 'fuzzysort'
 
 const initialState = { results: [], addressError: false }
 
@@ -56,7 +57,7 @@ class SearchableAddress extends Component {
   }
 
   handleResultSelect = (e, { result }) => {
-    this.setState({ value: result.value, addressError: false })
+    this.setState({ value: result.value, results: [], addressError: false })
     this.props.setSearchValue(result.value)
   }
 
@@ -72,14 +73,17 @@ class SearchableAddress extends Component {
 
   searchResults = (value) => {
     const { currentLocation, account } = this.props
-    const { source, multiSig } = this.state
-    let results
-
-    const re = new RegExp(escapeRegExp(value), 'i')
+    const { multiSig } = this.state
 
     // enable searching on name or address
-    const isMatch = result => (re.test(result.wallet_name) || re.test(result.value) || re.test(result.title) || re.test(result.contact_name))
-    results = filter(source, isMatch)
+    let results = fuzzysort.go(value, this.state.source, {
+      allowTypo: true,
+      keys: ['value', 'title']
+    })
+
+    results = results.map(res => {
+      return res.obj
+    })
 
     if (currentLocation !== routes.ADDRESS_BOOK) {
       results = results.filter(w => w.value !== this.props.form.transactionForm.values.selectedWallet.address)
@@ -90,7 +94,7 @@ class SearchableAddress extends Component {
     // If no results, this means the user copied or typed an address that he does not know yet.
     // Pass this address
     if (results.length === 0) {
-      return this.setState({ results, showNoResults: true, value })
+      return this.setState({ results: [], value })
     }
 
     // If results are found, show a dropdown list with possible selection
@@ -111,12 +115,12 @@ class SearchableAddress extends Component {
 
   handleOnBlur = () => {
     this.setState({
-      showNoResults: true, results: []
+      results: []
     })
   }
 
   render () {
-    const { results, addressError } = this.state
+    const { results, addressError, value } = this.state
     return (
       <div>
         <Search
@@ -128,7 +132,7 @@ class SearchableAddress extends Component {
             leading: true
           })}
           results={results}
-          value={this.props.value}
+          value={this.props.value || value}
           placeholder='address'
           showNoResults={false}
           minCharacters={3}
