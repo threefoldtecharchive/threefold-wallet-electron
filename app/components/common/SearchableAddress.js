@@ -75,8 +75,6 @@ class SearchableAddress extends Component {
     const { source, multiSig } = this.state
     let results
 
-    console.log(this.state.multiSig)
-
     const re = new RegExp(escapeRegExp(value), 'i')
 
     // enable searching on name or address
@@ -88,8 +86,6 @@ class SearchableAddress extends Component {
     } else if (!multiSig) {
       results = results.filter(w => !account.addresses.includes(w.value))
     }
-
-    console.log(results)
 
     // If no results, this means the user copied or typed an address that he does not know yet.
     // Pass this address
