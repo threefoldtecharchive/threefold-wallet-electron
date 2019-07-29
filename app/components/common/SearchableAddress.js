@@ -1,11 +1,11 @@
 import { connect } from 'react-redux'
 import React, { Component } from 'react'
-import { debounce, escapeRegExp, filter, flatten } from 'lodash'
+import { debounce, flatten, escapeRegExp, filter } from 'lodash'
 import { Search, Message, Icon } from 'semantic-ui-react'
 import * as tfchain from '../../tfchain/api'
 import routes from '../../constants/routes.json'
 
-const initialState = { results: [], addressError: false, showNoResults: true }
+const initialState = { results: [], addressError: false }
 
 const mapStateToProps = state => ({
   currentLocation: state.router.location.pathname,
@@ -18,7 +18,8 @@ class SearchableAddress extends Component {
     super(props)
     this.state = {
       ...initialState,
-      value: '' || this.props.value
+      value: '' || this.props.value,
+      multiSig: this.props.multiSig
     }
   }
 
@@ -65,43 +66,47 @@ class SearchableAddress extends Component {
 
   filterSearchInput = (value) => {
     this.setState({ addressError: !tfchain.wallet_address_is_valid(value) })
+    this.props.setSearchValue(value)
+    this.searchResults(value)
+  }
+
+  searchResults = (value) => {
+    const { currentLocation, account } = this.props
+    const { source, multiSig } = this.state
+    let results
 
     const re = new RegExp(escapeRegExp(value), 'i')
 
     // enable searching on name or address
     const isMatch = result => (re.test(result.wallet_name) || re.test(result.value) || re.test(result.title) || re.test(result.contact_name))
-    const results = filter(this.state.source, isMatch)
+    results = filter(source, isMatch)
 
-    this.props.setSearchValue(value)
+    if (currentLocation !== routes.ADDRESS_BOOK) {
+      results = results.filter(w => w.value !== this.props.form.transactionForm.values.selectedWallet.address)
+    } else if (!multiSig) {
+      results = results.filter(w => !account.addresses.includes(w.value))
+    }
+
     // If no results, this means the user copied or typed an address that he does not know yet.
     // Pass this address
     if (results.length === 0) {
-      return this.setState({ results, showNoResults: false, value })
+      return this.setState({ results, showNoResults: true, value })
     }
 
     // If results are found, show a dropdown list with possible selection
     this.setState({
-      results
+      results, value
     })
   }
 
   handleOnFocus = (e) => {
-    const { source } = this.state
-    const { value, currentLocation } = this.props
+    const { value } = this.props
 
     if (value) {
       return this.filterSearchInput(value)
     }
 
-    let result = source
-
-    if (currentLocation !== routes.ADDRESS_BOOK) {
-      result = source.filter(w => w.value !== this.props.form.transactionForm.values.selectedWallet.address)
-    }
-
-    this.setState({
-      showNoResults: false, results: result
-    })
+    this.searchResults(value)
   }
 
   handleOnBlur = () => {
@@ -111,7 +116,7 @@ class SearchableAddress extends Component {
   }
 
   render () {
-    const { results, addressError, showNoResults } = this.state
+    const { results, addressError } = this.state
     return (
       <div>
         <Search
@@ -125,8 +130,8 @@ class SearchableAddress extends Component {
           results={results}
           value={this.props.value}
           placeholder='address'
-          showNoResults={showNoResults}
-          minCharacters={0}
+          showNoResults={false}
+          minCharacters={3}
           icon={<Icon name={this.props.icon} position='left' style={{ color: '#0e72f5' }} />}
         />
         {addressError ? (

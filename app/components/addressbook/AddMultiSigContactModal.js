@@ -47,6 +47,7 @@ function renderOwnerInputFields (ownerAddresses, handleAddressOwnerChange, remov
       <div key={index} >
         <Form.Field style={{ marginTop: 20 }}>
           <SearchableAddress
+            multiSig
             setSearchValue={(v) => handleAddressOwnerChange(v, index)}
             icon='user'
           />
