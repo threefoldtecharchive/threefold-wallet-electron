@@ -5,7 +5,7 @@ import { Search, Message, Icon } from 'semantic-ui-react'
 import * as tfchain from '../../tfchain/api'
 import routes from '../../constants/routes.json'
 
-const initialState = { results: [], addressError: false, showNoResults: true }
+const initialState = { results: [], addressError: false }
 
 const mapStateToProps = state => ({
   currentLocation: state.router.location.pathname,
@@ -116,7 +116,7 @@ class SearchableAddress extends Component {
   }
 
   render () {
-    const { results, addressError, showNoResults } = this.state
+    const { results, addressError } = this.state
     return (
       <div>
         <Search
@@ -130,7 +130,7 @@ class SearchableAddress extends Component {
           results={results}
           value={this.props.value}
           placeholder='address'
-          showNoResults={showNoResults}
+          showNoResults={false}
           minCharacters={3}
           icon={<Icon name={this.props.icon} position='left' style={{ color: '#0e72f5' }} />}
         />
