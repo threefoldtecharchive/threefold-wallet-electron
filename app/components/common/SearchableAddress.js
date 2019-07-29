@@ -3,10 +3,12 @@ import React, { Component } from 'react'
 import { debounce, escapeRegExp, filter, flatten } from 'lodash'
 import { Search, Message, Icon } from 'semantic-ui-react'
 import * as tfchain from '../../tfchain/api'
+import routes from '../../constants/routes.json'
 
 const initialState = { results: [], addressError: false, showNoResults: true }
 
 const mapStateToProps = state => ({
+  currentLocation: state.router.location.pathname,
   account: state.account.state,
   form: state.form
 })
@@ -77,8 +79,6 @@ class SearchableAddress extends Component {
       return this.setState({ results, showNoResults: false, value })
     }
 
-    this.props.setValue(value)
-
     // If results are found, show a dropdown list with possible selection
     this.setState({
       results
@@ -87,13 +87,17 @@ class SearchableAddress extends Component {
 
   handleOnFocus = (e) => {
     const { source } = this.state
-    const { value } = this.props
+    const { value, currentLocation } = this.props
 
     if (value) {
       return this.filterSearchInput(value)
     }
 
-    const result = source.filter(w => w.value !== this.props.form.transactionForm.values.selectedWallet.address)
+    let result = source
+
+    if (currentLocation !== routes.ADDRESS_BOOK) {
+      result = source.filter(w => w.value !== this.props.form.transactionForm.values.selectedWallet.address)
+    }
 
     this.setState({
       showNoResults: false, results: result
