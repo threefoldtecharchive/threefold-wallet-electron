@@ -81,13 +81,11 @@ class SearchableAddress extends Component {
 
     // enable searching on name or address
     const isMatch = result => (re.test(result.wallet_name) || re.test(result.value) || re.test(result.title) || re.test(result.contact_name))
-    results = filter(this.state.source, isMatch)
+    results = filter(source, isMatch)
 
     if (currentLocation !== routes.ADDRESS_BOOK) {
       results = results.filter(w => w.value !== this.props.form.transactionForm.values.selectedWallet.address)
-    } else if (multiSig) {
-      results = source
-    } else {
+    } else if (!multiSig) {
       results = results.filter(w => !account.addresses.includes(w.value))
     }
 
