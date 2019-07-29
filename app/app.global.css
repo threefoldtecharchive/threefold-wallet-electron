@@ -69,6 +69,11 @@ a:hover {
   width: 100%;
 }
 
+.ui.search>.results {
+  height: 30vh;
+  overflow-y: scroll;
+}
+
 .gradient-text {
   background: linear-gradient(to right, #7f88df 0%, #49d2d8 100%) !important;
   color: linear-gradient(to right, #7f88df 0%, #49d2d8 100%) !important;

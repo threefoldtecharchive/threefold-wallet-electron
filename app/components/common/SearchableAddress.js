@@ -87,16 +87,18 @@ class SearchableAddress extends Component {
 
   handleOnFocus = (e) => {
     const { source } = this.state
-    const { value, currentLocation } = this.props
+    const { value, currentLocation, account } = this.props
 
     if (value) {
       return this.filterSearchInput(value)
     }
 
-    let result = source
+    let result
 
     if (currentLocation !== routes.ADDRESS_BOOK) {
       result = source.filter(w => w.value !== this.props.form.transactionForm.values.selectedWallet.address)
+    } else {
+      result = source.filter(w => !account.addresses.includes(w.value))
     }
 
     this.setState({
