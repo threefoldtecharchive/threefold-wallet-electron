@@ -34,6 +34,10 @@ class InsufficientFunds(TFChainBaseException):
     InsufficientFunds error
     """
 
+class UnsupporedFeature(TFChainBaseException):
+    """
+    Unsupported Feature on this Chain
+    """
 
 class CurrencyPrecisionOverflow(TFChainBaseException):
     """

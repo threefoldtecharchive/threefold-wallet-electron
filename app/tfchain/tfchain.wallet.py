@@ -12,11 +12,11 @@ from tfchain.encoding.siabin import SiaBinaryEncoder
 
 from tfchain.types import ConditionTypes, transactions, FulfillmentTypes
 from tfchain.types.transactions.Base import TransactionBaseClass
-from tfchain.types.transactions.Minting import TransactionV128, TransactionV129
+from tfchain.types.transactions.Minting import TransactionV128, TransactionV129, TransactionV130
 from tfchain.types.IO import CoinInput
 from tfchain.types.CryptoTypes import PublicKey, PublicKeySpecifier
 from tfchain.types.PrimitiveTypes import Hash, Currency
-from tfchain.types.ConditionTypes import UnlockHash, UnlockHashType, ConditionMultiSignature
+from tfchain.types.ConditionTypes import UnlockHash, UnlockHashType, ConditionUnlockHash, ConditionMultiSignature
 from tfchain.types.FulfillmentTypes import FulfillmentMultiSignature, PublicKeySignaturePair
 
 def assymetric_key_pair_generate(entropy, index):
@@ -63,7 +63,7 @@ class TFChainWallet:
             self._addresses.append(address)
 
         # add sub-apis
-        # self._minter = TFChainMinter(wallet=self)
+        self._minter = TFChainMinter(wallet=self)
         # self._atomicswap = TFChainAtomicSwap(wallet=self)
         # self._threebot = TFChainThreeBot(wallet=self)
         # self._erc20 = TFChainERC20(wallet=self)
@@ -116,14 +116,14 @@ class TFChainWallet:
         """
         return len(self.addresses)
 
-    # @property
-    # def minter(self):
-    #     """
-    #     Minter used to update the (Coin) Minter Definition
-    #     as well as to mint new coins, only useable if this wallet
-    #     has (co-)ownership over the current (coin) minter definition.
-    #     """
-    #     return self._minter
+    @property
+    def minter(self):
+        """
+        Minter used to update the (Coin) Minter Definition
+        as well as to mint new coins, only useable if this wallet
+        has (co-)ownership over the current (coin) minter definition.
+        """
+        return self._minter
 
     # @property
     # def atomicswap(self):
@@ -466,181 +466,247 @@ class TFChainWallet:
     def _transaction_put(self, transaction):
         return self._client.transaction_put(transaction)
 
-# class TFChainMinter():
-#     """
-#     TFChainMinter contains all Coin Minting logic.
-#     """
+class TFChainMinter():
+    """
+    TFChainMinter contains all Coin Minting logic.
+    """
 
-#     def __init__(self, wallet):
-#         if not isinstance(wallet, TFChainWallet):
-#             raise TypeError("wallet is expected to be a TFChainWallet")
-#         self._wallet = wallet
+    def __init__(self, wallet):
+        if not isinstance(wallet, TFChainWallet):
+            raise TypeError("wallet is expected to be a TFChainWallet")
+        self._wallet = wallet
 
-#     def definition_set(self, minter, data=None):
-#         """
-#         Redefine the current minter definition.
-#         Arbitrary data can be attached as well if desired.
+    # def definition_set(self, minter, data=None):
+    #     """
+    #     Redefine the current minter definition.
+    #     Arbitrary data can be attached as well if desired.
 
-#         The minter is one of:
-#             - str (or unlockhash): minter is a personal wallet
-#             - list: minter is a MultiSig wallet where all owners (specified as a list of addresses) have to sign
-#             - tuple (addresses, sigcount): minter is a sigcount-of-addresscount MultiSig wallet
+    #     The minter is one of:
+    #         - str (or unlockhash): minter is a personal wallet
+    #         - list: minter is a MultiSig wallet where all owners (specified as a list of addresses) have to sign
+    #         - tuple (addresses, sigcount): minter is a sigcount-of-addresscount MultiSig wallet
 
-#         Returns a TransactionSendResult.
+    #     Returns a TransactionSendResult.
 
-#         @param minter: see explanation above
-#         @param data: optional data that can be attached ot the sent transaction (str or bytes), with a max length of 83
-#         """
-#         # create empty Mint Definition Txn, with a newly generated Nonce set already
-#         txn = tftransactions.mint_definition_new()
+    #     @param minter: see explanation above
+    #     @param data: optional data that can be attached ot the sent transaction (str or bytes), with a max length of 83
+    #     """
+    #     # create empty Mint Definition Txn, with a newly generated Nonce set already
+    #     txn = tftransactions.mint_definition_new()
 
-#         # add the minimum miner fee
-#         txn.miner_fee_add(self._minium_miner_fee)
+    #     # add the minimum miner fee
+    #     txn.miner_fee_add(self._minium_miner_fee)
 
-#         # set the new mint condition
-#         txn.mint_condition = ConditionTypes.from_recipient(minter)
-#         # minter definition must be of unlock type 1 or 3
-#         ut = txn.mint_condition.unlockhash.type
-#         if ut not in (UnlockHashType.PUBLIC_KEY, UnlockHashType.MULTI_SIG):
-#             raise ValueError("{} is an invalid unlock hash type and cannot be used for a minter definition".format(ut))
+    #     # set the new mint condition
+    #     txn.mint_condition = ConditionTypes.from_recipient(minter)
+    #     # minter definition must be of unlock type 1 or 3
+    #     ut = txn.mint_condition.unlockhash.type
+    #     if ut not in (UnlockHashType.PUBLIC_KEY, UnlockHashType.MULTI_SIG):
+    #         raise ValueError("{} is an invalid unlock hash type and cannot be used for a minter definition".format(ut))
 
-#         # optionally set the data
-#         if data != None:
-#             txn.data = data
+    #     # optionally set the data
+    #     if data != None:
+    #         txn.data = data
 
-#         # get and set the current mint condition
-#         txn.parent_mint_condition = self._current_mint_condition_get()
-#         # create a raw fulfillment based on the current mint condition
-#         txn.mint_fulfillment = FulfillmentTypes.from_condition(txn.parent_mint_condition)
+    #     # get and set the current mint condition
+    #     txn.parent_mint_condition = self._current_mint_condition_get()
+    #     # create a raw fulfillment based on the current mint condition
+    #     txn.mint_fulfillment = FulfillmentTypes.from_condition(txn.parent_mint_condition)
 
-#         # get all signature requests
-#         sig_requests = txn.signature_requests_new()
-#         if len(sig_requests) == 0:
-#             raise Exception("BUG: sig requests should not be empty at this point, please fix or report as an issue")
+    #     # get all signature requests
+    #     sig_requests = txn.signature_requests_new()
+    #     if len(sig_requests) == 0:
+    #         raise Exception("BUG: sig requests should not be empty at this point, please fix or report as an issue")
 
-#         # fulfill the signature requests that we can fulfill
-#         for request in sig_requests:
-#             try:
-#                 key_pair = self._wallet.key_pair_get(request.wallet_address)
-#                 input_hash = request.input_hash_new(public_key=key_pair.public_key)
-#                 signature = key_pair.sign(input_hash)
-#                 request.signature_fulfill(public_key=key_pair.public_key, signature=signature)
-#             except KeyError:
-#                 pass # this is acceptable due to how we directly try the key_pair_get method
+    #     # fulfill the signature requests that we can fulfill
+    #     for request in sig_requests:
+    #         try:
+    #             key_pair = self._wallet.key_pair_get(request.wallet_address)
+    #             input_hash = request.input_hash_new(public_key=key_pair.public_key)
+    #             signature = key_pair.sign(input_hash)
+    #             request.signature_fulfill(public_key=key_pair.public_key, signature=signature)
+    #         except KeyError:
+    #             pass # this is acceptable due to how we directly try the key_pair_get method
 
-#         submit = txn.is_fulfilled()
-#         if submit:
-#             txn.id = self._transaction_put(transaction=txn)
+    #     submit = txn.is_fulfilled()
+    #     if submit:
+    #         txn.id = self._transaction_put(transaction=txn)
 
-#         # return the txn, as well as the submit status as a boolean
-#         return TransactionSendResult(txn, submit)
+    #     # return the txn, as well as the submit status as a boolean
+    #     return TransactionSendResult(txn, submit)
 
-#     def coins_new(self, recipient, amount, lock=None, data=None):
-#         """
-#         Create new (amount of) coins and give them to the defined recipient.
-#         Arbitrary data can be attached as well if desired.
+    # def coins_new(self, recipient, amount, lock=None, data=None):
+    #     """
+    #     Create new (amount of) coins and give them to the defined recipient.
+    #     Arbitrary data can be attached as well if desired.
 
-#         The recipient is one of:
-#             - None: recipient is the Free-For-All wallet
-#             - str (or unlockhash/bytes/bytearray): recipient is a personal wallet
-#             - list: recipient is a MultiSig wallet where all owners (specified as a list of addresses) have to sign
-#             - tuple (addresses, sigcount): recipient is a sigcount-of-addresscount MultiSig wallet
+    #     The recipient is one of:
+    #         - None: recipient is the Free-For-All wallet
+    #         - str (or unlockhash/bytes/bytearray): recipient is a personal wallet
+    #         - list: recipient is a MultiSig wallet where all owners (specified as a list of addresses) have to sign
+    #         - tuple (addresses, sigcount): recipient is a sigcount-of-addresscount MultiSig wallet
 
-#         The amount can be a str or an int:
-#             - when it is an int, you are defining the amount in the smallest unit (that is 1 == 0.000000001 TFT)
-#             - when defining as a str you can use the following space-stripped and case-insentive formats:
-#                 - '123456789': same as when defining the amount as an int
-#                 - '123.456': define the amount in TFT (that is '123.456' == 123.456 TFT == 123456000000)
-#                 - '123456 TFT': define the amount in TFT (that is '123456 TFT' == 123456 TFT == 123456000000000)
-#                 - '123.456 TFT': define the amount in TFT (that is '123.456 TFT' == 123.456 TFT == 123456000000)
+    #     The amount can be a str or an int:
+    #         - when it is an int, you are defining the amount in the smallest unit (that is 1 == 0.000000001 TFT)
+    #         - when defining as a str you can use the following space-stripped and case-insentive formats:
+    #             - '123456789': same as when defining the amount as an int
+    #             - '123.456': define the amount in TFT (that is '123.456' == 123.456 TFT == 123456000000)
+    #             - '123456 TFT': define the amount in TFT (that is '123456 TFT' == 123456 TFT == 123456000000000)
+    #             - '123.456 TFT': define the amount in TFT (that is '123.456 TFT' == 123.456 TFT == 123456000000)
 
-#         The lock can be a str, or int:
-#             - when it is an int it represents either a block height or an epoch timestamp (in seconds)
-#             - when a str it can be a Jumpscale Datetime (e.g. '12:00:10', '31/10/2012 12:30', ...) or a Jumpscale Duration (e.g. '+ 2h', '+7d12h', ...)
+    #     The lock can be a str, or int:
+    #         - when it is an int it represents either a block height or an epoch timestamp (in seconds)
+    #         - when a str it can be a Jumpscale Datetime (e.g. '12:00:10', '31/10/2012 12:30', ...) or a Jumpscale Duration (e.g. '+ 2h', '+7d12h', ...)
 
-#         Returns a TransactionSendResult.
+    #     Returns a TransactionSendResult.
 
-#         @param recipient: see explanation above
-#         @param amount: int or str that defines the amount of TFT to set, see explanation above
-#         @param lock: optional lock that can be used to lock the sent amount to a specific time or block height, see explation above
-#         @param data: optional data that can be attached ot the sent transaction (str or bytes), with a max length of 83
-#         """
-#         # create empty Mint Definition Txn, with a newly generated Nonce set already
-#         txn = tftransactions.mint_coin_creation_new()
+    #     @param recipient: see explanation above
+    #     @param amount: int or str that defines the amount of TFT to set, see explanation above
+    #     @param lock: optional lock that can be used to lock the sent amount to a specific time or block height, see explation above
+    #     @param data: optional data that can be attached ot the sent transaction (str or bytes), with a max length of 83
+    #     """
+    #     # create empty Mint Definition Txn, with a newly generated Nonce set already
+    #     txn = tftransactions.mint_coin_creation_new()
 
-#         # add the minimum miner fee
-#         txn.miner_fee_add(self._minium_miner_fee)
+    #     # add the minimum miner fee
+    #     txn.miner_fee_add(self._minium_miner_fee)
 
-#         balance = self._wallet.balance
+    #     balance = self._wallet.balance
 
-#         # parse the output
-#         amount = Currency(value=amount)
-#         if amount <= 0:
-#             raise ValueError("no amount is defined to be sent")
+    #     # parse the output
+    #     amount = Currency(value=amount)
+    #     if amount <= 0:
+    #         raise ValueError("no amount is defined to be sent")
 
-#         # define recipient
-#         recipient = ConditionTypes.from_recipient(recipient, lock=lock)
-#         # and add it is the output
-#         txn.coin_output_add(value=amount, condition=recipient)
+    #     # define recipient
+    #     recipient = ConditionTypes.from_recipient(recipient, lock=lock)
+    #     # and add it is the output
+    #     txn.coin_output_add(value=amount, condition=recipient)
 
-#         # optionally set the data
-#         if data != None:
-#             txn.data = data
+    #     # optionally set the data
+    #     if data != None:
+    #         txn.data = data
 
-#         # get and set the current mint condition
-#         txn.parent_mint_condition = self._current_mint_condition_get()
-#         # create a raw fulfillment based on the current mint condition
-#         txn.mint_fulfillment = FulfillmentTypes.from_condition(txn.parent_mint_condition)
+    #     # get and set the current mint condition
+    #     txn.parent_mint_condition = self._current_mint_condition_get()
+    #     # create a raw fulfillment based on the current mint condition
+    #     txn.mint_fulfillment = FulfillmentTypes.from_condition(txn.parent_mint_condition)
 
-#         # get all signature requests
-#         sig_requests = txn.signature_requests_new()
-#         if len(sig_requests) == 0:
-#             raise Exception("BUG: sig requests should not be empty at this point, please fix or report as an issue")
+    #     # get all signature requests
+    #     sig_requests = txn.signature_requests_new()
+    #     if len(sig_requests) == 0:
+    #         raise Exception("BUG: sig requests should not be empty at this point, please fix or report as an issue")
 
-#         # fulfill the signature requests that we can fulfill
-#         for request in sig_requests:
-#             try:
-#                 key_pair = self._wallet.key_pair_get(request.wallet_address)
-#                 input_hash = request.input_hash_new(public_key=key_pair.public_key)
-#                 signature = key_pair.sign(input_hash)
-#                 request.signature_fulfill(public_key=key_pair.public_key, signature=signature)
-#             except KeyError:
-#                 pass # this is acceptable due to how we directly try the key_pair_get method
+    #     # fulfill the signature requests that we can fulfill
+    #     for request in sig_requests:
+    #         try:
+    #             key_pair = self._wallet.key_pair_get(request.wallet_address)
+    #             input_hash = request.input_hash_new(public_key=key_pair.public_key)
+    #             signature = key_pair.sign(input_hash)
+    #             request.signature_fulfill(public_key=key_pair.public_key, signature=signature)
+    #         except KeyError:
+    #             pass # this is acceptable due to how we directly try the key_pair_get method
 
-#         submit = txn.is_fulfilled()
-#         if submit:
-#             txn.id = self._transaction_put(transaction=txn)
-#             # update balance of wallet
-#             addresses = self._wallet.addresses + balance.multisig_addresses
-#             for idx, co in enumerate(txn.coin_outputs):
-#                 if str(co.condition.unlockhash) in addresses:
-#                     # add the id to the coin_output, so we can track it has been spent
-#                     co.id = txn.coin_outputid_new(idx)
-#                     balance.output_add(co, confirmed=False, spent=False)
+    #     submit = txn.is_fulfilled()
+    #     if submit:
+    #         txn.id = self._transaction_put(transaction=txn)
+    #         # update balance of wallet
+    #         addresses = self._wallet.addresses + balance.multisig_addresses
+    #         for idx, co in enumerate(txn.coin_outputs):
+    #             if str(co.condition.unlockhash) in addresses:
+    #                 # add the id to the coin_output, so we can track it has been spent
+    #                 co.id = txn.coin_outputid_new(idx)
+    #                 balance.output_add(co, confirmed=False, spent=False)
 
-#         # return the txn, as well as the submit status as a boolean
-#         return TransactionSendResult(txn, submit)
+    #     # return the txn, as well as the submit status as a boolean
+    #     return TransactionSendResult(txn, submit)
 
-#     @property
-#     def _minium_miner_fee(self):
-#         """
-#         Returns the minimum miner fee
-#         """
-#         return self._wallet.network_type.minimum_miner_fee()
+    def coins_burn(self, amount, source=None, refund=None, data=None, balance=None):
+        """
+        Burn the specified amount of coins,
+        paying miner fees on top of it.
+        """
+        txn = TransactionV130()
+        miner_fee = self._minium_miner_fee
+        amount = Currency(amount)
+        balance_is_cached = (balance != None)
 
-#     def _current_mint_condition_get(self):
-#         """
-#         Get the current mind condition from the parent TFChain client.
-#         """
-#         return self._wallet.client.minter.condition_get()
+        if amount.less_than_or_equal_to(0):
+            raise ValueError("a strict positive amount is required to be burned")
 
-#     def _transaction_put(self, transaction):
-#         """
-#         Submit the transaction to the network using the parent's wallet client.
+        def balance_cb(balance):
+            # fund amount
+            inputs, remainder, suggested_refund = balance.fund(amount.plus(miner_fee), source=source)
 
-#         Returns the transaction ID.
-#         """
-#         return self._wallet.client.transaction_put(transaction=transaction)
+            # define the refund condition
+            if refund == None: # automatically choose a refund condition if none is given
+                if suggested_refund == None:
+                    refund = ConditionTypes.unlockhash_new(unlockhash=self._wallet.address)
+                else:
+                    refund = suggested_refund
+            else:
+                # use the given refund condition (defined as a recipient)
+                refund = ConditionTypes.from_recipient(refund)
+
+            # add refund coin output if needed
+            if remainder.greater_than(0):
+                txn.refund_coin_output_set(value=remainder, condition=refund)
+            # add the miner fee
+            txn.miner_fee_add(miner_fee)
+
+            # add the coin inputs
+            txn.coin_inputs = inputs
+
+            # if there is data to be added, add it as well
+            if data != None:
+                txn.data = data
+
+            # generate the signature requests
+            sig_requests = txn.signature_requests_new()
+            if len(sig_requests) == 0:
+                raise Exception("BUG: sig requests should not be empty at this point, please fix or report as an issue")
+
+            # fulfill the signature requests that we can fulfill
+            for request in sig_requests:
+                try:
+                    key_pair = self._wallet.key_pair_get(request.wallet_address)
+                    pk = public_key_from_assymetric_key_pair(key_pair)
+                    input_hash = request.input_hash_new(public_key=pk)
+                    signature = key_pair.sign(input_hash.value)
+                    request.signature_fulfill(public_key=pk, signature=signature)
+                except KeyError:
+                    pass # this is acceptable due to how we directly try the key_pair_get method
+
+            # txn should be fulfilled now
+            submit = txn.is_fulfilled()
+            if not submit: # return as-is
+                def stub_cb(resolve, reject):
+                    resolve(TransactionSendResult(txn, submit))
+                return jsasync.promise_new(stub_cb)
+            
+            # submit, and only then return
+            def id_cb(id):
+                txn.id = id
+                if balance_is_cached:
+                    addresses = balance.addresses
+                    for idx, ci in enumerate(txn.coin_inputs):
+                        if ci.parent_output.condition.unlockhash.__str__() in addresses:
+                            balance.output_add(txn, idx, confirmed=False, spent=True)
+                # return the semd result
+                return TransactionSendResult(txn, submit)
+            return jsasync.chain(self._wallet._transaction_put(transaction=txn), id_cb)
+
+        if balance != None:
+            if not isinstance(balance, WalletBalance):
+                raise TypeError("balance is of unexpected type: {} ({})".format(balance, type(balance)))
+            # if balance is given, execute the balance cb directly
+            return balance_cb(balance)
+        # else fetch the balance first and get it than
+        return jsasync.chain(self._wallet.balance, balance_cb)
+
+    @property
+    def _minium_miner_fee(self):
+        return self._wallet.network_type.minimum_miner_fee()
 
 
 # from tfchain.types.ConditionTypes import ConditionAtomicSwap, OutputLock, AtomicSwapSecret, AtomicSwapSecretHash

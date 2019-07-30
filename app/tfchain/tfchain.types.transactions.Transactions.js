@@ -4,7 +4,7 @@ import {UnknownTransansactionVersion} from './tfchain.errors.js';
 import * as jsobj from './tfchain.polyfill.encoding.object.js';
 import {json_loads} from './tfchain.polyfill.encoding.json.js';
 import {TransactionV176, TransactionV177} from './tfchain.types.transactions.AuthCoin.js';
-import {TransactionV128, TransactionV129} from './tfchain.types.transactions.Minting.js';
+import {TransactionV128, TransactionV129, TransactionV130} from './tfchain.types.transactions.Minting.js';
 import {TransactionV1} from './tfchain.types.transactions.Standard.js';
 import {OpaqueTransaction, TransactionBaseClass, TransactionVersion} from './tfchain.types.transactions.Base.js';
 var __name__ = 'tfchain.types.transactions.Transactions';
@@ -83,6 +83,9 @@ export var from_json = function (obj, id) {
 	}
 	else if (tt == TransactionVersion.MINTER_COIN_CREATION.value) {
 		var txn = TransactionV129.from_json (obj);
+	}
+	else if (tt == TransactionVersion.MINTER_COIN_DESTRUCTION.value) {
+		var txn = TransactionV130.from_json (obj);
 	}
 	else if (tt == TransactionVersion.COIN_AUTH_ADDRESS_UPDATE.value) {
 		var txn = TransactionV176.from_json (obj);

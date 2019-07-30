@@ -1,10 +1,10 @@
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __proxy__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, abs, all, any, assert, bool, bytearray, bytes, callable, chr, copy, deepcopy, delattr, dict, dir, divmod, enumerate, filter, float, getattr, hasattr, input, int, isinstance, issubclass, len, list, map, max, min, object, ord, pow, print, property, py_TypeError, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
 import {FulfillmentMultiSignature, PublicKeySignaturePair} from './tfchain.types.FulfillmentTypes.js';
-import {ConditionMultiSignature, UnlockHash, UnlockHashType} from './tfchain.types.ConditionTypes.js';
+import {ConditionMultiSignature, ConditionUnlockHash, UnlockHash, UnlockHashType} from './tfchain.types.ConditionTypes.js';
 import {Currency, Hash} from './tfchain.types.PrimitiveTypes.js';
 import {PublicKey, PublicKeySpecifier} from './tfchain.types.CryptoTypes.js';
 import {CoinInput} from './tfchain.types.IO.js';
-import {TransactionV128, TransactionV129} from './tfchain.types.transactions.Minting.js';
+import {TransactionV128, TransactionV129, TransactionV130} from './tfchain.types.transactions.Minting.js';
 import {TransactionBaseClass} from './tfchain.types.transactions.Base.js';
 import * as ConditionTypes from './tfchain.types.ConditionTypes.js';
 import * as transactions from './tfchain.types.transactions.js';
@@ -131,6 +131,7 @@ export var TFChainWallet =  __class__ ('TFChainWallet', [object], {
 			var address = uh.__str__ ();
 			self._addresses.append (address);
 		}
+		self._minter = TFChainMinter (__kwargtrans__ ({wallet: self}));
 	});},
 	get _get_addresses () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -227,6 +228,22 @@ export var TFChainWallet =  __class__ ('TFChainWallet', [object], {
 		else {
 		}
 		return len (self.addresses);
+	});},
+	get _get_minter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._minter;
 	});},
 	get _get_addresses_multisig () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -641,12 +658,213 @@ export var TFChainWallet =  __class__ ('TFChainWallet', [object], {
 Object.defineProperty (TFChainWallet, 'transactions', property.call (TFChainWallet, TFChainWallet._get_transactions));
 Object.defineProperty (TFChainWallet, 'balance', property.call (TFChainWallet, TFChainWallet._get_balance));
 Object.defineProperty (TFChainWallet, 'addresses_multisig', property.call (TFChainWallet, TFChainWallet._get_addresses_multisig));
+Object.defineProperty (TFChainWallet, 'minter', property.call (TFChainWallet, TFChainWallet._get_minter));
 Object.defineProperty (TFChainWallet, 'address_count', property.call (TFChainWallet, TFChainWallet._get_address_count));
 Object.defineProperty (TFChainWallet, 'address', property.call (TFChainWallet, TFChainWallet._get_address));
 Object.defineProperty (TFChainWallet, 'network_type', property.call (TFChainWallet, TFChainWallet._get_network_type));
 Object.defineProperty (TFChainWallet, 'client', property.call (TFChainWallet, TFChainWallet._get_client));
 Object.defineProperty (TFChainWallet, 'pairs', property.call (TFChainWallet, TFChainWallet._get_pairs));
 Object.defineProperty (TFChainWallet, 'addresses', property.call (TFChainWallet, TFChainWallet._get_addresses));;
+export var TFChainMinter =  __class__ ('TFChainMinter', [object], {
+	__module__: __name__,
+	get __init__ () {return __get__ (this, function (self, wallet) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'wallet': var wallet = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (!(isinstance (wallet, TFChainWallet))) {
+			var __except0__ = py_TypeError ('wallet is expected to be a TFChainWallet');
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		self._wallet = wallet;
+	});},
+	get coins_burn () {return __get__ (this, function (self, amount, source, refund, data, balance) {
+		if (typeof source == 'undefined' || (source != null && source.hasOwnProperty ("__kwargtrans__"))) {;
+			var source = null;
+		};
+		if (typeof refund == 'undefined' || (refund != null && refund.hasOwnProperty ("__kwargtrans__"))) {;
+			var refund = null;
+		};
+		if (typeof data == 'undefined' || (data != null && data.hasOwnProperty ("__kwargtrans__"))) {;
+			var data = null;
+		};
+		if (typeof balance == 'undefined' || (balance != null && balance.hasOwnProperty ("__kwargtrans__"))) {;
+			var balance = null;
+		};
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'amount': var amount = __allkwargs0__ [__attrib0__]; break;
+						case 'source': var source = __allkwargs0__ [__attrib0__]; break;
+						case 'refund': var refund = __allkwargs0__ [__attrib0__]; break;
+						case 'data': var data = __allkwargs0__ [__attrib0__]; break;
+						case 'balance': var balance = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var txn = TransactionV130 ();
+		var miner_fee = self._minium_miner_fee;
+		var amount = Currency (amount);
+		var balance_is_cached = balance != null;
+		if (amount.less_than_or_equal_to (0)) {
+			var __except0__ = ValueError ('a strict positive amount is required to be burned');
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		var balance_cb = function (balance) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'balance': var balance = __allkwargs0__ [__attrib0__]; break;
+						}
+					}
+				}
+			}
+			else {
+			}
+			var __left0__ = balance.fund (amount.plus (miner_fee), __kwargtrans__ ({source: source}));
+			var inputs = __left0__ [0];
+			var remainder = __left0__ [1];
+			var suggested_refund = __left0__ [2];
+			if (refund == null) {
+				if (suggested_refund == null) {
+					var refund = ConditionTypes.unlockhash_new (__kwargtrans__ ({unlockhash: self._wallet.address}));
+				}
+				else {
+					var refund = suggested_refund;
+				}
+			}
+			else {
+				var refund = ConditionTypes.from_recipient (refund);
+			}
+			if (remainder.greater_than (0)) {
+				txn.refund_coin_output_set (__kwargtrans__ ({value: remainder, condition: refund}));
+			}
+			txn.miner_fee_add (miner_fee);
+			txn.coin_inputs = inputs;
+			if (data != null) {
+				txn.data = data;
+			}
+			var sig_requests = txn.signature_requests_new ();
+			if (len (sig_requests) == 0) {
+				var __except0__ = Exception ('BUG: sig requests should not be empty at this point, please fix or report as an issue');
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
+			for (var request of sig_requests) {
+				try {
+					var key_pair = self._wallet.key_pair_get (request.wallet_address);
+					var pk = public_key_from_assymetric_key_pair (key_pair);
+					var input_hash = request.input_hash_new (__kwargtrans__ ({public_key: pk}));
+					var signature = key_pair.sign (input_hash.value);
+					request.signature_fulfill (__kwargtrans__ ({public_key: pk, signature: signature}));
+				}
+				catch (__except0__) {
+					if (isinstance (__except0__, KeyError)) {
+						// pass;
+					}
+					else {
+						throw __except0__;
+					}
+				}
+			}
+			var submit = txn.is_fulfilled ();
+			if (!(submit)) {
+				var stub_cb = function (resolve, reject) {
+					if (arguments.length) {
+						var __ilastarg0__ = arguments.length - 1;
+						if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+							var __allkwargs0__ = arguments [__ilastarg0__--];
+							for (var __attrib0__ in __allkwargs0__) {
+								switch (__attrib0__) {
+									case 'resolve': var resolve = __allkwargs0__ [__attrib0__]; break;
+									case 'reject': var reject = __allkwargs0__ [__attrib0__]; break;
+								}
+							}
+						}
+					}
+					else {
+					}
+					resolve (TransactionSendResult (txn, submit));
+				};
+				return jsasync.promise_new (stub_cb);
+			}
+			var id_cb = function (id) {
+				if (arguments.length) {
+					var __ilastarg0__ = arguments.length - 1;
+					if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+						var __allkwargs0__ = arguments [__ilastarg0__--];
+						for (var __attrib0__ in __allkwargs0__) {
+							switch (__attrib0__) {
+								case 'id': var id = __allkwargs0__ [__attrib0__]; break;
+							}
+						}
+					}
+				}
+				else {
+				}
+				txn.id = id;
+				if (balance_is_cached) {
+					var addresses = balance.addresses;
+					for (var [idx, ci] of enumerate (txn.coin_inputs)) {
+						if (__in__ (ci.parent_output.condition.unlockhash.__str__ (), addresses)) {
+							balance.output_add (txn, idx, __kwargtrans__ ({confirmed: false, spent: true}));
+						}
+					}
+				}
+				return TransactionSendResult (txn, submit);
+			};
+			return jsasync.chain (self._wallet._transaction_put (__kwargtrans__ ({transaction: txn})), id_cb);
+		};
+		if (balance != null) {
+			if (!(isinstance (balance, WalletBalance))) {
+				var __except0__ = py_TypeError ('balance is of unexpected type: {} ({})'.format (balance, py_typeof (balance)));
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
+			return balance_cb (balance);
+		}
+		return jsasync.chain (self._wallet.balance, balance_cb);
+	});},
+	get _get__minium_miner_fee () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._wallet.network_type.minimum_miner_fee ();
+	});}
+});
+Object.defineProperty (TFChainMinter, '_minium_miner_fee', property.call (TFChainMinter, TFChainMinter._get__minium_miner_fee));;
 export var TransactionSendResult =  __class__ ('TransactionSendResult', [object], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, transaction, submitted) {

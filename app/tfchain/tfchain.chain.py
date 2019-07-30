@@ -199,6 +199,9 @@ class Type:
             return "goldchain"
         raise ValueError("invalid network type {}".format(self.value))
 
+    def str(self):
+        return self.__str__()
+
     @classmethod
     def from_str(cls, s):
         if not isinstance(s, str):

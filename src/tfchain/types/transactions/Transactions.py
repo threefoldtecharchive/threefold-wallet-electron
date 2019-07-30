@@ -1,6 +1,6 @@
 from tfchain.types.transactions.Base import TransactionBaseClass, TransactionVersion, OpaqueTransaction
 from tfchain.types.transactions.Standard import TransactionV1
-from tfchain.types.transactions.Minting import TransactionV128, TransactionV129
+from tfchain.types.transactions.Minting import TransactionV128, TransactionV129, TransactionV130
 from tfchain.types.transactions.AuthCoin import TransactionV176, TransactionV177
 # from tfchain.types.transactions.ThreeBot import TransactionV144, TransactionV145, TransactionV146
 # from tfchain.types.transactions.ERC20 import TransactionV208, TransactionV209, TransactionV210
@@ -101,6 +101,8 @@ def from_json(obj, id=None):
         txn = TransactionV128.from_json(obj)
     elif tt == TransactionVersion.MINTER_COIN_CREATION.value:
         txn = TransactionV129.from_json(obj)
+    elif tt == TransactionVersion.MINTER_COIN_DESTRUCTION.value:
+        txn = TransactionV130.from_json(obj)
     elif tt == TransactionVersion.COIN_AUTH_ADDRESS_UPDATE.value:
         txn = TransactionV176.from_json(obj)
     elif tt == TransactionVersion.COIN_AUTH_CONDITION_UPDATE.value:

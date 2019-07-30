@@ -106,6 +106,7 @@ TransactionVersion.LEGACY = TransactionVersion (0);
 TransactionVersion.STANDARD = TransactionVersion (1);
 TransactionVersion.MINTER_DEFINITION = TransactionVersion (128);
 TransactionVersion.MINTER_COIN_CREATION = TransactionVersion (129);
+TransactionVersion.MINTER_COIN_DESTRUCTION = TransactionVersion (130);
 TransactionVersion.THREEBOT_REGISTRATION = TransactionVersion (144);
 TransactionVersion.THREEBOT_RECORD_UPDATE = TransactionVersion (145);
 TransactionVersion.THREEBOT_NAME_TRANSFER = TransactionVersion (146);

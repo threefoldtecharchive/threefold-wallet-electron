@@ -636,6 +636,22 @@ export var Type =  __class__ ('Type', [object], {
 		__except0__.__cause__ = null;
 		throw __except0__;
 	});},
+	get str () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self.__str__ ();
+	});},
 	get from_str () {return __getcm__ (this, function (cls, s) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;

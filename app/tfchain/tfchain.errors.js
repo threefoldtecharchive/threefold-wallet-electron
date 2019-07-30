@@ -33,6 +33,9 @@ export var UnknownTransansactionVersion =  __class__ ('UnknownTransansactionVers
 export var InsufficientFunds =  __class__ ('InsufficientFunds', [TFChainBaseException], {
 	__module__: __name__,
 });
+export var UnsupporedFeature =  __class__ ('UnsupporedFeature', [TFChainBaseException], {
+	__module__: __name__,
+});
 export var CurrencyPrecisionOverflow =  __class__ ('CurrencyPrecisionOverflow', [TFChainBaseException], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, value) {
