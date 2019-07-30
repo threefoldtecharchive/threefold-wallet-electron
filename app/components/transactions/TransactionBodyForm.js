@@ -129,7 +129,8 @@ class TransactionBodyForm extends Component {
     })
   }
 
-  selectWallet = (wallet) => {
+  selectWallet = (address) => {
+    const wallet = this.props.account.wallet_for_address(address)
     this.setState({ selectedWallet: wallet })
     this.props.account.select_wallet({ name: wallet.wallet_name, address: wallet.address })
   }
@@ -142,7 +143,7 @@ class TransactionBodyForm extends Component {
         <Dropdown
           placeholder='Select wallet'
           options={data}
-          value={selectedWallet}
+          value={selectedWallet.address}
           fluid
           selection
           onChange={(e, v) => {
@@ -162,7 +163,7 @@ class TransactionBodyForm extends Component {
         return {
           key: `NM: ${w.wallet_name}`,
           text: w.wallet_name,
-          value: w
+          value: w.address
         }
       })
 
@@ -171,7 +172,7 @@ class TransactionBodyForm extends Component {
         return {
           key: `MS: ${id}`,
           text: `Multisig: ${truncate(id, { length: 24 })}`,
-          value: w
+          value: w.address
         }
       })
 
@@ -186,7 +187,7 @@ class TransactionBodyForm extends Component {
     const walletOptions = this.mapWalletsToDropdownOption()
 
     return (
-      <Form style={{ width: '90%', margin: 'auto', marginTop: 50 }} onSubmit={handleSubmit} initialValues={{ selectedWallet }}>
+      <Form style={{ width: '90%', margin: 'auto', marginTop: 50 }} onSubmit={handleSubmit} initialvalues={{ selectedWallet }}>
         <Field
           name='amount'
           type='text'
@@ -209,7 +210,7 @@ class TransactionBodyForm extends Component {
           component={renderDateTimeField}
         />
         <Field
-          name='selectedWallet'
+          name='walletAddress'
           component={this.renderDropdownList}
           data={walletOptions}
         />
