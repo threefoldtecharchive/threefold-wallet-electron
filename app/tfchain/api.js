@@ -3641,7 +3641,17 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 		var sender = __left0__ [1];
 		var data = __left0__ [2];
 		if (data == null && (message != null || sender != null)) {
-			var data = FormattedSenderMessageData (__kwargtrans__ ({sender: sender, message: message})).to_bin ();
+			if (isinstance (message, str)) {
+				var data = FormattedSenderMessageData (__kwargtrans__ ({sender: sender, message: message})).to_bin ();
+			}
+			else {
+				if (sender != null) {
+					var __except0__ = ValueError ('sender is not supported as part of a structured message');
+					__except0__.__cause__ = null;
+					throw __except0__;
+				}
+				var data = FormattedStructuredData (__kwargtrans__ ({parts: message})).to_bin ();
+			}
 		}
 		var cb = function (result) {
 			if (arguments.length) {
@@ -3769,7 +3779,17 @@ export var MultiSignatureCoinTransactionBuilder =  __class__ ('MultiSignatureCoi
 		var sender = __left0__ [1];
 		var data = __left0__ [2];
 		if (data == null && (message != null || sender != null)) {
-			var data = FormattedSenderMessageData (__kwargtrans__ ({sender: sender, message: message})).to_bin ();
+			if (isinstance (message, str)) {
+				var data = FormattedSenderMessageData (__kwargtrans__ ({sender: sender, message: message})).to_bin ();
+			}
+			else {
+				if (sender != null) {
+					var __except0__ = ValueError ('sender is not supported as part of a structured message');
+					__except0__.__cause__ = null;
+					throw __except0__;
+				}
+				var data = FormattedStructuredData (__kwargtrans__ ({parts: message})).to_bin ();
+			}
 		}
 		var balance = self._wallet.balance;
 		var tfbalance = balance._tfbalance;

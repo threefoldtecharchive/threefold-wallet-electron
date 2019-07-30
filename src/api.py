@@ -1541,7 +1541,12 @@ class CoinTransactionBuilder:
         """
         message, sender, data = jsfunc.opts_get(opts, 'message', 'sender', 'data')
         if data == None and (message != None or sender != None):
-            data = FormattedSenderMessageData(sender=sender, message=message).to_bin()
+            if isinstance(message, str):
+                data = FormattedSenderMessageData(sender=sender, message=message).to_bin()
+            else: # assume [int/str, int/str, int/str] structure
+                if sender != None:
+                    raise ValueError("sender is not supported as part of a structured message")
+                data = FormattedStructuredData(parts=message).to_bin()
         def cb(result):
             if result.submitted:
                 self._wallet._account._update_unconfirmed_account_balance_from_transaction(result.transaction)
@@ -1581,7 +1586,12 @@ class MultiSignatureCoinTransactionBuilder:
     def send(self, opts=None):
         message, sender, data = jsfunc.opts_get(opts, 'message', 'sender', 'data')
         if data == None and (message != None or sender != None):
-            data = FormattedSenderMessageData(sender=sender, message=message).to_bin()
+            if isinstance(message, str):
+                data = FormattedSenderMessageData(sender=sender, message=message).to_bin()
+            else: # assume [int/str, int/str, int/str] structure
+                if sender != None:
+                    raise ValueError("sender is not supported as part of a structured message")
+                data = FormattedStructuredData(parts=message).to_bin()
         balance = self._wallet.balance
         tfbalance = balance._tfbalance
         p = self._builder.send(
