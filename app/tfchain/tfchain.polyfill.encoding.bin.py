@@ -23,6 +23,16 @@ def from_int16(num, order=None):
         return bytes(jsarray.reverse(buf))
     return bytes(buf)
 
+def to_int16(bs, order=None):
+    f, s = bs[0], bs[1]
+    if order == 'big':
+        f, s = bs[1], bs[0]
+    x = 0
+    __pragma__("js", "{}", """
+    x = f | (s << 8);
+    """)
+    return int(x)
+
 def from_int24(num, order=None):
     buf = None
     __pragma__("js", "{}", """
@@ -35,6 +45,16 @@ def from_int24(num, order=None):
     if order == 'big':
         return bytes(jsarray.reverse(buf))
     return bytes(buf)
+
+def to_int24(bs, order=None):
+    f, m, l = bs[0], bs[1], bs[2]
+    if order == 'big':
+        f, m, l = bs[2], bs[1], bs[0]
+    x = 0
+    __pragma__("js", "{}", """
+    x = f | (m << 8) | (l << 16);
+    """)
+    return int(x)
 
 def from_int32(num, order=None):
     buf = None

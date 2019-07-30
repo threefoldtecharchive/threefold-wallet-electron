@@ -985,6 +985,27 @@ const _all = {
     })
   },
 
+  encodeStructuredMessageData: (assert) => {
+    const testCases = [
+      {
+        input: [0, 0, 0],
+        output: new Uint8Array([232, 139, 67, 253, 237, 99, 2, 0, 0, 0, 0, 0, 0, 0])
+      },
+      {
+        input: [303, 4003, 54321],
+        output: new Uint8Array([118, 25, 223, 39, 34, 145, 2, 0x2f, 0x01, 0xa3, 0x0f, 0x31, 0xd4, 0x00])
+      },
+      {
+        input: [999, 9999, 99999],
+        output: new Uint8Array([238, 87, 68, 43, 232, 54, 2, 231, 3, 15, 39, 159, 134, 1])
+      }
+    ]
+    testCases.forEach(testCase => {
+      const data = tfchain.FormattedStructuredData(testCase.input)
+      assert.equal(data.to_bin(), testCase.output)
+    })
+  },
+
   validateFormattedData: (assert) => {
     const maxContentDataLength = 83 - 6 - 3
     const testCases = [

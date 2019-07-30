@@ -10,6 +10,7 @@ import tfchain.polyfill.func as jsfunc
 import tfchain.polyfill.encoding.decimal as jsdec
 import tfchain.polyfill.encoding.json as jsjson
 import tfchain.polyfill.encoding.hex as jshex
+import tfchain.polyfill.encoding.bin as jsbin
 import tfchain.polyfill.encoding.str as jsstr
 import tfchain.polyfill.encoding.object as jsobj
 import tfchain.polyfill.array as jsarr
@@ -1291,9 +1292,12 @@ class SingleSignatureWallet(BaseWallet):
         """
         if self._account._chain.value != tfchaintype.Type.GOLDCHAIN.value:
             raise tferrors.UnsupporedFeature("blockchain {} does not support the minting coin burn transaction".format(self._account._chain.str()))
-        message, sender, data = jsfunc.opts_get(opts, 'message', 'data')
-        if data == None and (message != None or sender != None):
-            data = FormattedSenderMessageData(sender=sender, message=message).to_bin()
+        message, data = jsfunc.opts_get(opts, 'message', 'data')
+        if data == None and message != None:
+            if isinstance(message, str):
+                data = FormattedSenderMessageData(sender=None, message=message).to_bin()
+            else: # assume [int/str, int/str, int/str] structure
+                data = FormattedStructuredData(parts=message).to_bin()
         def cb(result):
             if result.submitted:
                 self._account._update_unconfirmed_account_balance_from_transaction(result.transaction)
@@ -2559,6 +2563,10 @@ class FormattedData(SiaBinaryObjectEncoderBase, RivineBinaryObjectEncoderBase):
             out_data = FormattedSenderMessageData()
             out_data._binary_data_setter(content_data)
             return out_data
+        if dtype == FormattedData.Type.STRUCTURED_MESSAGE.value:
+            out_data = FormattedStructuredData()
+            out_data._binary_data_setter(content_data)
+            return out_data
         jslog.debug("registering formatted data as opaque due to unknown format:", dtype, data)
         return FormattedOpaqueData(data)
 
@@ -2608,6 +2616,7 @@ class FormattedData(SiaBinaryObjectEncoderBase, RivineBinaryObjectEncoderBase):
 
 FormattedData.Type.OPAQUE = FormattedData.Type(0)
 FormattedData.Type.TEXT_SENDER_MESSAGE = FormattedData.Type(1)
+FormattedData.Type.STRUCTURED_MESSAGE = FormattedData.Type(2)
 
 class FormattedOpaqueData(FormattedData):
     def __init__(self, data):
@@ -2702,6 +2711,59 @@ class FormattedSenderMessageData(FormattedData):
             except Exception as e:
                 jslog.debug("error while decoding FormattedSenderMessageData's message as UTF-8:", message_data, e)
                 self._message = jshex.bytes_to_hex(message_data)
+
+
+class FormattedStructuredData(FormattedData):
+    def __init__(self, parts=None):
+        super().__init__(FormattedData.Type.STRUCTURED_MESSAGE)
+        if parts == None:
+            self._parts = [0, 0, 0]
+            return
+        if not isinstance(parts, list) and not jsobj.is_js_arr(parts):
+            raise TypeError("invalid parts argument: {} ({})".format(parts, type(parts)))
+        if len(parts) != 3:
+            raise TypeError("expected a tripplet of numbers, but received {} parts instead".format(len(parts)))
+        for i, part in enumerate(parts):
+            if isinstance(part, str):
+                if not jsstr.isdigit(part):
+                    raise ValueError("invalid part {}".format(part))
+            elif isinstance(part, (int, float)):
+                part = str(part)
+            else:
+                part = jsstr.from_int(part)
+            part = jsstr.zfill(part, i+3)
+            parts[i] = part
+            if not isinstance(part, str) or not jsstr.isdigit(part) or len(part) != i+3:
+                raise ValueError("invalid part: {}".format(part))
+        self._parts = [part for part in parts]
+
+    @property
+    def parts(self):
+        return self._parts
+    
+    def _str_getter(self):
+        return "+++{}+++".format(jsstr.join(self.parts, "/"))
+
+    def _binary_data_getter(self):
+        enc = RivineBinaryEncoder()
+        ps = self.parts
+        enc.add_int16(jsstr.to_int(ps[0]))
+        enc.add_int16(jsstr.to_int(ps[1]))
+        enc.add_int24(jsstr.to_int(ps[2]))
+        return enc.data
+    
+    def _binary_data_setter(self, data):
+        if len(data) != 8:
+            raise ValueError("invalid binary data set for FormattedSenderMessageData: {}".format(data))
+        # decode
+        self._parts = [0, 0, 0]
+        self._parts[0] = jsstr.zfill(jsstr.from_int(jsbin.to_int16(jsarr.slice_array(data, 0, 2))), 3)
+        self._parts[1] = jsstr.zfill(jsstr.from_int(jsbin.to_int16(jsarr.slice_array(data, 2, 4))), 4)
+        self._parts[2] = jsstr.zfill(jsstr.from_int(jsbin.to_int24(jsarr.slice_array(data, 4, 7))), 5)
+        # validate
+        for i, part in enumerate(self.parts):
+            if not isinstance(part, str) or not jsstr.isdigit(part) or len(part) != i+3:
+                raise ValueError("invalid part: {}".format(part))
 
 
 class AddressBook:

@@ -18,6 +18,7 @@ import * as bip39 from './tfchain.crypto.mnemonic.js';
 import * as jsarr from './tfchain.polyfill.array.js';
 import * as jsobj from './tfchain.polyfill.encoding.object.js';
 import * as jsstr from './tfchain.polyfill.encoding.str.js';
+import * as jsbin from './tfchain.polyfill.encoding.bin.js';
 import * as jshex from './tfchain.polyfill.encoding.hex.js';
 import * as jsjson from './tfchain.polyfill.encoding.json.js';
 import * as jsdec from './tfchain.polyfill.encoding.decimal.js';
@@ -2880,10 +2881,14 @@ export var SingleSignatureWallet =  __class__ ('SingleSignatureWallet', [BaseWal
 		}
 		var __left0__ = jsfunc.opts_get (opts, 'message', 'data');
 		var message = __left0__ [0];
-		var sender = __left0__ [1];
-		var data = __left0__ [2];
-		if (data == null && (message != null || sender != null)) {
-			var data = FormattedSenderMessageData (__kwargtrans__ ({sender: sender, message: message})).to_bin ();
+		var data = __left0__ [1];
+		if (data == null && message != null) {
+			if (isinstance (message, str)) {
+				var data = FormattedSenderMessageData (__kwargtrans__ ({sender: null, message: message})).to_bin ();
+			}
+			else {
+				var data = FormattedStructuredData (__kwargtrans__ ({parts: message})).to_bin ();
+			}
 		}
 		var cb = function (result) {
 			if (arguments.length) {
@@ -6193,6 +6198,11 @@ export var FormattedData =  __class__ ('FormattedData', [SiaBinaryObjectEncoderB
 			out_data._binary_data_setter (content_data);
 			return out_data;
 		}
+		if (dtype == FormattedData.Type.STRUCTURED_MESSAGE.value) {
+			var out_data = FormattedStructuredData ();
+			out_data._binary_data_setter (content_data);
+			return out_data;
+		}
 		jslog.debug ('registering formatted data as opaque due to unknown format:', dtype, data);
 		return FormattedOpaqueData (data);
 	});},
@@ -6361,6 +6371,7 @@ export var FormattedData =  __class__ ('FormattedData', [SiaBinaryObjectEncoderB
 Object.defineProperty (FormattedData.Type, 'value', property.call (FormattedData.Type, FormattedData.Type._get_value));;
 FormattedData.Type.OPAQUE = FormattedData.Type (0);
 FormattedData.Type.TEXT_SENDER_MESSAGE = FormattedData.Type (1);
+FormattedData.Type.STRUCTURED_MESSAGE = FormattedData.Type (2);
 export var FormattedOpaqueData =  __class__ ('FormattedOpaqueData', [FormattedData], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, data) {
@@ -6639,6 +6650,158 @@ export var FormattedSenderMessageData =  __class__ ('FormattedSenderMessageData'
 });
 Object.defineProperty (FormattedSenderMessageData, 'message', property.call (FormattedSenderMessageData, FormattedSenderMessageData._get_message));
 Object.defineProperty (FormattedSenderMessageData, 'sender', property.call (FormattedSenderMessageData, FormattedSenderMessageData._get_sender));;
+export var FormattedStructuredData =  __class__ ('FormattedStructuredData', [FormattedData], {
+	__module__: __name__,
+	get __init__ () {return __get__ (this, function (self, parts) {
+		if (typeof parts == 'undefined' || (parts != null && parts.hasOwnProperty ("__kwargtrans__"))) {;
+			var parts = null;
+		};
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'parts': var parts = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		__super__ (FormattedStructuredData, '__init__') (self, FormattedData.Type.STRUCTURED_MESSAGE);
+		if (parts == null) {
+			self._parts = [0, 0, 0];
+			return ;
+		}
+		if (!(isinstance (parts, list)) && !(jsobj.is_js_arr (parts))) {
+			var __except0__ = py_TypeError ('invalid parts argument: {} ({})'.format (parts, py_typeof (parts)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		if (len (parts) != 3) {
+			var __except0__ = py_TypeError ('expected a tripplet of numbers, but received {} parts instead'.format (len (parts)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		for (var [i, part] of enumerate (parts)) {
+			if (isinstance (part, str)) {
+				if (!(jsstr.isdigit (part))) {
+					var __except0__ = ValueError ('invalid part {}'.format (part));
+					__except0__.__cause__ = null;
+					throw __except0__;
+				}
+			}
+			else if (isinstance (part, tuple ([int, float]))) {
+				var part = str (part);
+			}
+			else {
+				var part = jsstr.from_int (part);
+			}
+			var part = jsstr.zfill (part, i + 3);
+			parts [i] = part;
+			if (!(isinstance (part, str)) || !(jsstr.isdigit (part)) || len (part) != i + 3) {
+				var __except0__ = ValueError ('invalid part: {}'.format (part));
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
+		}
+		self._parts = (function () {
+			var __accu0__ = [];
+			for (var part of parts) {
+				__accu0__.append (part);
+			}
+			return __accu0__;
+		}) ();
+	});},
+	get _get_parts () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._parts;
+	});},
+	get _str_getter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return '+++{}+++'.format (jsstr.join (self.parts, '/'));
+	});},
+	get _binary_data_getter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var enc = RivineBinaryEncoder ();
+		var ps = self.parts;
+		enc.add_int16 (jsstr.to_int (ps [0]));
+		enc.add_int16 (jsstr.to_int (ps [1]));
+		enc.add_int24 (jsstr.to_int (ps [2]));
+		return enc.data;
+	});},
+	get _binary_data_setter () {return __get__ (this, function (self, data) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'data': var data = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (len (data) != 8) {
+			var __except0__ = ValueError ('invalid binary data set for FormattedSenderMessageData: {}'.format (data));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		self._parts = [0, 0, 0];
+		self._parts [0] = jsstr.zfill (jsstr.from_int (jsbin.to_int16 (jsarr.slice_array (data, 0, 2))), 3);
+		self._parts [1] = jsstr.zfill (jsstr.from_int (jsbin.to_int16 (jsarr.slice_array (data, 2, 4))), 4);
+		self._parts [2] = jsstr.zfill (jsstr.from_int (jsbin.to_int24 (jsarr.slice_array (data, 4, 7))), 5);
+		for (var [i, part] of enumerate (self.parts)) {
+			if (!(isinstance (part, str)) || !(jsstr.isdigit (part)) || len (part) != i + 3) {
+				var __except0__ = ValueError ('invalid part: {}'.format (part));
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
+		}
+	});}
+});
+Object.defineProperty (FormattedStructuredData, 'parts', property.call (FormattedStructuredData, FormattedStructuredData._get_parts));;
 export var AddressBook =  __class__ ('AddressBook', [object], {
 	__module__: __name__,
 	get _sort_contact_list_by_name_cb () {return function (a, b) {

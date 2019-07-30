@@ -60,6 +60,38 @@ export var from_int16 = function (num, order) {
 	}
 	return bytes (buf);
 };
+export var to_int16 = function (bs, order) {
+	if (typeof order == 'undefined' || (order != null && order.hasOwnProperty ("__kwargtrans__"))) {;
+		var order = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'bs': var bs = __allkwargs0__ [__attrib0__]; break;
+					case 'order': var order = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	var __left0__ = tuple ([bs [0], bs [1]]);
+	var f = __left0__ [0];
+	var s = __left0__ [1];
+	if (order == 'big') {
+		var __left0__ = tuple ([bs [1], bs [0]]);
+		var f = __left0__ [0];
+		var s = __left0__ [1];
+	}
+	var x = 0;
+	
+	    x = f | (s << 8);
+	    
+	return int (x);
+};
 export var from_int24 = function (num, order) {
 	if (typeof order == 'undefined' || (order != null && order.hasOwnProperty ("__kwargtrans__"))) {;
 		var order = null;
@@ -90,6 +122,40 @@ export var from_int24 = function (num, order) {
 		return bytes (jsarray.reverse (buf));
 	}
 	return bytes (buf);
+};
+export var to_int24 = function (bs, order) {
+	if (typeof order == 'undefined' || (order != null && order.hasOwnProperty ("__kwargtrans__"))) {;
+		var order = null;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'bs': var bs = __allkwargs0__ [__attrib0__]; break;
+					case 'order': var order = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	var __left0__ = tuple ([bs [0], bs [1], bs [2]]);
+	var f = __left0__ [0];
+	var m = __left0__ [1];
+	var l = __left0__ [2];
+	if (order == 'big') {
+		var __left0__ = tuple ([bs [2], bs [1], bs [0]]);
+		var f = __left0__ [0];
+		var m = __left0__ [1];
+		var l = __left0__ [2];
+	}
+	var x = 0;
+	
+	    x = f | (m << 8) | (l << 16);
+	    
+	return int (x);
 };
 export var from_int32 = function (num, order) {
 	if (typeof order == 'undefined' || (order != null && order.hasOwnProperty ("__kwargtrans__"))) {;
