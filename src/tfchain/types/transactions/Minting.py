@@ -6,6 +6,7 @@ from tfchain.types.ConditionTypes import ConditionBaseClass, ConditionNil
 from tfchain.types.PrimitiveTypes import BinaryData, Currency
 from tfchain.types.IO import CoinInput, CoinOutput
 from tfchain.encoding.siabin import SiaBinaryEncoder
+from tfchain.encoding.rivbin import RivineBinaryEncoder
 
 from tfchain.polyfill.crypto import random as crandom
 import tfchain.polyfill.encoding.str as jsstr
@@ -476,7 +477,9 @@ class TransactionV130(TransactionBaseClass):
         self._data = BinaryData(value=value, strencoding='base64')
 
     def _signature_hash_input_get(self, *extra_objects):
-        e = SiaBinaryEncoder()
+        # TODO: issue #247: make it that this is defined by the used chain, not hardcoded,
+        #       as tfchain might use SiaBinaryEncoder, while goldchain usr RivineBinaryEncoder
+        e = RivineBinaryEncoder()
 
         # encode the transaction version
         e.add_byte(self.version.__int__())
@@ -488,11 +491,11 @@ class TransactionV130(TransactionBaseClass):
         if extra_objects:
             e.add_all(*extra_objects)
 
-        # encode the number of coins inputs
-        e.add(len(self.coin_inputs))
-        # encode coin inputs parent_ids
+        # encode all parent ids
+        coin_input_ids = []
         for ci in self.coin_inputs:
-            e.add(ci.parentid)
+            coin_input_ids.append(ci.parentid)
+        e.add_slice(coin_input_ids)
 
         # encode refund coin output
         if self._refund_coin_output is None:
@@ -542,7 +545,9 @@ class TransactionV130(TransactionBaseClass):
         return jsarr.concat(TransactionV130._SPECIFIER, self._binary_encode_data())
 
     def _binary_encode_data(self):
-        encoder = SiaBinaryEncoder()
+        # TODO: issue #247: make it that this is defined by the used chain, not hardcoded,
+        #       as tfchain might use SiaBinaryEncoder, while goldchain usr RivineBinaryEncoder
+        encoder = RivineBinaryEncoder()
         encoder.add(self.coin_inputs)
          # encode refund coin output
         if self._refund_coin_output is None:

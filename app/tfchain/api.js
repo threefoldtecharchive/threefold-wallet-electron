@@ -2854,6 +2854,58 @@ export var SingleSignatureWallet =  __class__ ('SingleSignatureWallet', [BaseWal
 		}
 		return CoinTransactionBuilder (self);
 	});},
+	get coins_burn () {return __get__ (this, function (self, amount, opts) {
+		if (typeof opts == 'undefined' || (opts != null && opts.hasOwnProperty ("__kwargtrans__"))) {;
+			var opts = null;
+		};
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'amount': var amount = __allkwargs0__ [__attrib0__]; break;
+						case 'opts': var opts = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (self._account._chain.value != tfchaintype.Type.GOLDCHAIN.value) {
+			var __except0__ = tferrors.UnsupporedFeature ('blockchain {} does not support the minting coin burn transaction'.format (self._account._chain.str ()));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		var __left0__ = jsfunc.opts_get (opts, 'message', 'data');
+		var message = __left0__ [0];
+		var sender = __left0__ [1];
+		var data = __left0__ [2];
+		if (data == null && (message != null || sender != null)) {
+			var data = FormattedSenderMessageData (__kwargtrans__ ({sender: sender, message: message})).to_bin ();
+		}
+		var cb = function (result) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'result': var result = __allkwargs0__ [__attrib0__]; break;
+						}
+					}
+				}
+			}
+			else {
+			}
+			if (result.submitted) {
+				self._account._update_unconfirmed_account_balance_from_transaction (result.transaction);
+			}
+			return result;
+		};
+		return jsasync.chain (self._tfwallet.minter.coins_burn (__kwargtrans__ ({amount: amount, data: data, balance: self.balance._tfbalance})), cb);
+	});},
 	get transaction_sign () {return __get__ (this, function (self, transaction, balance) {
 		if (typeof balance == 'undefined' || (balance != null && balance.hasOwnProperty ("__kwargtrans__"))) {;
 			var balance = null;

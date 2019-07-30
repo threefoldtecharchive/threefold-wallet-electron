@@ -1284,6 +1284,24 @@ class SingleSignatureWallet(BaseWallet):
         """
         return CoinTransactionBuilder(self)
 
+    def coins_burn(self, amount, opts=None):
+        """
+        Burn the specified amount of coins,
+        optionally attaching a message to it.
+        """
+        if self._account._chain.value != tfchaintype.Type.GOLDCHAIN.value:
+            raise tferrors.UnsupporedFeature("blockchain {} does not support the minting coin burn transaction".format(self._account._chain.str()))
+        message, sender, data = jsfunc.opts_get(opts, 'message', 'data')
+        if data == None and (message != None or sender != None):
+            data = FormattedSenderMessageData(sender=sender, message=message).to_bin()
+        def cb(result):
+            if result.submitted:
+                self._account._update_unconfirmed_account_balance_from_transaction(result.transaction)
+            return result
+        return jsasync.chain(
+            self._tfwallet.minter.coins_burn(amount=amount, data=data, balance=self.balance._tfbalance),
+            cb)
+
     def transaction_sign(self, transaction, balance=None):
         """
         :returns: signs an existing transaction
