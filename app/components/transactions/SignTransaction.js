@@ -157,7 +157,7 @@ class SignTransaction extends Component {
       <div style={{ paddingBottom: 20 }}>
         <div className={styles.pageHeader}>
           <p className={styles.pageHeaderTitle}>Sign Transaction</p>
-          <p className={styles.pageHeaderSubtitle}>Paste a JSON Transaction to sign a multisign transaction</p>
+          <p className={styles.pageHeaderSubtitle}>Paste a JSON Transaction to sign a transaction</p>
         </div>
         <Divider className={styles.pageDivider} />
         <div>

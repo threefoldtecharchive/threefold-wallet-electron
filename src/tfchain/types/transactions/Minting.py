@@ -12,6 +12,7 @@ from tfchain.polyfill.crypto import random as crandom
 import tfchain.polyfill.encoding.str as jsstr
 import tfchain.polyfill.encoding.object as jsobj
 import tfchain.polyfill.array as jsarr
+import tfchain.polyfill.log as jslog
 
 class TransactionV128(TransactionBaseClass):
     _SPECIFIER = b'minter defin tx\0'
@@ -93,6 +94,7 @@ class TransactionV128(TransactionBaseClass):
             self._parent_mint_condition = None
             return
         if not isinstance(value, ConditionBaseClass):
+            jslog.error("unexpected parent_mint_condition attempted to be assigned to v128 tx", value)
             raise TypeError(
                 "MintDefinition (v128) Transaction's parent mint condition has to be a subtype of ConditionBaseClass, not {}".format(type(value)))
         self._parent_mint_condition = value
@@ -305,6 +307,7 @@ class TransactionV129(TransactionBaseClass):
             self._parent_mint_condition = None
             return
         if not isinstance(value, ConditionBaseClass):
+            jslog.error("unexpected parent_mint_condition attempted to be assigned to v129 tx", value)
             raise TypeError(
                 "CoinCreation (v129) Transaction's parent mint condition has to be a subtype of ConditionBaseClass, not {}".format(type(value)))
         self._parent_mint_condition = value

@@ -474,106 +474,139 @@ export var TFChainWallet =  __class__ ('TFChainWallet', [object], {
 					}
 				}
 			}
+			var p = null;
 			if (isinstance (txn, tuple ([TransactionV128, TransactionV129]))) {
-				txn.parent_mint_condition = self.client.minter.condition_get ();
-				if (!(txn.mint_fulfillment_defined ())) {
-					txn.mint_fulfillment = FulfillmentTypes.from_condition (txn.parent_mint_condition);
-				}
-			}
-			var sig_requests = txn.signature_requests_new ();
-			if (len (sig_requests) == 0) {
-				var nop_cb = function (resolve, reject) {
+				var cb = function (condition) {
 					if (arguments.length) {
 						var __ilastarg0__ = arguments.length - 1;
 						if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
 							var __allkwargs0__ = arguments [__ilastarg0__--];
 							for (var __attrib0__ in __allkwargs0__) {
 								switch (__attrib0__) {
-									case 'resolve': var resolve = __allkwargs0__ [__attrib0__]; break;
-									case 'reject': var reject = __allkwargs0__ [__attrib0__]; break;
+									case 'condition': var condition = __allkwargs0__ [__attrib0__]; break;
 								}
 							}
 						}
 					}
 					else {
 					}
-					resolve (TransactionSignResult (txn, false, false));
+					txn.parent_mint_condition = condition;
+					if (!(txn.mint_fulfillment_defined ())) {
+						txn.mint_fulfillment = FulfillmentTypes.from_condition (txn.parent_mint_condition);
+					}
 				};
-				return jsasync.promise_new (nop_cb);
+				var p = jsasync.chain (self.client.minter.condition_get (), cb);
 			}
-			var signature_count = 0;
-			for (var request of sig_requests) {
-				try {
-					var key_pair = self.key_pair_get (request.wallet_address);
-					var pk = public_key_from_assymetric_key_pair (key_pair);
-					var input_hash = request.input_hash_new (__kwargtrans__ ({public_key: pk}));
-					var signature = key_pair.sign (input_hash.value);
-					request.signature_fulfill (__kwargtrans__ ({public_key: pk, signature: signature}));
-					signature_count++;
-				}
-				catch (__except0__) {
-					if (isinstance (__except0__, KeyError)) {
-						// pass;
-					}
-					else {
-						throw __except0__;
-					}
-				}
-			}
-			var is_fulfilled = txn.is_fulfilled ();
-			var submit = to_submit && is_fulfilled;
-			if (!(submit)) {
-				var stub_cb = function (resolve, reject) {
-					if (arguments.length) {
-						var __ilastarg0__ = arguments.length - 1;
-						if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-							var __allkwargs0__ = arguments [__ilastarg0__--];
-							for (var __attrib0__ in __allkwargs0__) {
-								switch (__attrib0__) {
-									case 'resolve': var resolve = __allkwargs0__ [__attrib0__]; break;
-									case 'reject': var reject = __allkwargs0__ [__attrib0__]; break;
-								}
-							}
-						}
-					}
-					else {
-					}
-					resolve (TransactionSignResult (__kwargtrans__ ({transaction: txn, signed: signature_count > 0, submitted: submit})));
-				};
-				return jsasync.promise_new (stub_cb);
-			}
-			var id_cb = function (id) {
+			var sign_and_such = function () {
 				if (arguments.length) {
 					var __ilastarg0__ = arguments.length - 1;
 					if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
 						var __allkwargs0__ = arguments [__ilastarg0__--];
 						for (var __attrib0__ in __allkwargs0__) {
-							switch (__attrib0__) {
-								case 'id': var id = __allkwargs0__ [__attrib0__]; break;
-							}
 						}
 					}
 				}
 				else {
 				}
-				txn.id = id;
-				if (balance_is_cached) {
-					var addresses = balance.addresses;
-					for (var [idx, ci] of enumerate (txn.coin_inputs)) {
-						if (__in__ (ci.parent_output.condition.unlockhash.__str__ (), addresses)) {
-							balance.output_add (txn, idx, __kwargtrans__ ({confirmed: false, spent: true}));
+				var sig_requests = txn.signature_requests_new ();
+				if (len (sig_requests) == 0) {
+					var nop_cb = function (resolve, reject) {
+						if (arguments.length) {
+							var __ilastarg0__ = arguments.length - 1;
+							if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+								var __allkwargs0__ = arguments [__ilastarg0__--];
+								for (var __attrib0__ in __allkwargs0__) {
+									switch (__attrib0__) {
+										case 'resolve': var resolve = __allkwargs0__ [__attrib0__]; break;
+										case 'reject': var reject = __allkwargs0__ [__attrib0__]; break;
+									}
+								}
+							}
 						}
+						else {
+						}
+						resolve (TransactionSignResult (txn, false, false));
+					};
+					return jsasync.promise_new (nop_cb);
+				}
+				var signature_count = 0;
+				for (var request of sig_requests) {
+					try {
+						var key_pair = self.key_pair_get (request.wallet_address);
+						var pk = public_key_from_assymetric_key_pair (key_pair);
+						var input_hash = request.input_hash_new (__kwargtrans__ ({public_key: pk}));
+						var signature = key_pair.sign (input_hash.value);
+						request.signature_fulfill (__kwargtrans__ ({public_key: pk, signature: signature}));
+						signature_count++;
 					}
-					for (var [idx, co] of enumerate (txn.coin_outputs)) {
-						if (__in__ (co.condition.unlockhash.__str__ (), addresses)) {
-							co.id = txn.coin_outputid_new (idx);
-							balance.output_add (txn, idx, __kwargtrans__ ({confirmed: false, spent: false}));
+					catch (__except0__) {
+						if (isinstance (__except0__, KeyError)) {
+							// pass;
+						}
+						else {
+							throw __except0__;
 						}
 					}
 				}
-				return TransactionSignResult (__kwargtrans__ ({transaction: txn, signed: signature_count > 0, submitted: submit}));
+				var is_fulfilled = txn.is_fulfilled ();
+				var submit = to_submit && is_fulfilled;
+				if (!(submit)) {
+					var stub_cb = function (resolve, reject) {
+						if (arguments.length) {
+							var __ilastarg0__ = arguments.length - 1;
+							if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+								var __allkwargs0__ = arguments [__ilastarg0__--];
+								for (var __attrib0__ in __allkwargs0__) {
+									switch (__attrib0__) {
+										case 'resolve': var resolve = __allkwargs0__ [__attrib0__]; break;
+										case 'reject': var reject = __allkwargs0__ [__attrib0__]; break;
+									}
+								}
+							}
+						}
+						else {
+						}
+						resolve (TransactionSignResult (__kwargtrans__ ({transaction: txn, signed: signature_count > 0, submitted: submit})));
+					};
+					return jsasync.promise_new (stub_cb);
+				}
+				var id_cb = function (id) {
+					if (arguments.length) {
+						var __ilastarg0__ = arguments.length - 1;
+						if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+							var __allkwargs0__ = arguments [__ilastarg0__--];
+							for (var __attrib0__ in __allkwargs0__) {
+								switch (__attrib0__) {
+									case 'id': var id = __allkwargs0__ [__attrib0__]; break;
+								}
+							}
+						}
+					}
+					else {
+					}
+					txn.id = id;
+					if (balance_is_cached) {
+						var addresses = balance.addresses;
+						for (var [idx, ci] of enumerate (txn.coin_inputs)) {
+							if (__in__ (ci.parent_output.condition.unlockhash.__str__ (), addresses)) {
+								balance.output_add (txn, idx, __kwargtrans__ ({confirmed: false, spent: true}));
+							}
+						}
+						for (var [idx, co] of enumerate (txn.coin_outputs)) {
+							if (__in__ (co.condition.unlockhash.__str__ (), addresses)) {
+								co.id = txn.coin_outputid_new (idx);
+								balance.output_add (txn, idx, __kwargtrans__ ({confirmed: false, spent: false}));
+							}
+						}
+					}
+					return TransactionSignResult (__kwargtrans__ ({transaction: txn, signed: signature_count > 0, submitted: submit}));
+				};
+				return jsasync.chain (self._transaction_put (__kwargtrans__ ({transaction: txn})), id_cb);
 			};
-			return jsasync.chain (self._transaction_put (__kwargtrans__ ({transaction: txn})), id_cb);
+			if (p == null) {
+				return sign_and_such ();
+			}
+			return jsasync.chain (p, sign_and_such);
 		};
 		if (balance_is_cached) {
 			if (!(isinstance (balance, WalletBalance))) {

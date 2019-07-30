@@ -370,71 +370,81 @@ class TFChainWallet:
                     if parentid in known_outputs:
                         ci.parent_output = known_outputs[parentid]
 
+            p = None
+
             # check for specific transaction types, as to
             # be able to add whatever content we know we can add
             if isinstance(txn, (TransactionV128, TransactionV129)):
+                def cb(condition):
+                    txn.parent_mint_condition = condition
+                    if not txn.mint_fulfillment_defined():
+                        txn.mint_fulfillment = FulfillmentTypes.from_condition(txn.parent_mint_condition)
                 # set the parent mint condition
-                txn.parent_mint_condition = self.client.minter.condition_get()
-                # define the current fulfillment if it is not defined
-                if not txn.mint_fulfillment_defined():
-                    txn.mint_fulfillment = FulfillmentTypes.from_condition(txn.parent_mint_condition)
+                # and define the current fulfillment if it is not defined
+                p = jsasync.chain(self.client.minter.condition_get(), cb)
 
-            # generate the signature requests
-            sig_requests = txn.signature_requests_new()
-            if len(sig_requests) == 0:
-                # possible if the wallet does not own any of the still required signatures,
-                # or for example because the wallet does not know about the parent outputs of
-                # the inputs still to be signed
-                def nop_cb(resolve, reject):
-                    resolve(TransactionSignResult(txn, False, False))
-                return jsasync.promise_new(nop_cb)
+            def sign_and_such():
+                # generate the signature requests
+                sig_requests = txn.signature_requests_new()
+                if len(sig_requests) == 0:
+                    # possible if the wallet does not own any of the still required signatures,
+                    # or for example because the wallet does not know about the parent outputs of
+                    # the inputs still to be signed
+                    def nop_cb(resolve, reject):
+                        resolve(TransactionSignResult(txn, False, False))
+                    return jsasync.promise_new(nop_cb)
 
-            # fulfill the signature requests that we can fulfill
-            signature_count = 0
-            for request in sig_requests:
-                try:
-                    key_pair = self.key_pair_get(request.wallet_address)
-                    pk = public_key_from_assymetric_key_pair(key_pair)
-                    input_hash = request.input_hash_new(public_key=pk)
-                    signature = key_pair.sign(input_hash.value)
-                    request.signature_fulfill(public_key=pk, signature=signature)
-                    signature_count += 1
-                except KeyError:
-                    pass # this is acceptable due to how we directly try the key_pair_get method
+                # fulfill the signature requests that we can fulfill
+                signature_count = 0
+                for request in sig_requests:
+                    try:
+                        key_pair = self.key_pair_get(request.wallet_address)
+                        pk = public_key_from_assymetric_key_pair(key_pair)
+                        input_hash = request.input_hash_new(public_key=pk)
+                        signature = key_pair.sign(input_hash.value)
+                        request.signature_fulfill(public_key=pk, signature=signature)
+                        signature_count += 1
+                    except KeyError:
+                        pass # this is acceptable due to how we directly try the key_pair_get method
 
-            # check if fulfilled, and if so, we'll submit unless the callee does not want that
-            is_fulfilled = txn.is_fulfilled()
-            submit = (to_submit and is_fulfilled)
-            if not submit: # return as-is
-                def stub_cb(resolve, reject):
-                    resolve(TransactionSignResult(
+                # check if fulfilled, and if so, we'll submit unless the callee does not want that
+                is_fulfilled = txn.is_fulfilled()
+                submit = (to_submit and is_fulfilled)
+                if not submit: # return as-is
+                    def stub_cb(resolve, reject):
+                        resolve(TransactionSignResult(
+                            transaction=txn,
+                            signed=(signature_count>0),
+                            submitted=submit,
+                        ))
+                    return jsasync.promise_new(stub_cb)
+                
+                # submit, and only then return
+                def id_cb(id):
+                    txn.id = id
+                    if balance_is_cached:
+                        addresses = balance.addresses
+                        # if the balance is cached, also update the balance
+                        for idx, ci in enumerate(txn.coin_inputs):
+                            if ci.parent_output.condition.unlockhash.__str__() in addresses:
+                                balance.output_add(txn, idx, confirmed=False, spent=True)
+                        for idx, co in enumerate(txn.coin_outputs):
+                            if co.condition.unlockhash.__str__() in addresses:
+                                # add the id to the coin_output, so we can track it has been spent
+                                co.id = txn.coin_outputid_new(idx)
+                                balance.output_add(txn, idx, confirmed=False, spent=False)
+                    # return the signed result
+                    return TransactionSignResult(
                         transaction=txn,
                         signed=(signature_count>0),
                         submitted=submit,
-                    ))
-                return jsasync.promise_new(stub_cb)
-            
-            # submit, and only then return
-            def id_cb(id):
-                txn.id = id
-                if balance_is_cached:
-                    addresses = balance.addresses
-                    # if the balance is cached, also update the balance
-                    for idx, ci in enumerate(txn.coin_inputs):
-                        if ci.parent_output.condition.unlockhash.__str__() in addresses:
-                            balance.output_add(txn, idx, confirmed=False, spent=True)
-                    for idx, co in enumerate(txn.coin_outputs):
-                        if co.condition.unlockhash.__str__() in addresses:
-                            # add the id to the coin_output, so we can track it has been spent
-                            co.id = txn.coin_outputid_new(idx)
-                            balance.output_add(txn, idx, confirmed=False, spent=False)
-                # return the signed result
-                return TransactionSignResult(
-                    transaction=txn,
-                    signed=(signature_count>0),
-                    submitted=submit,
-                )
-            return jsasync.chain(self._transaction_put(transaction=txn), id_cb)
+                    )
+                return jsasync.chain(self._transaction_put(transaction=txn), id_cb)
+
+            # sign now, or chain it and sign when possible
+            if p == None:
+                return sign_and_such()
+            return jsasync.chain(p, sign_and_such)
 
         if balance_is_cached:
             if not isinstance(balance, WalletBalance):
