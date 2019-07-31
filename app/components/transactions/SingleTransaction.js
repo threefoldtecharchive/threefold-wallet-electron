@@ -169,7 +169,7 @@ class SingleTransaction extends Component {
   }
 
   buildSingleTransaction = () => {
-    const { destination, selectedWallet, amount, datetime, description } = this.state
+    const { destination, selectedWallet, amount, datetime, message } = this.state
 
     this.renderLoader(true)
     const builder = selectedWallet.transaction_new()
@@ -191,7 +191,7 @@ class SingleTransaction extends Component {
         return this.setState({ loader: false, errorMessage: errorMessage })
       }
     }
-    builder.send({ message: description }).then(result => {
+    builder.send({ message: message }).then(result => {
       this.setState({ destinationError: false, amountError: false, loader: false })
       if (result.submitted) {
         toast('Transaction ' + result.transaction.id + ' submitted')
@@ -251,7 +251,7 @@ class SingleTransaction extends Component {
         </Dimmer>
       )
     }
-    const { openConfirmationModal, transactionType, destination, selectedWalletRecipient, selectedRecipientAddress, description, contactName, openSaveModal, enableSubmit } = this.state
+    const { openConfirmationModal, transactionType, destination, selectedWalletRecipient, selectedRecipientAddress, message, contactName, openSaveModal, enableSubmit } = this.state
     const { amount, datetime, selectedWallet } = this.state
     return (
       <div>
@@ -267,7 +267,7 @@ class SingleTransaction extends Component {
           amount={amount}
           timestamp={datetime}
           minimumMinerFee={this.props.account.minimum_miner_fee}
-          description={description}
+          message={message}
         />}
 
         <UpdateContactModal

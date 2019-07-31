@@ -7,6 +7,7 @@ import QRCode from 'qrcode.react'
 import { flatten, filter } from 'lodash'
 import { CopyToClipboard } from 'react-copy-to-clipboard'
 import { toast } from 'react-toastify'
+import uuid from 'uuid'
 const { shell } = require('electron')
 
 const mapStateToProps = state => ({
@@ -107,7 +108,7 @@ class WalletReceive extends Component {
             {w.addresses.map(a => {
               const authorized = this.props.account.coin_auth_status_for_address_get(a)
               return (
-                <React.Fragment>
+                <React.Fragment key={uuid.v4()}>
                   <div key={a} style={{ display: 'flex', marginTop: 20 }}>
                     <p style={{ fontSize: 12 }}>{a}</p>
                     <CopyToClipboard text={a}
