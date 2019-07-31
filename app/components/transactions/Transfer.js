@@ -6,6 +6,7 @@ import styles from '../home/Home.css'
 import SingleTransaction from './SingleTransaction'
 import MultisigTransaction from './MultisigTransaction'
 import InternalTransaction from './InternalTransaction'
+import BurnTransaction from './BurnTransaction'
 import uuid from 'uuid'
 
 const tabStyle = {
@@ -36,6 +37,8 @@ class Transfer extends Component {
 
     if (!this.state.isGoldChain) {
       panes.push({ menuItem: <Button key={uuid.v4()} className={'item'}>Multisig Transaction</Button>, render: () => <Tab.Pane style={tabStyle}><MultisigTransaction /></Tab.Pane> })
+    } else {
+      panes.push({ menuItem: <Button key={uuid.v4()} className={'item'}>Burn Transaction</Button>, render: () => <Tab.Pane style={tabStyle}><BurnTransaction /></Tab.Pane> })
     }
 
     return (

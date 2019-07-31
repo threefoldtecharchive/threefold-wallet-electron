@@ -1,10 +1,9 @@
 // @flow
 import { connect } from 'react-redux'
 import React, { Component } from 'react'
-import { Form, Dropdown, Loader, Dimmer, Message } from 'semantic-ui-react'
+import { Loader, Dimmer, Message } from 'semantic-ui-react'
 import { toast } from 'react-toastify'
 import { updateAccount, setTransactionJson } from '../../actions'
-import moment from 'moment'
 import routes from '../../constants/routes'
 import { concat, truncate, flatten } from 'lodash'
 import TransactionConfirmationModal from './TransactionConfirmationModal'
@@ -14,7 +13,8 @@ import TransactionBodyForm from './TransactionBodyForm'
 const TransactionTypes = {
   SINGLE: 'SINGLE',
   MULTISIG: 'MULTISIG',
-  INTERNAL: 'INTERNAL'
+  INTERNAL: 'INTERNAL',
+  BURN: 'BURN'
 }
 
 const mapStateToProps = state => ({
@@ -32,11 +32,11 @@ const mapDispatchToProps = (dispatch) => ({
   }
 })
 
-class InternalTransaction extends Component {
+class BurnTransaction extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      transactionType: TransactionTypes.INTERNAL,
+      transactionType: TransactionTypes.BURN,
       wallets: [],
       selectedWallet: this.props.form.transactionForm.values.selectedWallet,
       loader: false,
@@ -49,53 +49,20 @@ class InternalTransaction extends Component {
     this.mapDestinationDropdown(this.state.selectedWallet)
   }
 
-  setSearchValue = (value) => {
-    this.setState({ destination: value })
-  }
-
   dismissError = () => {
     this.setState({ errorMessage: undefined })
   }
 
   renderDestinationForm = () => {
     const { transactionType } = this.state
-    if (transactionType === TransactionTypes.INTERNAL) {
-      const { walletsOptions, addressOptions, selectedWalletRecipient, selectedRecipientAddress, errorMessage } = this.state
+    if (transactionType === TransactionTypes.BURN) {
+      const { errorMessage } = this.state
       return (
         <div>
           {errorMessage && <Message style={{ width: '90%', margin: 'auto' }} error onDismiss={this.dismissError}>
             <Message.Header>Transaction failed</Message.Header>
             <p style={{ fontSize: 13 }}>{errorMessage}</p>
           </Message>}
-          <Form style={{ width: '90%', margin: 'auto' }}>
-            <Form.Field style={{ marginTop: 10 }}>
-              <label style={{ color: 'white' }}>Select your destination wallet *</label>
-              <Dropdown
-                placeholder='Select Wallet'
-                fluid
-                selection
-                search
-                options={walletsOptions}
-                onChange={this.selectWalletRecipient}
-                value={selectedWalletRecipient.wallet_name === '' ? selectedWalletRecipient.address : selectedWalletRecipient.wallet_name}
-              />
-            </Form.Field>
-            { selectedWalletRecipient.is_multisig ? (null) : (
-              <Form.Field>
-                <label style={{ color: 'white' }}>Destination Address *</label>
-                <Dropdown
-                  style={{ marginBottom: 20, marginTop: 10 }}
-                  placeholder='Select Address'
-                  fluid
-                  selection
-                  search
-                  options={addressOptions}
-                  onChange={this.selectAddress}
-                  value={selectedRecipientAddress}
-                />
-              </Form.Field>
-            )}
-          </Form>
         </div>
       )
     }
@@ -271,52 +238,27 @@ class InternalTransaction extends Component {
   }
 
   buildInternalTransation = () => {
-    const { selectedWallet, message, selectedRecipientAddress, selectedWalletRecipient, amount, datelock, timelock } = this.state
-
-    let timestamp
-    if (datelock !== '') {
-      const concatDate = datelock + ' ' + timelock
-      const dateLockDate = new Date(concatDate)
-      const dateLockTimeZone = dateLockDate.getTimezoneOffset()
-      timestamp = moment(dateLockDate).utcOffset(dateLockTimeZone).unix()
-    }
+    const { selectedWallet, message, structured, amount } = this.state
 
     this.renderLoader(true)
-    const builder = selectedWallet.transaction_new()
-    const recipient = selectedWalletRecipient.recipient_get({ address: selectedRecipientAddress })
-    if (timestamp) {
-      try {
-        builder.output_add(recipient, amount.toString(), { lock: timestamp })
-      } catch (error) {
-        toast('adding output failed')
-        const errorMessage = typeof error.__str__ === 'function' ? error.__str__() : error.toString()
-        return this.setState({ loader: false, errorMessage: errorMessage })
-      }
-    } else {
-      try {
-        builder.output_add(recipient, amount.toString())
-      } catch (error) {
-        toast('adding output failed')
-        const errorMessage = typeof error.__str__ === 'function' ? error.__str__() : error.toString()
-        return this.setState({ loader: false, errorMessage: errorMessage })
-      }
-    }
-    builder.send({ message: message }).then(result => {
-      this.setState({ destinationError: false, amountError: false, loader: false })
-      if (result.submitted) {
-        toast('Transaction ' + result.transaction.id + ' submitted')
-        this.props.updateAccount(this.props.account)
-        return this.props.history.push(routes.ACCOUNT)
-      } else {
-        this.props.setTransactionJson(JSON.stringify(result.transaction.json()))
-        return this.props.history.push(routes.SIGN)
-      }
-    }).catch(error => {
-      toast.error('sending transaction failed')
-      console.warn('failed to send internal transaction', JSON.stringify(builder.transaction.json()))
+
+    try {
+      selectedWallet.coins_burn(amount, { message: structured }).then(result => {
+        this.setState({ destinationError: false, amountError: false, loader: false })
+        if (result.submitted) {
+          toast('Transaction ' + result.transaction.id + ' submitted')
+          this.props.updateAccount(this.props.account)
+          return this.props.history.push(routes.ACCOUNT)
+        } else {
+          this.props.setTransactionJson(JSON.stringify(result.transaction.json()))
+          return this.props.history.push(routes.SIGN)
+        }
+      })
+    } catch (error) {
+      toast('adding output failed')
       const errorMessage = typeof error.__str__ === 'function' ? error.__str__() : error.toString()
-      this.setState({ loader: false, errorMessage: errorMessage, openConfirmationModal: false })
-    })
+      return this.setState({ loader: false, errorMessage: errorMessage })
+    }
   }
 
   renderLoader = (active) => {
@@ -330,7 +272,7 @@ class InternalTransaction extends Component {
   confirmTransaction = () => {
     const { transactionType } = this.state
 
-    if (transactionType === TransactionTypes.INTERNAL) {
+    if (transactionType === TransactionTypes.BURN) {
       this.buildInternalTransation()
     }
   }
@@ -338,7 +280,7 @@ class InternalTransaction extends Component {
   openConfirmationModal = () => {
     const { transactionType } = this.state
     let open = false
-    if (transactionType === TransactionTypes.INTERNAL) {
+    if (transactionType === TransactionTypes.BURN) {
       if (this.checkInternalTransactionFormValues()) {
         open = true
       }
@@ -366,6 +308,7 @@ class InternalTransaction extends Component {
     if (syncErrors || !this.checkInternalTransactionFormValues()) {
       return
     }
+
     const { values } = this.props.form.transactionForm
     this.setState({ ...values })
     return this.openConfirmationModal()
@@ -379,8 +322,8 @@ class InternalTransaction extends Component {
         </Dimmer>
       )
     }
-    const { openConfirmationModal, transactionType, destination, selectedWalletRecipient, selectedRecipientAddress, message, enableSubmit } = this.state
-    const { amount, datetime, selectedWallet } = this.state
+    const { openConfirmationModal, transactionType, message, enableSubmit } = this.state
+    const { amount, datetime, selectedWallet, partA, partB, partC } = this.state
     return (
       <div>
         {openConfirmationModal && <TransactionConfirmationModal
@@ -388,18 +331,16 @@ class InternalTransaction extends Component {
           closeModal={this.closeConfirmationModal}
           confirmTransaction={this.confirmTransaction}
           transactionType={transactionType}
-          selectedWalletRecipient={selectedWalletRecipient}
-          selectedRecipientAddress={selectedRecipientAddress}
-          destination={destination}
           selectedWallet={selectedWallet}
           amount={amount}
           timestamp={datetime}
+          structured={[partA, partB, partC]}
           minimumMinerFee={this.props.account.minimum_miner_fee}
           message={message}
         />}
 
         {this.renderDestinationForm()}
-        <TransactionBodyForm handleSubmit={this.handleSubmit} mapDestinationDropdown={this.mapDestinationDropdown} enableSubmit={enableSubmit} />
+        <TransactionBodyForm transactionType={transactionType} handleSubmit={this.handleSubmit} mapDestinationDropdown={this.mapDestinationDropdown} enableSubmit={enableSubmit} />
       </div>
     )
   }
@@ -408,4 +349,4 @@ class InternalTransaction extends Component {
 export default withRouter(connect(
   mapStateToProps,
   mapDispatchToProps
-)(InternalTransaction))
+)(BurnTransaction))

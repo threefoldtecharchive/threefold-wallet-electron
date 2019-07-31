@@ -1,12 +1,13 @@
 import React, { Component } from 'react'
 import { Field, reduxForm } from 'redux-form'
-import { Form, Dropdown, Button, Message, Input, Popup, Icon } from 'semantic-ui-react'
+import { Form, Dropdown, Button, Message, Input, Popup, Icon, Radio } from 'semantic-ui-react'
 import { connect } from 'react-redux'
 import styles from '../home/Home.css'
 import { truncate, concat } from 'lodash'
 import { DateTimePicker } from 'react-widgets'
 import moment from 'moment-timezone'
 import TransactionAmountField from './TransactionAmountField'
+import TransactionStructuredField from './TransactionStructuredField'
 import * as tfchain from '../../tfchain/api'
 import { withRouter } from 'react-router-dom'
 
@@ -23,7 +24,7 @@ const mapStateToProps = state => {
 
 const validate = (values, props) => {
   const errors = {}
-  const { amount, selectedWallet, datetime, description } = values
+  const { amount, selectedWallet, datetime, message, partA, partB, partC } = values
   const { account } = props
 
   if (!selectedWallet) {
@@ -37,11 +38,17 @@ const validate = (values, props) => {
     errors.amount = 'Not enough balance'
   }
 
-  if (!tfchain.formatted_data_is_valid({ message: description })) {
-    errors.description = 'Not a valid description'
+  if (!partA || !partB || !partC) {
+    errors.partA = 'required'
+  } else if (partA.length < 3 || partB.length < 4 || partC.length < 5) {
+    errors.partA = 'Missing field numbers'
   }
 
-  if (validateTimeLockChange(datetime, account)) {
+  if (!tfchain.formatted_data_is_valid({ message: message })) {
+    errors.message = 'Not a valid message'
+  }
+
+  if (datetime && validateTimeLockChange(datetime, account)) {
     errors.datetime = 'Datetime cannot be in the past'
   }
 
@@ -64,7 +71,7 @@ const renderDateTimeField = ({
 }) => (
   <Form.Field>
     <div style={{ display: 'flex', marginBottom: 5 }}>
-      <label style={{ color: 'white' }}>{label}</label>
+      <label>{label}</label>
       <Popup offset={0} size='large' position='right center' content='If a date is provided, sent coins will be locked until this date.' trigger={<Icon style={{ fontSize: 12, float: 'left', marginLeft: 10 }} name='question circle' />} />
     </div>
     <DateTimePicker
@@ -84,7 +91,7 @@ const renderField = ({
   meta: { touched, error, warning }
 }) => (
   <Form.Field>
-    <label style={{ color: 'white' }}>{label}</label>
+    <label>{label}</label>
     <div>
       <Input {...input} placeholder={label} type={type} />
       {touched && (error && <Message negative>{error}</Message>)}
@@ -95,7 +102,7 @@ const renderField = ({
 class TransactionBodyForm extends Component {
   constructor (props) {
     super(props)
-    const { account } = this.props
+    const { account, transactionType } = this.props
     let selectedWallet
     if (account.selected_wallet) {
       selectedWallet = account.selected_wallet
@@ -104,7 +111,8 @@ class TransactionBodyForm extends Component {
     }
     this.state = {
       selectedWallet,
-      minimumMinerFee: account.minimum_miner_fee
+      minimumMinerFee: account.minimum_miner_fee,
+      messageType: transactionType === 'BURN' ? 'structured' : 'free'
     }
   }
 
@@ -139,7 +147,7 @@ class TransactionBodyForm extends Component {
     const { selectedWallet } = this.state
     return (
       <Form.Field>
-        <label style={{ color: 'white' }}>Select Wallet *</label>
+        <label>Select Wallet *</label>
         <Dropdown
           placeholder='Select wallet'
           options={data}
@@ -151,6 +159,35 @@ class TransactionBodyForm extends Component {
             this.selectWallet(v.value)
             this.props.mapDestinationDropdown(v.value)
           }} />
+      </Form.Field>
+    )
+  }
+
+  handleChangeMessageType = (e, { value }) => this.setState({ messageType: value })
+
+  renderRadioButtons = ({ input, label, meta: { touched, error, warning } }) => {
+    const { messageType } = this.state
+    return (
+      <Form.Field>
+        <div style={{ display: 'flex', justifyContent: 'space-between', width: '65%' }}>
+          <label>{label}</label>
+          <Radio
+            label='free formatted'
+            name='messageType'
+            value='free'
+            checked={messageType === 'free'}
+            onChange={this.handleChangeMessageType}
+          />
+          <Radio
+            label='structured'
+            name='messageType'
+            value='structured'
+            checked={messageType === 'structured'}
+            onChange={this.handleChangeMessageType}
+          />
+        </div>
+        {((error && <Message negative>{error}</Message>) ||
+            (warning && <span>{warning}</span>))}
       </Form.Field>
     )
   }
@@ -182,8 +219,8 @@ class TransactionBodyForm extends Component {
   }
 
   render () {
-    const { selectedWallet } = this.state
-    const { handleSubmit, invalid, enableSubmit } = this.props
+    const { selectedWallet, messageType } = this.state
+    const { handleSubmit, invalid, enableSubmit, transactionType } = this.props
     const walletOptions = this.mapWalletsToDropdownOption()
 
     return (
@@ -198,17 +235,53 @@ class TransactionBodyForm extends Component {
           component={TransactionAmountField}
           label='amount'
         />
-        <Field
-          name='description'
+        {transactionType === 'BURN' && <Field
+          name='messageType'
+          label='message type:'
+          props={{
+            messageType
+          }}
+          component={this.renderRadioButtons}
+        />}
+        {messageType === 'structured' ? <div>
+          <label>message</label>
+          <div style={{ display: 'flex' }}>
+            <Field
+              name='partA'
+              type='text'
+              props={{
+                maxLength: 3
+              }}
+              component={TransactionStructuredField}
+            />
+            <Field
+              name='partB'
+              type='text'
+              props={{
+                maxLength: 4
+              }}
+              component={TransactionStructuredField}
+            />
+            <Field
+              name='partC'
+              type='text'
+              props={{
+                maxLength: 5
+              }}
+              component={TransactionStructuredField}
+            />
+          </div>
+        </div> : <Field
+          name='message'
           type='text'
           component={renderField}
-          label='description'
-        />
-        <Field
+          label='message'
+        />}
+        {transactionType !== 'BURN' && <Field
           name='datetime'
           label='locked until'
           component={renderDateTimeField}
-        />
+        />}
         <Field
           name='walletAddress'
           component={this.renderDropdownList}
@@ -217,7 +290,7 @@ class TransactionBodyForm extends Component {
         <label style={{ fontSize: 12 }}>Fields with * are required</label>
         <div style={{ float: 'right' }}>
           <Button type='button' onClick={() => this.props.history.goBack()} className={styles.cancelButton} style={{ marginTop: 20, marginRight: 10, float: 'left' }} size='big'>Cancel</Button>
-          <Button disabled={!enableSubmit || invalid} type='submit' className={styles.acceptButton} style={{ marginTop: 20, marginRight: 10, float: 'left', background: '#015DE1', color: 'white' }} size='big'>Send</Button>
+          <Button disabled={!enableSubmit || invalid} type='submit' className={transactionType === 'BURN' ? styles.dangerButton : styles.acceptButton} style={{ marginTop: 20, marginRight: 10, float: 'left', color: 'white' }} size='big'>{transactionType === 'BURN' ? 'Burn' : 'Send'}</Button>
         </div>
       </Form>
     )
