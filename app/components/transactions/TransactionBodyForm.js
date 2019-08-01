@@ -24,7 +24,7 @@ const mapStateToProps = state => {
 
 const validate = (values, props) => {
   const errors = {}
-  const { amount, selectedWallet, datetime, message, partA, partB, partC } = values
+  const { amount, selectedWallet, datetime, message, messageType, partA, partB, partC } = values
   const { account } = props
 
   if (!selectedWallet) {
@@ -38,10 +38,22 @@ const validate = (values, props) => {
     errors.amount = 'Not enough balance'
   }
 
-  if (!partA || !partB || !partC) {
-    errors.partA = 'required'
-  } else if (partA.length < 3 || partB.length < 4 || partC.length < 5) {
-    errors.partA = 'Missing field numbers'
+  if (messageType === 'structured') {
+    let totalLength = 0
+
+    if (partA) {
+      totalLength += partA.length
+    }
+    if (partB) {
+      totalLength += partB.length
+    }
+    if (partC) {
+      totalLength += partC.length
+    }
+
+    if (totalLength < 12 && totalLength > 0) {
+      errors.partA = 'Missing field numbers'
+    }
   }
 
   if (!tfchain.formatted_data_is_valid({ message: message })) {
@@ -102,7 +114,7 @@ const renderField = ({
 class TransactionBodyForm extends Component {
   constructor (props) {
     super(props)
-    const { account, transactionType } = this.props
+    const { account, messageType } = this.props
     let selectedWallet
     if (account.selected_wallet) {
       selectedWallet = account.selected_wallet
@@ -112,13 +124,14 @@ class TransactionBodyForm extends Component {
     this.state = {
       selectedWallet,
       minimumMinerFee: account.minimum_miner_fee,
-      messageType: transactionType === 'BURN' ? 'structured' : 'free'
+      messageType: messageType
     }
   }
 
   componentDidMount () {
     this.props.initialize({
-      selectedWallet: this.state.selectedWallet
+      selectedWallet: this.state.selectedWallet,
+      messageType: this.state.messageType
     })
   }
 
@@ -163,7 +176,9 @@ class TransactionBodyForm extends Component {
     )
   }
 
-  handleChangeMessageType = (e, { value }) => this.setState({ messageType: value })
+  handleChangeMessageType = (value) => {
+    this.setState({ messageType: value, message: '', structured: '' })
+  }
 
   renderRadioButtons = ({ input, label, meta: { touched, error, warning } }) => {
     const { messageType } = this.state
@@ -175,15 +190,19 @@ class TransactionBodyForm extends Component {
             label='free formatted'
             name='messageType'
             value='free'
-            checked={messageType === 'free'}
-            onChange={this.handleChangeMessageType}
+            checked={input.value === 'free'}
+            onChange={(e, v) => {
+              input.onChange(v.value)
+            }}
           />
           <Radio
             label='structured'
             name='messageType'
             value='structured'
-            checked={messageType === 'structured'}
-            onChange={this.handleChangeMessageType}
+            checked={input.value === 'structured'}
+            onChange={(e, v) => {
+              input.onChange(v.value)
+            }}
           />
         </div>
         {((error && <Message negative>{error}</Message>) ||
@@ -224,7 +243,7 @@ class TransactionBodyForm extends Component {
     const walletOptions = this.mapWalletsToDropdownOption()
 
     return (
-      <Form style={{ width: '90%', margin: 'auto', marginTop: 50 }} onSubmit={handleSubmit} initialvalues={{ selectedWallet }}>
+      <Form style={{ width: '90%', margin: 'auto', marginTop: 50 }} onSubmit={handleSubmit} initialvalues={{ selectedWallet, messageType }}>
         <Field
           name='amount'
           type='text'

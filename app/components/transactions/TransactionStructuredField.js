@@ -1,18 +1,6 @@
 // MyCustomInput.js
 import React, { Component } from 'react'
 import { Form, Input, Message } from 'semantic-ui-react'
-import { connect } from 'react-redux'
-
-const mapStateToProps = state => {
-  if (!state.account.state) {
-    return {
-      account: null
-    }
-  }
-  return {
-    account: state.account.state
-  }
-}
 
 class TransactionStructuredField extends Component {
   onInputChange = (e, v) => {
@@ -43,7 +31,4 @@ class TransactionStructuredField extends Component {
   }
 }
 
-export default connect(
-  mapStateToProps,
-  null
-)(TransactionStructuredField)
+export default TransactionStructuredField

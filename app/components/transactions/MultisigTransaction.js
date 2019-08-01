@@ -53,7 +53,8 @@ class MultisigTransaction extends Component {
       enableSubmit: false,
       enableSave: false,
       openAddMultiSigModal: false,
-      contactName: ''
+      contactName: '',
+      messageType: 'free'
     }
   }
 
@@ -420,7 +421,7 @@ class MultisigTransaction extends Component {
       )
     }
     const { openConfirmationModal, transactionType, destination, selectedWalletRecipient, selectedRecipientAddress, ownerAddresses, signatureCount, message, contactName, enableSubmit, signatureCountError, openAddMultiSigModal } = this.state
-    const { amount, datetime, selectedWallet } = this.state
+    const { amount, datetime, selectedWallet, messageType } = this.state
     return (
       <div>
         <TransactionConfirmationModal
@@ -455,7 +456,7 @@ class MultisigTransaction extends Component {
         />
         {this.renderAddressBook()}
         {this.renderDestinationForm()}
-        <TransactionBodyForm handleSubmit={this.handleSubmit} enableSubmit={enableSubmit} mapDestinationDropdown={this.mapDestinationDropdown} />
+        <TransactionBodyForm messageType={messageType} handleSubmit={this.handleSubmit} enableSubmit={enableSubmit} mapDestinationDropdown={this.mapDestinationDropdown} />
       </div>
     )
   }

@@ -41,7 +41,8 @@ class InternalTransaction extends Component {
       selectedWallet: this.props.form.transactionForm.values.selectedWallet,
       loader: false,
       openConfirmationModal: false,
-      enableSubmit: true
+      enableSubmit: true,
+      messageType: 'free'
     }
   }
 
@@ -380,7 +381,7 @@ class InternalTransaction extends Component {
       )
     }
     const { openConfirmationModal, transactionType, destination, selectedWalletRecipient, selectedRecipientAddress, message, enableSubmit } = this.state
-    const { amount, datetime, selectedWallet } = this.state
+    const { amount, datetime, selectedWallet, messageType } = this.state
     return (
       <div>
         {openConfirmationModal && <TransactionConfirmationModal
@@ -399,7 +400,7 @@ class InternalTransaction extends Component {
         />}
 
         {this.renderDestinationForm()}
-        <TransactionBodyForm handleSubmit={this.handleSubmit} mapDestinationDropdown={this.mapDestinationDropdown} enableSubmit={enableSubmit} />
+        <TransactionBodyForm messageType={messageType} handleSubmit={this.handleSubmit} mapDestinationDropdown={this.mapDestinationDropdown} enableSubmit={enableSubmit} />
       </div>
     )
   }
