@@ -49,7 +49,8 @@ class SingleTransaction extends Component {
       openConfirmationModal: false,
       enableSubmit: false,
       openSaveModal: false,
-      enableSave: false
+      enableSave: false,
+      messageType: 'free'
     }
   }
 
@@ -252,7 +253,7 @@ class SingleTransaction extends Component {
       )
     }
     const { openConfirmationModal, transactionType, destination, selectedWalletRecipient, selectedRecipientAddress, message, contactName, openSaveModal, enableSubmit } = this.state
-    const { amount, datetime, selectedWallet } = this.state
+    const { amount, datetime, selectedWallet, messageType } = this.state
     return (
       <div>
         {openConfirmationModal && <TransactionConfirmationModal
@@ -280,7 +281,7 @@ class SingleTransaction extends Component {
           updateContact={this.addContact}
         />
         {this.renderDestinationForm()}
-        <TransactionBodyForm handleSubmit={this.handleSubmit} enableSubmit={enableSubmit} mapDestinationDropdown={this.mapDestinationDropdown} />
+        <TransactionBodyForm messageType={messageType} handleSubmit={this.handleSubmit} enableSubmit={enableSubmit} mapDestinationDropdown={this.mapDestinationDropdown} />
       </div>
     )
   }

@@ -41,7 +41,8 @@ class BurnTransaction extends Component {
       selectedWallet: this.props.form.transactionForm.values.selectedWallet,
       loader: false,
       openConfirmationModal: false,
-      enableSubmit: true
+      enableSubmit: true,
+      messageType: 'structured'
     }
   }
 
@@ -239,11 +240,14 @@ class BurnTransaction extends Component {
 
   buildInternalTransation = () => {
     const { selectedWallet, message, structured, amount } = this.state
+    const { form } = this.props
+
+    const { messageType } = form.transactionForm.values
 
     this.renderLoader(true)
 
     try {
-      selectedWallet.coins_burn(amount, { message: structured }).then(result => {
+      selectedWallet.coins_burn(amount, { message: messageType === 'structured' ? structured : message }).then(result => {
         this.setState({ destinationError: false, amountError: false, loader: false })
         if (result.submitted) {
           toast('Transaction ' + result.transaction.id + ' submitted')
@@ -323,7 +327,7 @@ class BurnTransaction extends Component {
       )
     }
     const { openConfirmationModal, transactionType, message, enableSubmit } = this.state
-    const { amount, datetime, selectedWallet, partA, partB, partC } = this.state
+    const { amount, datetime, selectedWallet, partA, partB, partC, messageType } = this.state
     return (
       <div>
         {openConfirmationModal && <TransactionConfirmationModal
@@ -340,7 +344,7 @@ class BurnTransaction extends Component {
         />}
 
         {this.renderDestinationForm()}
-        <TransactionBodyForm transactionType={transactionType} handleSubmit={this.handleSubmit} mapDestinationDropdown={this.mapDestinationDropdown} enableSubmit={enableSubmit} />
+        <TransactionBodyForm messageType={messageType} transactionType={transactionType} handleSubmit={this.handleSubmit} mapDestinationDropdown={this.mapDestinationDropdown} enableSubmit={enableSubmit} />
       </div>
     )
   }
