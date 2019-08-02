@@ -15,6 +15,7 @@ import * as tferrors from './tfchain.errors.js';
 import * as tfrivbin from './tfchain.encoding.rivbin.js';
 import * as tfsiabin from './tfchain.encoding.siabin.js';
 import * as bip39 from './tfchain.crypto.mnemonic.js';
+import * as jshttp from './tfchain.polyfill.http.js';
 import * as jsarr from './tfchain.polyfill.array.js';
 import * as jsobj from './tfchain.polyfill.encoding.object.js';
 import * as jsstr from './tfchain.polyfill.encoding.str.js';
@@ -246,6 +247,7 @@ export var Account =  __class__ ('Account', [object], {
 		self._chain_info = ChainInfo (self._chain);
 		self._selected_wallet = null;
 		self._address_book = AddressBook ();
+		self._faucet = FaucetClient (self);
 		self._address_auth_state = dict ({});
 		self._loaded = false;
 		self._intermezzo_update_count = 0;
@@ -459,6 +461,22 @@ export var Account =  __class__ ('Account', [object], {
 		else {
 		}
 		return self._address_book;
+	});},
+	get _get_faucet () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._faucet;
 	});},
 	get _get_chain_info () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -2184,6 +2202,7 @@ Object.defineProperty (Account, 'selected_wallet', property.call (Account, Accou
 Object.defineProperty (Account, 'selected_wallet_name', property.call (Account, Account._get_selected_wallet_name));
 Object.defineProperty (Account, 'balance', property.call (Account, Account._get_balance));
 Object.defineProperty (Account, 'chain_info', property.call (Account, Account._get_chain_info));
+Object.defineProperty (Account, 'faucet', property.call (Account, Account._get_faucet));
 Object.defineProperty (Account, 'address_book', property.call (Account, Account._get_address_book));
 Object.defineProperty (Account, 'password', property.call (Account, Account._get_password));
 Object.defineProperty (Account, 'seed', property.call (Account, Account._get_seed));
@@ -2193,6 +2212,277 @@ Object.defineProperty (Account, 'account_name', property.call (Account, Account.
 Object.defineProperty (Account, 'previous_account_name', property.call (Account, Account._get_previous_account_name));
 Object.defineProperty (Account, 'intermezzo_update_count', property.call (Account, Account._get_intermezzo_update_count));
 Object.defineProperty (Account, 'is_loaded', property.call (Account, Account._get_is_loaded));;
+export var FaucetClient =  __class__ ('FaucetClient', [object], {
+	__module__: __name__,
+	get __init__ () {return __get__ (this, function (self, account) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'account': var account = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		self._account = account;
+	});},
+	get coins_receive () {return __get__ (this, function (self, opts) {
+		if (typeof opts == 'undefined' || (opts != null && opts.hasOwnProperty ("__kwargtrans__"))) {;
+			var opts = null;
+		};
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'opts': var opts = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._faucet_action ('/api/v1/coins', __kwargtrans__ ({opts: opts}));
+	});},
+	get auth_addess () {return __get__ (this, function (self, opts) {
+		if (typeof opts == 'undefined' || (opts != null && opts.hasOwnProperty ("__kwargtrans__"))) {;
+			var opts = null;
+		};
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'opts': var opts = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._faucet_action ('/api/v1/authorize', __kwargtrans__ ({opts: opts}));
+	});},
+	get deauth_addess () {return __get__ (this, function (self, opts) {
+		if (typeof opts == 'undefined' || (opts != null && opts.hasOwnProperty ("__kwargtrans__"))) {;
+			var opts = null;
+		};
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'opts': var opts = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._faucet_action ('/api/v1/deauthorize', __kwargtrans__ ({opts: opts}));
+	});},
+	get _faucet_action () {return __get__ (this, function (self, endpoint, opts) {
+		if (typeof opts == 'undefined' || (opts != null && opts.hasOwnProperty ("__kwargtrans__"))) {;
+			var opts = null;
+		};
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'endpoint': var endpoint = __allkwargs0__ [__attrib0__]; break;
+						case 'opts': var opts = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		self._chain_check ();
+		var __left0__ = jsfunc.opts_get (opts, 'wallet', 'address');
+		var wallet = __left0__ [0];
+		var address = __left0__ [1];
+		var wallet_address = self._get_wallet (wallet, address);
+		var sdata = jsjson.json_dumps (dict ({'address': wallet_address}));
+		var faucet_address = self._get_faucet_address ();
+		var cb = function (result) {
+			if (arguments.length) {
+				var __ilastarg0__ = arguments.length - 1;
+				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+					var __allkwargs0__ = arguments [__ilastarg0__--];
+					for (var __attrib0__ in __allkwargs0__) {
+						switch (__attrib0__) {
+							case 'result': var result = __allkwargs0__ [__attrib0__]; break;
+						}
+					}
+				}
+			}
+			else {
+			}
+			if (result.code != 200) {
+				var __except0__ = tferrors.ExplorerServerError ('error (code: {}): {}'.format (result.code, result.data), endpoint);
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
+			try {
+				return FaucetResult (result.data ['txid']);
+			}
+			catch (__except0__) {
+				if (isinstance (__except0__, KeyError)) {
+					var exc = __except0__;
+					var __except1__ = tferrors.ExplorerInvalidResponse (str (exc), endpoint, result.data);
+					__except1__.__cause__ = exc;
+					throw __except1__;
+				}
+				else {
+					throw __except0__;
+				}
+			}
+		};
+		return jsasync.chain (jshttp.http_post (faucet_address, endpoint, sdata), cb);
+	});},
+	get _get_wallet () {return __get__ (this, function (self, wallet, address) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'wallet': var wallet = __allkwargs0__ [__attrib0__]; break;
+						case 'address': var address = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (wallet == null && address == null) {
+			var address = self._account.address;
+			if (address == null) {
+				var __except0__ = ValueError ('no addess or wallet given, and account {} has no addresses to use'.format (self._account.account_name));
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
+			return address;
+		}
+		var wallet = self._account.wallet_get (__kwargtrans__ ({opts: dict ({'name': wallet, 'address': address, 'singlesig': true, 'multisig': false})}));
+		if (wallet == null) {
+			var __except0__ = ValueError ('no matching singlesig wallet (name={}, addr={}) found on account {}'.format (wallet, address, self._account.account_name));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		return wallet.address;
+	});},
+	get _get_faucet_address () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var address = self._account._network_type.faucet_address ();
+		if (address == null) {
+			var __except0__ = ValueError ('current network {} on chain {} does not have an official faucet'.format (self._account._network_type.str (), self._account._chain.str ()));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		return address;
+	});},
+	get _chain_check () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (self._account._chain.value != tfchaintype.Type.GOLDCHAIN.value) {
+			var __except0__ = tferrors.UnsupporedFeature ('blockchain {} does not support an official faucet REST API'.format (self._account._chain.str ()));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+	});}
+});
+export var FaucetResult =  __class__ ('FaucetResult', [object], {
+	__module__: __name__,
+	get __init__ () {return __get__ (this, function (self, txid) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'txid': var txid = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		self._txid = txid;
+	});},
+	get _get_transaction_id () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._txid;
+	});},
+	get _get_submitted () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return true;
+	});}
+});
+Object.defineProperty (FaucetResult, 'submitted', property.call (FaucetResult, FaucetResult._get_submitted));
+Object.defineProperty (FaucetResult, 'transaction_id', property.call (FaucetResult, FaucetResult._get_transaction_id));;
 export var BaseWallet =  __class__ ('BaseWallet', [object], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, wallet_name) {

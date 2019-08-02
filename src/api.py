@@ -14,6 +14,7 @@ import tfchain.polyfill.encoding.bin as jsbin
 import tfchain.polyfill.encoding.str as jsstr
 import tfchain.polyfill.encoding.object as jsobj
 import tfchain.polyfill.array as jsarr
+import tfchain.polyfill.http as jshttp
 
 import tfchain.crypto.mnemonic as bip39
 import tfchain.encoding.siabin as tfsiabin
@@ -233,6 +234,7 @@ class Account:
         self._chain_info = ChainInfo(self._chain)
         self._selected_wallet = None
         self._address_book = AddressBook()
+        self._faucet = FaucetClient(self)
 
         # goldchain-specific account cache
         self._address_auth_state = {}
@@ -341,6 +343,10 @@ class Account:
     @property
     def address_book(self):
         return self._address_book
+
+    @property
+    def faucet(self):
+        return self._faucet
 
     @property
     def chain_info(self):
@@ -1059,6 +1065,77 @@ class Account:
         # update all multisig wallets
         for wallet in self._multisig_wallets:
             wallet._update_unconfirmed_balance_from_transaction(transaction)
+
+class FaucetClient:
+    def __init__(self, account):
+        self._account = account
+
+    def coins_receive(self, opts=None):
+        return self._faucet_action("/api/v1/coins", opts=opts)
+
+    def auth_addess(self, opts=None):
+        return self._faucet_action("/api/v1/authorize", opts=opts)
+
+    def deauth_addess(self, opts=None):
+        return self._faucet_action("/api/v1/deauthorize", opts=opts)
+
+    def _faucet_action(self, endpoint, opts=None):
+        self._chain_check()
+        wallet, address = jsfunc.opts_get(opts, 'wallet', 'address')
+        wallet_address = self._get_wallet(wallet, address)
+        sdata = jsjson.json_dumps({"address": wallet_address})
+        faucet_address = self._get_faucet_address()
+        def cb(result):
+            if result.code != 200:
+                raise tferrors.ExplorerServerError("error (code: {}): {}".format(result.code, result.data), endpoint)
+            try:
+                return FaucetResult(result.data["txid"])
+            except KeyError as exc:
+                # return a KeyError as an invalid Explorer Response
+                raise tferrors.ExplorerInvalidResponse(str(exc), endpoint, result.data) from exc
+        return jsasync.chain(jshttp.http_post(faucet_address, endpoint, sdata), cb)
+    
+    def _get_wallet(self, wallet, address):
+        if wallet == None and address == None:
+            address = self._account.address
+            if address == None:
+               raise ValueError("no addess or wallet given, and account {} has no addresses to use".format(self._account.account_name))
+            return address
+        wallet = self._account.wallet_get(opts={
+            'name': wallet,
+            'address': address,
+            'singlesig': True,
+            'multisig': False,
+        })
+        if wallet == None:
+            raise ValueError("no matching singlesig wallet (name={}, addr={}) found on account {}".format(wallet, address, self._account.account_name))
+        return wallet.address
+
+    def _get_faucet_address(self):
+        address = self._account._network_type.faucet_address()
+        if address == None:
+            raise ValueError("current network {} on chain {} does not have an official faucet".format(self._account._network_type.str(), self._account._chain.str()))
+        return address
+
+    def _chain_check(self):
+        if self._account._chain.value != tfchaintype.Type.GOLDCHAIN.value:
+            raise tferrors.UnsupporedFeature("blockchain {} does not support an official faucet REST API".format(self._account._chain.str()))
+
+
+class FaucetResult():
+    """
+    TransactionSendResult is a named tuple,
+    used as the result for all faucet call results.
+    """
+    def __init__(self, txid):
+        self._txid = txid
+
+    @property
+    def transaction_id(self):
+        return self._txid
+    @property
+    def submitted(self):
+        return True
 
 
 class BaseWallet:

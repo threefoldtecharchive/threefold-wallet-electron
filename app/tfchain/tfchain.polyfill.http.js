@@ -53,6 +53,13 @@ export var http_get = function (address, endpoint, headers) {
 	                code: response.status,
 	                data: message || ("GET request to " + resource + " failed with status code " + response.status),
 	            };
+	        }).catch(() => {
+	            return {
+	                code: response.status,
+	                address: address,
+	                endpoint: endpoint,
+	                data: "POST request to " + resource + " failed with status code " + response.status,
+	            };
 	        });
 	    });
 	    
@@ -109,6 +116,13 @@ export var http_post = function (address, endpoint, data, headers) {
 	                address: address,
 	                endpoint: endpoint,
 	                data: data.message || ("POST request to " + resource + " failed with status code " + response.status),
+	            };
+	        }).catch(() => {
+	            return {
+	                code: response.status,
+	                address: address,
+	                endpoint: endpoint,
+	                data: "POST request to " + resource + " failed with status code " + response.status,
 	            };
 	        });
 	    });

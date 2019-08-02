@@ -89,6 +89,11 @@ class TFChainNetworkType(NetworkType):
             'http://localhost:23110'
         ]
 
+    def faucet_address(self):
+        if self.__eq__(TFChainNetworkType.TESTNET):
+            return "https://faucet.testnet.threefoldtoken.com"
+        return None
+
 TFChainNetworkType.STANDARD = TFChainNetworkType(0)
 TFChainNetworkType.TESTNET = TFChainNetworkType(1)
 TFChainNetworkType.DEVNET = TFChainNetworkType(2)
@@ -127,6 +132,9 @@ class GoldChainNetworkType(NetworkType):
             return "devnet"
         raise ValueError("invalid Goldchain network type {}".format(self.value))
 
+    def str(self):
+        return self.__str__()
+
     @classmethod
     def from_str(cls, s):
         if not isinstance(s, str):
@@ -158,6 +166,11 @@ class GoldChainNetworkType(NetworkType):
                 'http://localhost:22110'
             ]
         raise ValueError("invalid Goldchain network type {}".format(self.value))
+
+    def faucet_address(self):
+        if self.__eq__(GoldChainNetworkType.TESTNET):
+            return "https://faucet.testnet.nbh-digital.com"
+        return None
 
 GoldChainNetworkType.TESTNET = GoldChainNetworkType(1)
 GoldChainNetworkType.DEVNET = GoldChainNetworkType(2)

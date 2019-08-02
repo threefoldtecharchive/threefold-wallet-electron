@@ -277,6 +277,25 @@ export var TFChainNetworkType =  __class__ ('TFChainNetworkType', [NetworkType],
 			return ['https://explorer.testnet.threefoldtoken.com', 'https://explorer2.testnet.threefoldtoken.com'];
 		}
 		return ['http://localhost:23110'];
+	});},
+	get faucet_address () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (self.__eq__ (TFChainNetworkType.TESTNET)) {
+			return 'https://faucet.testnet.threefoldtoken.com';
+		}
+		return null;
 	});}
 });
 Object.defineProperty (TFChainNetworkType, 'value', property.call (TFChainNetworkType, TFChainNetworkType._get_value));;
@@ -411,6 +430,22 @@ export var GoldChainNetworkType =  __class__ ('GoldChainNetworkType', [NetworkTy
 		__except0__.__cause__ = null;
 		throw __except0__;
 	});},
+	get str () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self.__str__ ();
+	});},
 	get from_str () {return __getcm__ (this, function (cls, s) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -500,6 +535,25 @@ export var GoldChainNetworkType =  __class__ ('GoldChainNetworkType', [NetworkTy
 		var __except0__ = ValueError ('invalid Goldchain network type {}'.format (self.value));
 		__except0__.__cause__ = null;
 		throw __except0__;
+	});},
+	get faucet_address () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (self.__eq__ (GoldChainNetworkType.TESTNET)) {
+			return 'https://faucet.testnet.nbh-digital.com';
+		}
+		return null;
 	});}
 });
 Object.defineProperty (GoldChainNetworkType, 'value', property.call (GoldChainNetworkType, GoldChainNetworkType._get_value));;
