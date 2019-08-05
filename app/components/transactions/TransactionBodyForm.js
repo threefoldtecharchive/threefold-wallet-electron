@@ -181,7 +181,6 @@ class TransactionBodyForm extends Component {
   }
 
   renderRadioButtons = ({ input, label, meta: { touched, error, warning } }) => {
-    const { messageType } = this.state
     return (
       <Form.Field>
         <div style={{ display: 'flex', justifyContent: 'space-between', width: '65%' }}>
@@ -192,6 +191,7 @@ class TransactionBodyForm extends Component {
             value='free'
             checked={input.value === 'free'}
             onChange={(e, v) => {
+              this.setState({ messageType: v.value })
               input.onChange(v.value)
             }}
           />
@@ -201,6 +201,7 @@ class TransactionBodyForm extends Component {
             value='structured'
             checked={input.value === 'structured'}
             onChange={(e, v) => {
+              this.setState({ messageType: v.value })
               input.onChange(v.value)
             }}
           />
@@ -257,9 +258,6 @@ class TransactionBodyForm extends Component {
         {transactionType === 'BURN' && <Field
           name='messageType'
           label='message type:'
-          props={{
-            messageType
-          }}
           component={this.renderRadioButtons}
         />}
         {messageType === 'structured' ? <div>

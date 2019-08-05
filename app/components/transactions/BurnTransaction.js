@@ -215,19 +215,10 @@ class BurnTransaction extends Component {
     })
   }
 
-  checkInternalTransactionFormValues = () => {
-    const {
-      selectedWalletRecipient
-    } = this.state
-
+  checkBurnTransactionFormValues = () => {
     const { selectedWallet } = this.props.form.transactionForm.values
 
-    let selectedWalletReciepentError = false
-    if (!selectedWalletRecipient) {
-      selectedWalletReciepentError = true
-    }
-
-    if (!selectedWalletReciepentError && selectedWallet) {
+    if (selectedWallet) {
       if (selectedWallet.can_spent) {
         return true
       } else {
@@ -238,7 +229,7 @@ class BurnTransaction extends Component {
     return false
   }
 
-  buildInternalTransation = () => {
+  buildBurnTransaction = () => {
     const { selectedWallet, message, structured, amount } = this.state
     const { form } = this.props
 
@@ -277,7 +268,7 @@ class BurnTransaction extends Component {
     const { transactionType } = this.state
 
     if (transactionType === TransactionTypes.BURN) {
-      this.buildInternalTransation()
+      this.buildBurnTransaction()
     }
   }
 
@@ -285,7 +276,7 @@ class BurnTransaction extends Component {
     const { transactionType } = this.state
     let open = false
     if (transactionType === TransactionTypes.BURN) {
-      if (this.checkInternalTransactionFormValues()) {
+      if (this.checkBurnTransactionFormValues()) {
         open = true
       }
     }
@@ -309,7 +300,7 @@ class BurnTransaction extends Component {
     const { form } = this.props
     const { syncErrors } = form.transactionForm
 
-    if (syncErrors || !this.checkInternalTransactionFormValues()) {
+    if (syncErrors || !this.checkBurnTransactionFormValues()) {
       return
     }
 
