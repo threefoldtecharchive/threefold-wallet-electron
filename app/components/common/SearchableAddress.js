@@ -85,7 +85,7 @@ class SearchableAddress extends Component {
       return res.obj
     })
 
-    if (currentLocation !== routes.ADDRESS_BOOK) {
+    if (currentLocation !== routes.ADDRESS_BOOK && this.props.form.transactionForm) {
       results = results.filter(w => w.value !== this.props.form.transactionForm.values.selectedWallet.address)
     } else if (!multiSig) {
       results = results.filter(w => !account.addresses.includes(w.value))
