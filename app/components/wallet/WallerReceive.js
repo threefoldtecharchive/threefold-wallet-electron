@@ -9,9 +9,24 @@ import { CopyToClipboard } from 'react-copy-to-clipboard'
 import { toast } from 'react-toastify'
 const { shell } = require('electron')
 
-const mapStateToProps = state => ({
-  account: state.account.state
-})
+const mapStateToProps = state => {
+  if (!state.account.state) {
+    return {
+      account: null,
+      is_loaded: false,
+      walletLoadedCount: 0,
+      walletCount: 0,
+      intermezzoUpdateCount: 0
+    }
+  }
+  return {
+    account: state.account.state,
+    is_loaded: state.account.state.is_loaded,
+    walletLoadedCount: state.account.walletLoadedCount,
+    walletCount: state.account.walletCount,
+    intermezzoUpdateCount: state.account.intermezzoUpdateCount
+  }
+}
 
 class WalletReceive extends Component {
   constructor (props) {
@@ -33,7 +48,8 @@ class WalletReceive extends Component {
       selectedAddress,
       amount: 0,
       isOpen: false,
-      isGoldChain: this.props.account.chain_type === 'goldchain'
+      isGoldChain: this.props.account.chain_type === 'goldchain',
+      visible: true
     }
   }
 
@@ -88,6 +104,26 @@ class WalletReceive extends Component {
     )
   }
 
+  requestTokens = (selectedWallet) => {
+    this.props.account.faucet.coins_receive({ address: selectedWallet.address }).then(res => {
+      if (res.submitted) {
+        toast('Successfully requested 300 GFT')
+      }
+    })
+  }
+
+  requestAuthorization = (selectedWallet) => {
+    this.props.account.faucet.auth_address({ address: selectedWallet.address }).then(res => {
+      if (res.submitted) {
+        toast('Successfully requested Authorization')
+      }
+    })
+  }
+
+  handleDismiss = () => {
+    this.setState({ visible: false })
+  }
+
   renderWalletReceive = () => {
     const { selectedAddress, isGoldChain, selectedWallet, amount } = this.state
     const walletsOptions = this.mapWalletsToDropdownOption()
@@ -107,7 +143,7 @@ class WalletReceive extends Component {
             {w.addresses.map(a => {
               const authorized = this.props.account.coin_auth_status_for_address_get(a)
               return (
-                <React.Fragment>
+                <React.Fragment key={a}>
                   <div key={a} style={{ display: 'flex', marginTop: 20 }}>
                     <p style={{ fontSize: 12 }}>{a}</p>
                     <CopyToClipboard text={a}
@@ -115,9 +151,10 @@ class WalletReceive extends Component {
                       <Label onClick={() => toast('Copied to clipboard')} style={{ display: 'block', margin: 'auto', marginRight: 0, width: 200, cursor: 'pointer' }}><Icon name='clipboard' /> copy address to clipboard</Label>
                     </CopyToClipboard>
                   </div>
+                  {authorized && <Label onClick={() => this.requestTokens(w)} style={{ display: 'block', margin: 'auto', marginRight: 0, width: 200, cursor: 'pointer', marginTop: 10 }}><Icon name='arrow left' />Request 300 GFT</Label>}
                   {!authorized && <Message style={{ width: '100%', margin: 'auto', marginTop: 10, marginBottom: 10 }} error>
-                    <Message.Header>This addres is not authorized. To authorize this address, paste the address on the authorization page.</Message.Header>
-                    <p style={{ fontSize: 13, cursor: 'pointer', color: 'blue', textDecoration: 'underline' }} onClick={() => shell.openExternal(`https://faucet.testnet.nbh-digital.com/`)}>https://faucet.testnet.nbh-digital.com/</p>
+                    <Message.Header>This addres is not authorized. You cannot use this address when it's not authorized</Message.Header>
+                    <Label onClick={() => this.requestAuthorization(w)} style={{ display: 'block', margin: 'auto', marginLeft: 0, width: 200, cursor: 'pointer', marginTop: 10 }}><Icon name='unlock' />Request Authorization</Label>
                   </Message>}
                 </React.Fragment>
               )
@@ -174,6 +211,10 @@ class WalletReceive extends Component {
         </div>
         <Divider className={styles.pageDivider} />
         <div style={{ margin: 'auto', paddingBottom: 30 }}>
+          {this.state.visible && <Message style={{ width: '90%', margin: 'auto', marginTop: 10, marginBottom: 10 }} onDismiss={this.handleDismiss}>
+            <Message.Header>You can (de)authorize / request GFT for an address using our actions or you can go to following link to do it manualy.</Message.Header>
+            <p style={{ fontSize: 13, cursor: 'pointer', color: 'blue', textDecoration: 'underline' }} onClick={() => shell.openExternal(`https://faucet.testnet.nbh-digital.com/`)}>https://faucet.testnet.nbh-digital.com/</p>
+          </Message>}
           {this.renderWalletReceive()}
         </div>
       </div>

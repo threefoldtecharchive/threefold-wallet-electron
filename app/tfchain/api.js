@@ -2251,7 +2251,7 @@ export var FaucetClient =  __class__ ('FaucetClient', [object], {
 		}
 		return self._faucet_action ('/api/v1/coins', __kwargtrans__ ({opts: opts}));
 	});},
-	get auth_addess () {return __get__ (this, function (self, opts) {
+	get auth_address () {return __get__ (this, function (self, opts) {
 		if (typeof opts == 'undefined' || (opts != null && opts.hasOwnProperty ("__kwargtrans__"))) {;
 			var opts = null;
 		};
@@ -2271,7 +2271,7 @@ export var FaucetClient =  __class__ ('FaucetClient', [object], {
 		}
 		return self._faucet_action ('/api/v1/authorize', __kwargtrans__ ({opts: opts}));
 	});},
-	get deauth_addess () {return __get__ (this, function (self, opts) {
+	get deauth_address () {return __get__ (this, function (self, opts) {
 		if (typeof opts == 'undefined' || (opts != null && opts.hasOwnProperty ("__kwargtrans__"))) {;
 			var opts = null;
 		};

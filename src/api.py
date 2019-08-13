@@ -1073,10 +1073,10 @@ class FaucetClient:
     def coins_receive(self, opts=None):
         return self._faucet_action("/api/v1/coins", opts=opts)
 
-    def auth_addess(self, opts=None):
+    def auth_address(self, opts=None):
         return self._faucet_action("/api/v1/authorize", opts=opts)
 
-    def deauth_addess(self, opts=None):
+    def deauth_address(self, opts=None):
         return self._faucet_action("/api/v1/deauthorize", opts=opts)
 
     def _faucet_action(self, endpoint, opts=None):
@@ -1084,6 +1084,7 @@ class FaucetClient:
         wallet, address = jsfunc.opts_get(opts, 'wallet', 'address')
         wallet_address = self._get_wallet(wallet, address)
         sdata = jsjson.json_dumps({"address": wallet_address})
+
         faucet_address = self._get_faucet_address()
         def cb(result):
             if result.code != 200:
