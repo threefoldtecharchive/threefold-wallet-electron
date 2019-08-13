@@ -4,15 +4,27 @@ import { Form, Input, Message } from 'semantic-ui-react'
 
 class TransactionStructuredField extends Component {
   onInputChange = (e, v) => {
-    const { maxLength } = this.props
+    const { maxLength, input } = this.props
+    console.log(maxLength)
+    console.log(v.value.length)
     if (v.value.match(/^([0-9]+?)?$/) && v.value.length <= maxLength) {
       this.props.input.onChange(e)
+    }
+    if (v.value.match(/^([0-9]+?)?$/) && v.value.length === maxLength) {
+      switch (input.name) {
+        case 'partA':
+          this.props.fields.partB.focus()
+          break
+        case 'partB':
+          this.props.fields.partC.focus()
+          break
+      }
     }
   }
 
   render () {
-    let {
-      input: { value },
+    const {
+      input: { value, name },
       meta: { error, touched },
       type
     } = this.props
@@ -24,6 +36,7 @@ class TransactionStructuredField extends Component {
           placeholder=''
           type={type}
           onChange={this.onInputChange}
+          ref={(ref) => (this.props.fields[name] = ref)}
         />
         {touched && (error && <Message negative>{error}</Message>)}
       </Form.Field>

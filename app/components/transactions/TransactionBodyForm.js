@@ -126,6 +126,7 @@ class TransactionBodyForm extends Component {
       minimumMinerFee: account.minimum_miner_fee,
       messageType: messageType
     }
+    this.fields = []
   }
 
   componentDidMount () {
@@ -267,7 +268,8 @@ class TransactionBodyForm extends Component {
               name='partA'
               type='text'
               props={{
-                maxLength: 3
+                maxLength: 3,
+                fields: this.fields
               }}
               component={TransactionStructuredField}
             />
@@ -275,7 +277,8 @@ class TransactionBodyForm extends Component {
               name='partB'
               type='text'
               props={{
-                maxLength: 4
+                maxLength: 4,
+                fields: this.fields
               }}
               component={TransactionStructuredField}
             />
@@ -283,7 +286,8 @@ class TransactionBodyForm extends Component {
               name='partC'
               type='text'
               props={{
-                maxLength: 5
+                maxLength: 5,
+                fields: this.fields
               }}
               component={TransactionStructuredField}
             />
