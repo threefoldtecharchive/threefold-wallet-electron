@@ -66,7 +66,12 @@ class SearchableAddress extends Component {
   }
 
   filterSearchInput = (value) => {
-    this.setState({ addressError: !tfchain.wallet_address_is_valid(value) })
+    if (value.length > 10) {
+      this.setState({ addressError: !tfchain.wallet_address_is_valid(value) })
+    }
+    if (value.length === 0) {
+      this.setState({ addressError: false })
+    }
     this.props.setSearchValue(value)
     this.searchResults(value)
   }
@@ -85,10 +90,10 @@ class SearchableAddress extends Component {
       return res.obj
     })
 
-    if (currentLocation !== routes.ADDRESS_BOOK) {
+    if (currentLocation !== routes.ADDRESS_BOOK && currentLocation !== routes.WALLET_MULTI_NEW) {
       results = results.filter(w => w.value !== this.props.form.transactionForm.values.selectedWallet.address)
     } else if (!multiSig) {
-      results = results.filter(w => !account.addresses.includes(w.value))
+      results = results.filter(w => account.addresses.includes(w.value))
     }
 
     // If no results, this means the user copied or typed an address that he does not know yet.
@@ -135,7 +140,6 @@ class SearchableAddress extends Component {
           value={this.props.value || value}
           placeholder='address'
           showNoResults={false}
-          minCharacters={3}
           icon={<Icon name={this.props.icon} position='left' style={{ color: '#0e72f5' }} />}
         />
         {addressError ? (
