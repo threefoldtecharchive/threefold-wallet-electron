@@ -211,7 +211,7 @@ class WalletReceive extends Component {
         </div>
         <Divider className={styles.pageDivider} />
         <div style={{ margin: 'auto', paddingBottom: 30 }}>
-          {this.state.visible && <Message style={{ width: '90%', margin: 'auto', marginTop: 10, marginBottom: 10 }} onDismiss={this.handleDismiss}>
+          {this.state.visible && this.state.isGoldChain && <Message style={{ width: '90%', margin: 'auto', marginTop: 10, marginBottom: 10 }} onDismiss={this.handleDismiss}>
             <Message.Header>You can (de)authorize / request GFT for an address using our actions or you can go to following link to do it manualy.</Message.Header>
             <p style={{ fontSize: 13, cursor: 'pointer', color: 'blue', textDecoration: 'underline' }} onClick={() => shell.openExternal(`https://faucet.testnet.nbh-digital.com/`)}>https://faucet.testnet.nbh-digital.com/</p>
           </Message>}
