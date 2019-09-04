@@ -5,14 +5,14 @@ const closeOnEscape = true
 
 class ConfirmationModal extends Component {
   render () {
-    const { open, closeModal, confirmTransaction, transactionType, selectedWallet, amount, owners, destination, signatureCount, timestamp, selectedWalletRecipient, selectedRecipientAddress, minimumMinerFee, message } = this.props
+    const { open, closeModal, confirmTransaction, transactionType, selectedWallet, amount, owners, destination, signatureCount, timestamp, selectedWalletRecipient, selectedRecipientAddress, minimumMinerFee, message, structured } = this.props
     return (
       <Modal open={open} closeOnEscape={closeOnEscape} onClose={closeModal}>
         <Modal.Header>Confirm transaction</Modal.Header>
         <Modal.Content image>
           <Modal.Description>
             <Header>Do you wish to confirm this transaction?</Header>
-            {renderModalBody(transactionType, selectedWallet, amount, owners, destination, signatureCount, timestamp, selectedWalletRecipient, selectedRecipientAddress, minimumMinerFee, message)}
+            {renderModalBody(transactionType, selectedWallet, amount, owners, destination, signatureCount, timestamp, selectedWalletRecipient, selectedRecipientAddress, minimumMinerFee, message, structured)}
           </Modal.Description>
         </Modal.Content>
         <Modal.Actions>
@@ -34,7 +34,7 @@ class ConfirmationModal extends Component {
 
 export default ConfirmationModal
 
-function renderModalBody (transactionType, selectedWallet, amount, owners, destination, signatureCount, timestamp, selectedWalletRecipient, selectedRecipientAddress, minimumMinerFee, message) {
+function renderModalBody (transactionType, selectedWallet, amount, owners, destination, signatureCount, timestamp, selectedWalletRecipient, selectedRecipientAddress, minimumMinerFee, message, structured) {
   if (!selectedWallet) {
     return null
   }
@@ -128,6 +128,17 @@ function renderModalBody (transactionType, selectedWallet, amount, owners, desti
             <List.Header>Message: </List.Header>
             <List.Description>
               {message}
+            </List.Description>
+          </List.Content>
+        </List.Item>
+      ) : null}
+      {structured ? (
+        <List.Item>
+          <Icon name='right triangle' />
+          <List.Content>
+            <List.Header>Message: </List.Header>
+            <List.Description>
+              {'+++' + structured.join('/') + '+++'}
             </List.Description>
           </List.Content>
         </List.Item>
