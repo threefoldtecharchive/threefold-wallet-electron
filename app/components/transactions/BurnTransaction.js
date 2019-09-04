@@ -230,7 +230,7 @@ class BurnTransaction extends Component {
   }
 
   buildBurnTransaction = () => {
-    const { selectedWallet, message, structured, amount } = this.state
+    const { selectedWallet, message, amount, partA, partB, partC } = this.state
     const { form } = this.props
 
     const { messageType } = form.transactionForm.values
@@ -238,7 +238,7 @@ class BurnTransaction extends Component {
     this.renderLoader(true)
 
     try {
-      selectedWallet.coins_burn(amount, { message: messageType === 'structured' ? structured : message }).then(result => {
+      selectedWallet.coins_burn(amount, { message: messageType === 'structured' ? [partA, partB, partC] : message }).then(result => {
         this.setState({ destinationError: false, amountError: false, loader: false })
         if (result.submitted) {
           toast('Transaction ' + result.transaction.id + ' submitted')
