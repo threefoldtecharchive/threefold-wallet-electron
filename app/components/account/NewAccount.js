@@ -177,7 +177,7 @@ class NewAccount extends Component {
   handleNetworkChange = (e, { value }) => this.setState({ network: value })
 
   handleChainTypeChange = (e, { value }) => {
-    if (value === 'goldchain') {
+    if (value === 'goldchain' || value === 'tfbchain' || value === 'fftchain') {
       this.setState({ network: 'testnet' })
     }
     this.setState({ chainType: value })
@@ -318,22 +318,36 @@ class NewAccount extends Component {
           <Form error style={{ width: '50%', margin: 'auto', marginTop: 5, marginBottom: 50, fontSize: 18 }} onKeyDown={this.onKeyDown}>
             <Form.Field>
               <label style={{ float: 'left', color: 'white', marginRight: 20 }}>What chain type do you want to choose? </label>
-              <Popup size='large' position='right center' content='Chain type is the blockchain type your account will connect to. Tfchain is the tfchain blockchain, goldchain is the goldchain blockchain' trigger={<Icon style={{ fontSize: 12 }} name='question circle' />} />
+              <Popup size='large' position='right center' content='Chain type is the blockchain type your account will connect to' trigger={<Icon style={{ fontSize: 12 }} name='question circle' />} />
             </Form.Field>
             <Form.Field style={{ marginBottom: 20 }}>
               <div>
                 <Radio style={{ marginRight: 30, color: 'white' }}
-                  label={<label style={{ color: 'white' }}>tfchain</label>}
+                  label={<label style={{ color: 'white' }}>TFT Chain</label>}
                   name='chainRadioGroup'
                   value='tfchain'
                   checked={this.state.chainType === 'tfchain'}
                   onChange={this.handleChainTypeChange}
                 />
                 <Radio style={{ marginRight: 30, color: 'white' }}
-                  label={<label style={{ color: 'white' }}>goldchain</label>}
+                  label={<label style={{ color: 'white' }}>Gold Chain</label>}
                   name='chainRadioGroup'
                   value='goldchain'
                   checked={this.state.chainType === 'goldchain'}
+                  onChange={this.handleChainTypeChange}
+                />
+                <Radio style={{ marginRight: 30, color: 'white' }}
+                  label={<label style={{ color: 'white' }}>TFBonus Chain</label>}
+                  name='chainRadioGroup'
+                  value='tfbchain'
+                  checked={this.state.chainType === 'tfbchain'}
+                  onChange={this.handleChainTypeChange}
+                />
+                <Radio style={{ marginRight: 30, color: 'white' }}
+                  label={<label style={{ color: 'white' }}>FreeFlow Chain</label>}
+                  name='chainRadioGroup'
+                  value='fftchain'
+                  checked={this.state.chainType === 'fftchain'}
                   onChange={this.handleChainTypeChange}
                 />
               </div>
@@ -344,7 +358,7 @@ class NewAccount extends Component {
             </Form.Field>
             <Form.Field style={{ marginBottom: 20 }}>
               <div>
-                {this.state.chainType === 'goldchain' ? (
+                {(this.state.chainType === 'goldchain' || this.state.chainType === 'tfbchain' || this.state.chainType === 'fftchain') ? (
                   null
                 ) : (
                   <Radio style={{ marginRight: 30, color: 'white' }}
@@ -359,7 +373,7 @@ class NewAccount extends Component {
                   label={<label style={{ color: 'white' }}>testnet</label>}
                   name='radioGroup'
                   value='testnet'
-                  checked={this.state.network === 'testnet' || this.state.chainType === 'goldchain'}
+                  checked={this.state.network === 'testnet' || this.state.chainType === 'goldchain' || this.state.chainType === 'tfbchain' || this.state.chainType === 'fftchain'}
                   onChange={this.handleNetworkChange}
                 />
               </div>
