@@ -2763,8 +2763,8 @@ class FormattedStructuredData(FormattedData):
         return enc.data
     
     def _binary_data_setter(self, data):
-        if len(data) != 8:
-            raise ValueError("invalid binary data set for FormattedSenderMessageData: {}".format(data))
+        if len(data) != 7:
+            raise ValueError("invalid binary data set for FormattedStructuredData: {}".format(data))
         # decode
         self._parts = [0, 0, 0]
         self._parts[0] = jsstr.zfill(jsstr.from_int(jsbin.to_int16(jsarr.slice_array(data, 0, 2))), 3)
