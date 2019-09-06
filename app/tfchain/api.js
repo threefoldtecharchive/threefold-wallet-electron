@@ -7093,8 +7093,8 @@ export var FormattedStructuredData =  __class__ ('FormattedStructuredData', [For
 		}
 		else {
 		}
-		if (len (data) != 8) {
-			var __except0__ = ValueError ('invalid binary data set for FormattedSenderMessageData: {}'.format (data));
+		if (len (data) != 7) {
+			var __except0__ = ValueError ('invalid binary data set for FormattedStructuredData: {}'.format (data));
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
