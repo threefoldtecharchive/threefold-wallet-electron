@@ -5,7 +5,6 @@ import { Form, Button, Icon, Divider, Message, Popup } from 'semantic-ui-react'
 import routes from '../../constants/routes'
 import styles from '../home/Home.css'
 import { saveAccount, updateAccount } from '../../actions'
-import Footer from '../footer'
 import { toast } from 'react-toastify'
 
 const mapStateToProps = state => ({
@@ -207,7 +206,6 @@ class WalletSettings extends Component {
             <Button className={styles.acceptButton} size='big' type='submit' onClick={this.createWallet} style={{ marginTop: 10, margin: 'auto', background: '#015DE1', color: 'white', width: 200 }}>Create wallet</Button>
           </div>
         </Form>
-        <Footer />
       </div>
     )
   }

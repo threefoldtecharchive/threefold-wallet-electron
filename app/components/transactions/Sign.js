@@ -3,7 +3,6 @@ import { connect } from 'react-redux'
 import React, { Component } from 'react'
 import { Form, Button, Icon, Divider, TextArea, Label } from 'semantic-ui-react'
 import styles from '../home/Home.css'
-import Footer from '../footer'
 import routes from '../../constants/routes'
 import { updateAccount, clearTransactionJson } from '../../actions'
 import { CopyToClipboard } from 'react-copy-to-clipboard'
@@ -67,7 +66,6 @@ class Sign extends Component {
           </Form>
           <Button className={styles.cancelButton} onClick={() => this.goBackToAccount()} style={{ marginTop: 20, float: 'left', background: '#2B3C72', color: 'white', marginRight: 15, position: 'relative', left: '80%' }} size='big'>Go to account</Button>
         </div>
-        <Footer />
       </div>
     )
   }

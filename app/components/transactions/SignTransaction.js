@@ -3,7 +3,6 @@ import { connect } from 'react-redux'
 import React, { Component } from 'react'
 import { Form, Button, Dropdown, Icon, Divider, TextArea, Label, Message, Dimmer, Loader } from 'semantic-ui-react'
 import styles from '../home/Home.css'
-import Footer from '../footer'
 import routes from '../../constants/routes'
 import { updateAccount, clearTransactionJson } from '../../actions'
 import { CopyToClipboard } from 'react-copy-to-clipboard'
@@ -193,7 +192,6 @@ class SignTransaction extends Component {
             <Button className={styles.acceptButton} onClick={() => this.signAndSend()} style={{ marginTop: 20, background: '#2B3C72', color: 'white', float: 'right' }} size='big'>Sign and send</Button>
           </Form>
         </div>
-        <Footer />
       </div>
     )
   }

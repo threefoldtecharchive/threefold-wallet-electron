@@ -5,7 +5,6 @@ import { Message, Form, Button, Icon, Divider } from 'semantic-ui-react'
 import styles from '../home/Home.css'
 import { saveAccount, updateAccount } from '../../actions'
 import DeleteModal from '../wallet/DeleteWalletModal'
-import Footer from '../footer'
 import { toast } from 'react-toastify'
 
 const mapStateToProps = state => ({
@@ -170,7 +169,6 @@ class WalletSettings extends Component {
             </div>
           </Form>
         </div>
-        <Footer />
       </div>
     )
   }

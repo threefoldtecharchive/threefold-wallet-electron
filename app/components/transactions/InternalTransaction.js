@@ -274,6 +274,8 @@ class InternalTransaction extends Component {
   buildInternalTransation = () => {
     const { selectedWallet, message, selectedRecipientAddress, selectedWalletRecipient, amount, datelock, timelock } = this.state
 
+    const selectedWalletX = this.props.account.selected_wallet || selectedWallet
+
     let timestamp
     if (datelock !== '') {
       const concatDate = datelock + ' ' + timelock
@@ -283,7 +285,7 @@ class InternalTransaction extends Component {
     }
 
     this.renderLoader(true)
-    const builder = selectedWallet.transaction_new()
+    const builder = selectedWalletX.transaction_new()
     const recipient = selectedWalletRecipient.recipient_get({ address: selectedRecipientAddress })
     if (timestamp) {
       try {
@@ -380,8 +382,11 @@ class InternalTransaction extends Component {
         </Dimmer>
       )
     }
-    const { openConfirmationModal, transactionType, destination, selectedWalletRecipient, selectedRecipientAddress, message, enableSubmit } = this.state
-    const { amount, datetime, selectedWallet, messageType } = this.state
+    const { openConfirmationModal, transactionType, destination, selectedWalletRecipient, selectedRecipientAddress, message, messageType, enableSubmit } = this.state
+    const { amount, datetime, selectedWallet } = this.state
+
+    const selectedWalletX = this.props.account.selected_wallet || selectedWallet
+
     return (
       <div>
         {openConfirmationModal && <TransactionConfirmationModal
@@ -392,7 +397,7 @@ class InternalTransaction extends Component {
           selectedWalletRecipient={selectedWalletRecipient}
           selectedRecipientAddress={selectedRecipientAddress}
           destination={destination}
-          selectedWallet={selectedWallet}
+          selectedWallet={selectedWalletX}
           amount={amount}
           timestamp={datetime}
           minimumMinerFee={this.props.account.minimum_miner_fee}

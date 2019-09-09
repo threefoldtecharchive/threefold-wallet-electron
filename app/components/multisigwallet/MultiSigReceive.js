@@ -3,7 +3,6 @@ import { connect } from 'react-redux'
 import React, { Component } from 'react'
 import { Icon, Divider, Label, Segment } from 'semantic-ui-react'
 import styles from '../home/Home.css'
-import Footer from '../footer'
 import { CopyToClipboard } from 'react-copy-to-clipboard'
 import { toast } from 'react-toastify'
 
@@ -55,7 +54,6 @@ class WalletSettings extends Component {
             <Label onClick={() => toast('Copied to clipboard')} style={{ display: 'block', margin: 'auto', width: 200, cursor: 'pointer' }}><Icon name='clipboard' /> copy address to clipboard</Label>
           </CopyToClipboard>
         </div>
-        <Footer />
       </div>
     )
   }

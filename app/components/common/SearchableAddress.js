@@ -62,6 +62,7 @@ class SearchableAddress extends Component {
   }
 
   handleSearchChange = (e, { value }) => {
+    debugger
     this.filterSearchInput(value)
   }
 

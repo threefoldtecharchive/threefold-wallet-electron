@@ -5,7 +5,6 @@ import { Form, Button, Icon, Divider, Message } from 'semantic-ui-react'
 import styles from '../home/Home.css'
 import { saveAccount, updateAccount } from '../../actions'
 import DeleteModal from './DeleteWalletModal'
-import Footer from '../footer'
 import { toast } from 'react-toastify'
 
 const mapStateToProps = state => ({

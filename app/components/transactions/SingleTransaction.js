@@ -170,10 +170,12 @@ class SingleTransaction extends Component {
   }
 
   buildSingleTransaction = () => {
-    const { destination, selectedWallet, amount, datetime, message } = this.state
+    const { destination, selectedWallet, amount, datetime, description } = this.state
+
+    const selectedWalletX = this.props.account.selected_wallet || selectedWallet
 
     this.renderLoader(true)
-    const builder = selectedWallet.transaction_new()
+    const builder = selectedWalletX.transaction_new()
     if (datetime) {
       const timestamp = moment(datetime).unix()
       try {
@@ -192,22 +194,30 @@ class SingleTransaction extends Component {
         return this.setState({ loader: false, errorMessage: errorMessage })
       }
     }
-    builder.send({ message: message }).then(result => {
-      this.setState({ destinationError: false, amountError: false, loader: false })
-      if (result.submitted) {
-        toast('Transaction ' + result.transaction.id + ' submitted')
-        this.props.updateAccount(this.props.account)
-        return this.props.history.push(routes.ACCOUNT)
-      } else {
-        this.props.setTransactionJson(JSON.stringify(result.transaction.json()))
-        return this.props.history.push(routes.SIGN)
-      }
-    }).catch(error => {
+
+    try {
+      builder.send({ message: description }).then(result => {
+        this.setState({ destinationError: false, amountError: false, loader: false })
+        if (result.submitted) {
+          toast('Transaction ' + result.transaction.id + ' submitted')
+          this.props.updateAccount(this.props.account)
+          return this.props.history.push(routes.ACCOUNT)
+        } else {
+          this.props.setTransactionJson(JSON.stringify(result.transaction.json()))
+          return this.props.history.push(routes.SIGN)
+        }
+      }).catch(error => {
+        toast.error('sending transaction failed')
+        console.warn('failed to send single-signature transaction', JSON.stringify(builder.transaction.json()))
+        const errorMessage = typeof error.__str__ === 'function' ? error.__str__() : error.toString()
+        this.setState({ loader: false, errorMessage: errorMessage, openConfirmationModal: false })
+      })
+    } catch (error) {
       toast.error('sending transaction failed')
       console.warn('failed to send single-signature transaction', JSON.stringify(builder.transaction.json()))
       const errorMessage = typeof error.__str__ === 'function' ? error.__str__() : error.toString()
       this.setState({ loader: false, errorMessage: errorMessage, openConfirmationModal: false })
-    })
+    }
   }
 
   renderLoader = (active) => {
@@ -252,8 +262,11 @@ class SingleTransaction extends Component {
         </Dimmer>
       )
     }
-    const { openConfirmationModal, transactionType, destination, selectedWalletRecipient, selectedRecipientAddress, message, contactName, openSaveModal, enableSubmit } = this.state
-    const { amount, datetime, selectedWallet, messageType } = this.state
+    const { openConfirmationModal, transactionType, destination, selectedWalletRecipient, selectedRecipientAddress, message, messageType, contactName, openSaveModal, enableSubmit } = this.state
+    const { amount, datetime, selectedWallet } = this.state
+
+    const selectedWalletX = this.props.account.selected_wallet || selectedWallet
+
     return (
       <div>
         {openConfirmationModal && <TransactionConfirmationModal
@@ -264,7 +277,7 @@ class SingleTransaction extends Component {
           selectedWalletRecipient={selectedWalletRecipient}
           selectedRecipientAddress={selectedRecipientAddress}
           destination={destination}
-          selectedWallet={selectedWallet}
+          selectedWallet={selectedWalletX}
           amount={amount}
           timestamp={datetime}
           minimumMinerFee={this.props.account.minimum_miner_fee}

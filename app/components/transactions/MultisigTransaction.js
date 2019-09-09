@@ -320,6 +320,9 @@ class MultisigTransaction extends Component {
 
   buildMultiSignTransaction = () => {
     const { selectedWallet, signatureCount, ownerAddresses, amount, datelock, timelock, message } = this.state
+
+    const selectedWalletX = this.props.account.selected_wallet || selectedWallet
+
     let timestamp
     if (datelock !== '') {
       const concatDate = datelock + ' ' + timelock
@@ -329,7 +332,7 @@ class MultisigTransaction extends Component {
     }
 
     this.renderLoader(true)
-    const builder = selectedWallet.transaction_new()
+    const builder = selectedWalletX.transaction_new()
     if (timestamp) {
       try {
         builder.output_add([signatureCount, ownerAddresses], amount.toString(), { lock: timestamp })
@@ -422,6 +425,9 @@ class MultisigTransaction extends Component {
     }
     const { openConfirmationModal, transactionType, destination, selectedWalletRecipient, selectedRecipientAddress, ownerAddresses, signatureCount, message, contactName, enableSubmit, signatureCountError, openAddMultiSigModal } = this.state
     const { amount, datetime, selectedWallet, messageType } = this.state
+
+    const selectedWalletX = this.props.account.selected_wallet || selectedWallet
+
     return (
       <div>
         <TransactionConfirmationModal
@@ -432,7 +438,7 @@ class MultisigTransaction extends Component {
           selectedWalletRecipient={selectedWalletRecipient}
           selectedRecipientAddress={selectedRecipientAddress}
           destination={destination}
-          selectedWallet={selectedWallet}
+          selectedWallet={selectedWalletX}
           amount={amount}
           timestamp={datetime}
           owners={ownerAddresses}

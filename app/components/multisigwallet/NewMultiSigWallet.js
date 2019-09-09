@@ -5,7 +5,6 @@ import { Form, Button, Icon, Divider, Message, Popup, Input } from 'semantic-ui-
 import routes from '../../constants/routes'
 import styles from '../home/Home.css'
 import { saveAccount, updateAccount } from '../../actions'
-import Footer from '../footer'
 import { toast } from 'react-toastify'
 import * as tfchain from '../../tfchain/api'
 import { filter } from 'lodash'
@@ -236,7 +235,6 @@ class NewMultiSigWallet extends Component {
             </div>
           </Form>
         </div>
-        <Footer />
       </div>
     )
   }

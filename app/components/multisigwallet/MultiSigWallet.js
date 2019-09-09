@@ -4,7 +4,6 @@ import React, { Component } from 'react'
 import { Segment, Icon, Divider, List, Dimmer, Loader, Button } from 'semantic-ui-react'
 import routes from '../../constants/routes'
 import styles from '../home/Home.css'
-import Footer from '../footer'
 import BalanceGrid from '../wallet/BalanceGrid'
 import TransactionsList from '../wallet/TransactionList'
 import { truncate, find } from 'lodash'
@@ -281,7 +280,6 @@ class Wallet extends Component {
               </div>
             </div>
           )}
-        <Footer />
       </div>
     )
   }
