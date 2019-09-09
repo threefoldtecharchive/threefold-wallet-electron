@@ -5,8 +5,6 @@ import { Form, Input, Message } from 'semantic-ui-react'
 class TransactionStructuredField extends Component {
   onInputChange = (e, v) => {
     const { maxLength, input } = this.props
-    console.log(maxLength)
-    console.log(v.value.length)
     if (v.value.match(/^([0-9]+?)?$/) && v.value.length <= maxLength) {
       this.props.input.onChange(e)
     }
