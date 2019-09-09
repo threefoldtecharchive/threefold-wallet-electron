@@ -140,6 +140,7 @@ class SearchableAddress extends Component {
           value={this.props.value || value}
           placeholder='address'
           showNoResults={false}
+          minCharacters={1}
           icon={<Icon name={this.props.icon} position='left' style={{ color: '#0e72f5' }} />}
         />
         {addressError ? (
