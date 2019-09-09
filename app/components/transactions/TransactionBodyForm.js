@@ -24,18 +24,23 @@ const mapStateToProps = state => {
 
 const validate = (values, props) => {
   const errors = {}
-  const { amount, selectedWallet, datetime, message, messageType, partA, partB, partC } = values
+  const { amount, datetime, message, messageType, partA, partB, partC, selectedWallet } = values
   const { account } = props
 
-  if (!selectedWallet) {
+  const selectedWalletX = account.selected_wallet || selectedWallet
+
+  if (!selectedWalletX) {
     errors.selectedWallet = 'Required'
   }
+
   if (!amount) {
     errors.amount = 'Required'
-  } else if (!selectedWallet.balance.spend_amount_is_valid(amount)) {
-    errors.amount = 'Not a valid amount'
-  } else if (selectedWallet && !selectedWallet.balance.spend_amount_is_valid(amount)) {
-    errors.amount = 'Not enough balance'
+  } else if (selectedWalletX && !selectedWalletX.balance.spend_amount_is_valid(amount)) {
+    if (selectedWalletX) {
+      errors.amount = 'Not enough balance'
+    } else {
+      errors.amount = 'Not a valid amount'
+    }
   }
 
   if (messageType === 'structured') {
@@ -244,13 +249,15 @@ class TransactionBodyForm extends Component {
     const { handleSubmit, invalid, enableSubmit, transactionType } = this.props
     const walletOptions = this.mapWalletsToDropdownOption()
 
+    const selectedWalletX = this.props.account.selected_wallet || selectedWallet
+
     return (
-      <Form style={{ width: '90%', margin: 'auto', marginTop: 50 }} onSubmit={handleSubmit} initialvalues={{ selectedWallet, messageType }}>
+      <Form style={{ width: '90%', margin: 'auto', marginTop: 50 }} onSubmit={handleSubmit} initialvalues={{ selectedWalletX, messageType }}>
         <Field
           name='amount'
           type='text'
           props={{
-            selectedWallet,
+            selectedWallet: selectedWalletX,
             setMaxAmount: this.setMaxAmount
           }}
           component={TransactionAmountField}
