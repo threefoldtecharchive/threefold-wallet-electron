@@ -32,8 +32,10 @@ class TransactionAmountField extends Component {
 
     const minerFee = this.props.account.minimum_miner_fee
     let totalAmount = minerFee
+
     if (value) {
       totalAmount = totalAmount.plus(value)
+      this.props.input.onChange(value)
     }
 
     return (

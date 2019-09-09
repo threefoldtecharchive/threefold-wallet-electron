@@ -132,7 +132,7 @@ function renderModalBody (transactionType, selectedWallet, amount, owners, desti
           </List.Content>
         </List.Item>
       ) : null}
-      {structured ? (
+      {structured[0] && structured[1] && structured[2] ? (
         <List.Item>
           <Icon name='right triangle' />
           <List.Content>

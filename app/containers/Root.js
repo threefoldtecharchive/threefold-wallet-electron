@@ -3,7 +3,7 @@ import { connect, Provider } from 'react-redux'
 import React, { Component } from 'react'
 import { ConnectedRouter } from 'connected-react-router'
 import Routes from '../Routes'
-import { loadAccounts, updateAccount, getTransactionsNotifications, setError } from '../actions'
+import { loadAccounts, updateAccount, setError } from '../actions'
 import Moment from 'moment'
 import momentLocalizer from 'react-widgets-moment'
 
@@ -17,9 +17,6 @@ const mapDispatchToProps = (dispatch) => ({
   },
   updateAccount: (account) => {
     dispatch(updateAccount(account))
-  },
-  getTransactionsNotifications: (account) => {
-    dispatch(getTransactionsNotifications(account))
   },
   setError: (error) => {
     dispatch(setError(error))
@@ -50,7 +47,6 @@ class Root extends Component {
       const { account } = this.props
       if (account && !(account instanceof Array)) {
         this.props.updateAccount(account)
-        // this.props.getTransactionsNotifications(account)
       }
     }, 60000)
   }
