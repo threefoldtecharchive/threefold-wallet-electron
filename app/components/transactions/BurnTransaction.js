@@ -233,7 +233,7 @@ class BurnTransaction extends Component {
     const { message, amount, partA, partB, partC } = this.state
     const { form, account } = this.props
 
-    const selectedWallet = account.selected_wallet
+    const selectedWallet = account.selected_wallet || this.state.selectedWallet
 
     const { messageType } = form.transactionForm.values
 
@@ -256,6 +256,10 @@ class BurnTransaction extends Component {
           this.props.setTransactionJson(JSON.stringify(result.transaction.json()))
           return this.props.history.push(routes.SIGN)
         }
+      }).catch((error) => {
+        toast('adding output failed')
+        const errorMessage = typeof error.__str__ === 'function' ? error.__str__() : error.toString()
+        return this.setState({ loader: false, errorMessage: errorMessage })
       })
     } catch (error) {
       toast('adding output failed')
