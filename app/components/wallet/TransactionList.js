@@ -226,7 +226,7 @@ function renderTransactionHeader (tx, explorerAddress, accountAddresses) {
 
   return (
     <div>
-      <List.Header style={{ color: 'white' + '!important', display: 'flex' }}>
+      <List.Header style={{ color: 'white' + '!important', display: 'flex', justifyContent: 'space-between' }}>
         <span style={listHeaderColor}>TXID {tx.identifier}: <Icon style={{ cursor: 'pointer', marginLeft: 5 }} name='external alternate' onClick={() => shell.openExternal(`${explorerAddress}/hash.html?hash=${tx.identifier}`)} /></span>
         {tx.confirmed
           ? (<p style={confirmedStyle}>

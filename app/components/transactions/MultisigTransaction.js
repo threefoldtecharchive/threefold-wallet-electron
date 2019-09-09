@@ -53,7 +53,8 @@ class MultisigTransaction extends Component {
       enableSubmit: false,
       enableSave: false,
       openAddMultiSigModal: false,
-      contactName: ''
+      contactName: '',
+      messageType: 'free'
     }
   }
 
@@ -318,7 +319,7 @@ class MultisigTransaction extends Component {
   }
 
   buildMultiSignTransaction = () => {
-    const { selectedWallet, signatureCount, ownerAddresses, amount, datelock, timelock, description } = this.state
+    const { selectedWallet, signatureCount, ownerAddresses, amount, datelock, timelock, message } = this.state
     let timestamp
     if (datelock !== '') {
       const concatDate = datelock + ' ' + timelock
@@ -346,7 +347,7 @@ class MultisigTransaction extends Component {
         return this.setState({ loader: false, errorMessage: errorMessage })
       }
     }
-    builder.send({ message: description }).then(result => {
+    builder.send({ message: message }).then(result => {
       this.setState({ ownerAddressErrors: [false, false], amountError: false, loader: false })
       if (result.submitted) {
         toast('Multisign Transaction ' + result.transaction.id + ' submitted')
@@ -419,8 +420,8 @@ class MultisigTransaction extends Component {
         </Dimmer>
       )
     }
-    const { openConfirmationModal, transactionType, destination, selectedWalletRecipient, selectedRecipientAddress, ownerAddresses, signatureCount, description, contactName, enableSubmit, signatureCountError, openAddMultiSigModal } = this.state
-    const { amount, datetime, selectedWallet } = this.state
+    const { openConfirmationModal, transactionType, destination, selectedWalletRecipient, selectedRecipientAddress, ownerAddresses, signatureCount, message, contactName, enableSubmit, signatureCountError, openAddMultiSigModal } = this.state
+    const { amount, datetime, selectedWallet, messageType } = this.state
     return (
       <div>
         <TransactionConfirmationModal
@@ -437,7 +438,7 @@ class MultisigTransaction extends Component {
           owners={ownerAddresses}
           signatureCount={signatureCount}
           minimumMinerFee={this.props.account.minimum_miner_fee}
-          description={description}
+          message={message}
         />
         <UpdateMultiSigContactModal
           contactName={contactName}
@@ -455,7 +456,7 @@ class MultisigTransaction extends Component {
         />
         {this.renderAddressBook()}
         {this.renderDestinationForm()}
-        <TransactionBodyForm handleSubmit={this.handleSubmit} enableSubmit={enableSubmit} mapDestinationDropdown={this.mapDestinationDropdown} />
+        <TransactionBodyForm messageType={messageType} handleSubmit={this.handleSubmit} enableSubmit={enableSubmit} mapDestinationDropdown={this.mapDestinationDropdown} />
       </div>
     )
   }

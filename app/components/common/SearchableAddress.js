@@ -90,7 +90,7 @@ class SearchableAddress extends Component {
       return res.obj
     })
 
-    if (currentLocation !== routes.ADDRESS_BOOK && currentLocation !== routes.WALLET_MULTI_NEW) {
+    if (currentLocation !== routes.ADDRESS_BOOK && this.props.form.transactionForm) {
       results = results.filter(w => w.value !== this.props.form.transactionForm.values.selectedWallet.address)
     } else if (!multiSig) {
       results = results.filter(w => account.addresses.includes(w.value))
@@ -140,6 +140,7 @@ class SearchableAddress extends Component {
           value={this.props.value || value}
           placeholder='address'
           showNoResults={false}
+          minCharacters={1}
           icon={<Icon name={this.props.icon} position='left' style={{ color: '#0e72f5' }} />}
         />
         {addressError ? (
