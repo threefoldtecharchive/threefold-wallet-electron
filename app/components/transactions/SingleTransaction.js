@@ -1,17 +1,17 @@
 // @flow
-import { connect } from 'react-redux'
+import moment from 'moment-timezone'
 import React, { Component } from 'react'
-import { Form, Loader, Dimmer, Checkbox, Message } from 'semantic-ui-react'
-import { toast } from 'react-toastify'
-import { updateAccount, setTransactionJson, saveAccount } from '../../actions'
-import * as tfchain from '../../tfchain/api'
-import routes from '../../constants/routes'
-import SearchableAddress from '../common/SearchableAddress'
+import { connect } from 'react-redux'
 import { withRouter } from 'react-router-dom'
+import { toast } from 'react-toastify'
+import { Checkbox, Dimmer, Form, Loader, Message } from 'semantic-ui-react'
+import { saveAccount, setTransactionJson, updateAccount } from '../../actions'
+import routes from '../../constants/routes'
+import * as tfchain from '../../tfchain/api'
+import UpdateContactModal from '../addressbook/UpdateContactModal'
+import SearchableAddress from '../common/SearchableAddress'
 import TransactionBodyForm from './TransactionBodyForm'
 import TransactionConfirmationModal from './TransactionConfirmationModal'
-import UpdateContactModal from '../addressbook/UpdateContactModal'
-import moment from 'moment-timezone'
 
 const TransactionTypes = {
   SINGLE: 'SINGLE',
@@ -266,8 +266,8 @@ class SingleTransaction extends Component {
       )
     }
     const { form, account } = this.props
-    const { values } = form.transactionForm
-    const { message, amount, selectedWallet, datetime } = values
+    const { values } = form.transactionForm || {}
+    const { message, amount, selectedWallet, datetime } = values || {}
     const { destination, openConfirmationModal, transactionType, selectedRecipientAddress, selectedWalletRecipient, contactName, openSaveModal, enableSubmit, messageType } = this.state
 
     const selectedWalletX = account.selected_wallet || selectedWallet
