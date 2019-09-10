@@ -121,8 +121,8 @@ class App extends Component {
               </div>
             </Scrollbars>
           </Grid.Column>
-          <Grid.Column width='12'>
-            <Scrollbars style={{ height: '90vh' }} renderThumbVertical={props => <div {...props} style={{ backgroundColor: 'grey' }} />}>
+          <Grid.Column width='12' style={{ paddingBottom: 0 }}>
+            <Scrollbars style={{ height: '94vh' }} renderThumbVertical={props => <div {...props} style={{ backgroundColor: 'grey' }} />}>
               {children}
             </Scrollbars>
           </Grid.Column>
