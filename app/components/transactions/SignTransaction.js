@@ -109,6 +109,7 @@ class SignTransaction extends Component {
       const { selectedWallet } = this.state
       const result = selectedWallet.transaction_sign(json)
       result.then(res => {
+        this.setState({ loader: false })
         const { signed, submitted } = res
         if (signed && submitted) {
           this.props.history.push(routes.ACCOUNT)
@@ -119,7 +120,6 @@ class SignTransaction extends Component {
         } else {
           toast.error('transaction could not be signed or submitted')
         }
-        return this.setState({ loader: false })
       }).catch(err => {
         console.log(err)
         this.setState({ loader: false })
