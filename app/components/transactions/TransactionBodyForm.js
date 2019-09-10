@@ -135,10 +135,14 @@ class TransactionBodyForm extends Component {
   }
 
   componentDidMount () {
+    const { selectedWallet, messageType } = this.state
     this.props.initialize({
-      selectedWallet: this.state.selectedWallet,
-      messageType: this.state.messageType
+      selectedWallet,
+      messageType
     })
+
+    // select the account the properties
+    this.props.account.select_wallet({ name: selectedWallet.wallet_name, address: selectedWallet.address })
   }
 
   setMaxAmount = () => {

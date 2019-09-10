@@ -24,7 +24,22 @@ class SearchableAddress extends Component {
     }
   }
 
+  componentDidUpdate (prevProps, prevState) {
+    if (!this.props.account.selected_wallet) return
+
+    // When another wallet is selected filter and our filtered source is smaller then
+    // our source in state, map it again to get results without the selected wallet
+    const source = this.state.source.filter(s => s.wallet_name !== this.props.account.selected_wallet.wallet_name)
+    if (prevState.source.length !== source.length) {
+      this.mapSource()
+    }
+  }
+
   componentWillMount () {
+    this.mapSource()
+  }
+
+  mapSource () {
     const sources = this.props.sources || {}
     let wallets = []
     let contacts = []
@@ -52,7 +67,13 @@ class SearchableAddress extends Component {
       }))
     }
 
-    const source = wallets.concat(contacts.filter(Boolean))
+    let source = wallets.concat(contacts.filter(Boolean))
+
+    if (this.props.account.selected_wallet) {
+      // Filter out the selected wallet from account properties
+      source = source.filter(s => s.wallet_name !== this.props.account.selected_wallet.wallet_name)
+    }
+
     this.setState({ source })
   }
 
@@ -91,7 +112,7 @@ class SearchableAddress extends Component {
     })
 
     if (currentLocation !== routes.ADDRESS_BOOK && this.props.form.transactionForm) {
-      results = results.filter(w => w.value !== this.props.form.transactionForm.values.selectedWallet.address)
+      // results = results.filter(w => w.value !== this.props.account.selected_wallet.address || this.props.form.transactionForm.values.selectedWallet.address)
     } else if (!multiSig) {
       results = results.filter(w => account.addresses.includes(w.value))
     }
