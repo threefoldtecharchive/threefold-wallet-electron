@@ -17,6 +17,15 @@ const TransactionTypes = {
   BURN: 'BURN'
 }
 
+const initialTransactionFormState = {
+  amount: 0,
+  messageType: 'free',
+  message: '',
+  partA: '',
+  partB: '',
+  partC: ''
+}
+
 const mapStateToProps = state => ({
   account: state.account.state,
   routerLocations: state.routerLocations,
@@ -42,7 +51,8 @@ class BurnTransaction extends Component {
       loader: false,
       openConfirmationModal: false,
       enableSubmit: true,
-      messageType: 'structured'
+      messageType: 'structured',
+      ...initialTransactionFormState
     }
   }
 
@@ -231,6 +241,7 @@ class BurnTransaction extends Component {
 
   buildBurnTransaction = () => {
     const { message, amount, partA, partB, partC } = this.state
+
     const { form, account } = this.props
 
     const selectedWallet = account.selected_wallet || this.state.selectedWallet
@@ -308,7 +319,13 @@ class BurnTransaction extends Component {
     }
   }
 
+  resetState = () => {
+    this.setState({ ...initialTransactionFormState })
+  }
+
   handleSubmit = () => {
+    this.resetState()
+
     const { form } = this.props
     const { syncErrors } = form.transactionForm
 
