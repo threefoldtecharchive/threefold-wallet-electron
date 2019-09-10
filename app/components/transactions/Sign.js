@@ -47,7 +47,7 @@ class Sign extends Component {
           <span onClick={() => this.goBackToWallet()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
         </div>
         <div style={{ paddingBottom: 30 }}>
-          <Form error style={{ width: '50%', margin: 'auto', marginTop: 0 }}>
+          <Form error style={{ width: '90%', margin: 'auto', marginTop: 0 }}>
             <Form.Field style={{ marginTop: 30 }}>
               <p style={{ fontSize: 14 }}>Before completing this transaction, one or more signatures are required. Copy this transaction JSON and send it to the persons that must sign this.</p>
             </Form.Field>
@@ -63,8 +63,8 @@ class Sign extends Component {
             <CopyToClipboard text={json} onCopy={() => console.log('copied')}>
               <Label onClick={() => toast('Transaction json copied to clipboard')} style={{ display: 'block', margin: 'auto', width: 200, cursor: 'pointer' }}><Icon name='clipboard' /> copy json to clipboard</Label>
             </CopyToClipboard>
+            <Button className={styles.cancelButton} onClick={() => this.goBackToAccount()} style={{ marginTop: 20, float: 'right', background: '#2B3C72', color: 'white' }} size='big'>Go to account</Button>
           </Form>
-          <Button className={styles.cancelButton} onClick={() => this.goBackToAccount()} style={{ marginTop: 20, float: 'left', background: '#2B3C72', color: 'white', marginRight: 15, position: 'relative', left: '80%' }} size='big'>Go to account</Button>
         </div>
       </div>
     )
