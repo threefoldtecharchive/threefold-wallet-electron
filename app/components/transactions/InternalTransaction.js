@@ -272,9 +272,12 @@ class InternalTransaction extends Component {
   }
 
   buildInternalTransation = () => {
-    const { selectedWallet, message, selectedRecipientAddress, selectedWalletRecipient, amount, datelock, timelock } = this.state
+    const { form, account } = this.props
+    const { values } = form.transactionForm
+    const { message, amount, datelock, timelock, selectedWallet } = values
+    const { selectedRecipientAddress, selectedWalletRecipient } = this.state
 
-    const selectedWalletX = this.props.account.selected_wallet || selectedWallet
+    const selectedWalletX = account.selected_wallet || selectedWallet
 
     let timestamp
     if (datelock !== '') {
@@ -369,8 +372,7 @@ class InternalTransaction extends Component {
     if (syncErrors || !this.checkInternalTransactionFormValues()) {
       return
     }
-    const { values } = this.props.form.transactionForm
-    this.setState({ ...values })
+
     return this.openConfirmationModal()
   }
 
@@ -382,10 +384,12 @@ class InternalTransaction extends Component {
         </Dimmer>
       )
     }
-    const { openConfirmationModal, transactionType, destination, selectedWalletRecipient, selectedRecipientAddress, message, messageType, enableSubmit } = this.state
-    const { amount, datetime, selectedWallet } = this.state
+    const { form, account } = this.props
+    const { values } = form.transactionForm
+    const { message, amount, selectedWallet, datetime, destination } = values
+    const { selectedRecipientAddress, selectedWalletRecipient, openConfirmationModal, transactionType, messageType, enableSubmit } = this.state
 
-    const selectedWalletX = this.props.account.selected_wallet || selectedWallet
+    const selectedWalletX = account.selected_wallet || selectedWallet
 
     return (
       <div>

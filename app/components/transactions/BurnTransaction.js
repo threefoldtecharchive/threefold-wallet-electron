@@ -17,15 +17,6 @@ const TransactionTypes = {
   BURN: 'BURN'
 }
 
-const initialTransactionFormState = {
-  amount: 0,
-  messageType: 'free',
-  message: '',
-  partA: '',
-  partB: '',
-  partC: ''
-}
-
 const mapStateToProps = state => ({
   account: state.account.state,
   routerLocations: state.routerLocations,
@@ -51,8 +42,7 @@ class BurnTransaction extends Component {
       loader: false,
       openConfirmationModal: false,
       enableSubmit: true,
-      messageType: 'structured',
-      ...initialTransactionFormState
+      messageType: 'structured'
     }
   }
 
@@ -240,13 +230,11 @@ class BurnTransaction extends Component {
   }
 
   buildBurnTransaction = () => {
-    const { message, amount, partA, partB, partC } = this.state
-
     const { form, account } = this.props
+    const { values } = form.transactionForm
+    const { message, amount, partA, partB, partC, messageType } = values
 
     const selectedWallet = account.selected_wallet || this.state.selectedWallet
-
-    const { messageType } = form.transactionForm.values
 
     let isStructuredMessageValid = false
     if (messageType === 'structured') {
@@ -319,13 +307,7 @@ class BurnTransaction extends Component {
     }
   }
 
-  resetState = () => {
-    this.setState({ ...initialTransactionFormState })
-  }
-
   handleSubmit = () => {
-    this.resetState()
-
     const { form } = this.props
     const { syncErrors } = form.transactionForm
 
@@ -333,8 +315,6 @@ class BurnTransaction extends Component {
       return
     }
 
-    const { values } = this.props.form.transactionForm
-    this.setState({ ...values })
     return this.openConfirmationModal()
   }
 
@@ -346,8 +326,11 @@ class BurnTransaction extends Component {
         </Dimmer>
       )
     }
-    const { openConfirmationModal, transactionType, message, enableSubmit } = this.state
-    const { amount, datetime, partA, partB, partC, messageType } = this.state
+    const { openConfirmationModal, transactionType, enableSubmit } = this.state
+
+    const { form } = this.props
+    const { values } = form.transactionForm
+    const { message, amount, partA, partB, partC, messageType } = values
 
     // Get selectedWallet from account (can be not specified) or default state selectedWallet
     const selectedWallet = this.props.account.selected_wallet || this.state.selectedWallet
@@ -361,7 +344,6 @@ class BurnTransaction extends Component {
           transactionType={transactionType}
           selectedWallet={selectedWallet}
           amount={amount}
-          timestamp={datetime}
           structured={[partA, partB, partC]}
           minimumMinerFee={this.props.account.minimum_miner_fee}
           message={message}

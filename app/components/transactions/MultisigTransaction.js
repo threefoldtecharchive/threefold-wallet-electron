@@ -319,9 +319,14 @@ class MultisigTransaction extends Component {
   }
 
   buildMultiSignTransaction = () => {
-    const { selectedWallet, signatureCount, ownerAddresses, amount, datelock, timelock, message } = this.state
+    const { form, account } = this.props
+    const { values } = form.transactionForm
+    const { message, amount, datelock, timelock, selectedWallet } = values
+    const { signatureCount, ownerAddresses } = this.state
 
-    const selectedWalletX = this.props.account.selected_wallet || selectedWallet
+    // const { selectedWallet, signatureCount, ownerAddresses, amount, datelock, timelock, message } = this.state
+
+    const selectedWalletX = account.selected_wallet || selectedWallet
 
     let timestamp
     if (datelock !== '') {
@@ -408,8 +413,7 @@ class MultisigTransaction extends Component {
     if (syncErrors || !this.checkMultisigTransactionFormValues()) {
       return
     }
-    const { values } = this.props.form.transactionForm
-    this.setState({ ...values })
+
     return this.openConfirmationModal()
   }
 
@@ -423,10 +427,13 @@ class MultisigTransaction extends Component {
         </Dimmer>
       )
     }
-    const { openConfirmationModal, transactionType, destination, selectedWalletRecipient, selectedRecipientAddress, ownerAddresses, signatureCount, message, contactName, enableSubmit, signatureCountError, openAddMultiSigModal } = this.state
-    const { amount, datetime, selectedWallet, messageType } = this.state
+    const { messageType, openConfirmationModal, transactionType, destination, selectedWalletRecipient, selectedRecipientAddress, ownerAddresses, signatureCount, contactName, enableSubmit, signatureCountError, openAddMultiSigModal } = this.state
 
-    const selectedWalletX = this.props.account.selected_wallet || selectedWallet
+    const { form, account } = this.props
+    const { values } = form.transactionForm
+    const { message, amount, datetime, selectedWallet } = values
+
+    const selectedWalletX = account.selected_wallet || selectedWallet
 
     return (
       <div>

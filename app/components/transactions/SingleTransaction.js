@@ -170,9 +170,12 @@ class SingleTransaction extends Component {
   }
 
   buildSingleTransaction = () => {
-    const { destination, selectedWallet, amount, datetime, description } = this.state
+    const { form, account } = this.props
+    const { values } = form.transactionForm
+    const { message, amount, selectedWallet, datetime } = values
+    const { destination } = this.state
 
-    const selectedWalletX = this.props.account.selected_wallet || selectedWallet
+    const selectedWalletX = account.selected_wallet || selectedWallet
 
     this.renderLoader(true)
     const builder = selectedWalletX.transaction_new()
@@ -196,7 +199,7 @@ class SingleTransaction extends Component {
     }
 
     try {
-      builder.send({ message: description }).then(result => {
+      builder.send({ message }).then(result => {
         this.setState({ destinationError: false, amountError: false, loader: false })
         if (result.submitted) {
           toast('Transaction ' + result.transaction.id + ' submitted')
@@ -262,10 +265,12 @@ class SingleTransaction extends Component {
         </Dimmer>
       )
     }
-    const { openConfirmationModal, transactionType, destination, selectedWalletRecipient, selectedRecipientAddress, message, messageType, contactName, openSaveModal, enableSubmit } = this.state
-    const { amount, datetime, selectedWallet } = this.state
+    const { form, account } = this.props
+    const { values } = form.transactionForm
+    const { message, amount, selectedWallet, datetime } = values
+    const { destination, openConfirmationModal, transactionType, selectedRecipientAddress, selectedWalletRecipient, contactName, openSaveModal, enableSubmit, messageType } = this.state
 
-    const selectedWalletX = this.props.account.selected_wallet || selectedWallet
+    const selectedWalletX = account.selected_wallet || selectedWallet
 
     return (
       <div>
@@ -294,7 +299,12 @@ class SingleTransaction extends Component {
           updateContact={this.addContact}
         />
         {this.renderDestinationForm()}
-        <TransactionBodyForm messageType={messageType} handleSubmit={this.handleSubmit} enableSubmit={enableSubmit} mapDestinationDropdown={this.mapDestinationDropdown} />
+        <TransactionBodyForm
+          messageType={messageType}
+          handleSubmit={this.handleSubmit}
+          enableSubmit={enableSubmit}
+          mapDestinationDropdown={this.mapDestinationDropdown}
+        />
       </div>
     )
   }
