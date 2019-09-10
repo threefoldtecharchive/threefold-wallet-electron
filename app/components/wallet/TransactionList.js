@@ -127,14 +127,14 @@ function renderTransactionBody (tx, explorerAddress, chainTimestamp, account, ad
               )
             })}
           </List.Description>
-          <List.Description style={{ color: 'white', display: 'flex', marginTop: 3 }}>
+          {out.recipient ? <List.Description style={{ color: 'white', display: 'flex', marginTop: 3 }}>
             <div key={tx.identifier + '_out_' + out.recipient} style={{ display: 'flex', marginTop: 5 }}>
               To:
               <p style={{ fontSize: 14, marginBottom: 0, fontFamily: 'Lucida Typewriter', position: 'relative', left: 37 }}>
                 {_addressDisplayElement(out.recipient, account, explorerAddress, addContact)}
               </p>
             </div>
-          </List.Description>
+          </List.Description> : null}
         </div>
       )
     })

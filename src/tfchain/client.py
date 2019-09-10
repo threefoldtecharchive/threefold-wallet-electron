@@ -9,6 +9,7 @@ import tfchain.polyfill.log as jslog
 import tfchain.errors as tferrors
 import tfchain.explorer as tfexplorer
 from tfchain.balance import WalletBalance, SingleSigWalletBalance, MultiSigWalletBalance
+import tfchain.chain as tfchaintype
 
 from tfchain.types import transactions, ConditionTypes
 from tfchain.types.transactions.Base import TransactionBaseClass
@@ -25,10 +26,13 @@ class TFChainClient:
     """
     Tfchain client object
     """
-    def __init__(self, explorer_client):
+    def __init__(self, explorer_client, network_type):
         if not isinstance(explorer_client, tfexplorer.Client):
             raise TypeError("explorer_client has to be a tfexplorer.Client, cannot be {}".format(type(explorer_client)))
         self._explorer_client = explorer_client
+        if not isinstance(network_type, tfchaintype.NetworkType):
+            raise TypeError("network_type has to be a tfchaintype.NetworkType, cannot be {}".format(type(network_type)))
+        self._network_type = network_type
 
         # create subclients
         # self._threebot = TFChainThreeBotClient(self)
@@ -152,7 +156,7 @@ class TFChainClient:
             blockid = Hash.from_json(block['blockid'])
             # for all transactions assign these properties
             for transaction in transactions:
-                _assign_block_properties_to_transacton(transaction, block)
+                self._assign_block_properties_to_transacton(transaction, block)
                 transaction.height = height
                 transaction.blockid = blockid
             # return the block, as reported by the explorer
@@ -216,7 +220,7 @@ class TFChainClient:
             p = self._block_get_by_hash(transaction.blockid)
             def aggregate(result):
                 _, block = result
-                _assign_block_properties_to_transacton(transaction, block)
+                self._assign_block_properties_to_transacton(transaction, block)
                 return transaction
             return jsasync.chain(p, aggregate)
         return jsasync.chain(self.explorer_get(endpoint=endpoint), cb, fetch_transacton_timestamps)
@@ -374,7 +378,7 @@ class TFChainClient:
             def result_cb(block_result):
                 _, block = block_result
                 for transaction in transactions[block.get_or('blockid', '')]:
-                    _assign_block_properties_to_transacton(transaction, block)
+                    self._assign_block_properties_to_transacton(transaction, block)
             def aggregate():
                 return result
             return jsasync.chain(jsasync.promise_pool_new(generator, cb=result_cb), aggregate)
@@ -466,7 +470,7 @@ class TFChainClient:
                 if len(results) == 1:
                     # assign just the creation transacton timestamp
                     _, block = results[0]
-                    _assign_block_properties_to_transacton(result.creation_transaction, block)
+                    self._assign_block_properties_to_transacton(result.creation_transaction, block)
                     return result
                 # assign both creation- and spend transaction timestamp
                 _, block_a = results[0]
@@ -475,8 +479,8 @@ class TFChainClient:
                     block_c = block_a
                     block_a = block_b
                     block_b = block_c
-                _assign_block_properties_to_transacton(result.creation_transaction, block_a)
-                _assign_block_properties_to_transacton(result.spend_transaction, block_b)
+                self._assign_block_properties_to_transacton(result.creation_transaction, block_a)
+                self._assign_block_properties_to_transacton(result.spend_transaction, block_b)
                 return result
             return jsasync.chain(p, aggregate)
         # return as chained promise
@@ -542,20 +546,25 @@ class TFChainClient:
         return Hash(value=id).str()
 
 
-def _assign_block_properties_to_transacton(txn, block):
-    raw_block = block.get_or('rawblock', jsobj.new_dict())
-    # assign txn timestamp
-    txn.timestamp = raw_block.get_or('timestamp', 0)
-    # assign fee payout info
-    miner_payout_ids = block.get_or('minerpayoutids', [])
-    if len(miner_payout_ids) >= 2:
-        txn.fee_payout_id = miner_payout_ids[1]
-        txn.fee_payout_address = raw_block['minerpayouts'][1]["unlockhash"]
-    # assign transaction order (index within block)
-    for idx, transaction in enumerate(block.get_or('transactions', [])):
-        if transaction.get_or('id', 'id') == txn.id:
-            txn.transaction_order = idx
-            break
+    def _assign_block_properties_to_transacton(self, txn, block):
+        raw_block = block.get_or('rawblock', jsobj.new_dict())
+        # assign txn timestamp
+        txn.timestamp = raw_block.get_or('timestamp', 0)
+        # assign fee payout info
+        miner_payout_ids = block.get_or('minerpayoutids', [])
+        if self._network_type.block_creation_fee().less_than_or_equal_to(0): # take first one available
+            if len(miner_payout_ids) >= 1:
+                txn.fee_payout_id = miner_payout_ids[0]
+                txn.fee_payout_address = raw_block['minerpayouts'][0]["unlockhash"]
+        else: # take 2nd (if available)
+            if len(miner_payout_ids) >= 2:
+                txn.fee_payout_id = miner_payout_ids[1]
+                txn.fee_payout_address = raw_block['minerpayouts'][1]["unlockhash"]
+        # assign transaction order (index within block)
+        for idx, transaction in enumerate(block.get_or('transactions', [])):
+            if transaction.get_or('id', 'id') == txn.id:
+                txn.transaction_order = idx
+                break
 
 
 class ExplorerOutputResult():

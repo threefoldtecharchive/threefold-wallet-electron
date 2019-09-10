@@ -7,6 +7,7 @@ import {TransactionV128} from './tfchain.types.transactions.Minting.js';
 import {TransactionBaseClass} from './tfchain.types.transactions.Base.js';
 import * as transactions from './tfchain.types.transactions.js';
 import * as ConditionTypes from './tfchain.types.ConditionTypes.js';
+import * as tfchaintype from './tfchain.chain.js';
 import {MultiSigWalletBalance, SingleSigWalletBalance, WalletBalance} from './tfchain.balance.js';
 import * as tfexplorer from './tfchain.explorer.js';
 import * as tferrors from './tfchain.errors.js';
@@ -20,7 +21,7 @@ import * as jsobj from './tfchain.polyfill.encoding.object.js';
 var __name__ = 'tfchain.client';
 export var TFChainClient =  __class__ ('TFChainClient', [object], {
 	__module__: __name__,
-	get __init__ () {return __get__ (this, function (self, explorer_client) {
+	get __init__ () {return __get__ (this, function (self, explorer_client, network_type) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -29,6 +30,7 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 					switch (__attrib0__) {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
 						case 'explorer_client': var explorer_client = __allkwargs0__ [__attrib0__]; break;
+						case 'network_type': var network_type = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
@@ -41,6 +43,12 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 			throw __except0__;
 		}
 		self._explorer_client = explorer_client;
+		if (!(isinstance (network_type, tfchaintype.NetworkType))) {
+			var __except0__ = py_TypeError ('network_type has to be a tfchaintype.NetworkType, cannot be {}'.format (py_typeof (network_type)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		self._network_type = network_type;
 		self._minter = TFChainMinterClient (self);
 		self._authcoin = RivineAuthCoinClient (self);
 	});},
@@ -259,7 +267,7 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 			var timestamp = int (rawblock ['timestamp']);
 			var blockid = Hash.from_json (block ['blockid']);
 			for (var transaction of transactions) {
-				_assign_block_properties_to_transacton (transaction, block);
+				self._assign_block_properties_to_transacton (transaction, block);
 				transaction.height = height;
 				transaction.blockid = blockid;
 			}
@@ -477,7 +485,7 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 				var __left0__ = result;
 				var _ = __left0__ [0];
 				var block = __left0__ [1];
-				_assign_block_properties_to_transacton (transaction, block);
+				self._assign_block_properties_to_transacton (transaction, block);
 				return transaction;
 			};
 			return jsasync.chain (p, aggregate);
@@ -797,7 +805,7 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 				var _ = __left0__ [0];
 				var block = __left0__ [1];
 				for (var transaction of transactions [block.get_or ('blockid', '')]) {
-					_assign_block_properties_to_transacton (transaction, block);
+					self._assign_block_properties_to_transacton (transaction, block);
 				}
 			};
 			var aggregate = function () {
@@ -986,7 +994,7 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 					var __left0__ = results [0];
 					var _ = __left0__ [0];
 					var block = __left0__ [1];
-					_assign_block_properties_to_transacton (result.creation_transaction, block);
+					self._assign_block_properties_to_transacton (result.creation_transaction, block);
 					return result;
 				}
 				var __left0__ = results [0];
@@ -1000,8 +1008,8 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 					var block_a = block_b;
 					var block_b = block_c;
 				}
-				_assign_block_properties_to_transacton (result.creation_transaction, block_a);
-				_assign_block_properties_to_transacton (result.spend_transaction, block_b);
+				self._assign_block_properties_to_transacton (result.creation_transaction, block_a);
+				self._assign_block_properties_to_transacton (result.spend_transaction, block_b);
 				return result;
 			};
 			return jsasync.chain (p, aggregate);
@@ -1137,40 +1145,47 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 		else {
 		}
 		return Hash (__kwargtrans__ ({value: id})).str ();
+	});},
+	get _assign_block_properties_to_transacton () {return __get__ (this, function (self, txn, block) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'txn': var txn = __allkwargs0__ [__attrib0__]; break;
+						case 'block': var block = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var raw_block = block.get_or ('rawblock', jsobj.new_dict ());
+		txn.timestamp = raw_block.get_or ('timestamp', 0);
+		var miner_payout_ids = block.get_or ('minerpayoutids', []);
+		if (self._network_type.block_creation_fee ().less_than_or_equal_to (0)) {
+			if (len (miner_payout_ids) >= 1) {
+				txn.fee_payout_id = miner_payout_ids [0];
+				txn.fee_payout_address = raw_block ['minerpayouts'] [0] ['unlockhash'];
+			}
+		}
+		else if (len (miner_payout_ids) >= 2) {
+			txn.fee_payout_id = miner_payout_ids [1];
+			txn.fee_payout_address = raw_block ['minerpayouts'] [1] ['unlockhash'];
+		}
+		for (var [idx, transaction] of enumerate (block.get_or ('transactions', []))) {
+			if (transaction.get_or ('id', 'id') == txn.id) {
+				txn.transaction_order = idx;
+				break;
+			}
+		}
 	});}
 });
 Object.defineProperty (TFChainClient, 'explorer_addresses', property.call (TFChainClient, TFChainClient._get_explorer_addresses));
 Object.defineProperty (TFChainClient, 'authcoin', property.call (TFChainClient, TFChainClient._get_authcoin));
 Object.defineProperty (TFChainClient, 'minter', property.call (TFChainClient, TFChainClient._get_minter));;
-export var _assign_block_properties_to_transacton = function (txn, block) {
-	if (arguments.length) {
-		var __ilastarg0__ = arguments.length - 1;
-		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-			var __allkwargs0__ = arguments [__ilastarg0__--];
-			for (var __attrib0__ in __allkwargs0__) {
-				switch (__attrib0__) {
-					case 'txn': var txn = __allkwargs0__ [__attrib0__]; break;
-					case 'block': var block = __allkwargs0__ [__attrib0__]; break;
-				}
-			}
-		}
-	}
-	else {
-	}
-	var raw_block = block.get_or ('rawblock', jsobj.new_dict ());
-	txn.timestamp = raw_block.get_or ('timestamp', 0);
-	var miner_payout_ids = block.get_or ('minerpayoutids', []);
-	if (len (miner_payout_ids) >= 2) {
-		txn.fee_payout_id = miner_payout_ids [1];
-		txn.fee_payout_address = raw_block ['minerpayouts'] [1] ['unlockhash'];
-	}
-	for (var [idx, transaction] of enumerate (block.get_or ('transactions', []))) {
-		if (transaction.get_or ('id', 'id') == txn.id) {
-			txn.transaction_order = idx;
-			break;
-		}
-	}
-};
 export var ExplorerOutputResult =  __class__ ('ExplorerOutputResult', [object], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, output, creation_tx, spend_tx) {

@@ -183,7 +183,7 @@ function renderTransactionBody (tx, account) {
         <View style={styles.txBodyStyle} key={out.recipient}>
           <Text style={styles.sentAmount}>
             Amount:  - {out.amount.str({ unit: true })}
-            {out.is_fee ? (<Text>  Fee</Text>) : null}
+            {out.is_fee ? <Text>  (Fee)</Text> : null}
           </Text>
           {out.senders.map(sender => {
             return (
@@ -197,14 +197,14 @@ function renderTransactionBody (tx, account) {
               </View>
             )
           })}
-          <View style={styles.addresses}>
+          {out.recipient ? <View style={styles.addresses}>
             <Text>
               To: {out.recipient}
             </Text>
             <Text>
               {getAddressName(out.recipient, account)}
             </Text>
-          </View>
+          </View> : null}
         </View>
       )
     })

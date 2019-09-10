@@ -304,15 +304,14 @@ class Account:
             network_type = npt(network_type)
             explorer_addresses = network_type.default_explorer_addresses()
             self._explorer_client = tfexplorer.Client(explorer_addresses)
-            self._explorer_client = tfclient.TFChainClient(self._explorer_client)
+            self._explorer_client = tfclient.TFChainClient(self._explorer_client, network_type)
         else:
-            # explorer addresses are given, create the client
-            self._explorer_client = tfexplorer.Client(explorer_addresses)
-            self._explorer_client = tfclient.TFChainClient(self._explorer_client)
             if network_type == None:
                 raise ValueError("network_type is not given, while explorer addresses are given, this is currently not supported")
-        # ensure the network type is using the internal network type
-        network_type = npt(network_type)
+            network_type = npt(network_type)
+            # explorer addresses are given, create the client
+            self._explorer_client = tfexplorer.Client(explorer_addresses)
+            self._explorer_client = tfclient.TFChainClient(self._explorer_client, network_type)
         # assign all remaining properties
         self._network_type = network_type
 
@@ -2020,10 +2019,6 @@ class TransactionView:
                 aggregator.add_coin_input(
                     address=co.condition.unlockhash.__str__(),
                     amount=co.value)
-            else:
-                aggregator.add_coin_input(
-                    address=None,
-                    amount=co.value)
 
         # get all inputs and outputs
         inputs, outputs = aggregator.inputs_outputs_collect()
@@ -2147,6 +2142,7 @@ class WalletOutputAggregator:
             raise TypeError("chain_type has to be of type tfchain.chan.Type, not be of type {}".format(type(chain_type)))
         self._chain_type = chain_type
         self._our_addresses = addresses
+        self._total_output = Currency()
         self._our_input = Currency()
         self._our_input.unit = self._chain_type.currency_unit()
         self._our_send_addresses = set()
@@ -2176,6 +2172,8 @@ class WalletOutputAggregator:
             balances[slock] = balances[slock].plus(amount)
 
     def _modify_fee_balance(self, address, amount):
+        if not address:
+            address = ""
         if address not in self._fee_balances:
             self._fee_balances[address] = Currency(amount)
         else:
@@ -2192,9 +2190,11 @@ class WalletOutputAggregator:
             self._modify_balance(address, 0, amount, negate=True)
 
     def add_coin_output(self, address, lock, amount):
+        self._total_output = self._total_output.plus(amount)
         self._modify_balance(address, lock, amount, negate=False)
 
     def add_fee(self, address, amount):
+        self._total_output = self._total_output.plus(amount)
         self._modify_fee_balance(address, amount)
 
     def inputs_outputs_collect(self):
@@ -2204,8 +2204,9 @@ class WalletOutputAggregator:
 
         # define ratio
         ratio = Currency(1)
+        total_input = self._other_input.plus(self._our_input)
         if self._our_input.greater_than(0) and self._other_input.greater_than(0):
-            ratio = self._our_input.divided_by(self._other_input.plus(self._our_input))
+            ratio = self._our_input.divided_by(total_input)
 
         our_send_addresses = list(self._our_send_addresses)
         other_send_addresses = list(self._other_send_addresses)
@@ -2252,11 +2253,23 @@ class WalletOutputAggregator:
                 amount.unit = self._chain_type.currency_unit()
                 outputs.append(CoinOutputView(
                     senders=our_send_addresses,
-                    recipient=address,
+                    recipient=address if address else None,
                     amount=amount.times(ratio),
                     lock=0,
                     lock_is_timestamp=False,
                     fee=True,
+                ))
+            # check if we have any coins spent not matched with an output
+            if total_input.greater_than(self._total_output):
+                amount = total_input.minus(self._total_output)
+                amount.unit = self._chain_type.currency_unit()
+                outputs.append(CoinOutputView(
+                    senders=our_send_addresses,
+                    recipient=None,
+                    amount=amount.times(ratio),
+                    lock=0,
+                    lock_is_timestamp=False,
+                    fee=False,
                 ))
 
         # returm the (filtered and) aggregated I/O

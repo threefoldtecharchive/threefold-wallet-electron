@@ -384,18 +384,18 @@ export var Account =  __class__ ('Account', [object], {
 			var network_type = npt (network_type);
 			var explorer_addresses = network_type.default_explorer_addresses ();
 			self._explorer_client = tfexplorer.Client (explorer_addresses);
-			self._explorer_client = tfclient.TFChainClient (self._explorer_client);
+			self._explorer_client = tfclient.TFChainClient (self._explorer_client, network_type);
 		}
 		else {
-			self._explorer_client = tfexplorer.Client (explorer_addresses);
-			self._explorer_client = tfclient.TFChainClient (self._explorer_client);
 			if (network_type == null) {
 				var __except0__ = ValueError ('network_type is not given, while explorer addresses are given, this is currently not supported');
 				__except0__.__cause__ = null;
 				throw __except0__;
 			}
+			var network_type = npt (network_type);
+			self._explorer_client = tfexplorer.Client (explorer_addresses);
+			self._explorer_client = tfclient.TFChainClient (self._explorer_client, network_type);
 		}
-		var network_type = npt (network_type);
 		self._network_type = network_type;
 	});},
 	get _get_mnemonic () {return __get__ (this, function (self) {
@@ -5027,9 +5027,6 @@ export var TransactionView =  __class__ ('TransactionView', [object], {
 				var co = ci.parent_output;
 				aggregator.add_coin_input (__kwargtrans__ ({address: co.condition.unlockhash.__str__ (), amount: co.value}));
 			}
-			else {
-				aggregator.add_coin_input (__kwargtrans__ ({address: null, amount: co.value}));
-			}
 		}
 		var __left0__ = aggregator.inputs_outputs_collect ();
 		var inputs = __left0__ [0];
@@ -5332,6 +5329,7 @@ export var WalletOutputAggregator =  __class__ ('WalletOutputAggregator', [objec
 		}
 		self._chain_type = chain_type;
 		self._our_addresses = addresses;
+		self._total_output = Currency ();
 		self._our_input = Currency ();
 		self._our_input.unit = self._chain_type.currency_unit ();
 		self._our_send_addresses = set ();
@@ -5395,6 +5393,9 @@ export var WalletOutputAggregator =  __class__ ('WalletOutputAggregator', [objec
 		}
 		else {
 		}
+		if (!(address)) {
+			var address = '';
+		}
 		if (!__in__ (address, self._fee_balances)) {
 			self._fee_balances [address] = Currency (amount);
 		}
@@ -5447,6 +5448,7 @@ export var WalletOutputAggregator =  __class__ ('WalletOutputAggregator', [objec
 		}
 		else {
 		}
+		self._total_output = self._total_output.plus (amount);
 		self._modify_balance (address, lock, amount, __kwargtrans__ ({negate: false}));
 	});},
 	get add_fee () {return __get__ (this, function (self, address, amount) {
@@ -5465,6 +5467,7 @@ export var WalletOutputAggregator =  __class__ ('WalletOutputAggregator', [objec
 		}
 		else {
 		}
+		self._total_output = self._total_output.plus (amount);
 		self._modify_fee_balance (address, amount);
 	});},
 	get inputs_outputs_collect () {return __get__ (this, function (self) {
@@ -5484,8 +5487,9 @@ export var WalletOutputAggregator =  __class__ ('WalletOutputAggregator', [objec
 		var inputs = [];
 		var outputs = [];
 		var ratio = Currency (1);
+		var total_input = self._other_input.plus (self._our_input);
 		if (self._our_input.greater_than (0) && self._other_input.greater_than (0)) {
-			var ratio = self._our_input.divided_by (self._other_input.plus (self._our_input));
+			var ratio = self._our_input.divided_by (total_input);
 		}
 		var our_send_addresses = list (self._our_send_addresses);
 		var other_send_addresses = list (self._other_send_addresses);
@@ -5508,7 +5512,12 @@ export var WalletOutputAggregator =  __class__ ('WalletOutputAggregator', [objec
 		if (we_sent_coin_outputs) {
 			for (var [address, amount] of jsobj.get_items (self._fee_balances)) {
 				amount.unit = self._chain_type.currency_unit ();
-				outputs.append (CoinOutputView (__kwargtrans__ ({senders: our_send_addresses, recipient: address, amount: amount.times (ratio), lock: 0, lock_is_timestamp: false, fee: true})));
+				outputs.append (CoinOutputView (__kwargtrans__ ({senders: our_send_addresses, recipient: (address ? address : null), amount: amount.times (ratio), lock: 0, lock_is_timestamp: false, fee: true})));
+			}
+			if (total_input.greater_than (self._total_output)) {
+				var amount = total_input.minus (self._total_output);
+				amount.unit = self._chain_type.currency_unit ();
+				outputs.append (CoinOutputView (__kwargtrans__ ({senders: our_send_addresses, recipient: null, amount: amount.times (ratio), lock: 0, lock_is_timestamp: false, fee: false})));
 			}
 		}
 		return tuple ([inputs, outputs]);
