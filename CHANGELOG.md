@@ -1,3 +1,22 @@
+# v0.4.0 (2018.09.10)
+
+Features:
+
+- Freeflow token and Threefold bonus token support enabled, users can now create FFT/TFB testnet accounts.
+- added goldchain token burning support. You can now burn tokens in a transaction.
+- added goldchain faucet functionality in wallet receive page for goldchain accounts.
+
+Improvements:
+
+- now preventing clicks on loading wallets.
+- autofocus password field when logging in.
+
+Fixes:
+
+- some fixes in addressbook.
+- exported pdf endbalance is now correct.
+- fixed memory leaks.
+
 # v0.3.0 (2018.07.16)
 
 Features:
