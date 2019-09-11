@@ -1,7 +1,7 @@
 // @flow
 import { connect } from 'react-redux'
 import React, { Component } from 'react'
-import { Icon, Input, Divider, Dropdown, Segment, Label, Form, Message } from 'semantic-ui-react'
+import { Icon, Input, Divider, Dropdown, Segment, Label, Form, Message, Loader } from 'semantic-ui-react'
 import styles from '../home/Home.css'
 import QRCode from 'qrcode.react'
 import { flatten, filter } from 'lodash'
@@ -50,7 +50,12 @@ class WalletReceive extends Component {
       amount: 0,
       isOpen: false,
       isGoldChain: this.props.account.chain_type === 'goldchain',
-      visible: true
+      visible: true,
+      authorizationLoading: {
+        loading: false,
+        address: ''
+      },
+      authorizationRequestedForAddresses: []
     }
   }
 
@@ -113,11 +118,18 @@ class WalletReceive extends Component {
     })
   }
 
-  requestAuthorization = (selectedWallet) => {
-    this.props.account.faucet.auth_address({ address: selectedWallet.address }).then(res => {
+  requestAuthorization = (address) => {
+    this.setState({ authorizationLoading: { loading: true } })
+    this.props.account.faucet.auth_address({ address }).then(res => {
       if (res.submitted) {
-        toast('Successfully requested Authorization')
+        const { authorizationRequestedForAddresses } = this.state
+        authorizationRequestedForAddresses.push(address)
+        this.setState({ authorizationLoading: { loading: false }, authorizationRequestedForAddresses })
+        toast('Authorization succeeded')
       }
+    }).catch(() => {
+      toast.error('An error occured')
+      this.setState({ authorizationLoading: { loading: false } })
     })
   }
 
@@ -125,8 +137,15 @@ class WalletReceive extends Component {
     this.setState({ visible: false })
   }
 
+  isAuthorizationRequestedForAddress = (a) => {
+    const { authorizationRequestedForAddresses } = this.state
+    if (authorizationRequestedForAddresses.includes(a)) return true
+    return false
+  }
+
   renderWalletReceive = () => {
-    const { selectedAddress, isGoldChain, selectedWallet, amount } = this.state
+    const { selectedAddress, isGoldChain, selectedWallet, amount, authorizationLoading } = this.state
+
     const walletsOptions = this.mapWalletsToDropdownOption()
     const addressOptions = this.mapAddressesToDropdownOption()
     if (isGoldChain) {
@@ -141,7 +160,7 @@ class WalletReceive extends Component {
                 : <p className={'orange-gradient-text'} style={{ fontSize: 12 }}>Unauthorized</p>}
             </div>
             <Divider />
-            {w.addresses.map(a => {
+            {w.addresses.map((a, index) => {
               const authorized = this.props.account.coin_auth_status_for_address_get(a)
               return (
                 <React.Fragment key={uuid.v4()}>
@@ -155,7 +174,15 @@ class WalletReceive extends Component {
                   {authorized && <Label onClick={() => this.requestTokens(w)} style={{ display: 'block', margin: 'auto', marginRight: 0, width: 200, cursor: 'pointer', marginTop: 10 }}><Icon name='arrow left' />Request 300 GFT</Label>}
                   {!authorized && <Message style={{ width: '100%', margin: 'auto', marginTop: 10, marginBottom: 10 }} error>
                     <Message.Header>This addres is not authorized. You cannot use this address when it's not authorized</Message.Header>
-                    <Label onClick={() => this.requestAuthorization(w)} style={{ display: 'block', margin: 'auto', marginLeft: 0, width: 200, cursor: 'pointer', marginTop: 10 }}><Icon name='unlock' />Request Authorization</Label>
+                    {this.isAuthorizationRequestedForAddress(a) ? (
+                      <Label>Requested Authorization !</Label>
+                    )
+                      : (authorizationLoading.loading && authorizationLoading.address ? (
+                        <Loader active inline />
+                      ) : (
+                        <Label onClick={() => this.requestAuthorization(a, index)} style={{ display: 'block', margin: 'auto', marginLeft: 0, width: 200, cursor: 'pointer', marginTop: 10 }}><Icon name='unlock' />Request Authorization</Label>
+                      )
+                      )}
                   </Message>}
                 </React.Fragment>
               )

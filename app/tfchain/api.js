@@ -2384,7 +2384,7 @@ export var FaucetClient =  __class__ ('FaucetClient', [object], {
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		return wallet.address;
+		return address;
 	});},
 	get _get_faucet_address () {return __get__ (this, function (self) {
 		if (arguments.length) {

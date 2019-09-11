@@ -1101,6 +1101,7 @@ class FaucetClient:
             if address == None:
                raise ValueError("no addess or wallet given, and account {} has no addresses to use".format(self._account.account_name))
             return address
+        # check if a wallet exists with this address
         wallet = self._account.wallet_get(opts={
             'name': wallet,
             'address': address,
@@ -1109,7 +1110,7 @@ class FaucetClient:
         })
         if wallet == None:
             raise ValueError("no matching singlesig wallet (name={}, addr={}) found on account {}".format(wallet, address, self._account.account_name))
-        return wallet.address
+        return address
 
     def _get_faucet_address(self):
         address = self._account._network_type.faucet_address()
