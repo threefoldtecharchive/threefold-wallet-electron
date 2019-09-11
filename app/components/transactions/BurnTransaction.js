@@ -347,6 +347,7 @@ class BurnTransaction extends Component {
           structured={[partA, partB, partC]}
           minimumMinerFee={this.props.account.minimum_miner_fee}
           message={message}
+          messageType={messageType}
         />}
 
         {this.renderDestinationForm()}
