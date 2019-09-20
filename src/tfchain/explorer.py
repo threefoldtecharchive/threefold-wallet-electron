@@ -42,6 +42,8 @@ class Client:
             c_height = -1
             c_height_votes = -1
             for height, votes in jsobj.get_items(d):
+                # make sure height is int, not string
+                height = int(height)
                 if votes > c_height_votes or (votes == c_height_votes and height > c_height):
                     c_height = height
                     c_height_votes = votes
