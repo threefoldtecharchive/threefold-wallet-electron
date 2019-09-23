@@ -102,7 +102,8 @@ export var Client =  __class__ ('Client', [object], {
 			}
 			var c_height = -(1);
 			var c_height_votes = -(1);
-			for (var [height, votes] of jsobj.get_items (d)) {
+			for (var height of a.py_keys ()) {
+				var votes = d [height];
 				var height = int (height);
 				if (votes > c_height_votes || votes == c_height_votes && height > c_height) {
 					var c_height = height;

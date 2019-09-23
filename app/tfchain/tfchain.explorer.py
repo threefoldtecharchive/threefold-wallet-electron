@@ -41,8 +41,8 @@ class Client:
                 d[height] = d.get_or(height, 0) + 1
             c_height = -1
             c_height_votes = -1
-            for height, votes in jsobj.get_items(d):
-                # make sure height is int, not string
+            for height in a.keys():
+                votes = d[height]
                 height = int(height)
                 if votes > c_height_votes or (votes == c_height_votes and height > c_height):
                     c_height = height
