@@ -1,5 +1,11 @@
 # v0.4.0 (2018.09.10)
 
+Fixes:
+
+- wallet now syncs with the most up to date explorer.
+
+# v0.4.0 (2018.09.10)
+
 Features:
 
 - Freeflow token and Threefold bonus token support enabled, users can now create FFT/TFB testnet accounts.
