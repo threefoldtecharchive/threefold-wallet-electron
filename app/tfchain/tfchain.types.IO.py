@@ -392,3 +392,66 @@ class BlockstakeOutput(BaseDataTypeClass):
         Encode this BlockstakeOutput according to the Rivine Binary Encoding format.
         """
         encoder.add_all(self._value, self._condition)
+
+class MinerPayout:
+    """
+    MinerPayout class
+    """
+
+    def __init__(self, value=None, unlockhash=None, id=None):
+        self._value = None
+        self.value = value
+        self._unlockhash = None
+        self.unlockhash = unlockhash
+        # property that can be set if known, but which is not part of the actual BlockstakeOutput
+        self._id = None
+        self.id = id
+
+    @classmethod
+    def from_json(cls, obj):
+        if 'rawminerpayout' in obj:
+            return cls(
+                value=Currency.from_json(obj['rawminerpayout']['value']),
+                unlockhash=UnlockHash.from_json(obj['rawminerpayout']['unlockhash']),
+                id=Hash.from_json(obj['minerpayoutid']))
+        return cls(
+            value=Currency.from_json(obj['value']),
+            unlockhash=UnlockHash.from_json(obj['unlockhash']))
+
+    @property
+    def value(self):
+        return self._value
+
+    @value.setter
+    def value(self, value):
+        if isinstance(value, Currency):
+            self._value = value
+            return
+        self._value = Currency(value=value)
+
+    @property
+    def unlockhash(self):
+        return self._unlockhash
+
+    @unlockhash.setter
+    def unlockhash(self, value):
+        if value is None:
+            self._unlockhash = UnlockHash(type=UnlockHashType.NIL)
+            return
+        if isinstance(value, str):
+            self._unlockhash = UnlockHash.from_json(value)
+        if not isinstance(value, UnlockHash):
+            raise TypeError(
+                "cannot assign value of type {} as a MinerPayout's unlockhash (expected: UnlockHash or str)".format(type(value)))
+        self._unlockhash = value
+
+    @property
+    def id(self):
+        return self._id
+
+    @id.setter
+    def id(self, value):
+        if isinstance(value, Hash):
+            self._id = Hash(value=value.value)
+            return
+        self._id = Hash(value=value)

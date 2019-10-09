@@ -17,7 +17,7 @@ from tfchain.types.transactions.Minting import TransactionV128
 from tfchain.types.ConditionTypes import UnlockHash, UnlockHashType, ConditionMultiSignature
 from tfchain.types.PrimitiveTypes import Hash, Currency
 from tfchain.types.ERC20 import ERC20Address
-from tfchain.types.IO import CoinOutput, BlockstakeOutput
+from tfchain.types.IO import CoinOutput, BlockstakeOutput, MinerPayout
 
 # TODO: add KeyScan feature to client,
 # this way we can automatically create a wallet based on a start index
@@ -154,11 +154,6 @@ class TFChainClient:
             timestamp = int(rawblock['timestamp'])
             # get the block's identifier
             blockid = Hash.from_json(block['blockid'])
-            # for all transactions assign these properties
-            for transaction in transactions:
-                self._assign_block_properties_to_transacton(transaction, block)
-                transaction.height = height
-                transaction.blockid = blockid
             # return the block, as reported by the explorer
             return ExplorerBlock(
                 id=blockid, parentid=parentid,
@@ -213,17 +208,7 @@ class TFChainClient:
             except KeyError as exc:
                 # return a KeyError as an invalid Explorer Response
                 raise tferrors.ExplorerInvalidResponse(str(exc), endpoint, result) from exc
-        # fetch timestamps seperately
-        # TODO: make a pull request in Rivine to return [parent] block optionally with (or instead of) transaction.
-        def fetch_transacton_timestamps(result):
-            _, transaction = result
-            p = self._block_get_by_hash(transaction.blockid)
-            def aggregate(result):
-                _, block = result
-                self._assign_block_properties_to_transacton(transaction, block)
-                return transaction
-            return jsasync.chain(p, aggregate)
-        return jsasync.chain(self.explorer_get(endpoint=endpoint), cb, fetch_transacton_timestamps)
+        return jsasync.chain(self.explorer_get(endpoint=endpoint), cb)
 
     def transaction_put(self, transaction):
         """
@@ -358,33 +343,9 @@ class TFChainClient:
             except KeyError as exc:
                 # return a KeyError as an invalid Explorer Response
                 raise tferrors.ExplorerInvalidResponse(str(exc), endpoint, resp) from exc
-
-        # fetch timestamps seperately
-        # TODO: make a pull request in Rivine to return timestamps together with regular results,
-        #       as it is rediculous to have to do this
-        def fetch_transacton_block(result):
-            transactions = {}
-            for transaction in result.transactions:
-                if not transaction.unconfirmed:
-                    bid = transaction.blockid.__str__()
-                    if bid not in transactions:
-                        transactions[bid] = []
-                    transactions[bid].append(transaction)
-            if len(transactions) == 0:
-                return result # return as is, nothing to do
-            def generator():
-                for blockid in jsobj.get_keys(transactions):
-                    yield self._block_get_by_hash(blockid)
-            def result_cb(block_result):
-                _, block = block_result
-                for transaction in transactions[block.get_or('blockid', '')]:
-                    self._assign_block_properties_to_transacton(transaction, block)
-            def aggregate():
-                return result
-            return jsasync.chain(jsasync.promise_pool_new(generator, cb=result_cb), aggregate)
     
         return jsasync.catch_promise(
-            jsasync.chain(self.explorer_get(endpoint=endpoint), cb, fetch_transacton_block),
+            jsasync.chain(self.explorer_get(endpoint=endpoint), cb),
             catch_no_content)
 
 
@@ -456,35 +417,8 @@ class TFChainClient:
             except KeyError as exc:
                 # return a KeyError as an invalid Explorer Response
                 raise tferrors.ExplorerInvalidResponse(str(exc), endpoint, result) from exc
-        # fetch timestamps seperately
-        # TODO: make a pull request in Rivine to return timestamps together with regular results,
-        #       as it is rediculous to have to do this
-        def fetch_transacton_timestamps(result):
-            if result.creation_transaction.unconfirmed:
-                return result # return as is
-            ps = [self._block_get_by_hash(result.creation_transaction.blockid)]
-            if result.spend_transaction != None and not result.spend_transaction.unconfirmed:
-                ps.append(self._block_get_by_hash(result.spend_transaction.blockid))
-            p = jsasync.wait(*ps)
-            def aggregate(results):
-                if len(results) == 1:
-                    # assign just the creation transacton timestamp
-                    _, block = results[0]
-                    self._assign_block_properties_to_transacton(result.creation_transaction, block)
-                    return result
-                # assign both creation- and spend transaction timestamp
-                _, block_a = results[0]
-                _, block_b = results[1]
-                if block_a.id.__ne__(result.creation_transaction.blockid):
-                    block_c = block_a
-                    block_a = block_b
-                    block_b = block_c
-                self._assign_block_properties_to_transacton(result.creation_transaction, block_a)
-                self._assign_block_properties_to_transacton(result.spend_transaction, block_b)
-                return result
-            return jsasync.chain(p, aggregate)
         # return as chained promise
-        return jsasync.chain(self.explorer_get(endpoint=endpoint), cb, fetch_transacton_timestamps)
+        return jsasync.chain(self.explorer_get(endpoint=endpoint), cb)
 
     def _transaction_from_explorer_transaction(self, etxn, endpoint="/?", resp=None): # keyword parameters for error handling purposes only
         if resp == None:
@@ -523,8 +457,14 @@ class TFChainClient:
         transaction.unconfirmed = etxn.get_or('unconfirmed', False)
         # set the blockid and height of the transaction only if confirmed
         if not transaction.unconfirmed:
-            transaction.height = int(etxn.get_or('height', -1))
+            transaction.height = int(etxn.get_or('height', 0))
+            transaction.timestamp = int(etxn.get_or('timestamp', 0))
+            transaction.transaction_order = int(etxn.get_or('order', 0))
             transaction.blockid = etxn.get_or('parent', None)
+            miner_payouts = []
+            for mp in etxn.get_or('minerpayouts', []):
+                miner_payouts.append(MinerPayout.from_json(mp))
+            transaction.miner_payouts = miner_payouts
         # return the transaction
         return transaction
 
@@ -544,27 +484,6 @@ class TFChainClient:
 
     def _normalize_id(self, id):
         return Hash(value=id).str()
-
-
-    def _assign_block_properties_to_transacton(self, txn, block):
-        raw_block = block.get_or('rawblock', jsobj.new_dict())
-        # assign txn timestamp
-        txn.timestamp = raw_block.get_or('timestamp', 0)
-        # assign fee payout info
-        miner_payout_ids = block.get_or('minerpayoutids', [])
-        if self._network_type.block_creation_fee().less_than_or_equal_to(0): # take first one available
-            if len(miner_payout_ids) >= 1:
-                txn.fee_payout_id = miner_payout_ids[0]
-                txn.fee_payout_address = raw_block['minerpayouts'][0]["unlockhash"]
-        else: # take 2nd (if available)
-            if len(miner_payout_ids) >= 2:
-                txn.fee_payout_id = miner_payout_ids[1]
-                txn.fee_payout_address = raw_block['minerpayouts'][1]["unlockhash"]
-        # assign transaction order (index within block)
-        for idx, transaction in enumerate(block.get_or('transactions', [])):
-            if transaction.get_or('id', 'id') == txn.id:
-                txn.transaction_order = idx
-                break
 
 
 class ExplorerOutputResult():

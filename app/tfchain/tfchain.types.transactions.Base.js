@@ -4,7 +4,7 @@ import * as jsarr from './tfchain.polyfill.array.js';
 import * as jsobj from './tfchain.polyfill.encoding.object.js';
 import * as jsjson from './tfchain.polyfill.encoding.json.js';
 import * as ConditionTypes from './tfchain.types.ConditionTypes.js';
-import {CoinOutput} from './tfchain.types.IO.js';
+import {CoinOutput, MinerPayout} from './tfchain.types.IO.js';
 import {BinaryData, Currency, Hash} from './tfchain.types.PrimitiveTypes.js';
 import {SiaBinaryEncoder} from './tfchain.encoding.siabin.js';
 import {RivineBinaryEncoder} from './tfchain.encoding.rivbin.js';
@@ -136,6 +136,7 @@ export var TransactionBaseClass =  __class__ ('TransactionBaseClass', [object], 
 		self._block_timestamp = -(1);
 		self._blockid = null;
 		self._txorder = -(1);
+		self._miner_payouts = [];
 		self._fee_payout_address = null;
 		self._fee_payout_id = null;
 		self._unconfirmed = false;
@@ -451,7 +452,7 @@ export var TransactionBaseClass =  __class__ ('TransactionBaseClass', [object], 
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		if (value < 0) {
+		if (value < -(1)) {
 			var __except0__ = ValueError ('a block height cannot be negative');
 			__except0__.__cause__ = null;
 			throw __except0__;
@@ -494,7 +495,7 @@ export var TransactionBaseClass =  __class__ ('TransactionBaseClass', [object], 
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		if (value < 0) {
+		if (value < -(1)) {
 			var __except0__ = ValueError ('a transaction order cannot be negative');
 			__except0__.__cause__ = null;
 			throw __except0__;
@@ -537,12 +538,62 @@ export var TransactionBaseClass =  __class__ ('TransactionBaseClass', [object], 
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		if (value < 0) {
+		if (value < -(1)) {
 			var __except0__ = ValueError ('a block timestamp cannot be negative');
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
 		self._block_timestamp = value;
+	});},
+	get _get_miner_payouts () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._miner_payouts;
+	});},
+	get _set_miner_payouts () {return __get__ (this, function (self, value) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (value === null) {
+			self._miner_payouts = [];
+			return ;
+		}
+		if (!(jsobj.is_js_arr (value) || isinstance (value, list))) {
+			var __except0__ = py_TypeError ('value should be of type list, not {}'.format (py_typeof (value)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		self._miner_payouts = [];
+		for (var mp of value) {
+			if (!(isinstance (mp, MinerPayout))) {
+				var __except0__ = py_TypeError ('value should be of type MinerPayout, not {}'.format (py_typeof (mp)));
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
+			self._miner_payouts.append (mp);
+		}
 	});},
 	get _get_blockid () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -1419,6 +1470,7 @@ Object.defineProperty (TransactionBaseClass, 'blockstake_inputs', property.call 
 Object.defineProperty (TransactionBaseClass, 'coin_outputs', property.call (TransactionBaseClass, TransactionBaseClass._get_coin_outputs, TransactionBaseClass._set_coin_outputs));
 Object.defineProperty (TransactionBaseClass, 'coin_inputs', property.call (TransactionBaseClass, TransactionBaseClass._get_coin_inputs, TransactionBaseClass._set_coin_inputs));
 Object.defineProperty (TransactionBaseClass, 'blockid', property.call (TransactionBaseClass, TransactionBaseClass._get_blockid, TransactionBaseClass._set_blockid));
+Object.defineProperty (TransactionBaseClass, 'miner_payouts', property.call (TransactionBaseClass, TransactionBaseClass._get_miner_payouts, TransactionBaseClass._set_miner_payouts));
 Object.defineProperty (TransactionBaseClass, 'timestamp', property.call (TransactionBaseClass, TransactionBaseClass._get_timestamp, TransactionBaseClass._set_timestamp));
 Object.defineProperty (TransactionBaseClass, 'transaction_order', property.call (TransactionBaseClass, TransactionBaseClass._get_transaction_order, TransactionBaseClass._set_transaction_order));
 Object.defineProperty (TransactionBaseClass, 'height', property.call (TransactionBaseClass, TransactionBaseClass._get_height, TransactionBaseClass._set_height));

@@ -1092,5 +1092,183 @@ export var BlockstakeOutput =  __class__ ('BlockstakeOutput', [BaseDataTypeClass
 Object.defineProperty (BlockstakeOutput, 'id', property.call (BlockstakeOutput, BlockstakeOutput._get_id, BlockstakeOutput._set_id));
 Object.defineProperty (BlockstakeOutput, 'condition', property.call (BlockstakeOutput, BlockstakeOutput._get_condition, BlockstakeOutput._set_condition));
 Object.defineProperty (BlockstakeOutput, 'value', property.call (BlockstakeOutput, BlockstakeOutput._get_value, BlockstakeOutput._set_value));;
+export var MinerPayout =  __class__ ('MinerPayout', [object], {
+	__module__: __name__,
+	get __init__ () {return __get__ (this, function (self, value, unlockhash, id) {
+		if (typeof value == 'undefined' || (value != null && value.hasOwnProperty ("__kwargtrans__"))) {;
+			var value = null;
+		};
+		if (typeof unlockhash == 'undefined' || (unlockhash != null && unlockhash.hasOwnProperty ("__kwargtrans__"))) {;
+			var unlockhash = null;
+		};
+		if (typeof id == 'undefined' || (id != null && id.hasOwnProperty ("__kwargtrans__"))) {;
+			var id = null;
+		};
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+						case 'unlockhash': var unlockhash = __allkwargs0__ [__attrib0__]; break;
+						case 'id': var id = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		self._value = null;
+		self.value = value;
+		self._unlockhash = null;
+		self.unlockhash = unlockhash;
+		self._id = null;
+		self.id = id;
+	});},
+	get from_json () {return __getcm__ (this, function (cls, obj) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+						case 'obj': var obj = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (__in__ ('rawminerpayout', obj)) {
+			return cls (__kwargtrans__ ({value: Currency.from_json (obj ['rawminerpayout'] ['value']), unlockhash: UnlockHash.from_json (obj ['rawminerpayout'] ['unlockhash']), id: Hash.from_json (obj ['minerpayoutid'])}));
+		}
+		return cls (__kwargtrans__ ({value: Currency.from_json (obj ['value']), unlockhash: UnlockHash.from_json (obj ['unlockhash'])}));
+	});},
+	get _get_value () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._value;
+	});},
+	get _set_value () {return __get__ (this, function (self, value) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (isinstance (value, Currency)) {
+			self._value = value;
+			return ;
+		}
+		self._value = Currency (__kwargtrans__ ({value: value}));
+	});},
+	get _get_unlockhash () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._unlockhash;
+	});},
+	get _set_unlockhash () {return __get__ (this, function (self, value) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (value === null) {
+			self._unlockhash = UnlockHash (__kwargtrans__ ({py_metatype: UnlockHashType.NIL}));
+			return ;
+		}
+		if (isinstance (value, str)) {
+			self._unlockhash = UnlockHash.from_json (value);
+		}
+		if (!(isinstance (value, UnlockHash))) {
+			var __except0__ = py_TypeError ("cannot assign value of type {} as a MinerPayout's unlockhash (expected: UnlockHash or str)".format (py_typeof (value)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		self._unlockhash = value;
+	});},
+	get _get_id () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._id;
+	});},
+	get _set_id () {return __get__ (this, function (self, value) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (isinstance (value, Hash)) {
+			self._id = Hash (__kwargtrans__ ({value: value.value}));
+			return ;
+		}
+		self._id = Hash (__kwargtrans__ ({value: value}));
+	});}
+});
+Object.defineProperty (MinerPayout, 'id', property.call (MinerPayout, MinerPayout._get_id, MinerPayout._set_id));
+Object.defineProperty (MinerPayout, 'unlockhash', property.call (MinerPayout, MinerPayout._get_unlockhash, MinerPayout._set_unlockhash));
+Object.defineProperty (MinerPayout, 'value', property.call (MinerPayout, MinerPayout._get_value, MinerPayout._set_value));;
 
 //# sourceMappingURL=tfchain.types.IO.map

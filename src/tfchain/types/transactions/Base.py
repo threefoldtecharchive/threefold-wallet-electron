@@ -2,7 +2,7 @@ from tfchain.encoding.rivbin import RivineBinaryEncoder
 from tfchain.encoding.siabin import SiaBinaryEncoder
 
 from tfchain.types.PrimitiveTypes import Hash, Currency, BinaryData
-from tfchain.types.IO import CoinOutput
+from tfchain.types.IO import CoinOutput, MinerPayout
 from tfchain.types import ConditionTypes
 
 import tfchain.polyfill.encoding.json as jsjson
@@ -60,6 +60,7 @@ class TransactionBaseClass():
         self._block_timestamp = -1
         self._blockid = None
         self._txorder = -1
+        self._miner_payouts = []
         self._fee_payout_address = None
         self._fee_payout_id = None
         self._unconfirmed = False
@@ -157,7 +158,7 @@ class TransactionBaseClass():
         if not (isinstance(value, int) and not isinstance(value, bool)):
             raise TypeError(
                 "value should be of type int, not {}".format(type(value)))
-        if value < 0:
+        if value < -1:
             raise ValueError("a block height cannot be negative")
         self._height = value
 
@@ -173,7 +174,7 @@ class TransactionBaseClass():
         if not (isinstance(value, int) and not isinstance(value, bool)):
             raise TypeError(
                 "value should be of type int, not {}".format(type(value)))
-        if value < 0:
+        if value < -1:
             raise ValueError("a transaction order cannot be negative")
         self._txorder = value
 
@@ -189,9 +190,30 @@ class TransactionBaseClass():
         if not (isinstance(value, int) and not isinstance(value, bool)):
             raise TypeError(
                 "value should be of type int or bool, not {}".format(type(value)))
-        if value < 0:
+        if value < -1:
             raise ValueError("a block timestamp cannot be negative")
         self._block_timestamp = value
+
+    @property
+    def miner_payouts(self):
+        """
+        Miner payouts paid out as part of this transaction's block creation,
+        not known if not confirmed yet.
+        """
+        return self._miner_payouts
+    @miner_payouts.setter
+    def miner_payouts(self, value):
+        if value is None:
+            self._miner_payouts = []
+            return
+        if not (jsobj.is_js_arr(value) or isinstance(value, list)):
+            raise TypeError(
+                "value should be of type list, not {}".format(type(value)))
+        self._miner_payouts = []
+        for mp in value:
+            if not isinstance(mp, MinerPayout):
+                raise TypeError("value should be of type MinerPayout, not {}".format(type(mp)))
+            self._miner_payouts.append(mp)
 
     @property
     def blockid(self):

@@ -1,5 +1,5 @@
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __proxy__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, abs, all, any, assert, bool, bytearray, bytes, callable, chr, copy, deepcopy, delattr, dict, dir, divmod, enumerate, filter, float, getattr, hasattr, input, int, isinstance, issubclass, len, list, map, max, min, object, ord, pow, print, property, py_TypeError, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
-import {BlockstakeOutput, CoinOutput} from './tfchain.types.IO.js';
+import {BlockstakeOutput, CoinOutput, MinerPayout} from './tfchain.types.IO.js';
 import {ERC20Address} from './tfchain.types.ERC20.js';
 import {Currency, Hash} from './tfchain.types.PrimitiveTypes.js';
 import {ConditionMultiSignature, UnlockHash, UnlockHashType} from './tfchain.types.ConditionTypes.js';
@@ -266,11 +266,6 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 			var height = int (block ['height']);
 			var timestamp = int (rawblock ['timestamp']);
 			var blockid = Hash.from_json (block ['blockid']);
-			for (var transaction of transactions) {
-				self._assign_block_properties_to_transacton (transaction, block);
-				transaction.height = height;
-				transaction.blockid = blockid;
-			}
 			return ExplorerBlock (__kwargtrans__ ({id: blockid, parentid: parentid, height: height, timestamp: timestamp, transactions: transactions, miner_payouts: miner_payouts}));
 		}
 		catch (__except0__) {
@@ -450,47 +445,7 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 				}
 			}
 		};
-		var fetch_transacton_timestamps = function (result) {
-			if (arguments.length) {
-				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-					var __allkwargs0__ = arguments [__ilastarg0__--];
-					for (var __attrib0__ in __allkwargs0__) {
-						switch (__attrib0__) {
-							case 'result': var result = __allkwargs0__ [__attrib0__]; break;
-						}
-					}
-				}
-			}
-			else {
-			}
-			var __left0__ = result;
-			var _ = __left0__ [0];
-			var transaction = __left0__ [1];
-			var p = self._block_get_by_hash (transaction.blockid);
-			var aggregate = function (result) {
-				if (arguments.length) {
-					var __ilastarg0__ = arguments.length - 1;
-					if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-						var __allkwargs0__ = arguments [__ilastarg0__--];
-						for (var __attrib0__ in __allkwargs0__) {
-							switch (__attrib0__) {
-								case 'result': var result = __allkwargs0__ [__attrib0__]; break;
-							}
-						}
-					}
-				}
-				else {
-				}
-				var __left0__ = result;
-				var _ = __left0__ [0];
-				var block = __left0__ [1];
-				self._assign_block_properties_to_transacton (transaction, block);
-				return transaction;
-			};
-			return jsasync.chain (p, aggregate);
-		};
-		return jsasync.chain (self.explorer_get (__kwargtrans__ ({endpoint: endpoint})), cb, fetch_transacton_timestamps);
+		return jsasync.chain (self.explorer_get (__kwargtrans__ ({endpoint: endpoint})), cb);
 	});},
 	get transaction_put () {return __get__ (this, function (self, transaction) {
 		if (arguments.length) {
@@ -745,85 +700,7 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 				}
 			}
 		};
-		var fetch_transacton_block = function (result) {
-			if (arguments.length) {
-				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-					var __allkwargs0__ = arguments [__ilastarg0__--];
-					for (var __attrib0__ in __allkwargs0__) {
-						switch (__attrib0__) {
-							case 'result': var result = __allkwargs0__ [__attrib0__]; break;
-						}
-					}
-				}
-			}
-			else {
-			}
-			var transactions = dict ({});
-			for (var transaction of result.transactions) {
-				if (!(transaction.unconfirmed)) {
-					var bid = transaction.blockid.__str__ ();
-					if (!__in__ (bid, transactions)) {
-						transactions [bid] = [];
-					}
-					transactions [bid].append (transaction);
-				}
-			}
-			if (len (transactions) == 0) {
-				return result;
-			}
-			var generator = function* () {
-				if (arguments.length) {
-					var __ilastarg0__ = arguments.length - 1;
-					if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-						var __allkwargs0__ = arguments [__ilastarg0__--];
-						for (var __attrib0__ in __allkwargs0__) {
-						}
-					}
-				}
-				else {
-				}
-				for (var blockid of jsobj.get_keys (transactions)) {
-					yield self._block_get_by_hash (blockid);
-				}
-				};
-			var result_cb = function (block_result) {
-				if (arguments.length) {
-					var __ilastarg0__ = arguments.length - 1;
-					if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-						var __allkwargs0__ = arguments [__ilastarg0__--];
-						for (var __attrib0__ in __allkwargs0__) {
-							switch (__attrib0__) {
-								case 'block_result': var block_result = __allkwargs0__ [__attrib0__]; break;
-							}
-						}
-					}
-				}
-				else {
-				}
-				var __left0__ = block_result;
-				var _ = __left0__ [0];
-				var block = __left0__ [1];
-				for (var transaction of transactions [block.get_or ('blockid', '')]) {
-					self._assign_block_properties_to_transacton (transaction, block);
-				}
-			};
-			var aggregate = function () {
-				if (arguments.length) {
-					var __ilastarg0__ = arguments.length - 1;
-					if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-						var __allkwargs0__ = arguments [__ilastarg0__--];
-						for (var __attrib0__ in __allkwargs0__) {
-						}
-					}
-				}
-				else {
-				}
-				return result;
-			};
-			return jsasync.chain (jsasync.promise_pool_new (generator, __kwargtrans__ ({cb: result_cb})), aggregate);
-		};
-		return jsasync.catch_promise (jsasync.chain (self.explorer_get (__kwargtrans__ ({endpoint: endpoint})), cb, fetch_transacton_block), catch_no_content);
+		return jsasync.catch_promise (jsasync.chain (self.explorer_get (__kwargtrans__ ({endpoint: endpoint})), cb), catch_no_content);
 	});},
 	get coin_output_get () {return __get__ (this, function (self, id) {
 		if (arguments.length) {
@@ -954,67 +831,7 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 				}
 			}
 		};
-		var fetch_transacton_timestamps = function (result) {
-			if (arguments.length) {
-				var __ilastarg0__ = arguments.length - 1;
-				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-					var __allkwargs0__ = arguments [__ilastarg0__--];
-					for (var __attrib0__ in __allkwargs0__) {
-						switch (__attrib0__) {
-							case 'result': var result = __allkwargs0__ [__attrib0__]; break;
-						}
-					}
-				}
-			}
-			else {
-			}
-			if (result.creation_transaction.unconfirmed) {
-				return result;
-			}
-			var ps = [self._block_get_by_hash (result.creation_transaction.blockid)];
-			if (result.spend_transaction != null && !(result.spend_transaction.unconfirmed)) {
-				ps.append (self._block_get_by_hash (result.spend_transaction.blockid));
-			}
-			var p = jsasync.wait (...ps);
-			var aggregate = function (results) {
-				if (arguments.length) {
-					var __ilastarg0__ = arguments.length - 1;
-					if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-						var __allkwargs0__ = arguments [__ilastarg0__--];
-						for (var __attrib0__ in __allkwargs0__) {
-							switch (__attrib0__) {
-								case 'results': var results = __allkwargs0__ [__attrib0__]; break;
-							}
-						}
-					}
-				}
-				else {
-				}
-				if (len (results) == 1) {
-					var __left0__ = results [0];
-					var _ = __left0__ [0];
-					var block = __left0__ [1];
-					self._assign_block_properties_to_transacton (result.creation_transaction, block);
-					return result;
-				}
-				var __left0__ = results [0];
-				var _ = __left0__ [0];
-				var block_a = __left0__ [1];
-				var __left0__ = results [1];
-				var _ = __left0__ [0];
-				var block_b = __left0__ [1];
-				if (block_a.id.__ne__ (result.creation_transaction.blockid)) {
-					var block_c = block_a;
-					var block_a = block_b;
-					var block_b = block_c;
-				}
-				self._assign_block_properties_to_transacton (result.creation_transaction, block_a);
-				self._assign_block_properties_to_transacton (result.spend_transaction, block_b);
-				return result;
-			};
-			return jsasync.chain (p, aggregate);
-		};
-		return jsasync.chain (self.explorer_get (__kwargtrans__ ({endpoint: endpoint})), cb, fetch_transacton_timestamps);
+		return jsasync.chain (self.explorer_get (__kwargtrans__ ({endpoint: endpoint})), cb);
 	});},
 	get _transaction_from_explorer_transaction () {return __get__ (this, function (self, etxn, endpoint, resp) {
 		if (typeof endpoint == 'undefined' || (endpoint != null && endpoint.hasOwnProperty ("__kwargtrans__"))) {;
@@ -1085,8 +902,15 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 		}
 		transaction.unconfirmed = etxn.get_or ('unconfirmed', false);
 		if (!(transaction.unconfirmed)) {
-			transaction.height = int (etxn.get_or ('height', -(1)));
+			transaction.height = int (etxn.get_or ('height', 0));
+			transaction.timestamp = int (etxn.get_or ('timestamp', 0));
+			transaction.transaction_order = int (etxn.get_or ('order', 0));
 			transaction.blockid = etxn.get_or ('parent', null);
+			var miner_payouts = [];
+			for (var mp of etxn.get_or ('minerpayouts', [])) {
+				miner_payouts.append (MinerPayout.from_json (mp));
+			}
+			transaction.miner_payouts = miner_payouts;
 		}
 		return transaction;
 	});},
@@ -1145,42 +969,6 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 		else {
 		}
 		return Hash (__kwargtrans__ ({value: id})).str ();
-	});},
-	get _assign_block_properties_to_transacton () {return __get__ (this, function (self, txn, block) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-						case 'txn': var txn = __allkwargs0__ [__attrib0__]; break;
-						case 'block': var block = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		var raw_block = block.get_or ('rawblock', jsobj.new_dict ());
-		txn.timestamp = raw_block.get_or ('timestamp', 0);
-		var miner_payout_ids = block.get_or ('minerpayoutids', []);
-		if (self._network_type.block_creation_fee ().less_than_or_equal_to (0)) {
-			if (len (miner_payout_ids) >= 1) {
-				txn.fee_payout_id = miner_payout_ids [0];
-				txn.fee_payout_address = raw_block ['minerpayouts'] [0] ['unlockhash'];
-			}
-		}
-		else if (len (miner_payout_ids) >= 2) {
-			txn.fee_payout_id = miner_payout_ids [1];
-			txn.fee_payout_address = raw_block ['minerpayouts'] [1] ['unlockhash'];
-		}
-		for (var [idx, transaction] of enumerate (block.get_or ('transactions', []))) {
-			if (transaction.get_or ('id', 'id') == txn.id) {
-				txn.transaction_order = idx;
-				break;
-			}
-		}
 	});}
 });
 Object.defineProperty (TFChainClient, 'explorer_addresses', property.call (TFChainClient, TFChainClient._get_explorer_addresses));
