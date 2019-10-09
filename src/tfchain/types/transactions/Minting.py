@@ -394,7 +394,7 @@ class TransactionV130(TransactionBaseClass):
 
     def __init__(self):
         self._coin_inputs = []
-        self._refund_coin_output = None
+        self._coin_outputs = []
         self._miner_fees = []
         self._data = BinaryData(strencoding='base64')
 
@@ -423,30 +423,22 @@ class TransactionV130(TransactionBaseClass):
         self._coin_inputs.append(ci)
 
     def _custom_coin_outputs_getter(self):
-        if self._refund_coin_output is None:
-            return []
-        return [self._refund_coin_output]
+        """
+        Coin outputs of this Transaction,
+        funded by the Transaction's coin inputs.
+        """
+        return self._coin_outputs
     def _custom_coin_outputs_setter(self, value):
         self._coin_outputs = []
         if jsarr.is_empty(value):
-            self._refund_coin_output = None
             return
-        if jsobj.is_js_arr(value) or isinstance(value, list):
-            if len(value) == 0 or jsarr.is_empty(value):
-                self._refund_coin_output = None
-                return
-            if len(value) > 1:
-                raise ValueError("ThreeBot only can have one coin output, a refund coin output")
-            value = value[0]
-        if not isinstance(value, CoinOutput):
-            raise TypeError("cannot assign a value of type {} to coin outputs".format(type(value)))
-        self._refund_coin_output = CoinOutput(value=value.value, condition=value.condition)
-        self._refund_coin_output.id = value.id
+        for co in value:
+            self.coin_output_add(co.value, co.condition, id=co.id)
 
-    def refund_coin_output_set(self, value, condition, id=None):
+    def coin_output_add(self, value, condition, id=None):
         co = CoinOutput(value=value, condition=condition)
         co.id = id
-        self._refund_coin_output = co
+        self._coin_outputs.append(co)
 
     def miner_fee_add(self, value):
         self._miner_fees.append(Currency(value=value))

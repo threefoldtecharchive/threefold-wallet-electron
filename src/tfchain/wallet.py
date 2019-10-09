@@ -660,7 +660,7 @@ class TFChainMinter():
 
             # add refund coin output if needed
             if remainder.greater_than(0):
-                txn.refund_coin_output_set(value=remainder, condition=refund)
+                txn.coin_output_add(value=remainder, condition=refund)
             # add the miner fee
             txn.miner_fee_add(miner_fee)
 

@@ -792,7 +792,7 @@ export var TFChainMinter =  __class__ ('TFChainMinter', [object], {
 				var refund = ConditionTypes.from_recipient (refund);
 			}
 			if (remainder.greater_than (0)) {
-				txn.refund_coin_output_set (__kwargtrans__ ({value: remainder, condition: refund}));
+				txn.coin_output_add (__kwargtrans__ ({value: remainder, condition: refund}));
 			}
 			txn.miner_fee_add (miner_fee);
 			txn.coin_inputs = inputs;
