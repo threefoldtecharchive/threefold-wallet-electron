@@ -58,14 +58,14 @@ export var NetworkType =  __class__ ('NetworkType', [object], {
 		__except0__.__cause__ = null;
 		throw __except0__;
 	});},
-	get default_explorer_addresses () {return __getcm__ (this, function (cls) {
+	get default_explorer_addresses () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
 				var __allkwargs0__ = arguments [__ilastarg0__--];
 				for (var __attrib0__ in __allkwargs0__) {
 					switch (__attrib0__) {
-						case 'cls': var cls = __allkwargs0__ [__attrib0__]; break;
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
@@ -73,6 +73,24 @@ export var NetworkType =  __class__ ('NetworkType', [object], {
 		else {
 		}
 		var __except0__ = NotImplementedError ('default_explorer_addresses not implemented');
+		__except0__.__cause__ = null;
+		throw __except0__;
+	});},
+	get faucet_address () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var __except0__ = NotImplementedError ('faucet_address not implemented');
 		__except0__.__cause__ = null;
 		throw __except0__;
 	});}
@@ -313,7 +331,7 @@ export var TFChainNetworkType =  __class__ ('TFChainNetworkType', [NetworkType],
 		if (self.__eq__ (TFChainNetworkType.TESTNET)) {
 			return ['https://explorer.testnet.threefoldtoken.com', 'https://explorer2.testnet.threefoldtoken.com'];
 		}
-		return ['http://localhost:23110'];
+		return ['http://localhost:2015'];
 	});},
 	get faucet_address () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -331,6 +349,9 @@ export var TFChainNetworkType =  __class__ ('TFChainNetworkType', [NetworkType],
 		}
 		if (self.__eq__ (TFChainNetworkType.TESTNET)) {
 			return 'https://faucet.testnet.threefoldtoken.com';
+		}
+		if (self.__eq__ (TFChainNetworkType.DEVNET)) {
+			return 'http://localhost:2016';
 		}
 		return null;
 	});}
@@ -586,7 +607,7 @@ export var GoldChainNetworkType =  __class__ ('GoldChainNetworkType', [NetworkTy
 			return ['https://explorer.testnet.nbh-digital.com', 'https://explorer2.testnet.nbh-digital.com'];
 		}
 		if (self.__eq__ (GoldChainNetworkType.DEVNET)) {
-			return ['http://localhost:22110'];
+			return ['http://localhost:2015'];
 		}
 		var __except0__ = ValueError ('invalid Goldchain network type {}'.format (self.value));
 		__except0__.__cause__ = null;
@@ -608,6 +629,9 @@ export var GoldChainNetworkType =  __class__ ('GoldChainNetworkType', [NetworkTy
 		}
 		if (self.__eq__ (GoldChainNetworkType.TESTNET)) {
 			return 'https://faucet.testnet.nbh-digital.com';
+		}
+		if (self.__eq__ (GoldChainNetworkType.DEVNET)) {
+			return 'http://localhost:2016';
 		}
 		return null;
 	});}
@@ -840,11 +864,30 @@ export var ThreefoldBonusNetworkType =  __class__ ('ThreefoldBonusNetworkType', 
 			return ['https://explorer.testnet.tfb.threefold.tech'];
 		}
 		if (self.__eq__ (ThreefoldBonusNetworkType.DEVNET)) {
-			return ['http://localhost:21110'];
+			return ['http://localhost:2015'];
 		}
 		var __except0__ = ValueError ('invalid ThreeFoldBonus network type {}'.format (self.value));
 		__except0__.__cause__ = null;
 		throw __except0__;
+	});},
+	get faucet_address () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (self.__eq__ (ThreefoldBonusNetworkType.DEVNET)) {
+			return 'http://localhost:2016';
+		}
+		return null;
 	});}
 });
 Object.defineProperty (ThreefoldBonusNetworkType, 'value', property.call (ThreefoldBonusNetworkType, ThreefoldBonusNetworkType._get_value));;
@@ -1075,11 +1118,30 @@ export var FreeFlowTokenNetworkType =  __class__ ('FreeFlowTokenNetworkType', [N
 			return ['https://explorer.testnet.fft.threefold.tech'];
 		}
 		if (self.__eq__ (FreeFlowTokenNetworkType.DEVNET)) {
-			return ['http://localhost:22311'];
+			return ['http://localhost:2015'];
 		}
 		var __except0__ = ValueError ('invalid FreeFlowToken network type {}'.format (self.value));
 		__except0__.__cause__ = null;
 		throw __except0__;
+	});},
+	get faucet_address () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (self.__eq__ (FreeFlowTokenNetworkType.DEVNET)) {
+			return 'http://localhost:2016';
+		}
+		return null;
 	});}
 });
 Object.defineProperty (FreeFlowTokenNetworkType, 'value', property.call (FreeFlowTokenNetworkType, FreeFlowTokenNetworkType._get_value));;

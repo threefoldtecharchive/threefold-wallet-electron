@@ -376,6 +376,17 @@ class NewAccount extends Component {
                   checked={this.state.network === 'testnet' || this.state.chainType === 'goldchain' || this.state.chainType === 'tfbchain' || this.state.chainType === 'fftchain'}
                   onChange={this.handleNetworkChange}
                 />
+                {(this.state.chainType !== 'goldchain') ? (
+                  null
+                ) : (
+                  <Radio style={{ marginRight: 30, color: 'white' }}
+                    label={<label style={{ color: 'white' }}>devnet</label>}
+                    name='radioGroup'
+                    value='devnet'
+                    checked={this.state.network === 'devnet'}
+                    onChange={this.handleNetworkChange}
+                  />
+                )}
               </div>
             </Form.Field>
             <Form.Field error={nameError}>

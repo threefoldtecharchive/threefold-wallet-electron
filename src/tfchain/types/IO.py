@@ -2,7 +2,7 @@ from tfchain.types.BaseDataType import BaseDataTypeClass
 from tfchain.types.PrimitiveTypes import BinaryData, Hash, Currency, Blockstake
 from tfchain.types import FulfillmentTypes, ConditionTypes
 from tfchain.types.FulfillmentTypes import FulfillmentBaseClass, FulfillmentSingleSignature
-from tfchain.types.ConditionTypes import ConditionBaseClass, ConditionNil
+from tfchain.types.ConditionTypes import ConditionBaseClass, ConditionNil, UnlockHash, UnlockHashType
 
 class CoinInput(BaseDataTypeClass):
     """

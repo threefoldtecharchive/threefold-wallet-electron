@@ -13,9 +13,10 @@ class NetworkType:
     def block_creation_fee(self):
         raise NotImplementedError("block_creation_fee not implemented")
 
-    @classmethod
-    def default_explorer_addresses(cls):
+    def default_explorer_addresses(self):
         raise NotImplementedError("default_explorer_addresses not implemented")
+    def faucet_address(self):
+        raise NotImplementedError("faucet_address not implemented")
 
 class TFChainNetworkType(NetworkType):
     def __init__(self, value):
@@ -93,12 +94,14 @@ class TFChainNetworkType(NetworkType):
             ]
         # DEVNET
         return [
-            'http://localhost:23110'
+            'http://localhost:2015'
         ]
 
     def faucet_address(self):
         if self.__eq__(TFChainNetworkType.TESTNET):
             return "https://faucet.testnet.threefoldtoken.com"
+        if self.__eq__(TFChainNetworkType.DEVNET):
+            return "http://localhost:2016"
         return None
 
 TFChainNetworkType.STANDARD = TFChainNetworkType(0)
@@ -175,13 +178,15 @@ class GoldChainNetworkType(NetworkType):
             ]
         if self.__eq__(GoldChainNetworkType.DEVNET):
             return [
-                'http://localhost:22110'
+                'http://localhost:2015'
             ]
         raise ValueError("invalid Goldchain network type {}".format(self.value))
 
     def faucet_address(self):
         if self.__eq__(GoldChainNetworkType.TESTNET):
             return "https://faucet.testnet.nbh-digital.com"
+        if self.__eq__(GoldChainNetworkType.DEVNET):
+            return "http://localhost:2016"
         return None
 
 GoldChainNetworkType.TESTNET = GoldChainNetworkType(1)
@@ -249,9 +254,14 @@ class ThreefoldBonusNetworkType(NetworkType):
             ]
         if self.__eq__(ThreefoldBonusNetworkType.DEVNET):
             return [
-                'http://localhost:21110'
+                'http://localhost:2015'
             ]
         raise ValueError("invalid ThreeFoldBonus network type {}".format(self.value))
+
+    def faucet_address(self):
+        if self.__eq__(ThreefoldBonusNetworkType.DEVNET):
+            return "http://localhost:2016"
+        return None
 
 ThreefoldBonusNetworkType.TESTNET = ThreefoldBonusNetworkType(1)
 ThreefoldBonusNetworkType.DEVNET = ThreefoldBonusNetworkType(2)
@@ -318,9 +328,14 @@ class FreeFlowTokenNetworkType(NetworkType):
             ]
         if self.__eq__(FreeFlowTokenNetworkType.DEVNET):
             return [
-                'http://localhost:22311'
+                'http://localhost:2015'
             ]
         raise ValueError("invalid FreeFlowToken network type {}".format(self.value))
+
+    def faucet_address(self):
+        if self.__eq__(FreeFlowTokenNetworkType.DEVNET):
+            return "http://localhost:2016"
+        return None
 
 FreeFlowTokenNetworkType.TESTNET = FreeFlowTokenNetworkType(1)
 FreeFlowTokenNetworkType.DEVNET = FreeFlowTokenNetworkType(2)
