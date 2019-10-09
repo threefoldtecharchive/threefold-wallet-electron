@@ -4,7 +4,7 @@ import React, { Component } from 'react'
 import { Form, Dropdown, Loader, Dimmer, Message } from 'semantic-ui-react'
 import { toast } from 'react-toastify'
 import { updateAccount, setTransactionJson } from '../../actions'
-import moment from 'moment'
+import moment from 'moment-timezone'
 import routes from '../../constants/routes'
 import { concat, truncate, flatten } from 'lodash'
 import TransactionConfirmationModal from './TransactionConfirmationModal'
@@ -274,17 +274,14 @@ class InternalTransaction extends Component {
   buildInternalTransation = () => {
     const { form, account } = this.props
     const { values } = form.transactionForm
-    const { message, amount, datelock, timelock, selectedWallet } = values
+    const { message, amount, datetime, selectedWallet } = values
     const { selectedRecipientAddress, selectedWalletRecipient } = this.state
 
     const selectedWalletX = account.selected_wallet || selectedWallet
 
     let timestamp
-    if (datelock !== '') {
-      const concatDate = datelock + ' ' + timelock
-      const dateLockDate = new Date(concatDate)
-      const dateLockTimeZone = dateLockDate.getTimezoneOffset()
-      timestamp = moment(dateLockDate).utcOffset(dateLockTimeZone).unix()
+    if (datetime) {
+      timestamp = moment(datetime).unix()
     }
 
     this.renderLoader(true)

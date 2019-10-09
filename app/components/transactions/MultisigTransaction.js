@@ -5,7 +5,7 @@ import { Form, Input, Icon, Loader, Dimmer, Message, Popup, Dropdown, Divider, C
 import { toast } from 'react-toastify'
 import { updateAccount, setTransactionJson, saveAccount } from '../../actions'
 import * as tfchain from '../../tfchain/api'
-import moment from 'moment'
+import moment from 'moment-timezone'
 import routes from '../../constants/routes'
 import TransactionConfirmationModal from './TransactionConfirmationModal'
 import SearchableAddress from '../common/SearchableAddress'
@@ -321,19 +321,14 @@ class MultisigTransaction extends Component {
   buildMultiSignTransaction = () => {
     const { form, account } = this.props
     const { values } = form.transactionForm
-    const { message, amount, datelock, timelock, selectedWallet } = values
+    const { message, amount, datetime, selectedWallet } = values
     const { signatureCount, ownerAddresses } = this.state
-
-    // const { selectedWallet, signatureCount, ownerAddresses, amount, datelock, timelock, message } = this.state
 
     const selectedWalletX = account.selected_wallet || selectedWallet
 
     let timestamp
-    if (datelock !== '') {
-      const concatDate = datelock + ' ' + timelock
-      const dateLockDate = new Date(concatDate)
-      const dateLockTimeZone = dateLockDate.getTimezoneOffset()
-      timestamp = moment(dateLockDate).utcOffset(dateLockTimeZone).unix()
+    if (datetime) {
+      timestamp = moment(datetime).unix()
     }
 
     this.renderLoader(true)
