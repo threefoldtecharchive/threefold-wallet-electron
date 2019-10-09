@@ -465,6 +465,13 @@ class TFChainClient:
             for mp in etxn.get_or('minerpayouts', []):
                 miner_payouts.append(MinerPayout.from_json(mp))
             transaction.miner_payouts = miner_payouts
+            if self._network_type.block_creation_fee().less_than_or_equal_to(0): # take first one available
+                if len(transaction.miner_payouts) >= 1:
+                    transaction.fee_payout_id = transaction.miner_payouts[0].id
+                    transaction.fee_payout_address = transaction.miner_payouts[0].unlockhash
+            elif len(transaction.miner_payouts) >= 2:
+                transaction.fee_payout_id = transaction.miner_payouts[1].id
+                transaction.fee_payout_address = transaction.miner_payouts[1].unlockhash
         # return the transaction
         return transaction
 
