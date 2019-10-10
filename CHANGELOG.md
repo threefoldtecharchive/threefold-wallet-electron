@@ -1,3 +1,10 @@
+# v0.5.1 (2019.10.11)
+
+Fixes:
+
+- allow tokens to be transfered from goldchain wallets by fixing a bug related to custody fees;
+- allow miner payouts to be spent by wallet (including block rewards);
+
 # v0.5.0 (2019.10.10)
 
 Features:

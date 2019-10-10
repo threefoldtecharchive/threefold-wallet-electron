@@ -711,7 +711,17 @@ export var TransactionBaseClass =  __class__ ('TransactionBaseClass', [object], 
 		else {
 		}
 		var outputs = [];
-		if (self.fee_payout_address != null && len (self.miner_fees) > 0) {
+		var mps = self.miner_payouts;
+		if (mps != null && len (mps) > 0) {
+			var outputs = (function () {
+				var __accu0__ = [];
+				for (var mp of mps) {
+					__accu0__.append (mp.as_coin_output ());
+				}
+				return __accu0__;
+			}) ();
+		}
+		else if (self.fee_payout_address != null && len (self.miner_fees) > 0) {
 			var amount = Currency.sum (...self.miner_fees);
 			var condition = ConditionTypes.from_recipient (self.fee_payout_address);
 			outputs.append (CoinOutput (__kwargtrans__ ({value: amount, condition: condition, id: self._fee_payout_id, is_fee: true})));

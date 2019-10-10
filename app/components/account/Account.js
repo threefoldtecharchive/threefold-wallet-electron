@@ -227,20 +227,20 @@ class Account extends Component {
           <Grid.Column style={{ textAlign: 'center' }}>
             <h4 style={{ marginTop: 0 }}>Total Balance</h4>
             <h4 className={styles.gradientTitle} >{coinsTotalSpendable.str({ precision: 3, unit: true })}</h4>
-            {custodyFeeDebt.greater_than(0) ? (<span style={{ color: 'white', fontSize: 10 }}>custody fee: {custodyFeeDebt.str({ precision: 6, unit: true })}</span>) : (<p />)}
-            {unconfirmedTotalCoins.greater_than(0) ? (<span style={{ color: 'white', fontSize: 12 }}>* unconfirmed: {unconfirmedTotalCoins.str({ precision: 3, unit: true })}</span>) : (<p />)}
+            {custodyFeeDebt.greater_than(0) ? (<p style={{ color: 'white', fontSize: 10 }}>custody fee: {custodyFeeDebt.str({ precision: 6, unit: true })}</p>) : (<p />)}
+            {unconfirmedTotalCoins.greater_than(0) ? (<p style={{ color: 'white', fontSize: 12 }}>* unconfirmed: {unconfirmedTotalCoins.str({ precision: 3, unit: true })}</p>) : (<p />)}
           </Grid.Column>
           <Grid.Column style={{ textAlign: 'center' }}>
             <h4><Icon name='lock' />Locked Balance</h4>
             <h4>{coinsLockedSpendable.str({ precision: 3, unit: true })}</h4>
-            {custodyFeeDebtLocked.greater_than(0) ? (<span style={{ color: 'white', fontSize: 10 }}>custody fee: {custodyFeeDebtLocked.str({ precision: 6, unit: true })}</span>) : (<p />)}
-            {unconfirmedLockedCoins.greater_than(0) ? (<span style={{ color: 'white', fontSize: 12 }}>* unconfirmed: {unconfirmedLockedCoins.str({ precision: 3, unit: true })}</span>) : (<p />)}
+            {custodyFeeDebtLocked.greater_than(0) ? (<p style={{ color: 'white', fontSize: 10 }}>custody fee: {custodyFeeDebtLocked.str({ precision: 6, unit: true })}</p>) : (<p />)}
+            {unconfirmedLockedCoins.greater_than(0) ? (<p style={{ color: 'white', fontSize: 12 }}>* unconfirmed: {unconfirmedLockedCoins.str({ precision: 3, unit: true })}</p>) : (<p />)}
           </Grid.Column>
           <Grid.Column style={{ textAlign: 'center' }}>
             <h4><Icon name='unlock' />Unlocked Balance</h4>
             <h4 style={{ marginBottom: 0 }}>{coinsUnlockedSpendable.str({ precision: 3, unit: true })}</h4>
-            {custodyFeeDebtUnlocked.greater_than(0) ? (<span style={{ color: 'white', fontSize: 10 }}>custody fee: {custodyFeeDebtUnlocked.str({ precision: 6, unit: true })}</span>) : (<p />)}
-            {unconfirmedUnlockedCoins.greater_than(0) ? (<span style={{ color: 'white', fontSize: 12 }}>* unconfirmed: {unconfirmedUnlockedCoins.str({ precision: 3, unit: true })} </span>) : (<p />)}
+            {custodyFeeDebtUnlocked.greater_than(0) ? (<p style={{ color: 'white', fontSize: 10 }}>custody fee: {custodyFeeDebtUnlocked.str({ precision: 6, unit: true })}</p>) : (<p />)}
+            {unconfirmedUnlockedCoins.greater_than(0) ? (<p style={{ color: 'white', fontSize: 12 }}>* unconfirmed: {unconfirmedUnlockedCoins.str({ precision: 3, unit: true })} </p>) : (<p />)}
           </Grid.Column>
         </Grid>
       )

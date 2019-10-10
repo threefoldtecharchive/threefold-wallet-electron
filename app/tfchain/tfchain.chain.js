@@ -58,6 +58,24 @@ export var NetworkType =  __class__ ('NetworkType', [object], {
 		__except0__.__cause__ = null;
 		throw __except0__;
 	});},
+	get miner_payout_block_delay () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var __except0__ = NotImplementedError ('miner_payout_block_delay not implemented');
+		__except0__.__cause__ = null;
+		throw __except0__;
+	});},
 	get default_explorer_addresses () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -328,6 +346,22 @@ export var TFChainNetworkType =  __class__ ('TFChainNetworkType', [NetworkType],
 			return Currency ('1.0');
 		}
 		return Currency ('10.0');
+	});},
+	get miner_payout_block_delay () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return 1000;
 	});},
 	get default_explorer_addresses () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -623,6 +657,22 @@ export var GoldChainNetworkType =  __class__ ('GoldChainNetworkType', [NetworkTy
 		}
 		return Currency (0);
 	});},
+	get miner_payout_block_delay () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return 1000;
+	});},
 	get default_explorer_addresses () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -896,6 +946,22 @@ export var ThreefoldBonusNetworkType =  __class__ ('ThreefoldBonusNetworkType', 
 		}
 		return Currency ('1.0');
 	});},
+	get miner_payout_block_delay () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return 1000;
+	});},
 	get default_explorer_addresses () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -1165,6 +1231,22 @@ export var FreeFlowTokenNetworkType =  __class__ ('FreeFlowTokenNetworkType', [N
 		else {
 		}
 		return Currency ('0.0');
+	});},
+	get miner_payout_block_delay () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return 1000;
 	});},
 	get default_explorer_addresses () {return __get__ (this, function (self) {
 		if (arguments.length) {

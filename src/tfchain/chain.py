@@ -12,6 +12,8 @@ class NetworkType:
         raise NotImplementedError("minimum_miner_fee not implemented")
     def block_creation_fee(self):
         raise NotImplementedError("block_creation_fee not implemented")
+    def miner_payout_block_delay(self):
+        raise NotImplementedError("miner_payout_block_delay not implemented")
 
     def default_explorer_addresses(self):
         raise NotImplementedError("default_explorer_addresses not implemented")
@@ -81,6 +83,9 @@ class TFChainNetworkType(NetworkType):
         if self.__eq__(TFChainNetworkType.STANDARD):
             return Currency('1.0')
         return Currency('10.0')
+
+    def miner_payout_block_delay(self):
+        return 1000
 
     def default_explorer_addresses(self):
         if self.__eq__(TFChainNetworkType.STANDARD):
@@ -176,6 +181,9 @@ class GoldChainNetworkType(NetworkType):
             return Currency('10.0')
         return Currency(0)
 
+    def miner_payout_block_delay(self):
+        return 1000
+
     def default_explorer_addresses(self):
         if self.__eq__(GoldChainNetworkType.TESTNET):
             return [
@@ -256,6 +264,9 @@ class ThreefoldBonusNetworkType(NetworkType):
     def block_creation_fee(self):
         return Currency('1.0')
 
+    def miner_payout_block_delay(self):
+        return 1000
+
     def default_explorer_addresses(self):
         if self.__eq__(ThreefoldBonusNetworkType.TESTNET):
             return [
@@ -332,6 +343,9 @@ class FreeFlowTokenNetworkType(NetworkType):
 
     def block_creation_fee(self):
         return Currency('0.0')
+
+    def miner_payout_block_delay(self):
+        return 1000
 
     def default_explorer_addresses(self):
         if self.__eq__(FreeFlowTokenNetworkType.TESTNET):

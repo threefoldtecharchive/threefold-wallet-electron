@@ -9,7 +9,7 @@ import * as tferrors from './tfchain.errors.js';
 import * as jsarr from './tfchain.polyfill.array.js';
 import * as jsobj from './tfchain.polyfill.encoding.object.js';
 var __name__ = 'tfchain.balance';
-export var _MAX_RIVINE_TRANSACTION_INPUTS = 99;
+export var _MAX_RIVINE_TRANSACTION_INPUTS = 85;
 export var WalletBalance =  __class__ ('WalletBalance', [object], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self) {
@@ -728,7 +728,7 @@ export var WalletBalance =  __class__ ('WalletBalance', [object], {
 			var amount = sum ((function () {
 				var __accu0__ = [];
 				for (var co of used_outputs) {
-					__accu0__.append (co.value);
+					__accu0__.append (co.spendable_value);
 				}
 				return __accu0__;
 			}) ()) - miner_fee;
@@ -889,10 +889,10 @@ export var WalletBalance =  __class__ ('WalletBalance', [object], {
 			}
 			else {
 			}
-			if (a.value.less_than (b.value)) {
+			if (a.spendable_value.less_than (b.spendable_value)) {
 				return -(1);
 			}
-			if (a.value.greater_than (b.value)) {
+			if (a.spendable_value.greater_than (b.spendable_value)) {
 				return 1;
 			}
 			return 0;
@@ -901,13 +901,13 @@ export var WalletBalance =  __class__ ('WalletBalance', [object], {
 		var collected = Currency ();
 		var outputs = [];
 		for (var co of outputs_available) {
-			if (co.value.greater_than_or_equal_to (amount)) {
-				return tuple ([[co], co.value]);
+			if (co.spendable_value.greater_than_or_equal_to (amount)) {
+				return tuple ([[co], co.spendable_value]);
 			}
-			var collected = collected.plus (co.value);
+			var collected = collected.plus (co.spendable_value);
 			outputs.append (co);
 			if (len (outputs) > _MAX_RIVINE_TRANSACTION_INPUTS) {
-				var collected = collected.minus (jsarr.py_pop (outputs, 0).value);
+				var collected = collected.minus (jsarr.py_pop (outputs, 0).spendable_value);
 			}
 			if (collected.greater_than_or_equal_to (amount)) {
 				return tuple ([outputs, collected]);

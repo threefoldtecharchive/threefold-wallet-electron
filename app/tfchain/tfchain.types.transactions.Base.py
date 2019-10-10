@@ -248,7 +248,10 @@ class TransactionBaseClass():
         funded by the Transaction's coin inputs.
         """
         outputs = []
-        if self.fee_payout_address != None and len(self.miner_fees) > 0:
+        mps = self.miner_payouts
+        if mps != None and len(mps) > 0:
+            outputs = [mp.as_coin_output() for mp in mps]
+        elif self.fee_payout_address != None and len(self.miner_fees) > 0:
             amount = Currency.sum(*self.miner_fees)
             condition = ConditionTypes.from_recipient(self.fee_payout_address)
             outputs.append(CoinOutput(value=amount, condition=condition, id=self._fee_payout_id, is_fee=True))

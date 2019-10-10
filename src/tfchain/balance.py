@@ -10,7 +10,7 @@ from tfchain.types.IO import CoinInput
 from tfchain.chain import Type
 
 
-_MAX_RIVINE_TRANSACTION_INPUTS = 99
+_MAX_RIVINE_TRANSACTION_INPUTS = 85
 
 
 class WalletBalance(object):
@@ -350,7 +350,7 @@ class WalletBalance(object):
             used_outputs = outputs[:n]
             outputs = outputs[n:] # and update our output list, so we do not double spend
             # compute amount, minus minimum fee and add our only output
-            amount = sum([co.value for co in used_outputs]) - miner_fee
+            amount = sum([co.spendable_value for co in used_outputs]) - miner_fee
             txn.coin_output_add(condition=recipient, value=amount)
             # add the coin inputs
             txn.coin_inputs = [CoinInput.from_coin_output(co) for co in used_outputs]
@@ -421,9 +421,9 @@ class WalletBalance(object):
     def _fund_individual(self, amount, addresses):
         outputs_available = [co for co in self.outputs_available if co.condition.unlockhash.__str__() in addresses]
         def sort_output_by_value(a, b):
-            if a.value.less_than(b.value):
+            if a.spendable_value.less_than(b.spendable_value):
                 return -1
-            if a.value.greater_than(b.value):
+            if a.spendable_value.greater_than(b.spendable_value):
                 return 1
             return 0
         outputs_available = jsarr.sort(outputs_available, sort_output_by_value)
@@ -432,13 +432,13 @@ class WalletBalance(object):
         outputs = []
         # try to fund only with confirmed outputs, if possible
         for co in outputs_available:
-            if co.value.greater_than_or_equal_to(amount):
-                return [co], co.value
-            collected = collected.plus(co.value)
+            if co.spendable_value.greater_than_or_equal_to(amount):
+                return [co], co.spendable_value
+            collected = collected.plus(co.spendable_value)
             outputs.append(co)
             if len(outputs) > _MAX_RIVINE_TRANSACTION_INPUTS:
                 # to not reach the input limit
-                collected = collected.minus(jsarr.pop(outputs, 0).value)
+                collected = collected.minus(jsarr.pop(outputs, 0).spendable_value)
             if collected.greater_than_or_equal_to(amount):
                 return outputs, collected
 

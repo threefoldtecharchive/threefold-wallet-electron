@@ -2040,14 +2040,20 @@ class TransactionView:
         # go through all outputs and inputs and keep track of the addresses, locks and amounts
         aggregator = WalletOutputAggregator(chain_type, addresses)
         for co in transaction.coin_outputs:
-            if not co.is_fee:
-                aggregator.add_coin_output(
+            if co.is_fee:
+                aggregator.add_fee(
+                    address=co.condition.unlockhash.__str__(),
+                    lock=co.condition.lock.value,
+                    amount=co.value)
+            elif co.is_reward:
+                aggregator.add_reward(
                     address=co.condition.unlockhash.__str__(),
                     lock=co.condition.lock.value,
                     amount=co.value)
             else:
-                aggregator.add_fee(
+                aggregator.add_coin_output(
                     address=co.condition.unlockhash.__str__(),
+                    lock=co.condition.lock.value,
                     amount=co.value)
         for ci in transaction.coin_inputs:
             if ci.has_parent_output:
@@ -2187,6 +2193,7 @@ class WalletOutputAggregator:
         self._other_send_addresses = set()
         self._all_balances = {}
         self._fee_balances = {}
+        self._reward_balances = {}
 
     def _modify_balance(self, address, lock, amount, negate=False):
         slock = jsstr.from_int(lock)
@@ -2207,13 +2214,37 @@ class WalletOutputAggregator:
         else:
             balances[slock] = balances[slock].plus(amount)
 
-    def _modify_fee_balance(self, address, amount):
-        if not address:
-            address = ""
+    def _modify_fee_balance(self, address, lock, amount):
+        slock = jsstr.from_int(lock)
         if address not in self._fee_balances:
-            self._fee_balances[address] = Currency(amount)
-        else:
-            self._fee_balances[address] = self._fee_balances[address].plus(amount)
+            # store as new address/lock combo, with first of the address' set
+            self._fee_balances[address] = {
+                slock: Currency(amount),
+            }
+            return
+        balances = self._fee_balances[address]
+        if slock not in balances:
+            # store as new address/lock combo
+            balances[slock] = Currency(amount)
+            return
+        # modify existing address/lock combo
+        balances[slock] = balances[slock].plus(amount)
+
+    def _modify_reward_balance(self, address, lock, amount):
+        slock = jsstr.from_int(lock)
+        if address not in self._reward_balances:
+            # store as new address/lock combo, with first of the address' set
+            self._reward_balances[address] = {
+                slock: Currency(amount),
+            }
+            return
+        balances = self._reward_balances[address]
+        if slock not in balances:
+            # store as new address/lock combo
+            balances[slock] = Currency(amount)
+            return
+        # modify existing address/lock combo
+        balances[slock] = balances[slock].plus(amount)
 
     def add_coin_input(self, address, amount):
         if address != None:
@@ -2229,9 +2260,13 @@ class WalletOutputAggregator:
         self._total_output = self._total_output.plus(amount)
         self._modify_balance(address, lock, amount, negate=False)
 
-    def add_fee(self, address, amount):
+    def add_fee(self, address, lock, amount):
         self._total_output = self._total_output.plus(amount)
-        self._modify_fee_balance(address, amount)
+        self._modify_fee_balance(address, lock, amount)
+
+    def add_reward(self, address, lock, amount):
+        self._total_output = self._total_output.plus(amount)
+        self._modify_reward_balance(address, lock, amount)
 
     def inputs_outputs_collect(self):
         # our final I/O lists
@@ -2271,7 +2306,7 @@ class WalletOutputAggregator:
                         amount=amount,
                         lock=lock,
                         lock_is_timestamp=False if lock == 0 else OutputLock(lock).is_timestamp,
-                        fee=False,
+                        output_description='',
                     ))
                 elif we_sent_coin_outputs: # only if we actually send coins, shall we track
                     # outgoing money
@@ -2281,20 +2316,36 @@ class WalletOutputAggregator:
                         amount=amount.times(ratio),
                         lock=lock,
                         lock_is_timestamp=False if lock == 0 else OutputLock(lock).is_timestamp,
-                        fee=False,
+                        output_description='custody fee' if jsstr.startswith(address, "80") else '',
                     ))
-        # add all fees if required
+        # add all payouts if required
         if we_sent_coin_outputs:
-            for address, amount in jsobj.get_items(self._fee_balances):
-                amount.unit = self._chain_type.currency_unit()
-                outputs.append(CoinOutputView(
-                    senders=our_send_addresses,
-                    recipient=address if address else None,
-                    amount=amount.times(ratio),
-                    lock=0,
-                    lock_is_timestamp=False,
-                    fee=True,
-                ))
+            # add rewards
+            for address, balances in jsobj.get_items(self._reward_balances):
+                for slock, amount in jsobj.get_items(balances):
+                    lock = jsstr.to_int(slock)
+                    amount.unit = self._chain_type.currency_unit()
+                    outputs.append(CoinOutputView(
+                        senders=our_send_addresses,
+                        recipient=address if address else None,
+                        amount=amount.times(ratio),
+                        lock=lock,
+                        lock_is_timestamp=False,
+                        output_description='block reward',
+                    ))
+            # add fees
+            for address, balances in jsobj.get_items(self._fee_balances):
+                for slock, amount in jsobj.get_items(balances):
+                    lock = jsstr.to_int(slock)
+                    amount.unit = self._chain_type.currency_unit()
+                    outputs.append(CoinOutputView(
+                        senders=our_send_addresses,
+                        recipient=address if address else None,
+                        amount=amount.times(ratio),
+                        lock=lock,
+                        lock_is_timestamp=False,
+                        output_description='fee',
+                    ))
             # check if we have any coins spent not matched with an output
             if total_input.greater_than(self._total_output):
                 amount = total_input.minus(self._total_output)
@@ -2305,7 +2356,7 @@ class WalletOutputAggregator:
                     amount=amount.times(ratio),
                     lock=0,
                     lock_is_timestamp=False,
-                    fee=False,
+                    output_description='',
                 ))
 
         # returm the (filtered and) aggregated I/O
@@ -2319,13 +2370,13 @@ class CoinOutputView:
     NOTE: AtomicSwapConditioned outputs are not supported.
     """
 
-    def __init__(self, senders, recipient, amount, lock, lock_is_timestamp, fee):
+    def __init__(self, senders, recipient, amount, lock, lock_is_timestamp, output_description):
         self._senders = senders
         self._recipient = recipient
         self._amount = amount
         self._lock = lock
         self._lock_is_timestamp = lock_is_timestamp
-        self._fee = fee
+        self._output_description = output_description
 
     @property
     def senders(self):
@@ -2363,19 +2414,12 @@ class CoinOutputView:
         """
         return self._lock_is_timestamp
     @property
-    def is_fee(self):
+    def description(self):
         """
-        :returns: true if this coin output is a fee, false otherwise
-        :rtype: bool
+        :returns: an optional coin description
+        :rtype: str
         """
-        return self._fee
-    @property
-    def is_custody_fee(self):
-        """
-        :returns: returns true if this is a custody fee
-        :rtype: bool
-        """
-        return isinstance(self._recipient, str) and jsstr.startswith(self._recipient, "80")
+        return self._output_description
 
 
 class ChainInfo:

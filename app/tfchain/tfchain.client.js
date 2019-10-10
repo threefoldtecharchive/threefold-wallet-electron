@@ -927,8 +927,12 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 			transaction.transaction_order = int (etxn.get_or ('order', 0));
 			transaction.blockid = etxn.get_or ('parent', null);
 			var miner_payouts = [];
-			for (var mp of etxn.get_or ('minerpayouts', [])) {
-				miner_payouts.append (MinerPayout.from_json (mp));
+			var rewardIndex = (self._network_type.block_creation_fee ().greater_than (0) ? 0 : -(1));
+			for (var [idx, mp] of enumerate (etxn.get_or ('minerpayouts', []))) {
+				var dmp = MinerPayout.from_json (mp);
+				dmp.is_reward = idx == rewardIndex;
+				dmp.unlockheight = transaction.height + self._network_type.miner_payout_block_delay ();
+				miner_payouts.append (dmp);
 			}
 			transaction.miner_payouts = miner_payouts;
 			if (self._network_type.block_creation_fee ().less_than_or_equal_to (0)) {

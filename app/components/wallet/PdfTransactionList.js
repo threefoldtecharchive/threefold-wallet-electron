@@ -183,7 +183,7 @@ function renderTransactionBody (tx, account) {
         <View style={styles.txBodyStyle} key={out.recipient}>
           <Text style={styles.sentAmount}>
             Amount:  - {out.amount.str({ unit: true })}
-            {out.is_fee ? <Text>  (fee)</Text> : (out.is_custody_fee ? <Text>  (custody fee)</Text> : null)}
+            {out.description ? <Text>  ({out.description})</Text> : null}
           </Text>
           {out.senders.map(sender => {
             return (

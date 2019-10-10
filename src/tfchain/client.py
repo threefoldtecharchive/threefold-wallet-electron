@@ -477,8 +477,12 @@ class TFChainClient:
             transaction.transaction_order = int(etxn.get_or('order', 0))
             transaction.blockid = etxn.get_or('parent', None)
             miner_payouts = []
-            for mp in etxn.get_or('minerpayouts', []):
-                miner_payouts.append(MinerPayout.from_json(mp))
+            rewardIndex = 0 if self._network_type.block_creation_fee().greater_than(0) else -1
+            for (idx, mp) in enumerate(etxn.get_or('minerpayouts', [])):
+                dmp = MinerPayout.from_json(mp)
+                dmp.is_reward = (idx == rewardIndex)
+                dmp.unlockheight = transaction.height + self._network_type.miner_payout_block_delay()
+                miner_payouts.append(dmp)
             transaction.miner_payouts = miner_payouts
             if self._network_type.block_creation_fee().less_than_or_equal_to(0): # take first one available
                 if len(transaction.miner_payouts) >= 1:
