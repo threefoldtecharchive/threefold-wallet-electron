@@ -1,10 +1,27 @@
-# v0.4.0 (2018.09.23)
+# v0.5.0 (2019.10.10)
+
+Features:
+
+- added custody fee support for Custody Fees (only for Goldchain);
+- added support for devnet network (only for Goldchain);
+
+Fixes:
+
+- wallets are allowed to sent to themselves (allows for merging of coin outputs);
+- added timelocks for internal and multisig transactions are taken into account once again;
+- adapt minting destruction tx: chains now accepts multiple coin outputs for minting destruction tx;
+
+Improvements:
+
+- parent blocks are no longer fetched for each transaction, block header info is now directly taken from txn;
+
+# v0.4.1 (2019.09.23)
 
 Fixes:
 
 - wallet now syncs with the most up to date explorer.
 
-# v0.4.0 (2018.09.10)
+# v0.4.0 (2019.09.10)
 
 Features:
 
@@ -23,7 +40,7 @@ Fixes:
 - exported pdf endbalance is now correct.
 - fixed memory leaks.
 
-# v0.3.0 (2018.07.16)
+# v0.3.0 (2019.07.16)
 
 Features:
 
@@ -41,7 +58,7 @@ Fixes:
 
 - fixed displaying current route when navigating.
 
-# v0.2.2 (2018.07.11)
+# v0.2.2 (2019.07.11)
 
 Features:
 
@@ -60,7 +77,7 @@ Fixes:
 - fixed error when deleting an account.
 - fixed wrong available balance display on transfer page.
 
-# v0.2.1 (2018.07.09)
+# v0.2.1 (2019.07.09)
 
 Features:
 
@@ -79,7 +96,7 @@ Fixes:
 - fixed bugs for internal transactions that appeared when only one wallet was available.
 - fixed displaying of unconfirmed balance on account page.
 
-# v0.2.0 (2018.06.28)
+# v0.2.0 (2019.06.28)
 
 Features:
 
@@ -97,7 +114,7 @@ Fixes:
 - fix the labels of certain buttons to make their function more or clear or to match the companion description.
 - introduce base-sensitivity JS str compare on API level where it makes sense to avoid names that are too similar.
 
-# v0.1.3 (2018.06.19)
+# v0.1.3 (2019.06.19)
 
 Features:
 
@@ -119,7 +136,7 @@ Fixes:
 - fix several critical errors caused by both valid and invalid actions, that caused the app to stop working.
 - ensure the different (form) pages can be concluded and cancelled with respectively the enter and escape buttons.
 
-# v0.1.2 (2018.06.14)
+# v0.1.2 (2019.06.14)
 
 Features:
 
@@ -140,7 +157,7 @@ Fixes:
 - Clamp the wallet address count between 1 and 8 addresses (per wallet).
 - Do not allow (in front-end) negative wallet indices.
 
-# v0.1.1 (2018.06.12)
+# v0.1.1 (2019.06.12)
 
 Fixes:
 
@@ -148,7 +165,7 @@ Fixes:
 - fixed some filtering on wallet dropdowns.
 - added new appimage icon for Linux.
 
-# v0.1.0 (2018.06.11)
+# v0.1.0 (2019.06.11)
 
 - A first version of the desktop wallet, available for MacOS, Windows, Linux.
 - You can wallet multiple wallets per accounts, as many accounts you want.
