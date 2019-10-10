@@ -128,6 +128,7 @@ class CoinOutput(BaseDataTypeClass):
     def __init__(self, value=None, condition=None, id=None, is_fee=False):
         self._value = None
         self.value = value
+        self._spent = False
         self._spendable_value = None
         self._custody_fee = None
         self._condition = None
@@ -146,6 +147,10 @@ class CoinOutput(BaseDataTypeClass):
 
     @property
     def value(self):
+        if self.spent:
+            sv = self.spendable_value
+            if sv.greater_than(0):
+                return sv
         return self._value
 
     @value.setter
@@ -154,6 +159,16 @@ class CoinOutput(BaseDataTypeClass):
             self._value = value
             return
         self._value = Currency(value=value)
+
+    @property
+    def spent(self):
+        return self._spent
+
+    @spent.setter
+    def spent(self, value):
+        if not isinstance(value, bool):
+            raise TypeError("spent property of a CoinOutput has to be of type bool, not be of type {}".format(value))
+        self._spent = value
 
     @property
     def creation_value(self):

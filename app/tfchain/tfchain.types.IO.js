@@ -347,6 +347,7 @@ export var CoinOutput =  __class__ ('CoinOutput', [BaseDataTypeClass], {
 		}
 		self._value = null;
 		self.value = value;
+		self._spent = false;
 		self._spendable_value = null;
 		self._custody_fee = null;
 		self._condition = null;
@@ -387,6 +388,12 @@ export var CoinOutput =  __class__ ('CoinOutput', [BaseDataTypeClass], {
 		}
 		else {
 		}
+		if (self.spent) {
+			var sv = self.spendable_value;
+			if (sv.greater_than (0)) {
+				return sv;
+			}
+		}
 		return self._value;
 	});},
 	get _set_value () {return __get__ (this, function (self, value) {
@@ -409,6 +416,44 @@ export var CoinOutput =  __class__ ('CoinOutput', [BaseDataTypeClass], {
 			return ;
 		}
 		self._value = Currency (__kwargtrans__ ({value: value}));
+	});},
+	get _get_spent () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._spent;
+	});},
+	get _set_spent () {return __get__ (this, function (self, value) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (!(isinstance (value, bool))) {
+			var __except0__ = py_TypeError ('spent property of a CoinOutput has to be of type bool, not be of type {}'.format (value));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		self._spent = value;
 	});},
 	get _get_creation_value () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -688,6 +733,7 @@ Object.defineProperty (CoinOutput, 'condition', property.call (CoinOutput, CoinO
 Object.defineProperty (CoinOutput, 'custody_fee', property.call (CoinOutput, CoinOutput._get_custody_fee, CoinOutput._set_custody_fee));
 Object.defineProperty (CoinOutput, 'spendable_value', property.call (CoinOutput, CoinOutput._get_spendable_value, CoinOutput._set_spendable_value));
 Object.defineProperty (CoinOutput, 'creation_value', property.call (CoinOutput, CoinOutput._get_creation_value));
+Object.defineProperty (CoinOutput, 'spent', property.call (CoinOutput, CoinOutput._get_spent, CoinOutput._set_spent));
 Object.defineProperty (CoinOutput, 'value', property.call (CoinOutput, CoinOutput._get_value, CoinOutput._set_value));;
 export var BlockstakeInput =  __class__ ('BlockstakeInput', [BaseDataTypeClass], {
 	__module__: __name__,

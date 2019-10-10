@@ -873,6 +873,7 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 			if (__in__ ('custody', rco) && __in__ ('iscustodyfee', rco ['custody']) && !(rco ['custody'] ['iscustodyfee'])) {
 				transaction.coin_inputs [idx].parent_output.custody_fee = Currency.from_json (rco ['custody'] ['custodyfee']);
 				transaction.coin_inputs [idx].parent_output.spendable_value = Currency.from_json (rco ['custody'] ['spendablevalue']);
+				transaction.coin_inputs [idx].parent_output.spent = rco ['custody'] ['spent'];
 			}
 		}
 		var coinoutputids = etxn.get_or ('coinoutputids', null) || [];
@@ -895,6 +896,7 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 				if (__in__ ('iscustodyfee', coinoutputcustodyfee) && !(coinoutputcustodyfee ['iscustodyfee'])) {
 					transaction.coin_outputs [idx].custody_fee = Currency.from_json (coinoutputcustodyfee ['custodyfee']);
 					transaction.coin_outputs [idx].spendable_value = Currency.from_json (coinoutputcustodyfee ['spendablevalue']);
+					transaction.coin_outputs [idx].spent = coinoutputcustodyfee ['spent'];
 				}
 			}
 		}

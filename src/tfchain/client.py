@@ -437,6 +437,7 @@ class TFChainClient:
             if 'custody' in rco and 'iscustodyfee' in rco['custody'] and not rco['custody']['iscustodyfee']:
                 transaction.coin_inputs[idx].parent_output.custody_fee = Currency.from_json(rco['custody']['custodyfee'])
                 transaction.coin_inputs[idx].parent_output.spendable_value = Currency.from_json(rco['custody']['spendablevalue'])
+                transaction.coin_inputs[idx].parent_output.spent = rco['custody']['spent']
         # add the coin output ids
         coinoutputids = etxn.get_or('coinoutputids', None) or []
         if len(transaction.coin_outputs) != len(coinoutputids):
@@ -452,6 +453,7 @@ class TFChainClient:
                 if 'iscustodyfee' in coinoutputcustodyfee and not coinoutputcustodyfee['iscustodyfee']:
                     transaction.coin_outputs[idx].custody_fee = Currency.from_json(coinoutputcustodyfee['custodyfee'])
                     transaction.coin_outputs[idx].spendable_value = Currency.from_json(coinoutputcustodyfee['spendablevalue'])
+                    transaction.coin_outputs[idx].spent = coinoutputcustodyfee['spent']
         # add the parent (blockstake) outputs
         blockstakeinputoutputs = etxn.get_or('blockstakeinputoutputs', None) or []
         if len(transaction.blockstake_inputs) != len(blockstakeinputoutputs):
