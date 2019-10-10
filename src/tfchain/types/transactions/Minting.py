@@ -492,12 +492,8 @@ class TransactionV130(TransactionBaseClass):
             coin_input_ids.append(ci.parentid)
         e.add_slice(coin_input_ids)
 
-        # encode refund coin output
-        if self._refund_coin_output is None:
-            e.add_byte(0)
-        else:
-            e.add_byte(1)
-            e.add(self._refund_coin_output)
+        # encode coin outputs
+        e.add_slice(self.coin_outputs)
 
         # encode miner fees
         e.add_slice(self.miner_fees)
@@ -511,12 +507,8 @@ class TransactionV130(TransactionBaseClass):
     def _from_json_data_object(self, data):
         self._coin_inputs = [CoinInput.from_json(
             ci) for ci in data.get_or('coininputs', []) or []]
-        # decode refund coin output (if it exists)
-        rfco = data.get_or("refundcoinoutput", None)
-        if rfco != None:
-            self._refund_coin_output = CoinOutput.from_json(rfco)
-        else:
-            self._refund_coin_output = None
+        self._coin_outputs = [CoinOutput.from_json(
+            co) for co in data.get_or('coinoutputs', []) or []]
         self._miner_fees = [Currency.from_json(
             fee) for fee in data.get_or('minerfees', []) or []]
         self._data = BinaryData.from_json(
@@ -525,11 +517,10 @@ class TransactionV130(TransactionBaseClass):
     def _json_data_object(self):
         obj = {
             'coininputs': [ci.json() for ci in self._coin_inputs],
+            'coinoutputs': [co.json() for co in self._coin_outputs],
             'minerfees': [fee.json() for fee in self._miner_fees],
             'arbitrarydata': self.data.json(),
         }
-        if self._refund_coin_output is not None:
-            obj["refundcoinoutput"] = self._refund_coin_output.json()
         keys = list(obj.keys())
         for key in keys:
             if not obj[key]:
@@ -543,14 +534,9 @@ class TransactionV130(TransactionBaseClass):
         # TODO: issue #247: make it that this is defined by the used chain, not hardcoded,
         #       as tfchain might use SiaBinaryEncoder, while goldchain usr RivineBinaryEncoder
         encoder = RivineBinaryEncoder()
-        encoder.add(self.coin_inputs)
-         # encode refund coin output
-        if self._refund_coin_output is None:
-            encoder.add_byte(0)
-        else:
-            encoder.add_byte(1)
-            encoder.add(self._refund_coin_output)
         encoder.add_all(
+            self.coin_inputs,
+            self.coin_outputs,
             self.miner_fees,
             self.data,
         )

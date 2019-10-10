@@ -18,6 +18,9 @@ class NetworkType:
     def faucet_address(self):
         raise NotImplementedError("faucet_address not implemented")
 
+    def chain_type(self):
+        raise NotImplementedError("chain_type not implemented")
+
 class TFChainNetworkType(NetworkType):
     def __init__(self, value):
         if isinstance(value, TFChainNetworkType):
@@ -104,6 +107,9 @@ class TFChainNetworkType(NetworkType):
             return "http://localhost:2016"
         return None
 
+    def chain_type(self):
+        return Type.TFCHAIN
+
 TFChainNetworkType.STANDARD = TFChainNetworkType(0)
 TFChainNetworkType.TESTNET = TFChainNetworkType(1)
 TFChainNetworkType.DEVNET = TFChainNetworkType(2)
@@ -189,6 +195,9 @@ class GoldChainNetworkType(NetworkType):
             return "http://localhost:2016"
         return None
 
+    def chain_type(self):
+        return Type.GOLDCHAIN
+
 GoldChainNetworkType.TESTNET = GoldChainNetworkType(1)
 GoldChainNetworkType.DEVNET = GoldChainNetworkType(2)
 
@@ -263,6 +272,9 @@ class ThreefoldBonusNetworkType(NetworkType):
             return "http://localhost:2016"
         return None
 
+    def chain_type(self):
+        return Type.TFBCHAIN
+
 ThreefoldBonusNetworkType.TESTNET = ThreefoldBonusNetworkType(1)
 ThreefoldBonusNetworkType.DEVNET = ThreefoldBonusNetworkType(2)
 
@@ -336,6 +348,9 @@ class FreeFlowTokenNetworkType(NetworkType):
         if self.__eq__(FreeFlowTokenNetworkType.DEVNET):
             return "http://localhost:2016"
         return None
+
+    def chain_type(self):
+        return Type.FFTCHAIN
 
 FreeFlowTokenNetworkType.TESTNET = FreeFlowTokenNetworkType(1)
 FreeFlowTokenNetworkType.DEVNET = FreeFlowTokenNetworkType(2)

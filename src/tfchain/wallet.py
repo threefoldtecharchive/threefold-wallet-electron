@@ -6,7 +6,7 @@ import tfchain.polyfill.crypto as jscrypto
 import tfchain.client as tfclient
 import tfchain.errors as tferrors
 
-from tfchain.chain import NetworkType
+from tfchain.chain import NetworkType, Type
 from tfchain.balance import WalletBalance, SingleSigWalletBalance, MultiSigWalletBalance
 from tfchain.encoding.siabin import SiaBinaryEncoder
 
@@ -16,7 +16,7 @@ from tfchain.types.transactions.Minting import TransactionV128, TransactionV129,
 from tfchain.types.IO import CoinInput
 from tfchain.types.CryptoTypes import PublicKey, PublicKeySpecifier
 from tfchain.types.PrimitiveTypes import Hash, Currency
-from tfchain.types.ConditionTypes import UnlockHash, UnlockHashType, ConditionUnlockHash, ConditionMultiSignature
+from tfchain.types.ConditionTypes import UnlockHash, UnlockHashType, ConditionUnlockHash, ConditionMultiSignature, ConditionCustodyFee
 from tfchain.types.FulfillmentTypes import FulfillmentMultiSignature, PublicKeySignaturePair
 
 def assymetric_key_pair_generate(entropy, index):
@@ -666,6 +666,15 @@ class TFChainMinter():
 
             # add the coin inputs
             txn.coin_inputs = inputs
+
+            # add custody fees if the wallet is linked to a goldchain network
+            if self._wallet._network_type.chain_type() == Type.GOLDCHAIN:
+                total_custody_fee = Currency()
+                for ci in txn.coin_inputs:
+                    if not ci.parent_output:
+                        raise Exception("BUG: cannot define the required custody fee if no parent output is linked to coin input {}".format(ci.parentid.__str__()))
+                    total_custody_fee = total_custody_fee.plus(ci.parent_output.custody_fee)
+                txn.coin_output_add(value=total_custody_fee, condition=ConditionCustodyFee(balance.chain_time))
 
             # if there is data to be added, add it as well
             if data != None:
@@ -1841,6 +1850,15 @@ class CoinTransactionBuilder():
 
             # add the coin inputs
             txn.coin_inputs = inputs
+
+             # add custody fees if the wallet is linked to a goldchain network
+            if self._wallet.network_type.chain_type() == Type.GOLDCHAIN:
+                total_custody_fee = Currency()
+                for ci in txn.coin_inputs:
+                    if not ci.parent_output:
+                        raise Exception("BUG: cannot define the required custody fee if no parent output is linked to coin input {}".format(ci.parentid.__str__()))
+                    total_custody_fee = total_custody_fee.plus(ci.parent_output.custody_fee)
+                txn.coin_output_add(value=total_custody_fee, condition=ConditionCustodyFee(balance.chain_time))
 
             # if there is data to be added, add it as well
             if data != None:

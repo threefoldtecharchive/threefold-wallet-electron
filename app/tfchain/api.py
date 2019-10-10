@@ -1825,6 +1825,24 @@ class Balance:
         return c
 
     @property
+    def custody_fee_debt(self):
+        c = Currency(self._tfbalance.custody_fee_debt)
+        c.unit = self._chain_type.currency_unit()
+        return c
+
+    @property
+    def custody_fee_debt_unlocked(self):
+        c = Currency(self._tfbalance.custody_fee_debt_unlocked)
+        c.unit = self._chain_type.currency_unit()
+        return c
+
+    @property
+    def custody_fee_debt_locked(self):
+        c = Currency(self._tfbalance.custody_fee_debt_locked)
+        c.unit = self._chain_type.currency_unit()
+        return c
+
+    @property
     def coins_total(self):
         c = self.coins_unlocked.plus(self.coins_locked)
         c.unit = self._chain_type.currency_unit()

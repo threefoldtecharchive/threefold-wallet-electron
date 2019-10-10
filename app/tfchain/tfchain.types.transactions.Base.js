@@ -1293,7 +1293,7 @@ export var TransactionBaseClass =  __class__ ('TransactionBaseClass', [object], 
 		else {
 		}
 		if (index < 0 || index >= len (self.coin_outputs)) {
-			var __except0__ = ValueError ('coin output index is out of range');
+			var __except0__ = ValueError ('blockstake output index is out of range');
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}

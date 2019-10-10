@@ -866,10 +866,14 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		for (var [idx, co] of enumerate (coininputoutputs)) {
-			var co = CoinOutput.from_json (__kwargtrans__ ({obj: co}));
+		for (var [idx, rco] of enumerate (coininputoutputs)) {
+			var co = CoinOutput.from_json (__kwargtrans__ ({obj: rco}));
 			co.id = transaction.coin_inputs [idx].parentid;
 			transaction.coin_inputs [idx].parent_output = co;
+			if (__in__ ('custody', rco) && __in__ ('iscustodyfee', rco ['custody']) && !(rco ['custody'] ['iscustodyfee'])) {
+				transaction.coin_inputs [idx].parent_output.custody_fee = Currency.from_json (rco ['custody'] ['custodyfee']);
+				transaction.coin_inputs [idx].parent_output.spendable_value = Currency.from_json (rco ['custody'] ['spendablevalue']);
+			}
 		}
 		var coinoutputids = etxn.get_or ('coinoutputids', null) || [];
 		if (len (transaction.coin_outputs) != len (coinoutputids)) {
@@ -879,6 +883,20 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 		}
 		for (var [idx, id] of enumerate (coinoutputids)) {
 			transaction.coin_outputs [idx].id = Hash.from_json (__kwargtrans__ ({obj: id}));
+		}
+		var coinoutputcustodyfees = etxn.get_or ('coinoutputcustodyfees', null) || [];
+		if (len (coinoutputcustodyfees) > 0) {
+			if (len (transaction.coin_outputs) != len (coinoutputcustodyfees)) {
+				var __except0__ = tferrors.ExplorerInvalidResponse ('amount of coin outputs and output info are not matching: {} != {}'.format (len (transaction.coin_outputs), len (coinoutputids)), endpoint, resp);
+				__except0__.__cause__ = null;
+				throw __except0__;
+			}
+			for (var [idx, coinoutputcustodyfee] of enumerate (coinoutputcustodyfees)) {
+				if (__in__ ('iscustodyfee', coinoutputcustodyfee) && !(coinoutputcustodyfee ['iscustodyfee'])) {
+					transaction.coin_outputs [idx].custody_fee = Currency.from_json (coinoutputcustodyfee ['custodyfee']);
+					transaction.coin_outputs [idx].spendable_value = Currency.from_json (coinoutputcustodyfee ['spendablevalue']);
+				}
+			}
 		}
 		var blockstakeinputoutputs = etxn.get_or ('blockstakeinputoutputs', null) || [];
 		if (len (transaction.blockstake_inputs) != len (blockstakeinputoutputs)) {

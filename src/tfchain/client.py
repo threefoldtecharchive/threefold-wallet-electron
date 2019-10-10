@@ -429,16 +429,29 @@ class TFChainClient:
         coininputoutputs = etxn.get_or('coininputoutputs', None) or []
         if len(transaction.coin_inputs) != len(coininputoutputs):
             raise tferrors.ExplorerInvalidResponse("amount of coin inputs and parent outputs are not matching: {} != {}".format(len(transaction.coin_inputs), len(coininputoutputs)), endpoint, resp)
-        for (idx, co) in enumerate(coininputoutputs):
-            co = CoinOutput.from_json(obj=co)
+        for (idx, rco) in enumerate(coininputoutputs):
+            co = CoinOutput.from_json(obj=rco)
             co.id = transaction.coin_inputs[idx].parentid
             transaction.coin_inputs[idx].parent_output = co
+            # add the coin input (custodyfee) info if available
+            if 'custody' in rco and 'iscustodyfee' in rco['custody'] and not rco['custody']['iscustodyfee']:
+                transaction.coin_inputs[idx].parent_output.custody_fee = Currency.from_json(rco['custody']['custodyfee'])
+                transaction.coin_inputs[idx].parent_output.spendable_value = Currency.from_json(rco['custody']['spendablevalue'])
         # add the coin output ids
         coinoutputids = etxn.get_or('coinoutputids', None) or []
         if len(transaction.coin_outputs) != len(coinoutputids):
             raise tferrors.ExplorerInvalidResponse("amount of coin outputs and output identifiers are not matching: {} != {}".format(len(transaction.coin_outputs), len(coinoutputids)), endpoint, resp)
         for (idx, id) in enumerate(coinoutputids):
             transaction.coin_outputs[idx].id = Hash.from_json(obj=id)
+        # add the coin output (custodyfee) info if available
+        coinoutputcustodyfees = etxn.get_or('coinoutputcustodyfees', None) or []
+        if len(coinoutputcustodyfees) > 0:
+            if len(transaction.coin_outputs) != len(coinoutputcustodyfees):
+                raise tferrors.ExplorerInvalidResponse("amount of coin outputs and output info are not matching: {} != {}".format(len(transaction.coin_outputs), len(coinoutputids)), endpoint, resp)
+            for (idx, coinoutputcustodyfee) in enumerate(coinoutputcustodyfees):
+                if 'iscustodyfee' in coinoutputcustodyfee and not coinoutputcustodyfee['iscustodyfee']:
+                    transaction.coin_outputs[idx].custody_fee = Currency.from_json(coinoutputcustodyfee['custodyfee'])
+                    transaction.coin_outputs[idx].spendable_value = Currency.from_json(coinoutputcustodyfee['spendablevalue'])
         # add the parent (blockstake) outputs
         blockstakeinputoutputs = etxn.get_or('blockstakeinputoutputs', None) or []
         if len(transaction.blockstake_inputs) != len(blockstakeinputoutputs):

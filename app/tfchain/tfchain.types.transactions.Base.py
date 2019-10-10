@@ -387,7 +387,7 @@ class TransactionBaseClass():
         Compute the ID of a Coin Output within this transaction.
         """
         if index < 0 or index >= len(self.coin_outputs):
-            raise ValueError("coin output index is out of range")
+            raise ValueError("blockstake output index is out of range")
         return self._id_new(specifier=self._blockstake_outputid_specifier, index=index)
 
     def _id_new(self, specifier=None, index=None):

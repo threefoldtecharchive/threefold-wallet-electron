@@ -128,6 +128,8 @@ class CoinOutput(BaseDataTypeClass):
     def __init__(self, value=None, condition=None, id=None, is_fee=False):
         self._value = None
         self.value = value
+        self._spendable_value = None
+        self._custody_fee = None
         self._condition = None
         self.condition = condition
         # property that can be set if known, but which is not part of the actual CoinOutput
@@ -144,6 +146,9 @@ class CoinOutput(BaseDataTypeClass):
 
     @property
     def value(self):
+        sv = self.spendable_value
+        if sv.greater_than(0):
+            return sv
         return self._value
 
     @value.setter
@@ -152,6 +157,42 @@ class CoinOutput(BaseDataTypeClass):
             self._value = value
             return
         self._value = Currency(value=value)
+
+    @property
+    def creation_value(self):
+        return self._value
+
+    @property
+    def spendable_value(self):
+        if self._spendable_value == None:
+            return Currency()
+        return self._spendable_value
+
+    @spendable_value.setter
+    def spendable_value(self, value):
+        if value == None:
+            self._spendable_value = None
+            return
+        if isinstance(value, Currency):
+            self._spendable_value = value
+            return
+        self._spendable_value = Currency(value=value)
+
+    @property
+    def custody_fee(self):
+        if self._custody_fee == None:
+            return Currency()
+        return self._custody_fee
+
+    @custody_fee.setter
+    def custody_fee(self, value):
+        if value == None:
+            self._custody_fee = None
+            return
+        if isinstance(value, Currency):
+            self._custody_fee = value
+            return
+        self._custody_fee = Currency(value=value)
 
     @property
     def condition(self):
@@ -436,7 +477,7 @@ class MinerPayout:
     @unlockhash.setter
     def unlockhash(self, value):
         if value is None:
-            self._unlockhash = UnlockHash(type=UnlockHashType.NIL)
+            self._unlockhash = UnlockHash(uhtype=UnlockHashType.NIL)
             return
         if isinstance(value, str):
             self._unlockhash = UnlockHash.from_json(value)

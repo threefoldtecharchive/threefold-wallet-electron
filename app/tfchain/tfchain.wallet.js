@@ -1,6 +1,6 @@
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __proxy__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, abs, all, any, assert, bool, bytearray, bytes, callable, chr, copy, deepcopy, delattr, dict, dir, divmod, enumerate, filter, float, getattr, hasattr, input, int, isinstance, issubclass, len, list, map, max, min, object, ord, pow, print, property, py_TypeError, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
 import {FulfillmentMultiSignature, PublicKeySignaturePair} from './tfchain.types.FulfillmentTypes.js';
-import {ConditionMultiSignature, ConditionUnlockHash, UnlockHash, UnlockHashType} from './tfchain.types.ConditionTypes.js';
+import {ConditionCustodyFee, ConditionMultiSignature, ConditionUnlockHash, UnlockHash, UnlockHashType} from './tfchain.types.ConditionTypes.js';
 import {Currency, Hash} from './tfchain.types.PrimitiveTypes.js';
 import {PublicKey, PublicKeySpecifier} from './tfchain.types.CryptoTypes.js';
 import {CoinInput} from './tfchain.types.IO.js';
@@ -11,7 +11,7 @@ import * as transactions from './tfchain.types.transactions.js';
 import * as FulfillmentTypes from './tfchain.types.FulfillmentTypes.js';
 import {SiaBinaryEncoder} from './tfchain.encoding.siabin.js';
 import {MultiSigWalletBalance, SingleSigWalletBalance, WalletBalance} from './tfchain.balance.js';
-import {NetworkType} from './tfchain.chain.js';
+import {NetworkType, Type} from './tfchain.chain.js';
 import * as tferrors from './tfchain.errors.js';
 import * as tfclient from './tfchain.client.js';
 import * as jscrypto from './tfchain.polyfill.crypto.js';
@@ -796,6 +796,18 @@ export var TFChainMinter =  __class__ ('TFChainMinter', [object], {
 			}
 			txn.miner_fee_add (miner_fee);
 			txn.coin_inputs = inputs;
+			if (self._wallet._network_type.chain_type () == Type.GOLDCHAIN) {
+				var total_custody_fee = Currency ();
+				for (var ci of txn.coin_inputs) {
+					if (!(ci.parent_output)) {
+						var __except0__ = Exception ('BUG: cannot define the required custody fee if no parent output is linked to coin input {}'.format (ci.parentid.__str__ ()));
+						__except0__.__cause__ = null;
+						throw __except0__;
+					}
+					var total_custody_fee = total_custody_fee.plus (ci.parent_output.custody_fee);
+				}
+				txn.coin_output_add (__kwargtrans__ ({value: total_custody_fee, condition: ConditionCustodyFee (balance.chain_time)}));
+			}
 			if (data != null) {
 				txn.data = data;
 			}
@@ -1321,6 +1333,18 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 			}
 			txn.miner_fee_add (miner_fee);
 			txn.coin_inputs = inputs;
+			if (self._wallet.network_type.chain_type () == Type.GOLDCHAIN) {
+				var total_custody_fee = Currency ();
+				for (var ci of txn.coin_inputs) {
+					if (!(ci.parent_output)) {
+						var __except0__ = Exception ('BUG: cannot define the required custody fee if no parent output is linked to coin input {}'.format (ci.parentid.__str__ ()));
+						__except0__.__cause__ = null;
+						throw __except0__;
+					}
+					var total_custody_fee = total_custody_fee.plus (ci.parent_output.custody_fee);
+				}
+				txn.coin_output_add (__kwargtrans__ ({value: total_custody_fee, condition: ConditionCustodyFee (balance.chain_time)}));
+			}
 			if (data != null) {
 				txn.data = data;
 			}

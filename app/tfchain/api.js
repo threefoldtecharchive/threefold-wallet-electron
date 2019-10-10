@@ -4540,6 +4540,60 @@ export var Balance =  __class__ ('Balance', [object], {
 		c.unit = self._chain_type.currency_unit ();
 		return c;
 	});},
+	get _get_custody_fee_debt () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var c = Currency (self._tfbalance.custody_fee_debt);
+		c.unit = self._chain_type.currency_unit ();
+		return c;
+	});},
+	get _get_custody_fee_debt_unlocked () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var c = Currency (self._tfbalance.custody_fee_debt_unlocked);
+		c.unit = self._chain_type.currency_unit ();
+		return c;
+	});},
+	get _get_custody_fee_debt_locked () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var c = Currency (self._tfbalance.custody_fee_debt_locked);
+		c.unit = self._chain_type.currency_unit ();
+		return c;
+	});},
 	get _get_coins_total () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -4638,6 +4692,9 @@ Object.defineProperty (Balance, 'unconfirmed_coins_total', property.call (Balanc
 Object.defineProperty (Balance, 'unconfirmed_coins_locked', property.call (Balance, Balance._get_unconfirmed_coins_locked));
 Object.defineProperty (Balance, 'unconfirmed_coins_unlocked', property.call (Balance, Balance._get_unconfirmed_coins_unlocked));
 Object.defineProperty (Balance, 'coins_total', property.call (Balance, Balance._get_coins_total));
+Object.defineProperty (Balance, 'custody_fee_debt_locked', property.call (Balance, Balance._get_custody_fee_debt_locked));
+Object.defineProperty (Balance, 'custody_fee_debt_unlocked', property.call (Balance, Balance._get_custody_fee_debt_unlocked));
+Object.defineProperty (Balance, 'custody_fee_debt', property.call (Balance, Balance._get_custody_fee_debt));
 Object.defineProperty (Balance, 'coins_locked', property.call (Balance, Balance._get_coins_locked));
 Object.defineProperty (Balance, 'coins_unlocked', property.call (Balance, Balance._get_coins_unlocked));
 Object.defineProperty (Balance, 'addresses_used', property.call (Balance, Balance._get_addresses_used));

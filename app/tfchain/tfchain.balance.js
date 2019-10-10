@@ -1,11 +1,11 @@
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __proxy__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, abs, all, any, assert, bool, bytearray, bytes, callable, chr, copy, deepcopy, delattr, dict, dir, divmod, enumerate, filter, float, getattr, hasattr, input, int, isinstance, issubclass, len, list, map, max, min, object, ord, pow, print, property, py_TypeError, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
+import {Type} from './tfchain.chain.js';
 import {CoinInput} from './tfchain.types.IO.js';
-import {ConditionBaseClass, ConditionMultiSignature, ConditionNil, UnlockHash, UnlockHashType} from './tfchain.types.ConditionTypes.js';
+import {ConditionBaseClass, ConditionCustodyFee, ConditionMultiSignature, ConditionNil, UnlockHash, UnlockHashType} from './tfchain.types.ConditionTypes.js';
 import {Currency, Hash} from './tfchain.types.PrimitiveTypes.js';
 import * as ConditionTypes from './tfchain.types.ConditionTypes.js';
 import * as transactions from './tfchain.types.transactions.js';
 import * as tferrors from './tfchain.errors.js';
-import * as jslog from './tfchain.polyfill.log.js';
 import * as jsarr from './tfchain.polyfill.array.js';
 import * as jsobj from './tfchain.polyfill.encoding.object.js';
 var __name__ = 'tfchain.balance';
@@ -398,6 +398,73 @@ export var WalletBalance =  __class__ ('WalletBalance', [object], {
 			return __accu0__;
 		}) ());
 	});},
+	get _get_custody_fee_debt () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return Currency.sum (self.custody_fee_debt_unlocked, self.custody_fee_debt_locked);
+	});},
+	get _get_custody_fee_debt_unlocked () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return Currency.sum (...(function () {
+			var __accu0__ = [];
+			for (var co of self.outputs_available) {
+				__accu0__.append (co.custody_fee);
+			}
+			return __accu0__;
+		}) ());
+	});},
+	get _get_custody_fee_debt_locked () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (self.chain_time > 0 && self.chain_height > 0) {
+			return Currency.sum (...(function () {
+				var __accu0__ = [];
+				for (var co of jsobj.dict_values (self._outputs)) {
+					if (co.condition.lock.locked_check (__kwargtrans__ ({time: self.chain_time, height: self.chain_height}))) {
+						__accu0__.append (co.custody_fee);
+					}
+				}
+				return __accu0__;
+			}) ()) || Currency ();
+		}
+		else {
+			return Currency ();
+		}
+	});},
 	get _get_locked () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -606,7 +673,7 @@ export var WalletBalance =  __class__ ('WalletBalance', [object], {
 		}
 		return self;
 	});},
-	get drain () {return __get__ (this, function (self, recipient, miner_fee, unconfirmed, data, lock) {
+	get drain () {return __get__ (this, function (self, recipient, miner_fee, network_type, unconfirmed, data, lock) {
 		if (typeof unconfirmed == 'undefined' || (unconfirmed != null && unconfirmed.hasOwnProperty ("__kwargtrans__"))) {;
 			var unconfirmed = false;
 		};
@@ -625,6 +692,7 @@ export var WalletBalance =  __class__ ('WalletBalance', [object], {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
 						case 'recipient': var recipient = __allkwargs0__ [__attrib0__]; break;
 						case 'miner_fee': var miner_fee = __allkwargs0__ [__attrib0__]; break;
+						case 'network_type': var network_type = __allkwargs0__ [__attrib0__]; break;
 						case 'unconfirmed': var unconfirmed = __allkwargs0__ [__attrib0__]; break;
 						case 'data': var data = __allkwargs0__ [__attrib0__]; break;
 						case 'lock': var lock = __allkwargs0__ [__attrib0__]; break;
@@ -672,6 +740,18 @@ export var WalletBalance =  __class__ ('WalletBalance', [object], {
 				}
 				return __accu0__;
 			}) ();
+			if (network_type.chain_type () == Type.GOLDCHAIN) {
+				var total_custody_fee = Currency ();
+				for (var ci of txn.coin_inputs) {
+					if (!(ci.parent_output)) {
+						var __except0__ = Exception ('BUG: cannot define the required custody fee if no parent output is linked to coin input {}'.format (ci.parentid.__str__ ()));
+						__except0__.__cause__ = null;
+						throw __except0__;
+					}
+					var total_custody_fee = total_custody_fee.plus (ci.parent_output.custody_fee);
+				}
+				txn.coin_output_add (__kwargtrans__ ({value: total_custody_fee, condition: ConditionCustodyFee (self.chain_time)}));
+			}
 			txns.append (txn);
 		}
 		return txns;
@@ -865,6 +945,9 @@ export var WalletBalance =  __class__ ('WalletBalance', [object], {
 Object.defineProperty (WalletBalance, 'unconfirmed_locked', property.call (WalletBalance, WalletBalance._get_unconfirmed_locked));
 Object.defineProperty (WalletBalance, 'unconfirmed', property.call (WalletBalance, WalletBalance._get_unconfirmed));
 Object.defineProperty (WalletBalance, 'locked', property.call (WalletBalance, WalletBalance._get_locked));
+Object.defineProperty (WalletBalance, 'custody_fee_debt_locked', property.call (WalletBalance, WalletBalance._get_custody_fee_debt_locked));
+Object.defineProperty (WalletBalance, 'custody_fee_debt_unlocked', property.call (WalletBalance, WalletBalance._get_custody_fee_debt_unlocked));
+Object.defineProperty (WalletBalance, 'custody_fee_debt', property.call (WalletBalance, WalletBalance._get_custody_fee_debt));
 Object.defineProperty (WalletBalance, 'available', property.call (WalletBalance, WalletBalance._get_available));
 Object.defineProperty (WalletBalance, 'outputs_available', property.call (WalletBalance, WalletBalance._get_outputs_available));
 Object.defineProperty (WalletBalance, 'outputs_unconfirmed_spent', property.call (WalletBalance, WalletBalance._get_outputs_unconfirmed_spent));

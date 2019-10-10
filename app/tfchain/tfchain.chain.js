@@ -93,6 +93,24 @@ export var NetworkType =  __class__ ('NetworkType', [object], {
 		var __except0__ = NotImplementedError ('faucet_address not implemented');
 		__except0__.__cause__ = null;
 		throw __except0__;
+	});},
+	get chain_type () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var __except0__ = NotImplementedError ('chain_type not implemented');
+		__except0__.__cause__ = null;
+		throw __except0__;
 	});}
 });
 export var TFChainNetworkType =  __class__ ('TFChainNetworkType', [NetworkType], {
@@ -354,6 +372,22 @@ export var TFChainNetworkType =  __class__ ('TFChainNetworkType', [NetworkType],
 			return 'http://localhost:2016';
 		}
 		return null;
+	});},
+	get chain_type () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return Type.TFCHAIN;
 	});}
 });
 Object.defineProperty (TFChainNetworkType, 'value', property.call (TFChainNetworkType, TFChainNetworkType._get_value));;
@@ -634,6 +668,22 @@ export var GoldChainNetworkType =  __class__ ('GoldChainNetworkType', [NetworkTy
 			return 'http://localhost:2016';
 		}
 		return null;
+	});},
+	get chain_type () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return Type.GOLDCHAIN;
 	});}
 });
 Object.defineProperty (GoldChainNetworkType, 'value', property.call (GoldChainNetworkType, GoldChainNetworkType._get_value));;
@@ -888,6 +938,22 @@ export var ThreefoldBonusNetworkType =  __class__ ('ThreefoldBonusNetworkType', 
 			return 'http://localhost:2016';
 		}
 		return null;
+	});},
+	get chain_type () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return Type.TFBCHAIN;
 	});}
 });
 Object.defineProperty (ThreefoldBonusNetworkType, 'value', property.call (ThreefoldBonusNetworkType, ThreefoldBonusNetworkType._get_value));;
@@ -1142,6 +1208,22 @@ export var FreeFlowTokenNetworkType =  __class__ ('FreeFlowTokenNetworkType', [N
 			return 'http://localhost:2016';
 		}
 		return null;
+	});},
+	get chain_type () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return Type.FFTCHAIN;
 	});}
 });
 Object.defineProperty (FreeFlowTokenNetworkType, 'value', property.call (FreeFlowTokenNetworkType, FreeFlowTokenNetworkType._get_value));;

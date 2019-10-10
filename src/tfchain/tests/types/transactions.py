@@ -61,12 +61,12 @@ def test_standard_transactions():
     jsass.equals(v129_txn.coin_outputid_new(0).str(), 'f4b8569f430a29af187a8b97e78167b63895c51339255ea5198a35f4b162b4c6')
 
     # v130 Transactions are supported
-    v130_txn_json = jsjson.json_loads('{"version":130,"data":{"coininputs":[{"parentid":"1100000000000000000000000000000000000000000000000000000000000011","fulfillment":{"type":1,"data":{"publickey":"ed25519:def123def123def123def123def123def123def123def123def123def123def1","signature":"ef12345ef12345ef12345ef12345ef12345ef12345ef12345ef12345ef12345ef12345ef12345ef12345ef12345ef12345ef12345ef12345ef12345ef12345ef"}}}],"minerfees":["1000000000"],"arbitrarydata":"dGVzdC4uLiAxLCAyLi4uIDM=","refundcoinoutput":{"value":"500000000000000","condition":{"type":1,"data":{"unlockhash":"01e3cbc41bd3cdfec9e01a6be46a35099ba0e1e1b793904fce6aa5a444496c6d815f5e3e981ccf"}}}}}')
+    v130_txn_json = jsjson.json_loads('{"version":130,"data":{"coininputs":[{"parentid":"1100000000000000000000000000000000000000000000000000000000000011","fulfillment":{"type":1,"data":{"publickey":"ed25519:def123def123def123def123def123def123def123def123def123def123def1","signature":"ef12345ef12345ef12345ef12345ef12345ef12345ef12345ef12345ef12345ef12345ef12345ef12345ef12345ef12345ef12345ef12345ef12345ef12345ef"}}}],"coinoutputs":[{"value":"500000000000000","condition":{"type":1,"data":{"unlockhash":"01e3cbc41bd3cdfec9e01a6be46a35099ba0e1e1b793904fce6aa5a444496c6d815f5e3e981ccf"}}}],"minerfees":["1000000000"],"arbitrarydata":"dGVzdC4uLiAxLCAyLi4uIDM="}}')
     v130_txn = tftransactions.from_json(v130_txn_json)
     jsass.equals(v130_txn.json(), v130_txn_json)
-    jsass.equals(v130_txn.signature_hash_get(0), 'f605ac9b9c6d9556c832afb223e9914a5b0e27f7e268faa3fceaf791f0fb7179')
-    jsass.equals(v130_txn.binary_encode(), '8202110000000000000000000000000000000000000000000000000000000000001101c401def123def123def123def123def123def123def123def123def123def123def180ef12345ef12345ef12345ef12345ef12345ef12345ef12345ef12345ef12345ef12345ef12345ef12345ef12345ef12345ef12345ef12345ef12345ef12345ef010e01c6bf52634000014201e3cbc41bd3cdfec9e01a6be46a35099ba0e1e1b793904fce6aa5a444496c6d8102083b9aca0022746573742e2e2e20312c20322e2e2e2033')
-    jsass.equals(v130_txn.coin_outputid_new(0).str(), '4f1e1750f9eb187a5c78311206bcfbc68b02dca88b25248a3da00682629e31e9')
+    jsass.equals(v130_txn.signature_hash_get(0), '44c953f3531cf50dbbb9e60ce401d7588854f66e7163056066713defb08f511d')
+    jsass.equals(v130_txn.binary_encode(), '8202110000000000000000000000000000000000000000000000000000000000001101c401def123def123def123def123def123def123def123def123def123def123def180ef12345ef12345ef12345ef12345ef12345ef12345ef12345ef12345ef12345ef12345ef12345ef12345ef12345ef12345ef12345ef12345ef12345ef12345ef020e01c6bf52634000014201e3cbc41bd3cdfec9e01a6be46a35099ba0e1e1b793904fce6aa5a444496c6d8102083b9aca0022746573742e2e2e20312c20322e2e2e2033')
+    jsass.equals(v130_txn.coin_outputid_new(0).str(), '986756eafd889faa7e9a2bcfebe744a3ce7880280e78ac0d027d0766e44647c4')
 
     # # 3Bot Transactions
 

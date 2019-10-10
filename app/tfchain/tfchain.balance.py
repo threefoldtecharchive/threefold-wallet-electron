@@ -1,13 +1,13 @@
 import tfchain.polyfill.encoding.object as jsobj
 import tfchain.polyfill.array as jsarr
-import tfchain.polyfill.log as jslog
 
 import tfchain.errors as tferrors
 
 from tfchain.types import ConditionTypes, transactions
 from tfchain.types.PrimitiveTypes import Hash, Currency
-from tfchain.types.ConditionTypes import UnlockHash, UnlockHashType, ConditionBaseClass, ConditionMultiSignature, ConditionNil
+from tfchain.types.ConditionTypes import UnlockHash, UnlockHashType, ConditionBaseClass, ConditionMultiSignature, ConditionNil, ConditionCustodyFee
 from tfchain.types.IO import CoinInput
+from tfchain.chain import Type
 
 
 _MAX_RIVINE_TRANSACTION_INPUTS = 99
@@ -174,6 +174,33 @@ class WalletBalance(object):
         return Currency.sum(*[co.value for co in self.outputs_available])
 
     @property
+    def custody_fee_debt(self):
+        """
+        Total Custody Fee Debt.
+        """
+        return Currency.sum(
+            self.custody_fee_debt_unlocked,
+            self.custody_fee_debt_locked)
+
+    @property
+    def custody_fee_debt_unlocked(self):
+        """
+        Total Custody Fee Debt for unlocked tokens.
+        """
+        return Currency.sum(*[co.custody_fee for co in self.outputs_available])
+
+    @property
+    def custody_fee_debt_locked(self):
+        """
+        Total Custody Fee Debt for locked tokens.
+        """
+        if self.chain_time > 0 and self.chain_height > 0:
+            return Currency.sum(*[co.custody_fee for co in jsobj.dict_values(self._outputs)
+                if co.condition.lock.locked_check(time=self.chain_time, height=self.chain_height)]) or Currency()
+        else:
+            return Currency() # impossible to know for sure without a complete context
+
+    @property
     def locked(self):
         """
         Total available coins that are locked.
@@ -281,7 +308,7 @@ class WalletBalance(object):
         # return the modified self
         return self
 
-    def drain(self, recipient, miner_fee, unconfirmed=False, data=None, lock=None):
+    def drain(self, recipient, miner_fee, network_type, unconfirmed=False, data=None, lock=None):
         """
         add all available outputs into as many transactions as required,
         by default only confirmed outputs are used, if unconfirmed=True
@@ -291,6 +318,7 @@ class WalletBalance(object):
 
         @param recipient: required recipient towards who the drained coins will be sent
         @param the miner fee to be added to all sent transactions
+        @param network_type: the network type on which this balance is drained
         @param unconfirmed: optionally drain unconfirmed (available) outputs as well
         @param data: optional data that can be attached ot the created transactions (str or bytes), with a max length of 83
         @param lock: optional lock that can be attached to the sent coin outputs
@@ -326,6 +354,14 @@ class WalletBalance(object):
             txn.coin_output_add(condition=recipient, value=amount)
             # add the coin inputs
             txn.coin_inputs = [CoinInput.from_coin_output(co) for co in used_outputs]
+            # add custody fees if the wallet is linked to a goldchain network
+            if network_type.chain_type() == Type.GOLDCHAIN:
+                total_custody_fee = Currency()
+                for ci in txn.coin_inputs:
+                    if not ci.parent_output:
+                        raise Exception("BUG: cannot define the required custody fee if no parent output is linked to coin input {}".format(ci.parentid.__str__()))
+                    total_custody_fee = total_custody_fee.plus(ci.parent_output.custody_fee)
+                txn.coin_output_add(value=total_custody_fee, condition=ConditionCustodyFee(self.chain_time))
             # append the transaction
             txns.append(txn)
 

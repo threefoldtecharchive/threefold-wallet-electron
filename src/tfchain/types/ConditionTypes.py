@@ -22,6 +22,9 @@ _CONDITION_TYPE_ATOMIC_SWAP = 2
 _CONDITION_TYPE_LOCKTIME = 3
 _CONDITION_TYPE_MULTI_SIG = 4
 
+# goldchain specific
+_CONDITION_TYPE_CUSTODY_FEE = 128
+
 
 def from_json(obj):
     ct = obj.get_or('type', 0)
@@ -35,6 +38,8 @@ def from_json(obj):
         return ConditionLockTime.from_json(obj)
     if ct == _CONDITION_TYPE_MULTI_SIG:
         return ConditionMultiSignature.from_json(obj)
+    if ct == _CONDITION_TYPE_CUSTODY_FEE:
+        return ConditionCustodyFee.from_json(obj)
     raise ValueError("unsupport condition type {}".format(ct))
 
 def from_recipient(recipient, lock=None):
@@ -129,6 +134,12 @@ def multi_signature_new(min_nr_sig=0, unlockhashes=None):
     Create a new MultiSignature Condition, which can be fulfilled by a matching MultiSignature Fulfillment.
     """
     return ConditionMultiSignature(unlockhashes=unlockhashes, min_nr_sig=min_nr_sig)
+
+def custody_fee_new(computation_time=0):
+    """
+    Create a new CustodyFee Condition, which cannot be fulfilled and is used only on Goldchain.
+    """
+    return ConditionCustodyFee(computation_time=computation_time)
 
 def output_lock_new(value):
     """
@@ -334,6 +345,8 @@ UnlockHashType.NIL = UnlockHashType(0)
 UnlockHashType.PUBLIC_KEY = UnlockHashType(1)
 UnlockHashType.ATOMIC_SWAP = UnlockHashType(2)
 UnlockHashType.MULTI_SIG = UnlockHashType(3)
+# goldchain specific
+UnlockHashType.CUSTODY_FEE = UnlockHashType(128)
 
 class UnlockHash(BaseDataTypeClass):
     """
@@ -800,3 +813,43 @@ class ConditionMultiSignature(ConditionBaseClass):
     def rivine_binary_encode_data(self, encoder):
         encoder.add_int64(self._min_nr_sig)
         encoder.add_slice(self._unlockhashes)
+
+class ConditionCustodyFee(ConditionBaseClass):
+    """
+    ConditionCustodyFee class
+    """
+    def __init__(self, computation_time=None):
+        self._computation_time = None
+        self.computation_time = computation_time
+
+    def _custom_type_getter(self):
+        return _CONDITION_TYPE_CUSTODY_FEE
+
+    def _custom_unlockhash_getter(self):
+        return UnlockHash(uhtype=UnlockHashType.CUSTODY_FEE, uhhash=None)
+
+    @property
+    def computation_time(self):
+        return self._computation_time
+    @computation_time.setter
+    def computation_time(self, value):
+        if value == None:
+            self._computation_time = 0
+            return
+        if not isinstance(value, int):
+            raise TypeError("ConditionCustodyFee's computation time value is expected to be of type int, not {}".format(type(value)))
+        self._computation_time = value
+
+    def from_json_data_object(self, data):
+        self.computation_time = data['computationtime']
+
+    def json_data_object(self):
+        return {
+            'computationtime': self.computation_time,
+        }
+
+    def sia_binary_encode_data(self, encoder):
+        encoder.add_int(self.computation_time)
+
+    def rivine_binary_encode_data(self, encoder):
+        encoder.add_int64(self.computation_time)

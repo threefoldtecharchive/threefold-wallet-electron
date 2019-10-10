@@ -18,6 +18,7 @@ export var _CONDITION_TYPE_UNLOCK_HASH = 1;
 export var _CONDITION_TYPE_ATOMIC_SWAP = 2;
 export var _CONDITION_TYPE_LOCKTIME = 3;
 export var _CONDITION_TYPE_MULTI_SIG = 4;
+export var _CONDITION_TYPE_CUSTODY_FEE = 128;
 export var from_json = function (obj) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -47,6 +48,9 @@ export var from_json = function (obj) {
 	}
 	if (ct == _CONDITION_TYPE_MULTI_SIG) {
 		return ConditionMultiSignature.from_json (obj);
+	}
+	if (ct == _CONDITION_TYPE_CUSTODY_FEE) {
+		return ConditionCustodyFee.from_json (obj);
 	}
 	var __except0__ = ValueError ('unsupport condition type {}'.format (ct));
 	__except0__.__cause__ = null;
@@ -252,6 +256,25 @@ export var multi_signature_new = function (min_nr_sig, unlockhashes) {
 	else {
 	}
 	return ConditionMultiSignature (__kwargtrans__ ({unlockhashes: unlockhashes, min_nr_sig: min_nr_sig}));
+};
+export var custody_fee_new = function (computation_time) {
+	if (typeof computation_time == 'undefined' || (computation_time != null && computation_time.hasOwnProperty ("__kwargtrans__"))) {;
+		var computation_time = 0;
+	};
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'computation_time': var computation_time = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	return ConditionCustodyFee (__kwargtrans__ ({computation_time: computation_time}));
 };
 export var output_lock_new = function (value) {
 	if (arguments.length) {
@@ -993,6 +1016,7 @@ UnlockHashType.NIL = UnlockHashType (0);
 UnlockHashType.PUBLIC_KEY = UnlockHashType (1);
 UnlockHashType.ATOMIC_SWAP = UnlockHashType (2);
 UnlockHashType.MULTI_SIG = UnlockHashType (3);
+UnlockHashType.CUSTODY_FEE = UnlockHashType (128);
 export var UnlockHash =  __class__ ('UnlockHash', [BaseDataTypeClass], {
 	__module__: __name__,
 	get __init__ () {return __get__ (this, function (self, uhtype, uhhash) {
@@ -2599,5 +2623,171 @@ export var ConditionMultiSignature =  __class__ ('ConditionMultiSignature', [Con
 });
 Object.defineProperty (ConditionMultiSignature, 'required_signatures', property.call (ConditionMultiSignature, ConditionMultiSignature._get_required_signatures, ConditionMultiSignature._set_required_signatures));
 Object.defineProperty (ConditionMultiSignature, 'unlockhashes', property.call (ConditionMultiSignature, ConditionMultiSignature._get_unlockhashes));;
+export var ConditionCustodyFee =  __class__ ('ConditionCustodyFee', [ConditionBaseClass], {
+	__module__: __name__,
+	get __init__ () {return __get__ (this, function (self, computation_time) {
+		if (typeof computation_time == 'undefined' || (computation_time != null && computation_time.hasOwnProperty ("__kwargtrans__"))) {;
+			var computation_time = null;
+		};
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'computation_time': var computation_time = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		self._computation_time = null;
+		self.computation_time = computation_time;
+	});},
+	get _custom_type_getter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return _CONDITION_TYPE_CUSTODY_FEE;
+	});},
+	get _custom_unlockhash_getter () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return UnlockHash (__kwargtrans__ ({uhtype: UnlockHashType.CUSTODY_FEE, uhhash: null}));
+	});},
+	get _get_computation_time () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._computation_time;
+	});},
+	get _set_computation_time () {return __get__ (this, function (self, value) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (value == null) {
+			self._computation_time = 0;
+			return ;
+		}
+		if (!(isinstance (value, int))) {
+			var __except0__ = py_TypeError ("ConditionCustodyFee's computation time value is expected to be of type int, not {}".format (py_typeof (value)));
+			__except0__.__cause__ = null;
+			throw __except0__;
+		}
+		self._computation_time = value;
+	});},
+	get from_json_data_object () {return __get__ (this, function (self, data) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'data': var data = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		self.computation_time = data ['computationtime'];
+	});},
+	get json_data_object () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return dict ({'computationtime': self.computation_time});
+	});},
+	get sia_binary_encode_data () {return __get__ (this, function (self, encoder) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'encoder': var encoder = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		encoder.add_int (self.computation_time);
+	});},
+	get rivine_binary_encode_data () {return __get__ (this, function (self, encoder) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'encoder': var encoder = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		encoder.add_int64 (self.computation_time);
+	});}
+});
+Object.defineProperty (ConditionCustodyFee, 'computation_time', property.call (ConditionCustodyFee, ConditionCustodyFee._get_computation_time, ConditionCustodyFee._set_computation_time));;
 
 //# sourceMappingURL=tfchain.types.ConditionTypes.map

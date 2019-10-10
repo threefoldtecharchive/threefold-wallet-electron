@@ -1,4 +1,5 @@
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __proxy__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, abs, all, any, assert, bool, bytearray, bytes, callable, chr, copy, deepcopy, delattr, dict, dir, divmod, enumerate, filter, float, getattr, hasattr, input, int, isinstance, issubclass, len, list, map, max, min, object, ord, pow, print, property, py_TypeError, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
+import * as jslog from './tfchain.polyfill.log.js';
 import {ConditionBaseClass, ConditionNil, UnlockHash, UnlockHashType} from './tfchain.types.ConditionTypes.js';
 import {FulfillmentBaseClass, FulfillmentSingleSignature} from './tfchain.types.FulfillmentTypes.js';
 import * as FulfillmentTypes from './tfchain.types.FulfillmentTypes.js';
@@ -347,6 +348,8 @@ export var CoinOutput =  __class__ ('CoinOutput', [BaseDataTypeClass], {
 		}
 		self._value = null;
 		self.value = value;
+		self._spendable_value = null;
+		self._custody_fee = null;
 		self._condition = null;
 		self.condition = condition;
 		self._id = null;
@@ -385,6 +388,11 @@ export var CoinOutput =  __class__ ('CoinOutput', [BaseDataTypeClass], {
 		}
 		else {
 		}
+		var sv = self.spendable_value;
+		jslog.info (sv.__str__ (), self._value.__str__ ());
+		if (sv.greater_than (0)) {
+			return sv;
+		}
 		return self._value;
 	});},
 	get _set_value () {return __get__ (this, function (self, value) {
@@ -407,6 +415,110 @@ export var CoinOutput =  __class__ ('CoinOutput', [BaseDataTypeClass], {
 			return ;
 		}
 		self._value = Currency (__kwargtrans__ ({value: value}));
+	});},
+	get _get_creation_value () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._value;
+	});},
+	get _get_spendable_value () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (self._spendable_value == null) {
+			return Currency ();
+		}
+		return self._spendable_value;
+	});},
+	get _set_spendable_value () {return __get__ (this, function (self, value) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (value == null) {
+			self._spendable_value = null;
+			return ;
+		}
+		if (isinstance (value, Currency)) {
+			self._spendable_value = value;
+			return ;
+		}
+		self._spendable_value = Currency (__kwargtrans__ ({value: value}));
+	});},
+	get _get_custody_fee () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (self._custody_fee == null) {
+			return Currency ();
+		}
+		return self._custody_fee;
+	});},
+	get _set_custody_fee () {return __get__ (this, function (self, value) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'value': var value = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		if (value == null) {
+			self._custody_fee = null;
+			return ;
+		}
+		if (isinstance (value, Currency)) {
+			self._custody_fee = value;
+			return ;
+		}
+		self._custody_fee = Currency (__kwargtrans__ ({value: value}));
 	});},
 	get _get_condition () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -579,6 +691,9 @@ export var CoinOutput =  __class__ ('CoinOutput', [BaseDataTypeClass], {
 Object.defineProperty (CoinOutput, 'is_fee', property.call (CoinOutput, CoinOutput._get_is_fee, CoinOutput._set_is_fee));
 Object.defineProperty (CoinOutput, 'id', property.call (CoinOutput, CoinOutput._get_id, CoinOutput._set_id));
 Object.defineProperty (CoinOutput, 'condition', property.call (CoinOutput, CoinOutput._get_condition, CoinOutput._set_condition));
+Object.defineProperty (CoinOutput, 'custody_fee', property.call (CoinOutput, CoinOutput._get_custody_fee, CoinOutput._set_custody_fee));
+Object.defineProperty (CoinOutput, 'spendable_value', property.call (CoinOutput, CoinOutput._get_spendable_value, CoinOutput._set_spendable_value));
+Object.defineProperty (CoinOutput, 'creation_value', property.call (CoinOutput, CoinOutput._get_creation_value));
 Object.defineProperty (CoinOutput, 'value', property.call (CoinOutput, CoinOutput._get_value, CoinOutput._set_value));;
 export var BlockstakeInput =  __class__ ('BlockstakeInput', [BaseDataTypeClass], {
 	__module__: __name__,
@@ -1216,7 +1331,7 @@ export var MinerPayout =  __class__ ('MinerPayout', [object], {
 		else {
 		}
 		if (value === null) {
-			self._unlockhash = UnlockHash (__kwargtrans__ ({py_metatype: UnlockHashType.NIL}));
+			self._unlockhash = UnlockHash (__kwargtrans__ ({uhtype: UnlockHashType.NIL}));
 			return ;
 		}
 		if (isinstance (value, str)) {
