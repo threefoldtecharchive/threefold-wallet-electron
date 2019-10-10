@@ -4308,6 +4308,72 @@ export var AccountBalance =  __class__ ('AccountBalance', [object], {
 		c.unit = self._chain_type.currency_unit ();
 		return c;
 	});},
+	get _get_custody_fee_debt () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var c = self.custody_fee_debt_unlocked.plus (self.custody_fee_debt_locked);
+		c.unit = self._chain_type.currency_unit ();
+		return c;
+	});},
+	get _get_custody_fee_debt_unlocked () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var c = Currency.sum (...(function () {
+			var __accu0__ = [];
+			for (var balance of self._balances) {
+				__accu0__.append (balance.custody_fee_debt_unlocked);
+			}
+			return __accu0__;
+		}) ());
+		c.unit = self._chain_type.currency_unit ();
+		return c;
+	});},
+	get _get_custody_fee_debt_locked () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var c = Currency.sum (...(function () {
+			var __accu0__ = [];
+			for (var balance of self._balances) {
+				__accu0__.append (balance.custody_fee_debt_locked);
+			}
+			return __accu0__;
+		}) ());
+		c.unit = self._chain_type.currency_unit ();
+		return c;
+	});},
 	get _get_unconfirmed_coins_unlocked () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -4378,6 +4444,9 @@ export var AccountBalance =  __class__ ('AccountBalance', [object], {
 Object.defineProperty (AccountBalance, 'unconfirmed_coins_total', property.call (AccountBalance, AccountBalance._get_unconfirmed_coins_total));
 Object.defineProperty (AccountBalance, 'unconfirmed_coins_locked', property.call (AccountBalance, AccountBalance._get_unconfirmed_coins_locked));
 Object.defineProperty (AccountBalance, 'unconfirmed_coins_unlocked', property.call (AccountBalance, AccountBalance._get_unconfirmed_coins_unlocked));
+Object.defineProperty (AccountBalance, 'custody_fee_debt_locked', property.call (AccountBalance, AccountBalance._get_custody_fee_debt_locked));
+Object.defineProperty (AccountBalance, 'custody_fee_debt_unlocked', property.call (AccountBalance, AccountBalance._get_custody_fee_debt_unlocked));
+Object.defineProperty (AccountBalance, 'custody_fee_debt', property.call (AccountBalance, AccountBalance._get_custody_fee_debt));
 Object.defineProperty (AccountBalance, 'coins_total', property.call (AccountBalance, AccountBalance._get_coins_total));
 Object.defineProperty (AccountBalance, 'coins_locked', property.call (AccountBalance, AccountBalance._get_coins_locked));
 Object.defineProperty (AccountBalance, 'coins_unlocked', property.call (AccountBalance, AccountBalance._get_coins_unlocked));;
@@ -5704,8 +5773,25 @@ export var CoinOutputView =  __class__ ('CoinOutputView', [object], {
 		else {
 		}
 		return self._fee;
+	});},
+	get _get_is_custody_fee () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return isinstance (self._recipient, str) && jsstr.startswith (self._recipient, '80');
 	});}
 });
+Object.defineProperty (CoinOutputView, 'is_custody_fee', property.call (CoinOutputView, CoinOutputView._get_is_custody_fee));
 Object.defineProperty (CoinOutputView, 'is_fee', property.call (CoinOutputView, CoinOutputView._get_is_fee));
 Object.defineProperty (CoinOutputView, 'lock_is_timestamp', property.call (CoinOutputView, CoinOutputView._get_lock_is_timestamp));
 Object.defineProperty (CoinOutputView, 'lock', property.call (CoinOutputView, CoinOutputView._get_lock));

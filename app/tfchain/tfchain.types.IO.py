@@ -3,7 +3,6 @@ from tfchain.types.PrimitiveTypes import BinaryData, Hash, Currency, Blockstake
 from tfchain.types import FulfillmentTypes, ConditionTypes
 from tfchain.types.FulfillmentTypes import FulfillmentBaseClass, FulfillmentSingleSignature
 from tfchain.types.ConditionTypes import ConditionBaseClass, ConditionNil, UnlockHash, UnlockHashType
-import tfchain.polyfill.log as jslog
 
 class CoinInput(BaseDataTypeClass):
     """
@@ -148,7 +147,6 @@ class CoinOutput(BaseDataTypeClass):
     @property
     def value(self):
         sv = self.spendable_value
-        jslog.info(sv.__str__(), self._value.__str__())
         if sv.greater_than(0):
             return sv
         return self._value

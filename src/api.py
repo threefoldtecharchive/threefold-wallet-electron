@@ -1749,6 +1749,23 @@ class AccountBalance:
         return c
 
     @property
+    def custody_fee_debt(self):
+        c = self.custody_fee_debt_unlocked.plus(self.custody_fee_debt_locked)
+        c.unit = self._chain_type.currency_unit()
+        return c
+
+    @property
+    def custody_fee_debt_unlocked(self):
+        c = Currency.sum(*[balance.custody_fee_debt_unlocked for balance in self._balances])
+        c.unit = self._chain_type.currency_unit()
+        return c
+    @property
+    def custody_fee_debt_locked(self):
+        c = Currency.sum(*[balance.custody_fee_debt_locked for balance in self._balances])
+        c.unit = self._chain_type.currency_unit()
+        return c
+
+    @property
     def unconfirmed_coins_unlocked(self):
         c = Currency.sum(*[balance.unconfirmed_coins_unlocked for balance in self._balances])
         c.unit = self._chain_type.currency_unit()
@@ -2352,6 +2369,13 @@ class CoinOutputView:
         :rtype: bool
         """
         return self._fee
+    @property
+    def is_custody_fee(self):
+        """
+        :returns: returns true if this is a custody fee
+        :rtype: bool
+        """
+        return isinstance(self._recipient, str) and jsstr.startswith(self._recipient, "80")
 
 
 class ChainInfo:

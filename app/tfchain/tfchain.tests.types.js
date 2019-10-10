@@ -3,7 +3,7 @@ import * as tftransactions from './tfchain.tests.types.transactions.js';
 import * as tfconditiontypes from './tfchain.tests.types.conditiontypes.js';
 import * as tffullfillments from './tfchain.tests.types.fullfillments.js';
 import * as tftypes from './tfchain.tests.types.types.js';
-export {tftransactions, tftypes, tffullfillments, tfconditiontypes};
+export {tftransactions, tffullfillments, tftypes, tfconditiontypes};
 var __name__ = 'tfchain.tests.types';
 export var tests = function () {
 	if (arguments.length) {

@@ -112,7 +112,7 @@ function renderTransactionBody (tx, explorerAddress, chainTimestamp, account, ad
             Amount: <span style={{ color: '#ff6961' }}>- {out.amount.str({
               unit: true
             })}</span>
-            {out.is_fee ? (<span style={{ marginLeft: 3 }}>(fee)</span>) : null}
+            {out.is_fee ? (<span style={{ marginLeft: 3 }}>(fee)</span>) : (out.is_custody_fee ? (<span style={{ marginLeft: 3 }}>(custody fee)</span>) : null)}
             {renderLockedValue(out.lock, out.lock_is_timestamp, chainTimestamp)}
           </List.Description>
           <List.Description style={listDescriptionStyle}>
