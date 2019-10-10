@@ -55,23 +55,18 @@ class SingleTransaction extends Component {
   }
 
   setSearchValue = (destination) => {
-    const { selectedWallet } = this.props.form.transactionForm.values
-
     let destinationError = false
-    let sendToSelfError = false
 
     if (!tfchain.wallet_address_is_valid(destination) || destination === '') {
       destinationError = true
       this.setState({ enableSubmit: false, enableSave: false })
-    } else if (selectedWallet && selectedWallet.is_address_owned_by_wallet(destination)) {
-      sendToSelfError = true
     }
 
-    if (!destinationError && !sendToSelfError) {
+    if (!destinationError) {
       this.setState({ enableSave: true, enableSubmit: true })
     }
 
-    if (destinationError || sendToSelfError) {
+    if (destinationError) {
       this.setState({ enableSubmit: false })
     }
     this.setState({ destination })
@@ -144,12 +139,8 @@ class SingleTransaction extends Component {
     const { selectedWallet } = this.props.form.transactionForm.values
 
     let destinationError = false
-    let sendToSelfError = false
 
     if (!tfchain.wallet_address_is_valid(destination) || destination === '') {
-      destinationError = true
-    } else if (selectedWallet && selectedWallet.is_address_owned_by_wallet(destination)) {
-      sendToSelfError = true
       destinationError = true
     }
 
@@ -161,11 +152,7 @@ class SingleTransaction extends Component {
       }
     }
     this.setState({ destinationError })
-    if (sendToSelfError) {
-      toast.error('source and destination wallets need to be different')
-    } else {
-      toast.error('form is not filled in correctly')
-    }
+    toast.error('form is not filled in correctly')
     return false
   }
 

@@ -29,7 +29,7 @@ class SearchableAddress extends Component {
 
     // When another wallet is selected filter and our filtered source is smaller then
     // our source in state, map it again to get results without the selected wallet
-    const source = this.state.source.filter(s => s.wallet_name !== this.props.account.selected_wallet.wallet_name)
+    const source = this.state.source
     if (prevState.source.length !== source.length) {
       this.mapSource()
     }
@@ -68,11 +68,6 @@ class SearchableAddress extends Component {
     }
 
     let source = wallets.concat(contacts.filter(Boolean))
-
-    if (this.props.account.selected_wallet) {
-      // Filter out the selected wallet from account properties
-      source = source.filter(s => s.wallet_name !== this.props.account.selected_wallet.wallet_name)
-    }
 
     this.setState({ source })
   }

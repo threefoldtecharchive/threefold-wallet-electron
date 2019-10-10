@@ -296,10 +296,6 @@ class MultisigTransaction extends Component {
     }
 
     let destinationError = false
-    if (selectedWallet != null && !signatureCountErrorValidation && !hasOwnerAddressErrors) {
-      const msaddress = tfchain.multisig_wallet_address_new(ownerAddresses, signatureCount)
-      destinationError = selectedWallet.is_address_owned_by_wallet(msaddress)
-    }
 
     if (!signatureCountErrorValidation && selectedWallet && !hasOwnerAddressErrors && areAllOwnersFilledIn && !destinationError) {
       this.setState({ enableSave: true })

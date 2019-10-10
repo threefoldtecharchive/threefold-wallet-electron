@@ -129,7 +129,7 @@ class InternalTransaction extends Component {
   mapOtherWalletsToDropdownOption = (selectedWallet) => {
     const { wallets, multisig_wallets: multiSigWallets } = this.props.account
 
-    const nWallets = wallets.filter(w => w.wallet_name !== selectedWallet.wallet_name).map(w => {
+    const nWallets = wallets.map(w => {
       return {
         key: `NM: ${w.wallet_name}`,
         text: w.wallet_name,
@@ -137,7 +137,7 @@ class InternalTransaction extends Component {
       }
     })
 
-    const mWallets = multiSigWallets.filter(w => w.address !== selectedWallet.address).map(w => {
+    const mWallets = multiSigWallets.map(w => {
       const id = w.wallet_name || w.address
       return {
         key: `MS: ${id}`,
