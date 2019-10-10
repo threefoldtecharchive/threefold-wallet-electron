@@ -151,7 +151,7 @@ class Account extends Component {
                 <p style={{ fontSize: 14 }}>{w.signatures_required}/{w.owners.length}</p>
               </Card.Description>
             ) : null}
-            <Icon className={styles.walletArrow} name='chevron right' style={{ position: 'absolute', right: 20, top: 135, fontSize: 25, opacity: '0.3', color: 'white' }} />
+            <Icon className={styles.walletArrow} name='chevron right' style={{ position: 'absolute', right: 20, top: '50%', fontSize: 25, opacity: '0.3', color: 'white' }} />
             <Card.Description style={{ color: 'white', marginTop: 10, marginBottom: 10, fontFamily: 'SF UI Text Bold', display: 'flex' }}>
               <Icon name='unlock' style={{ fontSize: 16, marginLeft: 20 }} />
               <p style={{ marginLeft: 30, marginTop: -8 }}>{unlockedBalance}</p>
@@ -196,7 +196,7 @@ class Account extends Component {
           <Card.Header style={{ color: 'white', fontFamily: 'SF UI Text Bold', fontSize: 16, textTransform: 'uppercase', marginTop: 30, textAlign: 'center' }}>
             {isMultisig ? 'Create multisig wallet' : 'Create wallet'}
           </Card.Header>
-          <Icon name='plus circle' style={{ position: 'absolute', left: 145, top: 110, fontSize: 40, color: '#4f52d2' }} />
+          <Icon name='plus circle' style={{ marginTop: 40, fontSize: 40, color: '#4f52d2' }} />
         </Card.Content>
       </Card>
     )
