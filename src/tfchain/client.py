@@ -448,7 +448,7 @@ class TFChainClient:
         coinoutputcustodyfees = etxn.get_or('coinoutputcustodyfees', None) or []
         if len(coinoutputcustodyfees) > 0:
             if len(transaction.coin_outputs) != len(coinoutputcustodyfees):
-                raise tferrors.ExplorerInvalidResponse("amount of coin outputs and output info are not matching: {} != {}".format(len(transaction.coin_outputs), len(coinoutputids)), endpoint, resp)
+                raise tferrors.ExplorerInvalidResponse("amount of coin outputs and output info are not matching: {} != {}".format(len(transaction.coin_outputs), len(coinoutputcustodyfees)), endpoint, resp)
             for (idx, coinoutputcustodyfee) in enumerate(coinoutputcustodyfees):
                 if 'iscustodyfee' in coinoutputcustodyfee and not coinoutputcustodyfee['iscustodyfee']:
                     transaction.coin_outputs[idx].custody_fee = Currency.from_json(coinoutputcustodyfee['custodyfee'])

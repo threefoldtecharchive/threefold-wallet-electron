@@ -888,7 +888,7 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 		var coinoutputcustodyfees = etxn.get_or ('coinoutputcustodyfees', null) || [];
 		if (len (coinoutputcustodyfees) > 0) {
 			if (len (transaction.coin_outputs) != len (coinoutputcustodyfees)) {
-				var __except0__ = tferrors.ExplorerInvalidResponse ('amount of coin outputs and output info are not matching: {} != {}'.format (len (transaction.coin_outputs), len (coinoutputids)), endpoint, resp);
+				var __except0__ = tferrors.ExplorerInvalidResponse ('amount of coin outputs and output info are not matching: {} != {}'.format (len (transaction.coin_outputs), len (coinoutputcustodyfees)), endpoint, resp);
 				__except0__.__cause__ = null;
 				throw __except0__;
 			}
