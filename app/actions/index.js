@@ -82,6 +82,9 @@ export const resetApp = function () {
 
 export const updateAccount = function (account) {
   return dispatch => {
+    if (account.update_account === undefined) {
+      return;
+    }
     account.update_account((acc, _) => {
       dispatch({
         type: 'UPDATE_ACCOUNT',
