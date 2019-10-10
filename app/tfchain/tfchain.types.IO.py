@@ -146,9 +146,6 @@ class CoinOutput(BaseDataTypeClass):
 
     @property
     def value(self):
-        sv = self.spendable_value
-        if sv.greater_than(0):
-            return sv
         return self._value
 
     @value.setter

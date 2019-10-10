@@ -15,6 +15,10 @@ const WalletBalanceGrid = ({ walletBalance }) => {
     unconfirmed_coins_unlocked: unconfirmedUnlockedCoins
   } = walletBalance
 
+  const coinsTotalSpendable = coinsTotal.minus(custodyFeeDebt)
+  const coinsLockedSpendable = coinsLocked.minus(custodyFeeDebtLocked)
+  const coinsUnlockedSpendable = coinsUnlocked.minus(custodyFeeDebtUnlocked)
+
   return (
     <Segment style={{ background: '#131421', border: 'none', paddingTop: 0, paddingLeft: 0, paddingRight: 0, width: '90%', margin: 'auto' }}>
       <div style={{ background: 'linear-gradient(90deg, rgba(102,60,198,1) 0%, rgba(169,92,202,1) 100%)', width: '100%', textAlign: 'center', height: 50, paddingTop: 15, borderRadius: 2 }}>
@@ -24,19 +28,19 @@ const WalletBalanceGrid = ({ walletBalance }) => {
         <Grid columns='3'>
           <Grid.Column style={{ textAlign: 'center' }}>
             <h4 style={{ marginTop: 0 }}>Total Balance</h4>
-            <h4 className={styles.gradientTitle} >{coinsTotal.str({ precision: 3, unit: true })}</h4>
+            <h4 className={styles.gradientTitle} >{coinsTotalSpendable.str({ precision: 3, unit: true })}</h4>
             {custodyFeeDebt.greater_than(0) ? (<span style={{ color: 'white', fontSize: 10 }}>custody fee: {custodyFeeDebt.str({ precision: 6, unit: true })}</span>) : (<p />)}
             {unconfirmedTotalCoins.greater_than(0) ? (<span style={{ color: 'white', fontSize: 12 }}>* unconfirmed: {unconfirmedTotalCoins.str({ precision: 3, unit: true })}</span>) : (<p />)}
           </Grid.Column>
           <Grid.Column style={{ textAlign: 'center' }}>
             <h4><Icon name='lock' />Locked Balance</h4>
-            <h4>{coinsLocked.str({ precision: 3, unit: true })}</h4>
+            <h4>{coinsLockedSpendable.str({ precision: 3, unit: true })}</h4>
             {custodyFeeDebtLocked.greater_than(0) ? (<span style={{ color: 'white', fontSize: 10 }}>custody fee: {custodyFeeDebtLocked.str({ precision: 6, unit: true })}</span>) : (<p />)}
             {unconfirmedLockedCoins.greater_than(0) ? (<span style={{ color: 'white', fontSize: 12 }}>* unconfirmed: {unconfirmedLockedCoins.str({ precision: 3, unit: true })}</span>) : (<p />)}
           </Grid.Column>
           <Grid.Column style={{ textAlign: 'center' }}>
             <h4><Icon name='unlock' />Unlocked Balance</h4>
-            <h4 style={{ marginBottom: 0 }}>{coinsUnlocked.str({ precision: 3, unit: true })}</h4>
+            <h4 style={{ marginBottom: 0 }}>{coinsUnlockedSpendable.str({ precision: 3, unit: true })}</h4>
             {custodyFeeDebtUnlocked.greater_than(0) ? (<span style={{ color: 'white', fontSize: 10 }}>custody fee: {custodyFeeDebtUnlocked.str({ precision: 6, unit: true })}</span>) : (<p />)}
             {unconfirmedUnlockedCoins.greater_than(0) ? (<span style={{ color: 'white', fontSize: 12 }}>* unconfirmed: {unconfirmedUnlockedCoins.str({ precision: 3, unit: true })} </span>) : (<p />)}
           </Grid.Column>

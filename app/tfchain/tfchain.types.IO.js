@@ -387,10 +387,6 @@ export var CoinOutput =  __class__ ('CoinOutput', [BaseDataTypeClass], {
 		}
 		else {
 		}
-		var sv = self.spendable_value;
-		if (sv.greater_than (0)) {
-			return sv;
-		}
 		return self._value;
 	});},
 	get _set_value () {return __get__ (this, function (self, value) {

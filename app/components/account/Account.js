@@ -128,16 +128,16 @@ class Account extends Component {
       if (w.is_multisig) {
         onClick = () => this.handleMultiSigWalletClick(w)
       }
-      let unlockedBalance = `${w.balance.coins_unlocked.str({ precision: 3, unit: true })}`
-      let lockedBalance = `${w.balance.coins_locked.str({ precision: 3, unit: true })}`
+      let unlockedBalance = `${w.balance.coins_unlocked.minus(w.balance.custody_fee_debt_unlocked).str({ precision: 3, unit: true })}`
+      let lockedBalance = `${w.balance.coins_locked.minus(w.balance.custody_fee_debt_locked).str({ precision: 3, unit: true })}`
 
       if (w.balance.unconfirmed_coins_unlocked.not_equal_to(0)) {
-        const totalUnlockedBalance = w.balance.unconfirmed_coins_unlocked.plus(w.balance.coins_unlocked)
+        const totalUnlockedBalance = w.balance.unconfirmed_coins_unlocked.plus(w.balance.coins_unlocked).minus(w.balance.custody_fee_debt_unlocked)
         unlockedBalance = `${totalUnlockedBalance.str({ precision: 3, unit: true })} *`
       }
 
       if (w.balance.unconfirmed_coins_locked.not_equal_to(0)) {
-        const totalLockedBalance = w.balance.unconfirmed_coins_locked.plus(w.balance.coins_locked)
+        const totalLockedBalance = w.balance.unconfirmed_coins_locked.plus(w.balance.coins_locked).minus(w.balance.custody_fee_debt_locked)
         lockedBalance = `${totalLockedBalance.str({ precision: 3, unit: true })} *`
       }
 
@@ -217,24 +217,28 @@ class Account extends Component {
       unconfirmed_coins_locked: unconfirmedLockedCoins
     } = this.props.account.balance
 
+    const coinsTotalSpendable = coinsTotal.minus(custodyFeeDebt)
+    const coinsLockedSpendable = coinsLocked.minus(custodyFeeDebtLocked)
+    const coinsUnlockedSpendable = coinsUnlocked.minus(custodyFeeDebtUnlocked)
+
     if (this.props.is_loaded) {
       content = (
         <Grid columns='3'>
           <Grid.Column style={{ textAlign: 'center' }}>
             <h4 style={{ marginTop: 0 }}>Total Balance</h4>
-            <h4 className={styles.gradientTitle} >{coinsTotal.str({ precision: 3, unit: true })}</h4>
+            <h4 className={styles.gradientTitle} >{coinsTotalSpendable.str({ precision: 3, unit: true })}</h4>
             {custodyFeeDebt.greater_than(0) ? (<span style={{ color: 'white', fontSize: 10 }}>custody fee: {custodyFeeDebt.str({ precision: 6, unit: true })}</span>) : (<p />)}
             {unconfirmedTotalCoins.greater_than(0) ? (<span style={{ color: 'white', fontSize: 12 }}>* unconfirmed: {unconfirmedTotalCoins.str({ precision: 3, unit: true })}</span>) : (<p />)}
           </Grid.Column>
           <Grid.Column style={{ textAlign: 'center' }}>
             <h4><Icon name='lock' />Locked Balance</h4>
-            <h4>{coinsLocked.str({ precision: 3, unit: true })}</h4>
+            <h4>{coinsLockedSpendable.str({ precision: 3, unit: true })}</h4>
             {custodyFeeDebtLocked.greater_than(0) ? (<span style={{ color: 'white', fontSize: 10 }}>custody fee: {custodyFeeDebtLocked.str({ precision: 6, unit: true })}</span>) : (<p />)}
             {unconfirmedLockedCoins.greater_than(0) ? (<span style={{ color: 'white', fontSize: 12 }}>* unconfirmed: {unconfirmedLockedCoins.str({ precision: 3, unit: true })}</span>) : (<p />)}
           </Grid.Column>
           <Grid.Column style={{ textAlign: 'center' }}>
             <h4><Icon name='unlock' />Unlocked Balance</h4>
-            <h4 style={{ marginBottom: 0 }}>{coinsUnlocked.str({ precision: 3, unit: true })}</h4>
+            <h4 style={{ marginBottom: 0 }}>{coinsUnlockedSpendable.str({ precision: 3, unit: true })}</h4>
             {custodyFeeDebtUnlocked.greater_than(0) ? (<span style={{ color: 'white', fontSize: 10 }}>custody fee: {custodyFeeDebtUnlocked.str({ precision: 6, unit: true })}</span>) : (<p />)}
             {unconfirmedUnlockedCoins.greater_than(0) ? (<span style={{ color: 'white', fontSize: 12 }}>* unconfirmed: {unconfirmedUnlockedCoins.str({ precision: 3, unit: true })} </span>) : (<p />)}
           </Grid.Column>
