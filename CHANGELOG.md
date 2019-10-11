@@ -1,3 +1,9 @@
+# v0.5.2 (2019.10.11)
+
+Fixes:
+
+- allow the maxAmount feature of send pages once again;
+
 # v0.5.1 (2019.10.11)
 
 Fixes:
