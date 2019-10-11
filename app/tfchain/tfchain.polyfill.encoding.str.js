@@ -336,6 +336,27 @@ export var py_replace = function (s, sub_old, sub_new) {
 	    
 	return s;
 };
+export var replace_all = function (s, sub_old, sub_new) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 's': var s = __allkwargs0__ [__attrib0__]; break;
+					case 'sub_old': var sub_old = __allkwargs0__ [__attrib0__]; break;
+					case 'sub_new': var sub_new = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	
+	    s = s.replace(new RegExp(sub_old, 'g'), sub_new);
+	    
+	return s;
+};
 export var sprintf = function (fmt) {
 	if (arguments.length) {
 		var __ilastarg0__ = arguments.length - 1;
@@ -837,6 +858,24 @@ export var String =  __class__ ('String', [object], {
 		else {
 		}
 		return String (py_replace (self.value, sub_old, sub_new));
+	});},
+	get replace_all () {return __get__ (this, function (self, sub_old, sub_new) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'sub_old': var sub_old = __allkwargs0__ [__attrib0__]; break;
+						case 'sub_new': var sub_new = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return String (replace_all (self.value, sub_old, sub_new));
 	});},
 	get sprintf () {return __get__ (this, function (self) {
 		if (arguments.length) {

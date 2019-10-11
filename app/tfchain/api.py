@@ -1099,7 +1099,7 @@ class FaucetClient:
         if wallet == None and address == None:
             address = self._account.address
             if address == None:
-               raise ValueError("no addess or wallet given, and account {} has no addresses to use".format(self._account.account_name))
+               raise ValueError("no address or wallet given, and account {} has no addresses to use".format(self._account.account_name))
             return address
         # check if a wallet exists with this address
         wallet = self._account.wallet_get(opts={
@@ -2318,10 +2318,43 @@ class WalletOutputAggregator:
                         lock_is_timestamp=False if lock == 0 else OutputLock(lock).is_timestamp,
                         output_description='custody fee' if jsstr.startswith(address, "80") else '',
                     ))
+        # add all payouts that are sent to us
+        # add rewards
+        for address, balances in jsobj.get_items(self._reward_balances):
+            if address not in self._our_addresses:
+                continue
+            for slock, amount in jsobj.get_items(balances):
+                lock = jsstr.to_int(slock)
+                amount.unit = self._chain_type.currency_unit()
+                inputs.append(CoinOutputView(
+                    senders=None,
+                    recipient=address,
+                    amount=amount,
+                    lock=lock,
+                    lock_is_timestamp=False,
+                    output_description='block reward',
+                ))
+        # add fees
+        for address, balances in jsobj.get_items(self._fee_balances):
+            if address not in self._our_addresses:
+                continue
+            for slock, amount in jsobj.get_items(balances):
+                lock = jsstr.to_int(slock)
+                amount.unit = self._chain_type.currency_unit()
+                inputs.append(CoinOutputView(
+                    senders=other_send_addresses,
+                    recipient=address,
+                    amount=amount,
+                    lock=lock,
+                    lock_is_timestamp=False,
+                    output_description='fee',
+                ))
         # add all payouts if required
         if we_sent_coin_outputs:
             # add rewards
             for address, balances in jsobj.get_items(self._reward_balances):
+                if address in self._our_addresses:
+                    continue
                 for slock, amount in jsobj.get_items(balances):
                     lock = jsstr.to_int(slock)
                     amount.unit = self._chain_type.currency_unit()
@@ -2335,6 +2368,8 @@ class WalletOutputAggregator:
                     ))
             # add fees
             for address, balances in jsobj.get_items(self._fee_balances):
+                if address in self._our_addresses:
+                    continue
                 for slock, amount in jsobj.get_items(balances):
                     lock = jsstr.to_int(slock)
                     amount.unit = self._chain_type.currency_unit()
@@ -2578,7 +2613,7 @@ class Currency:
             fraction = '0'
         # remove group operator if it exists
         if not jsstr.equal(group, ''):
-            integer = jsstr.replace(integer, group, '')
+            integer = jsstr.replace_all(integer, group, '')
         # piggy-back on the regular TFCurrency logic
         return cls(TFCurrency(value=jsstr.sprintf('%s.%s', integer, fraction)))
 

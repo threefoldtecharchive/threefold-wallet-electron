@@ -81,18 +81,20 @@ function renderTransactionBody (tx, explorerAddress, chainTimestamp, account, ad
             })}</span>
             {renderLockedValue(input.lock, input.lock_is_timestamp, chainTimestamp)}
           </List.Description>
-          <List.Description style={listDescriptionStyle}>
-            {input.senders.map(sender => {
-              return (
-                <div key={tx.identifier + '_in_' + sender} style={{ display: 'flex', marginTop: 5 }}>
-                  From:
-                  <p style={{ fontSize: 14, marginBottom: 0, fontFamily: 'Lucida Typewriter', position: 'relative', left: 19 }}>
-                    {_addressDisplayElement(sender, account, explorerAddress, addContact)}
-                  </p>
-                </div>
-              )
-            })}
-          </List.Description>
+          {input.senders ? (
+            <List.Description style={listDescriptionStyle}>
+              {input.senders.map(sender => {
+                return (
+                  <div key={tx.identifier + '_in_' + sender} style={{ display: 'flex', marginTop: 5 }}>
+                    From:
+                    <p style={{ fontSize: 14, marginBottom: 0, fontFamily: 'Lucida Typewriter', position: 'relative', left: 19 }}>
+                      {_addressDisplayElement(sender, account, explorerAddress, addContact)}
+                    </p>
+                  </div>
+                )
+              })}
+            </List.Description>
+          ) : null}
           <List.Description style={{ color: 'white', display: 'flex', marginTop: 3 }}>
             <div key={tx.identifier + '_in_' + input.recipient} style={{ display: 'flex', marginTop: 5 }}>
               To:

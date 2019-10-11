@@ -121,6 +121,12 @@ def replace(s, sub_old, sub_new):
     """)
     return s
 
+def replace_all(s, sub_old, sub_new):
+    __pragma__("js", "{}", """
+    s = s.replace(new RegExp(sub_old, 'g'), sub_new);
+    """)
+    return s
+
 def sprintf(fmt, *argv):
     return sprintfjs(fmt, *argv)
 
@@ -259,6 +265,9 @@ class String:
 
     def replace(self, sub_old, sub_new):
         return String(replace(self.value, sub_old, sub_new))
+
+    def replace_all(self, sub_old, sub_new):
+        return String(replace_all(self.value, sub_old, sub_new))
 
     def sprintf(self, *argv):
         return String(sprintf(self.value, *argv))

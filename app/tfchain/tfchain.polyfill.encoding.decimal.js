@@ -177,6 +177,9 @@ export var Decimal =  __class__ ('Decimal', [object], {
 		}
 		else {
 		}
+		if (self._value.isZero ()) {
+			return [];
+		}
 		var v = null;
 		var mep = null;
 		if (isinstance (prec, int)) {

@@ -38,6 +38,14 @@ class TransactionAmountField extends Component {
       this.props.input.onChange(value)
     }
 
+    const {
+      coins_unlocked: coinsUnlocked,
+      unconfirmed_coins_unlocked: unconfirmedUnlockedCoins,
+      custody_fee_debt_unlocked: custodyFeeDebtUnlocked
+    } = selectedWallet.balance
+
+    const availableCoins = coinsUnlocked.plus(unconfirmedUnlockedCoins).minus(custodyFeeDebtUnlocked)
+
     return (
       <div style={{ marginBottom: 20 }}>
         <div style={{ display: 'flex' }}>
@@ -55,7 +63,7 @@ class TransactionAmountField extends Component {
             className='gradient-text'
             onClick={() => this.props.setMaxAmount()}
           >
-            Available balance: {selectedWallet.balance.coins_unlocked.str({ unit: true })}
+            Available balance: {availableCoins.str({ unit: true })}
           </label>
         </div>
         <label style={{ color: 'white' }}>Minerfee: {minerFee.str({ unit: true })}, amount including minerfee: {totalAmount.str({ unit: true })}</label>

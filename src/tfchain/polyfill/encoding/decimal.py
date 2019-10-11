@@ -59,6 +59,8 @@ class Decimal:
         return self.value.toString()
 
     def bytes(self, prec=None):
+        if self._value.isZero():
+            return []
         v = None
         mep = None
         if isinstance(prec, int):

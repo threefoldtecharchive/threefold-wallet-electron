@@ -2372,7 +2372,7 @@ export var FaucetClient =  __class__ ('FaucetClient', [object], {
 		if (wallet == null && address == null) {
 			var address = self._account.address;
 			if (address == null) {
-				var __except0__ = ValueError ('no addess or wallet given, and account {} has no addresses to use'.format (self._account.account_name));
+				var __except0__ = ValueError ('no address or wallet given, and account {} has no addresses to use'.format (self._account.account_name));
 				__except0__.__cause__ = null;
 				throw __except0__;
 			}
@@ -5692,8 +5692,31 @@ export var WalletOutputAggregator =  __class__ ('WalletOutputAggregator', [objec
 				}
 			}
 		}
+		for (var [address, balances] of jsobj.get_items (self._reward_balances)) {
+			if (!__in__ (address, self._our_addresses)) {
+				continue;
+			}
+			for (var [slock, amount] of jsobj.get_items (balances)) {
+				var lock = jsstr.to_int (slock);
+				amount.unit = self._chain_type.currency_unit ();
+				inputs.append (CoinOutputView (__kwargtrans__ ({senders: null, recipient: address, amount: amount, lock: lock, lock_is_timestamp: false, output_description: 'block reward'})));
+			}
+		}
+		for (var [address, balances] of jsobj.get_items (self._fee_balances)) {
+			if (!__in__ (address, self._our_addresses)) {
+				continue;
+			}
+			for (var [slock, amount] of jsobj.get_items (balances)) {
+				var lock = jsstr.to_int (slock);
+				amount.unit = self._chain_type.currency_unit ();
+				inputs.append (CoinOutputView (__kwargtrans__ ({senders: other_send_addresses, recipient: address, amount: amount, lock: lock, lock_is_timestamp: false, output_description: 'fee'})));
+			}
+		}
 		if (we_sent_coin_outputs) {
 			for (var [address, balances] of jsobj.get_items (self._reward_balances)) {
+				if (__in__ (address, self._our_addresses)) {
+					continue;
+				}
 				for (var [slock, amount] of jsobj.get_items (balances)) {
 					var lock = jsstr.to_int (slock);
 					amount.unit = self._chain_type.currency_unit ();
@@ -5701,6 +5724,9 @@ export var WalletOutputAggregator =  __class__ ('WalletOutputAggregator', [objec
 				}
 			}
 			for (var [address, balances] of jsobj.get_items (self._fee_balances)) {
+				if (__in__ (address, self._our_addresses)) {
+					continue;
+				}
 				for (var [slock, amount] of jsobj.get_items (balances)) {
 					var lock = jsstr.to_int (slock);
 					amount.unit = self._chain_type.currency_unit ();
@@ -6172,7 +6198,7 @@ export var Currency =  __class__ ('Currency', [object], {
 			var fraction = '0';
 		}
 		if (!(jsstr.equal (group, ''))) {
-			var integer = jsstr.py_replace (integer, group, '');
+			var integer = jsstr.replace_all (integer, group, '');
 		}
 		return cls (TFCurrency (__kwargtrans__ ({value: jsstr.sprintf ('%s.%s', integer, fraction)})));
 	});},
