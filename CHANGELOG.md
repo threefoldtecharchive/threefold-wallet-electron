@@ -4,6 +4,7 @@ Fixes:
 
 - allow tokens to be transfered from goldchain wallets by fixing a bug related to custody fees;
 - allow miner payouts to be spent by wallet (including block rewards);
+- show correctly available balance in pages such as sent transactions;
 
 # v0.5.0 (2019.10.10)
 
