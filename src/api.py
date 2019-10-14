@@ -2359,7 +2359,7 @@ class WalletOutputAggregator:
                     lock = jsstr.to_int(slock)
                     amount.unit = self._chain_type.currency_unit()
                     outputs.append(CoinOutputView(
-                        senders=our_send_addresses,
+                        senders=None,
                         recipient=address if address else None,
                         amount=amount.times(ratio),
                         lock=lock,
@@ -3438,3 +3438,20 @@ def unlock_condition_from_recipient(recipient):
 
 def wallet_address_from_recipient(recipient):
     return unlock_condition_from_recipient(recipient).unlockhash.__str__()
+
+def address_description(address):
+    try:
+        uh = UnlockHash.from_str(address)
+        if uh.uhtype.value == UnlockHashType.CUSTODY_FEE.value:
+            return "cust. fee void"
+        if uh.uhtype.value == UnlockHashType.NIL.value:
+            return "free-for-all wallet"
+        if uh.uhtype.value == UnlockHashType.MULTI_SIG.value:
+            return "multisig wallet"
+        if uh.uhtype.value == UnlockHashType.PUBLIC_KEY.value:
+            return "singlesig wallet"
+        if uh.uhtype.value == UnlockHashType.ATOMIC_SWAP.value:
+            return "atomic swap contract"
+        return None
+    except Exception:
+        return None

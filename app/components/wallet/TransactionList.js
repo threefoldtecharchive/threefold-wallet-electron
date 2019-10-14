@@ -6,6 +6,8 @@ import { differenceWith, flatten, isEqual, find } from 'lodash'
 import styles from '../home/Home.css'
 const { shell } = require('electron')
 
+import * as tfchain from '../../tfchain/api'
+
 const confirmedStyle = {
   fontSize: 14,
   marginLeft: 80,
@@ -118,7 +120,7 @@ function renderTransactionBody (tx, explorerAddress, chainTimestamp, account, ad
             {renderLockedValue(out.lock, out.lock_is_timestamp, chainTimestamp)}
           </List.Description>
           <List.Description style={listDescriptionStyle}>
-            {out.senders.map(sender => {
+            {out.senders ? out.senders.map(sender => {
               return (
                 <div key={tx.identifier + '_out_' + sender} style={{ display: 'flex', marginTop: 5 }}>
                   From:
@@ -127,7 +129,7 @@ function renderTransactionBody (tx, explorerAddress, chainTimestamp, account, ad
                   </p>
                 </div>
               )
-            })}
+            }) : null}
           </List.Description>
           {out.recipient ? <List.Description style={{ color: 'white', display: 'flex', marginTop: 3 }}>
             <div key={tx.identifier + '_out_' + out.recipient} style={{ display: 'flex', marginTop: 5 }}>
@@ -147,46 +149,54 @@ function _addressDisplayElement (address, account, explorerAddress, addContact) 
   const openExplorerIcon = (<Icon style={{ cursor: 'pointer', marginLeft: 10, marginRight: 10 }} name='external alternate' onClick={() => shell.openExternal(`${explorerAddress}/hash.html?hash=${address}`)} />)
   let addressElement = (<span style={hashFont}>{address}</span>)
 
-  // default add single sig contact (pass address as a single string)
-  let onClick = () => addContact(address)
-  const wallet = account.wallet_for_address(address)
-  if (wallet) {
-    // if there is a wallet associated with the address than pass recipient (can be single string or array in case of multisig)
-    onClick = () => addContact(wallet.recipient_get())
-  }
+  let contactOrWallet
+  if (tfchain.wallet_address_is_valid(address)) {
+    // default add single sig contact (pass address as a single string)
+    let onClick = () => addContact(address)
+    const wallet = account.wallet_for_address(address)
+    if (wallet) {
+      // if there is a wallet associated with the address than pass recipient (can be single string or array in case of multisig)
+      onClick = () => addContact(wallet.recipient_get())
+    }
 
-  let contactOrWallet = (<Label onClick={onClick} className={styles.tinyAcceptButton} as='a'>
-    <Icon name='plus' />
-  Add to contacts
-  </Label>)
+    contactOrWallet = (<Label onClick={onClick} className={styles.tinyAcceptButton} as='a'>
+      <Icon name='plus' />
+    Add to contacts
+    </Label>)
 
-  const { address_book: addressBook } = account
-  const { contacts } = addressBook
+    const { address_book: addressBook } = account
+    const { contacts } = addressBook
 
-  // Filter out multisig contacts
-  const singleContacts = contacts.filter(contact => !(contact.recipient instanceof Array))
-  // Check if address to display is a contact from addressboek
-  const contact = find(singleContacts, contact => contact.recipient === address)
+    // Filter out multisig contacts
+    const singleContacts = contacts.filter(contact => !(contact.recipient instanceof Array))
+    // Check if address to display is a contact from addressboek
+    const contact = find(singleContacts, contact => contact.recipient === address)
 
-  // Single sig contact
-  if (contact) {
-    addressElement = (<span style={hashFont}>{contact.recipient}</span>)
-    contactOrWallet = (<span>(contact: {contact.contact_name})</span>)
-  }
+    // Single sig contact
+    if (contact) {
+      addressElement = (<span style={hashFont}>{contact.recipient}</span>)
+      contactOrWallet = (<span>(contact: {contact.contact_name})</span>)
+    }
 
-  // Single sig wallet
-  if (wallet && wallet.wallet_name) {
-    addressElement = (<span style={hashFont}>{address}</span>)
-    contactOrWallet = (<span>(wallet {`${wallet.wallet_name}`})</span>)
-  }
+    // Single sig wallet
+    if (wallet && wallet.wallet_name) {
+      addressElement = (<span style={hashFont}>{address}</span>)
+      contactOrWallet = (<span>(wallet {`${wallet.wallet_name}`})</span>)
+    }
 
-  // If nothing above and there is a ms wallet connected to the recipients, show ms wallet contact
-  if (wallet && wallet.is_multisig) {
-    const msContacts = contacts.filter(contact => contact.recipient instanceof Array)
-    const msContact = find(msContacts, contact => isEqual(contact.recipient[1], wallet.authorized_owners))
-    if (msContact) {
-      addressElement = (<React.Fragment><span style={hashFont}>{address}</span></React.Fragment>)
-      contactOrWallet = (<span>(contact: {msContact.contact_name})</span>)
+    // If nothing above and there is a ms wallet connected to the recipients, show ms wallet contact
+    if (wallet && wallet.is_multisig) {
+      const msContacts = contacts.filter(contact => contact.recipient instanceof Array)
+      const msContact = find(msContacts, contact => isEqual(contact.recipient[1], wallet.authorized_owners))
+      if (msContact) {
+        addressElement = (<React.Fragment><span style={hashFont}>{address}</span></React.Fragment>)
+        contactOrWallet = (<span>(contact: {msContact.contact_name})</span>)
+      }
+    }
+  } else {
+    const desc = tfchain.address_description(address)
+    if (desc) {
+      contactOrWallet = (<span>({`${desc}`})</span>)
     }
   }
 

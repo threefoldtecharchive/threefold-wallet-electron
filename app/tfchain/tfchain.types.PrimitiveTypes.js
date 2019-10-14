@@ -240,7 +240,12 @@ export var BinaryData =  __class__ ('BinaryData', [BaseDataTypeClass], {
 			var value = value.value;
 		}
 		else if (value == null) {
-			var value = bytes (jsarray.new_array (0));
+			if (self._fixed_size != null) {
+				var value = bytes (jsarray.new_array (self._fixed_size));
+			}
+			else {
+				var value = bytes (jsarray.new_array (0));
+			}
 		}
 		else if (isinstance (value, str)) {
 			var value = self._from_str (value);

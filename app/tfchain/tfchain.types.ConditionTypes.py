@@ -324,7 +324,7 @@ class UnlockHashType:
             obj = jsstr.to_int(obj)
         elif not isinstance(obj, int):
             raise TypeError("UnlockHashType is expected to be JSON-encoded as an int, not {}".format(type(obj)))
-        if obj < UnlockHashType.NIL.value or obj > UnlockHashType.MULTI_SIG.value:
+        if (obj < UnlockHashType.NIL.value or obj > UnlockHashType.MULTI_SIG.value) and obj != UnlockHashType.CUSTODY_FEE.value:
             raise ValueError("UnlockHashType {} is not valid".format(obj))
         return cls(obj) # int -> enum
 
@@ -368,7 +368,7 @@ class UnlockHash(BaseDataTypeClass):
         if len(obj) != UnlockHash._TOTAL_SIZE_HEX:
             raise ValueError("UnlockHash is expexcted to be of length {} when stringified, not of length {}, invalid: {} ({})".format(UnlockHash._TOTAL_SIZE_HEX, len(obj), obj, type(obj)))
 
-        t = UnlockHashType(int(jsarr.slice_array(obj, 0, UnlockHash._TYPE_SIZE_HEX)))
+        t = UnlockHashType(jshex.hex_to_int(jsarr.slice_array(obj, 0, UnlockHash._TYPE_SIZE_HEX)))
         h = Hash(value=obj[UnlockHash._TYPE_SIZE_HEX:UnlockHash._TYPE_SIZE_HEX+UnlockHash._HASH_SIZE_HEX])
         uh = cls(uhtype=t, uhhash=h)
         

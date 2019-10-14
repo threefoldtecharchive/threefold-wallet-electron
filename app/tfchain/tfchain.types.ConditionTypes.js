@@ -934,7 +934,7 @@ export var UnlockHashType =  __class__ ('UnlockHashType', [object], {
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		if (obj < UnlockHashType.NIL.value || obj > UnlockHashType.MULTI_SIG.value) {
+		if ((obj < UnlockHashType.NIL.value || obj > UnlockHashType.MULTI_SIG.value) && obj != UnlockHashType.CUSTODY_FEE.value) {
 			var __except0__ = ValueError ('UnlockHashType {} is not valid'.format (obj));
 			__except0__.__cause__ = null;
 			throw __except0__;
@@ -1072,7 +1072,7 @@ export var UnlockHash =  __class__ ('UnlockHash', [BaseDataTypeClass], {
 			__except0__.__cause__ = null;
 			throw __except0__;
 		}
-		var t = UnlockHashType (int (jsarr.slice_array (obj, 0, UnlockHash._TYPE_SIZE_HEX)));
+		var t = UnlockHashType (jshex.hex_to_int (jsarr.slice_array (obj, 0, UnlockHash._TYPE_SIZE_HEX)));
 		var h = Hash (__kwargtrans__ ({value: obj.__getslice__ (UnlockHash._TYPE_SIZE_HEX, UnlockHash._TYPE_SIZE_HEX + UnlockHash._HASH_SIZE_HEX, 1)}));
 		var uh = cls (__kwargtrans__ ({uhtype: t, uhhash: h}));
 		if (t.__eq__ (UnlockHashType.NIL)) {

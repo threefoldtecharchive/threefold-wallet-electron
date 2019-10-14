@@ -5720,7 +5720,7 @@ export var WalletOutputAggregator =  __class__ ('WalletOutputAggregator', [objec
 				for (var [slock, amount] of jsobj.get_items (balances)) {
 					var lock = jsstr.to_int (slock);
 					amount.unit = self._chain_type.currency_unit ();
-					outputs.append (CoinOutputView (__kwargtrans__ ({senders: our_send_addresses, recipient: (address ? address : null), amount: amount.times (ratio), lock: lock, lock_is_timestamp: false, output_description: 'block reward'})));
+					outputs.append (CoinOutputView (__kwargtrans__ ({senders: null, recipient: (address ? address : null), amount: amount.times (ratio), lock: lock, lock_is_timestamp: false, output_description: 'block reward'})));
 				}
 			}
 			for (var [address, balances] of jsobj.get_items (self._fee_balances)) {
@@ -8566,6 +8566,48 @@ export var wallet_address_from_recipient = function (recipient) {
 	else {
 	}
 	return unlock_condition_from_recipient (recipient).unlockhash.__str__ ();
+};
+export var address_description = function (address) {
+	if (arguments.length) {
+		var __ilastarg0__ = arguments.length - 1;
+		if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+			var __allkwargs0__ = arguments [__ilastarg0__--];
+			for (var __attrib0__ in __allkwargs0__) {
+				switch (__attrib0__) {
+					case 'address': var address = __allkwargs0__ [__attrib0__]; break;
+				}
+			}
+		}
+	}
+	else {
+	}
+	try {
+		var uh = UnlockHash.from_str (address);
+		if (uh.uhtype.value == UnlockHashType.CUSTODY_FEE.value) {
+			return 'cust. fee void';
+		}
+		if (uh.uhtype.value == UnlockHashType.NIL.value) {
+			return 'free-for-all wallet';
+		}
+		if (uh.uhtype.value == UnlockHashType.MULTI_SIG.value) {
+			return 'multisig wallet';
+		}
+		if (uh.uhtype.value == UnlockHashType.PUBLIC_KEY.value) {
+			return 'singlesig wallet';
+		}
+		if (uh.uhtype.value == UnlockHashType.ATOMIC_SWAP.value) {
+			return 'atomic swap contract';
+		}
+		return null;
+	}
+	catch (__except0__) {
+		if (isinstance (__except0__, Exception)) {
+			return null;
+		}
+		else {
+			throw __except0__;
+		}
+	}
 };
 
 //# sourceMappingURL=api.map
