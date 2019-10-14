@@ -1,3 +1,14 @@
+# v0.5.3 (2019.10.14)
+
+Fixes:
+
+- Only show add contact for addresses that coins can be sent to (#276);
+- Prevent exponential notation from being displayed in Custody Fee Panes (#277);
+
+Improvements:
+
+- Display custody fee to be paid in send transaction preview and confirmation dialogue (#275);
+
 # v0.5.2 (2019.10.11)
 
 Fixes:
