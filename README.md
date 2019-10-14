@@ -22,13 +22,13 @@ The mnemonic phrase (used as seed for an account) is compatible with [the Threef
 
 ![GitHub release](https://img.shields.io/github/release-pre/threefoldtech/threefold-wallet-electron.svg)
 
-- [Windows Installer](https://github.com/threefoldtech/threefold-wallet-electron/releases/download/v0.5.2/Threefold-Wallet.Setup.0.5.2.exe)
+- [Windows Installer](https://github.com/threefoldtech/threefold-wallet-electron/releases/download/v0.5.3/Threefold-Wallet.Setup.0.5.3.exe)
   - Windows 7 or later
   - ia32 (x86) and x64 (amd64)
-- [macOS Installer](https://github.com/threefoldtech/threefold-wallet-electron/releases/download/v0.5.2/Threefold-Wallet-0.5.2.dmg)
+- [macOS Installer](https://github.com/threefoldtech/threefold-wallet-electron/releases/download/v0.5.3/Threefold-Wallet-0.5.3.dmg)
   - 10.10 (Yosemite) or later
   - 64-bit only
-- [Linux Installer](https://github.com/threefoldtech/threefold-wallet-electron/releases/download/v0.5.2/Threefold-Wallet.0.5.2.AppImage)
+- [Linux Installer](https://github.com/threefoldtech/threefold-wallet-electron/releases/download/v0.5.3/Threefold-Wallet.0.5.3.AppImage)
   - Fedora 21, Debian 8 or Ubuntu 12.04 and newer
   - ia32 (i686), x64 (amd64), armv7l (ARM v7)
 
