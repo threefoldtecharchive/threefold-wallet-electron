@@ -24,7 +24,8 @@ class Transfer extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      isGoldChain: this.props.account.chain_type === 'goldchain'
+      allowMultisig: this.props.account.chain_type !== 'goldchain' && this.props.account.chain_type !== 'eurochain',
+      allowBurnTx: this.props.account.chain_type === 'goldchain' && this.props.account.chain_type === 'eurochain'
     }
   }
 
@@ -35,9 +36,10 @@ class Transfer extends Component {
       { menuItem: <Button key={uuid.v4()} disabled={hasInternal} className={hasInternal ? styles.disableTab : 'item'}>Internal Transaction</Button>, render: () => <Tab.Pane style={tabStyle}><InternalTransaction /></Tab.Pane> }
     ]
 
-    if (!this.state.isGoldChain) {
+    if (this.state.allowMultisig) {
       panes.push({ menuItem: <Button key={uuid.v4()} className={'item'}>Multisig Transaction</Button>, render: () => <Tab.Pane style={tabStyle}><MultisigTransaction /></Tab.Pane> })
-    } else {
+    }
+    if (this.state.allowBurnTx) {
       panes.push({ menuItem: <Button key={uuid.v4()} className={'item'}>Burn Transaction</Button>, render: () => <Tab.Pane style={tabStyle}><BurnTransaction /></Tab.Pane> })
     }
 

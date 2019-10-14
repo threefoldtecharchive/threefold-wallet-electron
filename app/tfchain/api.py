@@ -540,6 +540,13 @@ class Account:
         return self._chain.currency_unit()
 
     @property
+    def chain_faucet_web_address(self):
+        """
+        :returns: the chain faucet web address in str format
+        """
+        return self._network_type.faucet_address()
+
+    @property
     def network_type(self):
         """
         :returns: the network type in str format
@@ -984,7 +991,7 @@ class Account:
             self._update_singlesig_wallet_balances(itcb),
             self._update_known_multisig_wallet_balances(itcb),
             self._collect_unknown_multisig_wallet_balances(itcb),
-            self._update_goldchain_specific_info, # runs only for goldchain
+            self._update_chain_specific_info, # runs only for specific chains
             cb_return_self
         )
 
@@ -1043,8 +1050,8 @@ class Account:
             )
         return body
 
-    def _update_goldchain_specific_info(self):
-        if self._chain.__ne__(tfchaintype.Type.GOLDCHAIN):
+    def _update_chain_specific_info(self):
+        if self._chain.__ne__(tfchaintype.Type.GOLDCHAIN) and self._chain.__ne__(tfchaintype.Type.EUROCHAIN):
             return None
         addresses = self.addresses_get(opts={
             'singlesig': True,
@@ -1081,7 +1088,6 @@ class FaucetClient:
         return self._faucet_action("/api/v1/deauthorize", opts=opts)
 
     def _faucet_action(self, endpoint, opts=None):
-        self._chain_check()
         wallet, address = jsfunc.opts_get(opts, 'wallet', 'address')
         wallet_address = self._get_wallet(wallet, address)
         sdata = jsjson.json_dumps({"address": wallet_address})
@@ -1119,10 +1125,6 @@ class FaucetClient:
         if address == None:
             raise ValueError("current network {} on chain {} does not have an official faucet".format(self._account._network_type.str(), self._account._chain.str()))
         return address
-
-    def _chain_check(self):
-        if self._account._chain.value != tfchaintype.Type.GOLDCHAIN.value:
-            raise tferrors.UnsupporedFeature("blockchain {} does not support an official faucet REST API".format(self._account._chain.str()))
 
 
 class FaucetResult():
@@ -1389,7 +1391,7 @@ class SingleSignatureWallet(BaseWallet):
         Burn the specified amount of coins,
         optionally attaching a message to it.
         """
-        if self._account._chain.value != tfchaintype.Type.GOLDCHAIN.value:
+        if self._account._chain.value != tfchaintype.Type.GOLDCHAIN.value and self._account._chain.value != tfchaintype.Type.EUROCHAIN.value:
             raise tferrors.UnsupporedFeature("blockchain {} does not support the minting coin burn transaction".format(self._account._chain.str()))
         message, data = jsfunc.opts_get(opts, 'message', 'data')
         if data == None and message != None:

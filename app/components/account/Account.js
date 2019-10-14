@@ -54,7 +54,8 @@ class Account extends Component {
       wallets: this.props.account.wallets,
       intervalId: undefined,
       balanceValues: undefined,
-      isGoldChain: this.props.account.chain_type === 'goldchain'
+      disableMultiSig: this.props.account.chain_type === 'goldchain' || this.props.account.chain_type === 'eurochain',
+      addressRequireAuth: this.props.account.chain_type === 'goldchain' || this.props.account.chain_type === 'eurochain',
     }
   }
 
@@ -89,7 +90,7 @@ class Account extends Component {
           {this.renderCreateWalletCard(false)}
         </Card.Group>
         {isOneOrMoreUnconfirmed ? (<p style={{ fontSize: 12, marginBottom: 30, marginLeft: 25 }}>Wallet balance amounts with (*) have unconfirmed balances</p>) : null}
-        {this.state.isGoldChain ? (null) : (
+        {this.state.disableMultiSig ? (null) : (
           <React.Fragment>
             <div style={{ background: 'linear-gradient(90deg, rgba(251,100,164,1) 0%, rgba(244,154,93,1) 100%)', width: '100%', textAlign: 'center', height: 50, paddingTop: 15, borderRadius: 2, marginTop: 20 }}>
               <p style={{ fontFamily: 'SF UI Text Bold', fontSize: 16, textTransform: 'uppercase' }}>Multisig Wallets</p>
@@ -144,7 +145,7 @@ class Account extends Component {
       content = (
         <Card.Content>
           <div>
-            {this.state.isGoldChain ? (
+            {this.state.addressRequireAuth ? (
               this.renderAuthorizedText(w)
             ) : w.is_multisig ? (
               <Card.Description style={{ position: 'absolute', top: 10, right: 5, left: 310, color: 'white' }}>

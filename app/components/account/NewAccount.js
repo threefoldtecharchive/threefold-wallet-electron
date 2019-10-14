@@ -177,7 +177,7 @@ class NewAccount extends Component {
   handleNetworkChange = (e, { value }) => this.setState({ network: value })
 
   handleChainTypeChange = (e, { value }) => {
-    if (value === 'goldchain' || value === 'tfbchain' || value === 'fftchain') {
+    if (value === 'goldchain' || value === 'eurochain' || value === 'tfbchain' || value === 'fftchain') {
       this.setState({ network: 'testnet' })
     }
     this.setState({ chainType: value })
@@ -337,6 +337,13 @@ class NewAccount extends Component {
                   onChange={this.handleChainTypeChange}
                 />
                 <Radio style={{ marginRight: 30, color: 'white' }}
+                  label={<label style={{ color: 'white' }}>Euro Chain</label>}
+                  name='chainRadioGroup'
+                  value='eurochain'
+                  checked={this.state.chainType === 'eurochain'}
+                  onChange={this.handleChainTypeChange}
+                />
+                <Radio style={{ marginRight: 30, color: 'white' }}
                   label={<label style={{ color: 'white' }}>TFBonus Chain</label>}
                   name='chainRadioGroup'
                   value='tfbchain'
@@ -358,7 +365,7 @@ class NewAccount extends Component {
             </Form.Field>
             <Form.Field style={{ marginBottom: 20 }}>
               <div>
-                {(this.state.chainType === 'goldchain' || this.state.chainType === 'tfbchain' || this.state.chainType === 'fftchain') ? (
+                {(this.state.chainType === 'goldchain' || this.state.chainType === 'eurochain' || this.state.chainType === 'tfbchain' || this.state.chainType === 'fftchain') ? (
                   null
                 ) : (
                   <Radio style={{ marginRight: 30, color: 'white' }}
@@ -376,7 +383,7 @@ class NewAccount extends Component {
                   checked={this.state.network === 'testnet' || this.state.chainType === 'tfbchain' || this.state.chainType === 'fftchain'}
                   onChange={this.handleNetworkChange}
                 />
-                {(this.state.chainType !== 'goldchain') ? (
+                {(this.state.chainType !== 'goldchain' && this.state.chainType !== 'eurochain') ? (
                   null
                 ) : (
                   <Radio style={{ marginRight: 30, color: 'white' }}

@@ -58,7 +58,7 @@ class Wallet extends Component {
       hasConfirmedTx: false,
       showError: true,
       authorized: filter(this.props.account.coin_auth_status_for_wallet_get({ name: this.props.account.selected_wallet.wallet_name }), x => x === false).length === 0,
-      isGoldChain: this.props.account.chain_type === 'goldchain'
+      addressesRequireAuth: this.props.account.chain_type === 'goldchain' || this.props.account.chain_type === 'eurochain'
     }
   }
 
@@ -178,7 +178,7 @@ class Wallet extends Component {
   }
 
   render () {
-    const { contactName, contactAddress, openAddModal, ownerAddresses, signatureCount, openAddMultisigModal, openExportModal, hasConfirmedTx, isGoldChain, authorized } = this.state
+    const { contactName, contactAddress, openAddModal, ownerAddresses, signatureCount, openAddMultisigModal, openExportModal, hasConfirmedTx, addressesRequireAuth, authorized } = this.state
 
     if (this.state.openAddModal) {
       return (
@@ -228,7 +228,7 @@ class Wallet extends Component {
         <div className={styles.pageHeader}>
           <div style={{ display: 'flex' }}>
             <p className={styles.pageHeaderTitle}>Wallet {selectedWallet.wallet_name}</p>
-            {isGoldChain ? (
+            {addressesRequireAuth ? (
               authorizedText
             ) : (null)}
           </div>
@@ -240,7 +240,7 @@ class Wallet extends Component {
             <Icon onClick={() => this.goBack()} style={{ fontSize: 25, marginLeft: 15, marginTop: 5, cursor: 'pointer', zIndex: 5 }} name='chevron circle left' />
             <span onClick={() => this.goBack()} style={{ width: 60, fontFamily: 'SF UI Text Light', fontSize: 12, cursor: 'pointer', position: 'relative', top: -5 }}>Go Back</span>
           </div>
-          {!this.state.authorized && this.state.showError && this.state.isGoldChain && <Message style={{ width: '90%', margin: 'auto', marginTop: 10, marginBottom: 10 }} error onDismiss={this.dismissError}>
+          {!this.state.authorized && this.state.showError && addressesRequireAuth && <Message style={{ width: '90%', margin: 'auto', marginTop: 10, marginBottom: 10 }} error onDismiss={this.dismissError}>
             <Message.Header>Not all addresses are authorized</Message.Header>
             <p style={{ fontSize: 13, cursor: 'pointer', color: 'blue', textDecoration: 'underline' }} onClick={() => this.props.history.push('/walletreceive')}>Show me Unauthorized addresses</p>
           </Message>}

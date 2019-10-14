@@ -926,6 +926,22 @@ export var Account =  __class__ ('Account', [object], {
 		}
 		return self._chain.currency_unit ();
 	});},
+	get _get_chain_faucet_web_address () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		return self._network_type.faucet_address ();
+	});},
 	get _get_network_type () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -1845,7 +1861,7 @@ export var Account =  __class__ ('Account', [object], {
 			};
 			var itcb = stub_cb;
 		}
-		return jsasync.chain (self._update_chain_info (), self._update_singlesig_wallet_balances (itcb), self._update_known_multisig_wallet_balances (itcb), self._collect_unknown_multisig_wallet_balances (itcb), self._update_goldchain_specific_info, cb_return_self);
+		return jsasync.chain (self._update_chain_info (), self._update_singlesig_wallet_balances (itcb), self._update_known_multisig_wallet_balances (itcb), self._collect_unknown_multisig_wallet_balances (itcb), self._update_chain_specific_info, cb_return_self);
 	});},
 	get _update_chain_info () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -2107,7 +2123,7 @@ export var Account =  __class__ ('Account', [object], {
 		};
 		return body;
 	});},
-	get _update_goldchain_specific_info () {return __get__ (this, function (self) {
+	get _update_chain_specific_info () {return __get__ (this, function (self) {
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -2121,7 +2137,7 @@ export var Account =  __class__ ('Account', [object], {
 		}
 		else {
 		}
-		if (self._chain.__ne__ (tfchaintype.Type.GOLDCHAIN)) {
+		if (self._chain.__ne__ (tfchaintype.Type.GOLDCHAIN) && self._chain.__ne__ (tfchaintype.Type.EUROCHAIN)) {
 			return null;
 		}
 		var addresses = self.addresses_get (__kwargtrans__ ({opts: dict ({'singlesig': true, 'multisig': false})}));
@@ -2197,6 +2213,7 @@ Object.defineProperty (Account, 'wallets', property.call (Account, Account._get_
 Object.defineProperty (Account, 'explorer', property.call (Account, Account._get_explorer));
 Object.defineProperty (Account, 'minimum_miner_fee', property.call (Account, Account._get_minimum_miner_fee));
 Object.defineProperty (Account, 'network_type', property.call (Account, Account._get_network_type));
+Object.defineProperty (Account, 'chain_faucet_web_address', property.call (Account, Account._get_chain_faucet_web_address));
 Object.defineProperty (Account, 'chain_currency_unit', property.call (Account, Account._get_chain_currency_unit));
 Object.defineProperty (Account, 'chain_type', property.call (Account, Account._get_chain_type));
 Object.defineProperty (Account, 'wallet', property.call (Account, Account._get_wallet));
@@ -2312,7 +2329,6 @@ export var FaucetClient =  __class__ ('FaucetClient', [object], {
 		}
 		else {
 		}
-		self._chain_check ();
 		var __left0__ = jsfunc.opts_get (opts, 'wallet', 'address');
 		var wallet = __left0__ [0];
 		var address = __left0__ [1];
@@ -2409,26 +2425,6 @@ export var FaucetClient =  __class__ ('FaucetClient', [object], {
 			throw __except0__;
 		}
 		return address;
-	});},
-	get _chain_check () {return __get__ (this, function (self) {
-		if (arguments.length) {
-			var __ilastarg0__ = arguments.length - 1;
-			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-				var __allkwargs0__ = arguments [__ilastarg0__--];
-				for (var __attrib0__ in __allkwargs0__) {
-					switch (__attrib0__) {
-						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-					}
-				}
-			}
-		}
-		else {
-		}
-		if (self._account._chain.value != tfchaintype.Type.GOLDCHAIN.value) {
-			var __except0__ = tferrors.UnsupporedFeature ('blockchain {} does not support an official faucet REST API'.format (self._account._chain.str ()));
-			__except0__.__cause__ = null;
-			throw __except0__;
-		}
 	});}
 });
 export var FaucetResult =  __class__ ('FaucetResult', [object], {
@@ -3227,7 +3223,7 @@ export var SingleSignatureWallet =  __class__ ('SingleSignatureWallet', [BaseWal
 		}
 		else {
 		}
-		if (self._account._chain.value != tfchaintype.Type.GOLDCHAIN.value) {
+		if (self._account._chain.value != tfchaintype.Type.GOLDCHAIN.value && self._account._chain.value != tfchaintype.Type.EUROCHAIN.value) {
 			var __except0__ = tferrors.UnsupporedFeature ('blockchain {} does not support the minting coin burn transaction'.format (self._account._chain.str ()));
 			__except0__.__cause__ = null;
 			throw __except0__;

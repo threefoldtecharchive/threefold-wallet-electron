@@ -49,7 +49,9 @@ class WalletReceive extends Component {
       selectedAddress,
       amount: 0,
       isOpen: false,
-      isGoldChain: this.props.account.chain_type === 'goldchain',
+      addressRequireAuth: this.props.account.chain_type === 'goldchain' || this.props.account.chain_type === 'eurochain',
+      currencyUnit: this.props.account.chain_currency_unit,
+      faucetAddress: this.props.account.chain_faucet_web_address,
       visible: true,
       authorizationLoading: {
         loading: false,
@@ -110,10 +112,10 @@ class WalletReceive extends Component {
     )
   }
 
-  requestTokens = (selectedWallet) => {
+  requestTokens = (selectedWallet, currencyUnit) => {
     this.props.account.faucet.coins_receive({ address: selectedWallet.address }).then(res => {
       if (res.submitted) {
-        toast('Successfully requested 300 GFT')
+        toast(`Successfully requested 300 ${currencyUnit}`)
       }
     })
   }
@@ -144,11 +146,11 @@ class WalletReceive extends Component {
   }
 
   renderWalletReceive = () => {
-    const { selectedAddress, isGoldChain, selectedWallet, amount, authorizationLoading } = this.state
+    const { selectedAddress, addressRequireAuth, selectedWallet, amount, authorizationLoading, currencyUnit } = this.state
 
     const walletsOptions = this.mapWalletsToDropdownOption()
     const addressOptions = this.mapAddressesToDropdownOption()
-    if (isGoldChain) {
+    if (addressRequireAuth) {
       const wallets = this.props.account.wallets
       return wallets.map(w => {
         const isWalletAuthorized = filter(this.props.account.coin_auth_status_for_wallet_get({ name: w.wallet_name }), x => x === false).length === 0
@@ -171,7 +173,7 @@ class WalletReceive extends Component {
                       <Label onClick={() => toast('Copied to clipboard')} style={{ display: 'block', margin: 'auto', marginRight: 0, width: 200, cursor: 'pointer' }}><Icon name='clipboard' /> copy address to clipboard</Label>
                     </CopyToClipboard>
                   </div>
-                  {authorized && <Label onClick={() => this.requestTokens(w)} style={{ display: 'block', margin: 'auto', marginRight: 0, width: 200, cursor: 'pointer', marginTop: 10 }}><Icon name='arrow left' />Request 300 GFT</Label>}
+                  {authorized && <Label onClick={() => this.requestTokens(w, currencyUnit)} style={{ display: 'block', margin: 'auto', marginRight: 0, width: 200, cursor: 'pointer', marginTop: 10 }}><Icon name='arrow left' />Request 300 {currencyUnit}</Label>}
                   {!authorized && <Message style={{ width: '100%', margin: 'auto', marginTop: 10, marginBottom: 10 }} error>
                     <Message.Header>This addres is not authorized. You cannot use this address when it's not authorized</Message.Header>
                     {this.isAuthorizationRequestedForAddress(a) ? (
@@ -230,18 +232,18 @@ class WalletReceive extends Component {
   }
 
   render () {
-    const { isGoldChain } = this.state
+    const { addressRequireAuth, currencyUnit, faucetAddress } = this.state
     return (
       <div >
         <div className={styles.pageHeader}>
           <p className={styles.pageHeaderTitle}>Receive </p>
-          <p className={styles.pageHeaderSubtitle}>Receive tokens by {isGoldChain ? ' sharing the address' : 'scanning the QR code' }</p>
+          <p className={styles.pageHeaderSubtitle}>Receive tokens by {addressRequireAuth ? ' sharing the address' : 'scanning the QR code' }</p>
         </div>
         <Divider className={styles.pageDivider} />
         <div style={{ margin: 'auto', paddingBottom: 30 }}>
-          {this.state.visible && this.state.isGoldChain && <Message style={{ width: '90%', margin: 'auto', marginTop: 10, marginBottom: 10 }} onDismiss={this.handleDismiss}>
-            <Message.Header>You can (de)authorize / request GFT for an address using our actions or you can go to following link to do it manualy.</Message.Header>
-            <p style={{ fontSize: 13, cursor: 'pointer', color: 'blue', textDecoration: 'underline' }} onClick={() => shell.openExternal(`https://faucet.testnet.nbh-digital.com/`)}>https://faucet.testnet.nbh-digital.com/</p>
+          {this.state.visible && addressRequireAuth && <Message style={{ width: '90%', margin: 'auto', marginTop: 10, marginBottom: 10 }} onDismiss={this.handleDismiss}>
+            <Message.Header>You can (de)authorize / request {currencyUnit} for an address using our actions or you can go to following link to do it manualy.</Message.Header>
+            <p style={{ fontSize: 13, cursor: 'pointer', color: 'blue', textDecoration: 'underline' }} onClick={() => shell.openExternal(faucetAddress)}>{faucetAddress}</p>
           </Message>}
           {this.renderWalletReceive()}
         </div>

@@ -85,7 +85,9 @@ class TFChainNetworkType(NetworkType):
         return Currency('10.0')
 
     def miner_payout_block_delay(self):
-        return 1000
+        if self.__eq__(TFChainNetworkType.DEVNET):
+            return 10
+        return 720
 
     def default_explorer_addresses(self):
         if self.__eq__(TFChainNetworkType.STANDARD):
@@ -182,7 +184,11 @@ class GoldChainNetworkType(NetworkType):
         return Currency(0)
 
     def miner_payout_block_delay(self):
-        return 1000
+        if self.__eq__(GoldChainNetworkType.TESTNET):
+            return 720
+        if self.__eq__(GoldChainNetworkType.DEVNET):
+            return 10
+        raise ValueError("invalid Goldchain network type {}".format(self.value))
 
     def default_explorer_addresses(self):
         if self.__eq__(GoldChainNetworkType.TESTNET):
@@ -265,7 +271,9 @@ class ThreefoldBonusNetworkType(NetworkType):
         return Currency('1.0')
 
     def miner_payout_block_delay(self):
-        return 1000
+        if self.__eq__(ThreefoldBonusNetworkType.DEVNET):
+            return 10
+        return 720
 
     def default_explorer_addresses(self):
         if self.__eq__(ThreefoldBonusNetworkType.TESTNET):
@@ -345,7 +353,9 @@ class FreeFlowTokenNetworkType(NetworkType):
         return Currency('0.0')
 
     def miner_payout_block_delay(self):
-        return 1000
+        if self.__eq__(FreeFlowTokenNetworkType.DEVNET):
+            return 10
+        return 720
 
     def default_explorer_addresses(self):
         if self.__eq__(FreeFlowTokenNetworkType.TESTNET):
@@ -369,6 +379,101 @@ class FreeFlowTokenNetworkType(NetworkType):
 FreeFlowTokenNetworkType.TESTNET = FreeFlowTokenNetworkType(1)
 FreeFlowTokenNetworkType.DEVNET = FreeFlowTokenNetworkType(2)
 
+
+class EuroChainNetworkType(NetworkType):
+    def __init__(self, value):
+        if isinstance(value, EuroChainNetworkType):
+            value = value.value
+        elif isinstance(value, str):
+            value = EuroChainNetworkType.from_str(value).value
+        if not isinstance(value, int):
+            raise TypeError("EuroChain network type value was expected to be an int, not be of type {}".format(type(value)))
+        if value < 1 or value > 2:
+            raise ValueError("EuroChain network type out of range: {}".format(value))
+        self._value = value
+
+    @property
+    def value(self):
+        return self._value
+
+    def __eq__(self, other):
+        if isinstance(other, EuroChainNetworkType):
+            return self.value == other.value
+        return self.value == other
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __int__(self):
+        return self.value
+
+    def __str__(self):
+        if self.__eq__(EuroChainNetworkType.TESTNET):
+            return "testnet"
+        if self.__eq__(EuroChainNetworkType.DEVNET):
+            return "devnet"
+        raise ValueError("invalid EuroChain network type {}".format(self.value))
+
+    def str(self):
+        return self.__str__()
+
+    @classmethod
+    def from_str(cls, s):
+        if not isinstance(s, str):
+            raise TypeError("can only convert from a string")
+        s = jsstr.lower(s)
+        if s in ("testnet", "test"):
+            return EuroChainNetworkType.TESTNET
+        if s in ("devnet", "dev"):
+            return EuroChainNetworkType.DEVNET
+        raise ValueError(s + " is not a supported EuroChain network type str")
+
+    @classmethod
+    def default_network_type(cls):
+        return EuroChainNetworkType.TESTNET
+
+    def minimum_miner_fee(self):
+        if self.__eq__(EuroChainNetworkType.DEVNET):
+            return Currency('1.0')
+        return Currency('0.1')
+
+    def block_creation_fee(self):
+        if self.__eq__(EuroChainNetworkType.DEVNET):
+            return Currency('10.0')
+        return Currency(0)
+
+    def miner_payout_block_delay(self):
+        if self.__eq__(EuroChainNetworkType.TESTNET):
+            return 720
+        if self.__eq__(EuroChainNetworkType.DEVNET):
+            return 10
+        raise ValueError("invalid Eurochain network type {}".format(self.value))
+
+    def default_explorer_addresses(self):
+        if self.__eq__(EuroChainNetworkType.TESTNET):
+            return [
+                'https://explorer.testnet.eurochain.nbh-digital.com',
+                'https://explorer2.testnet.eurochain.nbh-digital.com',
+            ]
+        if self.__eq__(EuroChainNetworkType.DEVNET):
+            return [
+                'http://localhost:2015'
+            ]
+        raise ValueError("invalid Eurochain network type {}".format(self.value))
+
+    def faucet_address(self):
+        if self.__eq__(EuroChainNetworkType.TESTNET):
+            return "https://faucet.testnet.eurochain.nbh-digital.com"
+        if self.__eq__(EuroChainNetworkType.DEVNET):
+            return "http://localhost:2016"
+        return None
+
+    def chain_type(self):
+        return Type.EUROCHAIN
+
+EuroChainNetworkType.TESTNET = EuroChainNetworkType(1)
+EuroChainNetworkType.DEVNET = EuroChainNetworkType(2)
+
+
 # Chain Type
 
 class Type:
@@ -381,7 +486,7 @@ class Type:
             value = Type.from_str(value).value
         if not isinstance(value, int):
             raise TypeError("chain type value was expected to be an int, not be of type {}".format(type(value)))
-        if value < 1 or value > 4:
+        if value < 1 or value > 5:
             raise ValueError("chain type out of range: {}".format(value))
         self._value = value
 
@@ -404,6 +509,8 @@ class Type:
             return "tfchain"
         if self.__eq__(Type.GOLDCHAIN):
             return "goldchain"
+        if self.__eq__(Type.EUROCHAIN):
+            return "eurochain"
         if self.__eq__(Type.TFBCHAIN):
             return "tfbchain"
         if self.__eq__(Type.FFTCHAIN):
@@ -422,6 +529,8 @@ class Type:
             return Type.TFCHAIN
         if s == "goldchain":
             return Type.GOLDCHAIN
+        if s == "eurochain":
+            return Type.EUROCHAIN
         if s == "tfbchain":
             return Type.TFBCHAIN
         if s == "fftchain":
@@ -433,6 +542,8 @@ class Type:
             return TFChainNetworkType
         if self.__eq__(Type.GOLDCHAIN):
             return GoldChainNetworkType
+        if self.__eq__(Type.EUROCHAIN):
+            return EuroChainNetworkType
         if self.__eq__(Type.TFBCHAIN):
             return ThreefoldBonusNetworkType
         if self.__eq__(Type.FFTCHAIN):
@@ -444,6 +555,8 @@ class Type:
             return "TFT"
         if self.__eq__(Type.GOLDCHAIN):
             return "GFT"
+        if self.__eq__(Type.EUROCHAIN):
+            return "EUR"
         if self.__eq__(Type.TFBCHAIN):
             return "TFB"
         if self.__eq__(Type.FFTCHAIN):
@@ -454,6 +567,4 @@ Type.TFCHAIN = Type(1)
 Type.GOLDCHAIN = Type(2)
 Type.TFBCHAIN = Type(3)
 Type.FFTCHAIN = Type(4)
-
-Type._MIN_CHAIN_TYPE = Type.TFCHAIN
-Type._MAX_CHAIN_TYPE = Type.FFTCHAIN
+Type.EUROCHAIN = Type(5)

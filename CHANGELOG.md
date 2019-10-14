@@ -1,3 +1,14 @@
+# v0.6.0 (tbd)
+
+Features:
+
+- add support for the EuroToken (EUR) (#279);
+
+Fixes:
+
+- allow faucet usage for all chains, not just for goldchain (#280);
+- correct miner payout block delay values for all networks (#281)
+
 # v0.5.3 (2019.10.14)
 
 Fixes:
