@@ -4,6 +4,7 @@ Fixes:
 
 - Only show add contact for addresses that coins can be sent to (#276);
 - Prevent exponential notation from being displayed in Custody Fee Panes (#277);
+- Do not show block rewards in outgoing transactions (#278);
 
 Improvements:
 

@@ -4845,6 +4845,13 @@ const Decimal = (function(){
 })();
 
 
+// overwrite defaults once
+Decimal.set({
+    // prevent exponential notation from showing up when converting to a string
+    toExpNeg: -9e15,
+    toExpPos: 9e15,
+});
+
 export const api = {
     new_decimal: function(value) {
         return new Decimal(value || 0);
