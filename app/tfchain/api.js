@@ -956,7 +956,9 @@ export var Account =  __class__ ('Account', [object], {
 		}
 		else {
 		}
-		return Currency (self._network_type.minimum_miner_fee ());
+		var mf = Currency (self._network_type.minimum_miner_fee ());
+		mf.unit = self.chain_currency_unit;
+		return mf;
 	});},
 	get _get_explorer () {return __get__ (this, function (self) {
 		if (arguments.length) {
@@ -2851,6 +2853,24 @@ export var BaseWallet =  __class__ ('BaseWallet', [object], {
 		__except0__.__cause__ = null;
 		throw __except0__;
 	});},
+	get custody_fees_to_pay_for () {return __get__ (this, function (self) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		var __except0__ = NotImplementedError ('custody_fees_to_pay_for is not implemented');
+		__except0__.__cause__ = null;
+		throw __except0__;
+	});},
 	get transaction_sign () {return __get__ (this, function (self, transaction, balance) {
 		if (typeof balance == 'undefined' || (balance != null && balance.hasOwnProperty ("__kwargtrans__"))) {;
 			var balance = null;
@@ -3144,6 +3164,49 @@ export var SingleSignatureWallet =  __class__ ('SingleSignatureWallet', [BaseWal
 		else {
 		}
 		return CoinTransactionBuilder (self);
+	});},
+	get custody_fees_to_pay_for () {return __get__ (this, function (self, amount) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'amount': var amount = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		try {
+			if (isinstance (amount, Currency)) {
+				var amount = amount._value;
+			}
+			var __left0__ = self.balance._tfbalance.fund (amount);
+			var inputs = __left0__ [0];
+			var _ = __left0__ [1];
+			var _ = __left0__ [2];
+			var cfee = Currency ();
+			cfee.unit = self._account.chain_currency_unit;
+			for (var ci of inputs) {
+				var cfee = cfee.plus (ci.parent_output.custody_fee);
+			}
+			return cfee;
+		}
+		catch (__except0__) {
+			if (isinstance (__except0__, Exception)) {
+				var exc = __except0__;
+				jslog.warning ('exception while trying to esitmate custody fees to pay for amount', amount, exc);
+				var cfee = Currency ();
+				cfee.unit = self._account.chain_currency_unit;
+				return cfee;
+			}
+			else {
+				throw __except0__;
+			}
+		}
 	});},
 	get coins_burn () {return __get__ (this, function (self, amount, opts) {
 		if (typeof opts == 'undefined' || (opts != null && opts.hasOwnProperty ("__kwargtrans__"))) {;
@@ -3594,6 +3657,49 @@ export var MultiSignatureWallet =  __class__ ('MultiSignatureWallet', [BaseWalle
 		}
 		var owner_wallets = self._authorized_owners_get ();
 		return MultiSignatureCoinTransactionBuilder (self, owner_wallets);
+	});},
+	get custody_fees_to_pay_for () {return __get__ (this, function (self, amount) {
+		if (arguments.length) {
+			var __ilastarg0__ = arguments.length - 1;
+			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+				var __allkwargs0__ = arguments [__ilastarg0__--];
+				for (var __attrib0__ in __allkwargs0__) {
+					switch (__attrib0__) {
+						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+						case 'amount': var amount = __allkwargs0__ [__attrib0__]; break;
+					}
+				}
+			}
+		}
+		else {
+		}
+		try {
+			if (isinstance (amount, Currency)) {
+				var amount = amount._value;
+			}
+			var __left0__ = self.balance._tfbalance.fund (amount);
+			var inputs = __left0__ [0];
+			var _ = __left0__ [1];
+			var _ = __left0__ [2];
+			var cfee = Currency ();
+			cfee.unit = self._account.chain_currency_unit;
+			for (var ci of inputs) {
+				var cfee = cfee.plus (ci.parent_output.custody_fee);
+			}
+			return cfee;
+		}
+		catch (__except0__) {
+			if (isinstance (__except0__, Exception)) {
+				var exc = __except0__;
+				jslog.warning ('exception while trying to esitmate custody fees to pay for amount', amount, exc);
+				var cfee = Currency ();
+				cfee.unit = self._account.chain_currency_unit;
+				return cfee;
+			}
+			else {
+				throw __except0__;
+			}
+		}
 	});},
 	get transaction_sign () {return __get__ (this, function (self, transaction, balance) {
 		if (typeof balance == 'undefined' || (balance != null && balance.hasOwnProperty ("__kwargtrans__"))) {;

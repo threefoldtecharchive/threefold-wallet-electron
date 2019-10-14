@@ -46,6 +46,14 @@ class TransactionAmountField extends Component {
 
     const availableCoins = coinsUnlocked.plus(unconfirmedUnlockedCoins).minus(custodyFeeDebtUnlocked)
 
+    let custodyFeeToPay
+    if (value) {
+      custodyFeeToPay = selectedWallet.custody_fees_to_pay_for(totalAmount)
+      if (custodyFeeToPay.equal_to(0)) {
+        custodyFeeToPay = null
+      }
+    }
+
     return (
       <div style={{ marginBottom: 20 }}>
         <div style={{ display: 'flex' }}>
@@ -67,6 +75,7 @@ class TransactionAmountField extends Component {
           </label>
         </div>
         <label style={{ color: 'white' }}>Minerfee: {minerFee.str({ unit: true })}, amount including minerfee: {totalAmount.str({ unit: true })}</label>
+        {custodyFeeToPay ? <label style={{ color: 'white' }}><br />Estimated custody fee to pay: {custodyFeeToPay.str({ unit: true })}</label> : null}
       </div>
     )
   }

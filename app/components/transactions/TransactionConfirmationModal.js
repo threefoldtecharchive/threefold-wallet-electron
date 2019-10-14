@@ -59,6 +59,12 @@ class ConfirmationModal extends Component {
       tz = moment.tz.guess()
     }
 
+    let custodyFeeToPay
+    custodyFeeToPay = selectedWallet.custody_fees_to_pay_for(minimumMinerFee.plus(amount))
+    if (custodyFeeToPay.equal_to(0)) {
+      custodyFeeToPay = null
+    }
+
     // single recipient if single sig transaction
     let recipients = (
       <List.Item>
@@ -135,6 +141,17 @@ class ConfirmationModal extends Component {
             </List.Description>
           </List.Content>
         </List.Item>
+        {custodyFeeToPay ? (
+          <List.Item>
+            <Icon name='right triangle' />
+            <List.Content>
+              <List.Header>Estimated custody fee to pay: </List.Header>
+              <List.Description>
+                {custodyFeeToPay.str({ unit: true })}
+              </List.Description>
+            </List.Content>
+          </List.Item>
+        ) : null}
         {message && messageType !== 'structured' ? (
           <List.Item>
             <Icon name='right triangle' />

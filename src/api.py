@@ -551,7 +551,9 @@ class Account:
         """
         :returns: the minimum miner fee as a Currency Object
         """
-        return Currency(self._network_type.minimum_miner_fee())
+        mf = Currency(self._network_type.minimum_miner_fee())
+        mf.unit = self.chain_currency_unit
+        return mf
 
     @property
     def explorer(self):
@@ -1249,6 +1251,9 @@ class BaseWallet:
         """
         raise NotImplementedError("transaction_new is not implemented")
 
+    def custody_fees_to_pay_for(self):
+        raise NotImplementedError("custody_fees_to_pay_for is not implemented")
+
     def transaction_sign(self, transaction, balance=None):
         """
         :returns: signs an existing transaction
@@ -1362,6 +1367,22 @@ class SingleSignatureWallet(BaseWallet):
         :returns: a transaction builder that allows for the building of transactions
         """
         return CoinTransactionBuilder(self)
+
+    def custody_fees_to_pay_for(self, amount):
+        try:
+            if isinstance(amount, Currency):
+                amount = amount._value
+            inputs, _, _ = self.balance._tfbalance.fund(amount)
+            cfee = Currency()
+            cfee.unit = self._account.chain_currency_unit
+            for ci in inputs:
+                cfee = cfee.plus(ci.parent_output.custody_fee)
+            return cfee
+        except Exception as exc:
+            jslog.warning("exception while trying to esitmate custody fees to pay for amount", amount, exc)
+            cfee = Currency()
+            cfee.unit = self._account.chain_currency_unit
+            return cfee
 
     def coins_burn(self, amount, opts=None):
         """
@@ -1500,6 +1521,22 @@ class MultiSignatureWallet(BaseWallet):
     def transaction_new(self):
         owner_wallets = self._authorized_owners_get()
         return MultiSignatureCoinTransactionBuilder(self, owner_wallets)
+
+    def custody_fees_to_pay_for(self, amount):
+        try:
+            if isinstance(amount, Currency):
+                amount = amount._value
+            inputs, _, _ = self.balance._tfbalance.fund(amount)
+            cfee = Currency()
+            cfee.unit = self._account.chain_currency_unit
+            for ci in inputs:
+                cfee = cfee.plus(ci.parent_output.custody_fee)
+            return cfee
+        except Exception as exc:
+            jslog.warning("exception while trying to esitmate custody fees to pay for amount", amount, exc)
+            cfee = Currency()
+            cfee.unit = self._account.chain_currency_unit
+            return cfee
 
     def transaction_sign(self, transaction, balance=None):
         owner_wallets = self._authorized_owners_get()
