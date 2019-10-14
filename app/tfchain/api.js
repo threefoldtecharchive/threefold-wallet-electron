@@ -5819,16 +5819,6 @@ export var WalletOutputAggregator =  __class__ ('WalletOutputAggregator', [objec
 			}
 		}
 		if (we_sent_coin_outputs) {
-			for (var [address, balances] of jsobj.get_items (self._reward_balances)) {
-				if (__in__ (address, self._our_addresses)) {
-					continue;
-				}
-				for (var [slock, amount] of jsobj.get_items (balances)) {
-					var lock = jsstr.to_int (slock);
-					amount.unit = self._chain_type.currency_unit ();
-					outputs.append (CoinOutputView (__kwargtrans__ ({senders: null, recipient: (address ? address : null), amount: amount.times (ratio), lock: lock, lock_is_timestamp: false, output_description: 'block reward'})));
-				}
-			}
 			for (var [address, balances] of jsobj.get_items (self._fee_balances)) {
 				if (__in__ (address, self._our_addresses)) {
 					continue;

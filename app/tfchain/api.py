@@ -2388,21 +2388,7 @@ class WalletOutputAggregator:
                 ))
         # add all payouts if required
         if we_sent_coin_outputs:
-            # add rewards
-            for address, balances in jsobj.get_items(self._reward_balances):
-                if address in self._our_addresses:
-                    continue
-                for slock, amount in jsobj.get_items(balances):
-                    lock = jsstr.to_int(slock)
-                    amount.unit = self._chain_type.currency_unit()
-                    outputs.append(CoinOutputView(
-                        senders=None,
-                        recipient=address if address else None,
-                        amount=amount.times(ratio),
-                        lock=lock,
-                        lock_is_timestamp=False,
-                        output_description='block reward',
-                    ))
+            # block rewards are not added
             # add fees
             for address, balances in jsobj.get_items(self._fee_balances):
                 if address in self._our_addresses:
