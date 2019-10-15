@@ -1596,7 +1596,7 @@ export var EuroChainNetworkType =  __class__ ('EuroChainNetworkType', [NetworkTy
 		else {
 		}
 		if (self.__eq__ (EuroChainNetworkType.TESTNET)) {
-			return ['https://explorer.testnet.eurochain.nbh-digital.com', 'https://explorer2.testnet.eurochain.nbh-digital.com'];
+			return ['https://explorer.testnet.euroflow.io', 'https://explorer2.testnet.euroflow.io'];
 		}
 		if (self.__eq__ (EuroChainNetworkType.DEVNET)) {
 			return ['http://localhost:2015'];
@@ -1620,7 +1620,7 @@ export var EuroChainNetworkType =  __class__ ('EuroChainNetworkType', [NetworkTy
 		else {
 		}
 		if (self.__eq__ (EuroChainNetworkType.TESTNET)) {
-			return 'https://faucet.testnet.eurochain.nbh-digital.com';
+			return 'https://faucet.testnet.euroflow.io';
 		}
 		if (self.__eq__ (EuroChainNetworkType.DEVNET)) {
 			return 'http://localhost:2016';

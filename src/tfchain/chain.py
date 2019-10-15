@@ -451,8 +451,8 @@ class EuroChainNetworkType(NetworkType):
     def default_explorer_addresses(self):
         if self.__eq__(EuroChainNetworkType.TESTNET):
             return [
-                'https://explorer.testnet.eurochain.nbh-digital.com',
-                'https://explorer2.testnet.eurochain.nbh-digital.com',
+                'https://explorer.testnet.euroflow.io',
+                'https://explorer2.testnet.euroflow.io',
             ]
         if self.__eq__(EuroChainNetworkType.DEVNET):
             return [
@@ -462,7 +462,7 @@ class EuroChainNetworkType(NetworkType):
 
     def faucet_address(self):
         if self.__eq__(EuroChainNetworkType.TESTNET):
-            return "https://faucet.testnet.eurochain.nbh-digital.com"
+            return "https://faucet.testnet.euroflow.io"
         if self.__eq__(EuroChainNetworkType.DEVNET):
             return "http://localhost:2016"
         return None
