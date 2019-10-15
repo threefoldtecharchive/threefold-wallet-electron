@@ -39,7 +39,7 @@ class Footer extends Component {
     if (chainConstants.err) {
       error = true
     }
-    const date = moment(chainConstants.chain_timestamp * 1000).format('MMMM Do , HH:mm')
+    const date = moment(chainConstants.chain_timestamp * 1000).format('MMMM Do YYYY, HH:mm')
     const tz = momentTz.tz.guess()
 
     return (
@@ -52,7 +52,7 @@ class Footer extends Component {
           : <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <div>
               <Icon name='circle' style={{ color: 'green', marginLeft: 10 }} />
-              <label><a onClick={() => shell.openExternal(`${chainConstants.explorer_address}`)}>connected to {chainConstants.chain_name} {chainConstants.chain_network}</a></label>
+              <label><a onClick={() => shell.openExternal(`${chainConstants.explorer_address}`)}>connected to {chainConstants.chain_name} {chainConstants.chain_network} (v{chainConstants.chain_version})</a></label>
             </div>
             <label><a onClick={() => shell.openExternal(`${chainConstants.explorer_address}/block.html?height=${chainConstants.chain_height}`)}><Icon name='h square' /> {chainConstants.chain_height} @ {date} {tz}</a></label>
             <label>version {pjson.version}</label>

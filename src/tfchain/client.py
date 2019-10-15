@@ -279,6 +279,7 @@ class TFChainClient:
 
         def catch_no_content(reason):
             if isinstance(reason, tferrors.ExplorerNoContent):
+                jslog.debug("catch_no_content: returning empty result for ", unlockhash, reason)
                 return ExplorerUnlockhashResult(
                     unlockhash=UnlockHash.from_json(unlockhash),
                     transactions=[],

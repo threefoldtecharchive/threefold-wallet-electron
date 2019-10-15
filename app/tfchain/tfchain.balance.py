@@ -283,14 +283,14 @@ class WalletBalance(object):
         # another balance is defined, create a new balance that will contain our merge
         # merge the chain info
         if self.chain_height >= other.chain_height:
-            if self.chain_time < other.chain_time:
+            if self.chain_time != 0 and self.chain_time < other.chain_time:
                 raise ValueError("chain time and chain height of balances do not match")
         else:
-            if self.chain_time >= other.chain_time:
+            if other.chain_time != 0 and self.chain_time >= other.chain_time:
                 raise ValueError("chain time and chain height of balances do not match")
-            self.chain_time = other.chain_time
-            self.chain_height = other.chain_height
-            self.chain_blockid = other.chain_blockid
+        self.chain_time = other.chain_time
+        self.chain_height = other.chain_height
+        self.chain_blockid = other.chain_blockid
         # merge the outputs
         for (id, output) in jsobj.get_items(other._outputs):
             self._outputs[id] = output

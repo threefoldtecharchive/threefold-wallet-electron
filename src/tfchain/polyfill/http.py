@@ -26,9 +26,11 @@ def http_get(address, endpoint, headers=None):
             let message;
             try {
                 message = JSON.parse(data).message;
-            } catch(e) {}
+            } catch(e) { console.debug("failed to parse (GET) error message", e); };
             return {
                 code: response.status,
+                address: address,
+                endpoint: endpoint,
                 data: message || ("GET request to " + resource + " failed with status code " + response.status),
             };
         }).catch(() => {
@@ -36,7 +38,7 @@ def http_get(address, endpoint, headers=None):
                 code: response.status,
                 address: address,
                 endpoint: endpoint,
-                data: "POST request to " + resource + " failed with status code " + response.status,
+                data: "GET request to " + resource + " failed with status code " + response.status,
             };
         });
     });
@@ -67,12 +69,16 @@ def http_post(address, endpoint, data, headers=None):
                 };
             });
         }
-        return response.json().then(function(data) {
+        return response.text().then(function(data) {
+            let message;
+            try {
+                message = JSON.parse(data).message;
+            } catch(e) { console.debug("failed to parse (POST) error message", e); };
             return {
                 code: response.status,
                 address: address,
                 endpoint: endpoint,
-                data: data.message || ("POST request to " + resource + " failed with status code " + response.status),
+                data: message || ("POST request to " + resource + " failed with status code " + response.status),
             };
         }).catch(() => {
             return {

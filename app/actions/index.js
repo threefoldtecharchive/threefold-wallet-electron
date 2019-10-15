@@ -83,7 +83,7 @@ export const resetApp = function () {
 export const updateAccount = function (account) {
   return dispatch => {
     if (account.update_account === undefined) {
-      return;
+      return
     }
     account.update_account((acc, _) => {
       dispatch({
@@ -96,6 +96,8 @@ export const updateAccount = function (account) {
         account: acc
       })
       getTransactionsNotifications(acc)
+    }).catch((reason) => {
+      console.warn('failed ot update account', account.account_name, reason)
     })
   }
 }

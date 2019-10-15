@@ -596,6 +596,7 @@ export var TFChainClient =  __class__ ('TFChainClient', [object], {
 			else {
 			}
 			if (isinstance (reason, tferrors.ExplorerNoContent)) {
+				jslog.debug ('catch_no_content: returning empty result for ', unlockhash, reason);
 				return ExplorerUnlockhashResult (__kwargtrans__ ({unlockhash: UnlockHash.from_json (unlockhash), transactions: [], multisig_addresses: null, erc20_info: null}));
 			}
 			var __except0__ = reason;

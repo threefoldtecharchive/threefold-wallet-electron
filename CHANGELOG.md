@@ -4,10 +4,15 @@ Features:
 
 - add support for the EuroToken (EUR) (#279);
 
+Improvements:
+
+- show node version in footer information next to the network information;
+
 Fixes:
 
 - allow faucet usage for all chains, not just for goldchain (#280);
-- correct miner payout block delay values for all networks (#281)
+- correct miner payout block delay values for all networks (#281);
+- ensure desktop app also works in case account has multiple wallets for a chain of height 0 (#282);
 
 # v0.5.3 (2019.10.14)
 

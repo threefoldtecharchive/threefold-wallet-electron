@@ -136,7 +136,11 @@ class Client:
         def final_catch(reason):
             # pass on user errors
             if isinstance(reason, tferrors.ExplorerUserError):
-                raise reason # no need to retry user errors
+                # no need to retry user errors
+                if isinstance(reason, tferrors.ExplorerError):
+                    jslog.warning("raising error as-is in final catch of", endpoint, reason)
+                    raise reason
+                raise tferrors.ExplorerError("GET call(s) failed: {}".format(reason), endpoint)
             jslog.debug("servers exhausted, previous GET call failed as well: {}".format(reason))
             raise tferrors.ExplorerNotAvailable("no explorer was available", endpoint, self._consensus_addresses)
 

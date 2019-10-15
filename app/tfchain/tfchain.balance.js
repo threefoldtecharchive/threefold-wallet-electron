@@ -639,22 +639,20 @@ export var WalletBalance =  __class__ ('WalletBalance', [object], {
 			throw __except0__;
 		}
 		if (self.chain_height >= other.chain_height) {
-			if (self.chain_time < other.chain_time) {
+			if (self.chain_time != 0 && self.chain_time < other.chain_time) {
 				var __except0__ = ValueError ('chain time and chain height of balances do not match');
 				__except0__.__cause__ = null;
 				throw __except0__;
 			}
 		}
-		else {
-			if (self.chain_time >= other.chain_time) {
-				var __except0__ = ValueError ('chain time and chain height of balances do not match');
-				__except0__.__cause__ = null;
-				throw __except0__;
-			}
-			self.chain_time = other.chain_time;
-			self.chain_height = other.chain_height;
-			self.chain_blockid = other.chain_blockid;
+		else if (other.chain_time != 0 && self.chain_time >= other.chain_time) {
+			var __except0__ = ValueError ('chain time and chain height of balances do not match');
+			__except0__.__cause__ = null;
+			throw __except0__;
 		}
+		self.chain_time = other.chain_time;
+		self.chain_height = other.chain_height;
+		self.chain_blockid = other.chain_blockid;
 		for (var [id, output] of jsobj.get_items (other._outputs)) {
 			self._outputs [id] = output;
 		}
