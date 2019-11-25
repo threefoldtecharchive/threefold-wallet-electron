@@ -217,10 +217,8 @@ for (let i = 0; i < periodMonthCount; i++) {
 // correct first payment in case rounding errors have occured
 const totalAmount = periodicAmount.times(periodMonthCount)
 const difference = amount.minus(totalAmount)
-if (difference.greater_than(0)) {
+if (difference.not_equal_to(0)) {
     unlockInfo[0].amount = unlockInfo[0].amount.plus(difference)
-} else if (difference.less_than(0)) {
-    throw 'unexpected difference of ' + difference.str({unit: true})
 }
 
 // ensure our total amount equals the desired amount
