@@ -7,6 +7,7 @@ import SingleTransaction from './SingleTransaction'
 import MultisigTransaction from './MultisigTransaction'
 import InternalTransaction from './InternalTransaction'
 import BurnTransaction from './BurnTransaction'
+import ScriptedTransaction from './ScriptedTransaction'
 import uuid from 'uuid'
 
 const tabStyle = {
@@ -42,6 +43,8 @@ class Transfer extends Component {
     if (this.state.allowBurnTx) {
       panes.push({ menuItem: <Button key={uuid.v4()} className={'item'}>Burn Transaction</Button>, render: () => <Tab.Pane style={tabStyle}><BurnTransaction /></Tab.Pane> })
     }
+
+    panes.push({ menuItem: <Button key={uuid.v4()} className={'item'}>Scripted Transaction</Button>, render: () => <Tab.Pane style={tabStyle}><ScriptedTransaction /></Tab.Pane> })
 
     return (
       <div style={{ paddingBottom: 30 }}>
