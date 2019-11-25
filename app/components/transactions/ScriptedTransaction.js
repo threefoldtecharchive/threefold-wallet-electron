@@ -4,8 +4,10 @@ import React, { Component } from 'react'
 import { Form, Button, TextArea, Icon, Dropdown } from 'semantic-ui-react'
 import { withRouter } from 'react-router-dom'
 import { toast } from 'react-toastify'
+import * as tfchain from '../../tfchain/api'
 import styles from '../home/Home.css'
 import { truncate, concat } from 'lodash'
+import TransactionAmountField from './TransactionAmountField'
 
 const safeEval = require('safe-eval')
 
@@ -38,7 +40,8 @@ class ScriptedTransaction extends Component {
   sendScript = () => {
     const { script, selectedWallet } = this.state
     const context = {
-      wallet: selectedWallet
+      wallet: selectedWallet,
+      Currency: tfchain.Currency
     }
     let ok = true
     let result
@@ -46,13 +49,27 @@ class ScriptedTransaction extends Component {
       result = safeEval(script, context)
     } catch (error) {
       ok = false
+      const errorMessage = typeof error.__str__ === 'function' ? error.__str__() : error.toString()
       console.log('error while evaluating script', error)
-      this.setState({ scriptOutput: 'Error: ' + error })
+      this.setState({ scriptOutput: 'Error: ' + errorMessage })
     } finally {
       if (ok) {
-        toast('script executed succesfully')
-        if (result && result.output) {
-          this.setState({ scriptOutput: result.output })
+        if (result && typeof result.output.then === 'function') {
+          result.output.then((result) => {
+            toast('script executed succesfully')
+            if (result && result.output) {
+              this.setState({ scriptOutput: result.output })
+            }
+          }).catch((error) => {
+            const errorMessage = typeof error.__str__ === 'function' ? error.__str__() : error.toString()
+            console.log('error while evaluating script', error)
+            this.setState({ scriptOutput: 'Error: ' + errorMessage })
+          })
+        } else {
+          toast('script executed succesfully')
+          if (result && result.output) {
+            this.setState({ scriptOutput: result.output })
+          }
         }
       }
     }
@@ -109,15 +126,29 @@ class ScriptedTransaction extends Component {
   }
 
   render () {
-    const { script, scriptOutput } = this.state
+    const { script, scriptOutput, selectedWallet } = this.state
     const walletOptions = this.mapWalletsToDropdownOption()
+
+    const selectedWalletX = this.props.account.selected_wallet || selectedWallet
+    const {
+      coins_unlocked: coinsUnlocked,
+      unconfirmed_coins_unlocked: unconfirmedUnlockedCoins,
+      custody_fee_debt_unlocked: custodyFeeDebtUnlocked
+    } = selectedWalletX.balance
+    const availableCoins = coinsUnlocked.plus(unconfirmedUnlockedCoins).minus(custodyFeeDebtUnlocked)
 
     return (
       <Form>
         {this.renderDropdownList({ data: walletOptions })}
+        {selectedWalletX && <label
+          style={{ marginTop: 30, marginLeft: 20 }}
+          className='gradient-text'
+        >
+          Available balance: {availableCoins.str({ unit: true })}
+        </label>}
         <Form.Field>
           <TextArea
-            style={{ background: '#0c111d !important', color: '#7784a9', height: 250 }}
+            style={{ background: '#0c111d !important', color: '#7784a9', height: 250, marginTop: 10 }}
             icon={<Icon name='send' style={{ color: '#0e72f5' }} />}
             placeholder='raw script'
             value={script}

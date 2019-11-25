@@ -16,6 +16,7 @@ The mnemonic phrase (used as seed for an account) is compatible with [the Threef
 
 - [Download docs](#download) (including macOS and Windows installation instructions)
 - [Usage docs](#usage)
+- [Scripted transactions](#scripted-transactions)
 - [Developer docs](#developer-docs)
 
 ## Download
@@ -165,6 +166,90 @@ Index:
 
 > This page allows you to create, delete and modify contacts.
 > A contact is identified by a name and can represent a single-signature wallet as well as a multi-signature wallet.
+
+## Scripted Transactions
+
+No matter how many transaction forms we'll provide the user,
+there will always be use cases that cannot be achieved using the GUI.
+That is where the Scripted Transactions Send page comes in.
+
+It allows you to use modern ES6 javascript directly to define your logic,
+using our internal JS API. It is currently still undocumented,
+but you can view the API code at [/src/api.py](/src/api.py).
+
+Your script will have access to the following two global variables exposed by the eval code:
+- `wallet`: the wallet selected (see the API src code for the Wallet API)
+- `Currency`: the class that can be used for doing safe currency value computations (see the API src code for the Currency API)
+
+Besides our exposed tfchain globals you can also access the standard builtin JS globals (e.g. `Date`).
+
+### Examples
+
+This is an example script allowing you to transfer a total amount of tokens to someone,
+spreaded over several months (default is 24), where each of those months 1/24 of the total amount will unlock:
+
+```javascript
+function() {
+
+// script constants
+const destination = '01547499996a673c394f7c1f229a20c6e75262b64f44d0fb45cf30f497da6c35710457a561f102'
+const periodMonthCount = 24
+const startUnlockDateTime = '2020.01.01 00:00:00'
+const amount = new Currency('500')
+const message = ''
+
+// generate periodic pay info
+const startUnlockDate = new Date(startUnlockDateTime)
+let unlockInfo = []
+const periodicAmount = amount.divided_by(periodMonthCount)
+for (let i = 0; i < periodMonthCount; i++) {
+    var m, d = (date = new Date(+startUnlockDate)).getUTCDate()
+    date.setUTCMonth(date.getUTCMonth() + i, 1)
+    m = date.getUTCMonth()
+    date.setUTCDate(d)
+    if (date.getUTCMonth() !== m) date.setUTCDate(0)
+    unlockInfo.push({
+        timestamp: date.getTime() / 1000,
+        amount: new Currency(periodicAmount),
+    })
+}
+
+// correct first payment in case rounding errors have occured
+const totalAmount = periodicAmount.times(periodMonthCount)
+const difference = amount.minus(totalAmount)
+if (difference.greater_than(0)) {
+    unlockInfo[0].amount = unlockInfo[0].amount.plus(difference)
+} else if (difference.less_than(0)) {
+    throw 'unexpected difference of ' + difference.str({unit: true})
+}
+
+// ensure our total amount equals the desired amount
+let newTotalAmount = new Currency()
+unlockInfo.forEach((unlockPair) => newTotalAmount = newTotalAmount.plus(unlockPair.amount))
+if (amount.not_equal_to(newTotalAmount)) {
+    throw 'unexpected total amount of ' + newTotalAmount.str({unit: true})
+}
+
+// build transaction
+const builder = wallet.transaction_new()
+unlockInfo.forEach((unlockPair) => {
+    builder.output_add(destination, unlockPair.amount.str(), { lock: unlockPair.timestamp })
+})
+
+// send the transaction and return the result promise
+const resprom = builder.send({ message: message ? message : null }).then(result => {
+    return {
+        output: `Successfully sent ${amount.str({unit: true})} to ${destination} unlocked over ${periodMonthCount} month(s) starting at ${startUnlockDateTime}!`,
+    }
+})
+
+// return our resulting promise
+return {
+    output: resprom,
+}
+
+}()
+```
 
 ## Developer Docs
 
