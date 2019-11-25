@@ -1,8 +1,9 @@
-# v0.6.0 (tbd)
+# v0.6.0 (2019.11.25)
 
 Features:
 
 - add support for the EuroToken (EUR) (#279);
+- add scripted transactions for more advanced transactions;
 
 Improvements:
 
