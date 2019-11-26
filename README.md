@@ -192,10 +192,10 @@ spreaded over several months (default is 24), where each of those months 1/24 of
 function() {
 
 // script constants
-const destination = '010166d96586cc4d678eedca31a03d36675873b4e4365066a75a54d0cdda5879bdd3df1b54a698'
+const destination = '<ENTER WALLET ADDRESS HERE>'
 const periodMonthCount = 24
 const startUnlockDateTime = '2020.01.01 00:00:00'
-const amount = new Currency('42')
+const amount = new Currency('<ENTER AMOUNT HERE, e.g: 42.345>')
 const message = ''
 
 // generate periodic pay info
