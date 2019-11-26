@@ -192,10 +192,10 @@ spreaded over several months (default is 24), where each of those months 1/24 of
 function() {
 
 // script constants
-const destination = '01547499996a673c394f7c1f229a20c6e75262b64f44d0fb45cf30f497da6c35710457a561f102'
+const destination = '010166d96586cc4d678eedca31a03d36675873b4e4365066a75a54d0cdda5879bdd3df1b54a698'
 const periodMonthCount = 24
 const startUnlockDateTime = '2020.01.01 00:00:00'
-const amount = new Currency('500')
+const amount = new Currency('42')
 const message = ''
 
 // generate periodic pay info
@@ -237,7 +237,7 @@ unlockInfo.forEach((unlockPair) => {
 // send the transaction and return the result promise
 const resprom = builder.send({ message: message ? message : null }).then(result => {
     return {
-        output: `Successfully sent ${amount.str({unit: true})} to ${destination} unlocked over ${periodMonthCount} month(s) starting at ${startUnlockDateTime}!`,
+        output: `successfully sent ${amount.str({unit: true})} to ${destination} unlocked over ${periodMonthCount} month(s) starting at ${startUnlockDateTime} as Txn ${result.transaction.id}`,
     }
 })
 
