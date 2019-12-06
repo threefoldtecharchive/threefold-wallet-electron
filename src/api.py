@@ -1656,7 +1656,7 @@ class CoinTransactionBuilder:
 
         :returns: a promise that resolves with a transaction ID or rejects with an Exception
         """
-        message, sender, data = jsfunc.opts_get(opts, 'message', 'sender', 'data')
+        message, sender, data, merge, merge_min_co_count = jsfunc.opts_get(opts, 'message', 'sender', 'data', 'merge', 'mergeMinOutputCount')
         if data == None and (message != None or sender != None):
             if isinstance(message, str):
                 data = FormattedSenderMessageData(sender=sender, message=message).to_bin()
@@ -1669,8 +1669,10 @@ class CoinTransactionBuilder:
                 self._wallet._account._update_unconfirmed_account_balance_from_transaction(result.transaction)
             return result
         return jsasync.chain(
-            self._builder.send(data=data, balance=self._wallet.balance._tfbalance),
-            cb)
+            self._builder.send(data=data, balance=self._wallet.balance._tfbalance,
+                merge=(True if merge else False),
+                merge_min_co_count=(int(merge_min_co_count) if merge_min_co_count else None),
+            ), cb)
 
 
 class MultiSignatureCoinTransactionBuilder:
@@ -1701,7 +1703,7 @@ class MultiSignatureCoinTransactionBuilder:
         return self
 
     def send(self, opts=None):
-        message, sender, data = jsfunc.opts_get(opts, 'message', 'sender', 'data')
+        message, sender, data, merge, merge_min_co_count = jsfunc.opts_get(opts, 'message', 'sender', 'data', 'merge', 'mergeMinOutputCount')
         if data == None and (message != None or sender != None):
             if isinstance(message, str):
                 data = FormattedSenderMessageData(sender=sender, message=message).to_bin()
@@ -1715,7 +1717,10 @@ class MultiSignatureCoinTransactionBuilder:
             source=self._wallet.address,
             refund=self._wallet.address,
             data=data,
-            balance=tfbalance)
+            balance=tfbalance,
+            merge=(True if merge else False),
+            merge_min_co_count=(int(merge_min_co_count) if merge_min_co_count else None),
+        )
 
         def submitted_cb(result):
             if result.submitted:

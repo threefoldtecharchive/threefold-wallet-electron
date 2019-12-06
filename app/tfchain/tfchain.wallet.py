@@ -1820,7 +1820,7 @@ class CoinTransactionBuilder():
         self._txn.coin_output_add(value=amount, condition=recipient)
         return self
 
-    def send(self, source=None, refund=None, data=None, balance=None):
+    def send(self, source=None, refund=None, data=None, balance=None, merge=False, merge_min_co_count=None):
         if self._txn_send:
             raise RuntimeError("coin transaction builder is already consumed")
 
@@ -1829,41 +1829,73 @@ class CoinTransactionBuilder():
 
         balance_is_cached = (balance != None)
         def balance_cb(balance):
-            # fund amount
-            amount = Currency.sum(*[co.value for co in txn.coin_outputs])
-            miner_fee = self._wallet.network_type.minimum_miner_fee()
-            inputs, remainder, suggested_refund = balance.fund(amount.plus(miner_fee), source=source)
+            if not merge: # regular fund logic
+                # fund amount
+                amount = Currency.sum(*[co.value for co in txn.coin_outputs])
+                miner_fee = self._wallet.network_type.minimum_miner_fee()
+                inputs, remainder, suggested_refund = balance.fund(amount.plus(miner_fee), source=source)
 
-            # if there is data to be added, add it as well
-            if data != None:
-                txn.data = data
+                # if there is data to be added, add it as well
+                if data != None:
+                    txn.data = data
 
-            # compute the amount of coin inputs we can accept, and ensure we do not have more
-            # > 16e3 is the maximum size allowed by rivine-chains
-            # > 307 is the size in bytes of a txn without arb. data, one miner fee, and no inputs/outputs
-            # > 51 bytes is required per (coin) output
-            # > 169 bytes is required per (coin) input
-            extraBytesCount = 0
-            if len(txn.coin_outputs) > 0 and txn.coin_outputs[0].condition.ctype == 3:
-                extraBytesCount = 17 # add 17 bytes for lock time condition
-            maxInputCount = floor((16e3 - 307 - (51 * len(txn.coin_outputs)) - len(txn.data) - extraBytesCount) / 169)
-            if len(inputs) > maxInputCount:
-                raise tferrors.InsufficientFunds(
-                    "insufficient big funds funds in this wallet: {} coin inputs overflow the allowed {} inputs".format(
-                        len(inputs), maxInputCount))
+                # compute the amount of coin inputs we can accept, and ensure we do not have more
+                # > 16e3 is the maximum size allowed by rivine-chains
+                # > 307 is the size in bytes of a txn without arb. data, one miner fee, and no inputs/outputs
+                # > 51 bytes is required per (coin) output
+                # > 169 bytes is required per (coin) input
+                extra_bytes_count = 0
+                if len(txn.coin_outputs) > 0 and txn.coin_outputs[0].condition.ctype == 3:
+                    extra_bytes_count = 17 # add 17 bytes for lock time condition
+                max_input_count = floor((16e3 - 307 - (51 * len(txn.coin_outputs)) - len(txn.data) - extra_bytes_count) / 169)
+                if len(inputs) > max_input_count:
+                    raise tferrors.InsufficientFunds(
+                        "insufficient big funds funds in this wallet: {} coin inputs overflow the allowed {} inputs".format(
+                            len(inputs), max_input_count))
+            else: # merge logic
+                # gather all outputs
+                all_outputs = []
+                for co in balance.outputs_available:
+                    all_outputs.append(co)
+                if len(all_outputs) < 92:
+                    for co in balance.outputs_unconfirmed_available:
+                        all_outputs.append(co)
+                all_outputs.sort(lambda co: float(co.value.str()))
 
-            # define the refund condition
-            if refund == None: # automatically choose a refund condition if none is given
-                if suggested_refund == None:
-                    refund = ConditionTypes.unlockhash_new(unlockhash=self._wallet.address)
-                else:
-                    refund = suggested_refund
-            else:
-                # use the given refund condition (defined as a recipient)
-                refund = ConditionTypes.from_recipient(refund)
+                # select outputs to use (low ones)
+                output_count = min(len(all_outputs), 92) # 92 is a hardcoded constant of allowed coin outputs
+
+                if not output_count or (merge_min_co_count and output_count < min(92, merge_min_co_count)):
+                    # early return in case not enough outputs to merge
+                    def stub_cb(resolve, reject):
+                        resolve(TransactionSendResult(txn, False))
+                    return jsasync.promise_new(stub_cb)
+
+                used_outputs = all_outputs[:output_count]
+
+                # select the inputs from these inputs
+                inputs = [CoinInput.from_coin_output(co) for co in used_outputs]
+                remainder = Currency()
+                suggested_refund = None
+
+                # select and create the output for these inputs
+                miner_fee = self._wallet.network_type.minimum_miner_fee()
+                txn.coin_output_add(
+                    Currency.sum(*[co.value for co in used_outputs]).minus(miner_fee),
+                    used_outputs[output_count-1].condition, # use the address with the highest value
+                )
 
             # add refund coin output if needed
             if remainder.greater_than(0):
+                # define the refund condition
+                if refund == None: # automatically choose a refund condition if none is given
+                    if suggested_refund == None:
+                        refund = ConditionTypes.unlockhash_new(unlockhash=self._wallet.address)
+                    else:
+                        refund = suggested_refund
+                else:
+                    # use the given refund condition (defined as a recipient)
+                    refund = ConditionTypes.from_recipient(refund)
                 txn.coin_output_add(value=remainder, condition=refund)
             # add the miner fee
             txn.miner_fee_add(miner_fee)

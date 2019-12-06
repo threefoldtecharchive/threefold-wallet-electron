@@ -1254,7 +1254,7 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 		self._txn.coin_output_add (__kwargtrans__ ({value: amount, condition: recipient}));
 		return self;
 	});},
-	get send () {return __get__ (this, function (self, source, refund, data, balance) {
+	get send () {return __get__ (this, function (self, source, refund, data, balance, merge, merge_min_co_count) {
 		if (typeof source == 'undefined' || (source != null && source.hasOwnProperty ("__kwargtrans__"))) {;
 			var source = null;
 		};
@@ -1267,6 +1267,12 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 		if (typeof balance == 'undefined' || (balance != null && balance.hasOwnProperty ("__kwargtrans__"))) {;
 			var balance = null;
 		};
+		if (typeof merge == 'undefined' || (merge != null && merge.hasOwnProperty ("__kwargtrans__"))) {;
+			var merge = false;
+		};
+		if (typeof merge_min_co_count == 'undefined' || (merge_min_co_count != null && merge_min_co_count.hasOwnProperty ("__kwargtrans__"))) {;
+			var merge_min_co_count = null;
+		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -1278,6 +1284,8 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 						case 'refund': var refund = __allkwargs0__ [__attrib0__]; break;
 						case 'data': var data = __allkwargs0__ [__attrib0__]; break;
 						case 'balance': var balance = __allkwargs0__ [__attrib0__]; break;
+						case 'merge': var merge = __allkwargs0__ [__attrib0__]; break;
+						case 'merge_min_co_count': var merge_min_co_count = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
@@ -1306,43 +1314,111 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 			}
 			else {
 			}
-			var amount = Currency.sum (...(function () {
-				var __accu0__ = [];
-				for (var co of txn.coin_outputs) {
-					__accu0__.append (co.value);
+			if (!(merge)) {
+				var amount = Currency.sum (...(function () {
+					var __accu0__ = [];
+					for (var co of txn.coin_outputs) {
+						__accu0__.append (co.value);
+					}
+					return __accu0__;
+				}) ());
+				var miner_fee = self._wallet.network_type.minimum_miner_fee ();
+				var __left0__ = balance.fund (amount.plus (miner_fee), __kwargtrans__ ({source: source}));
+				var inputs = __left0__ [0];
+				var remainder = __left0__ [1];
+				var suggested_refund = __left0__ [2];
+				if (data != null) {
+					txn.data = data;
 				}
-				return __accu0__;
-			}) ());
-			var miner_fee = self._wallet.network_type.minimum_miner_fee ();
-			var __left0__ = balance.fund (amount.plus (miner_fee), __kwargtrans__ ({source: source}));
-			var inputs = __left0__ [0];
-			var remainder = __left0__ [1];
-			var suggested_refund = __left0__ [2];
-			if (data != null) {
-				txn.data = data;
-			}
-			var extraBytesCount = 0;
-			if (len (txn.coin_outputs) > 0 && txn.coin_outputs [0].condition.ctype == 3) {
-				var extraBytesCount = 17;
-			}
-			var maxInputCount = floor (((((16000.0 - 307) - 51 * len (txn.coin_outputs)) - len (txn.data)) - extraBytesCount) / 169);
-			if (len (inputs) > maxInputCount) {
-				var __except0__ = tferrors.InsufficientFunds ('insufficient big funds funds in this wallet: {} coin inputs overflow the allowed {} inputs'.format (len (inputs), maxInputCount));
-				__except0__.__cause__ = null;
-				throw __except0__;
-			}
-			if (refund == null) {
-				if (suggested_refund == null) {
-					var refund = ConditionTypes.unlockhash_new (__kwargtrans__ ({unlockhash: self._wallet.address}));
+				var extra_bytes_count = 0;
+				if (len (txn.coin_outputs) > 0 && txn.coin_outputs [0].condition.ctype == 3) {
+					var extra_bytes_count = 17;
 				}
-				else {
-					var refund = suggested_refund;
+				var max_input_count = floor (((((16000.0 - 307) - 51 * len (txn.coin_outputs)) - len (txn.data)) - extra_bytes_count) / 169);
+				if (len (inputs) > max_input_count) {
+					var __except0__ = tferrors.InsufficientFunds ('insufficient big funds funds in this wallet: {} coin inputs overflow the allowed {} inputs'.format (len (inputs), max_input_count));
+					__except0__.__cause__ = null;
+					throw __except0__;
 				}
 			}
 			else {
-				var refund = ConditionTypes.from_recipient (refund);
+				var all_outputs = [];
+				for (var co of balance.outputs_available) {
+					all_outputs.append (co);
+				}
+				if (len (all_outputs) < 92) {
+					for (var co of balance.outputs_unconfirmed_available) {
+						all_outputs.append (co);
+					}
+				}
+				all_outputs.py_sort ((function __lambda__ (co) {
+					if (arguments.length) {
+						var __ilastarg0__ = arguments.length - 1;
+						if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+							var __allkwargs0__ = arguments [__ilastarg0__--];
+							for (var __attrib0__ in __allkwargs0__) {
+								switch (__attrib0__) {
+									case 'co': var co = __allkwargs0__ [__attrib0__]; break;
+								}
+							}
+						}
+					}
+					else {
+					}
+					return float (co.value.str ());
+				}));
+				var output_count = min (len (all_outputs), 92);
+				if (!(output_count) || merge_min_co_count && output_count < min (92, merge_min_co_count)) {
+					var stub_cb = function (resolve, reject) {
+						if (arguments.length) {
+							var __ilastarg0__ = arguments.length - 1;
+							if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+								var __allkwargs0__ = arguments [__ilastarg0__--];
+								for (var __attrib0__ in __allkwargs0__) {
+									switch (__attrib0__) {
+										case 'resolve': var resolve = __allkwargs0__ [__attrib0__]; break;
+										case 'reject': var reject = __allkwargs0__ [__attrib0__]; break;
+									}
+								}
+							}
+						}
+						else {
+						}
+						resolve (TransactionSendResult (txn, false));
+					};
+					return jsasync.promise_new (stub_cb);
+				}
+				var used_outputs = all_outputs.__getslice__ (0, output_count, 1);
+				var inputs = (function () {
+					var __accu0__ = [];
+					for (var co of used_outputs) {
+						__accu0__.append (CoinInput.from_coin_output (co));
+					}
+					return __accu0__;
+				}) ();
+				var remainder = Currency ();
+				var suggested_refund = null;
+				var miner_fee = self._wallet.network_type.minimum_miner_fee ();
+				txn.coin_output_add (Currency.sum (...(function () {
+					var __accu0__ = [];
+					for (var co of used_outputs) {
+						__accu0__.append (co.value);
+					}
+					return __accu0__;
+				}) ()).minus (miner_fee), used_outputs [output_count - 1].condition);
 			}
 			if (remainder.greater_than (0)) {
+				if (refund == null) {
+					if (suggested_refund == null) {
+						var refund = ConditionTypes.unlockhash_new (__kwargtrans__ ({unlockhash: self._wallet.address}));
+					}
+					else {
+						var refund = suggested_refund;
+					}
+				}
+				else {
+					var refund = ConditionTypes.from_recipient (refund);
+				}
 				txn.coin_output_add (__kwargtrans__ ({value: remainder, condition: refund}));
 			}
 			txn.miner_fee_add (miner_fee);

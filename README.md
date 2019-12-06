@@ -249,6 +249,54 @@ return {
 }()
 ```
 
+This is an example script that allows you to ensure your wallet only has a
+limited amount of coin outputs, doing paid merge transactions if required:
+
+```javascript
+function() {
+
+// script constants
+const maxOutputsPerWalletCount = 32
+
+// callback used to merge
+let txs = []
+const merge_callback = (result) => {
+    if (result) {
+        if (!result.submitted) {
+            // special case in case no transactions were submitted
+            if (txs.length == 0) {
+                return { output: 'No merge transactions have been submitted!' }
+            }
+
+            // get the total merged value
+            let mergeTotal = new Currency()
+            txs.forEach(tx => {
+                tx.coin_outputs.forEach(co => {
+                    mergeTotal = mergeTotal.plus(co.value)
+                })
+            })
+
+            // return the merge info
+            let output = `Successfully merged ${mergeTotal.str({unit: true})} in ${txs.length} merge transaction(s). All Transactions: `
+            output += txs.map(tx => tx.id).join(', ')
+            return { output }
+        }
+
+        // add submitted transaction
+        txs.push(result.transaction)
+    }
+
+    // send next merge transaction
+    const builder = wallet.transaction_new()
+    return builder.send({ merge: true, mergeMinOutputCount: maxOutputsPerWalletCount+1 }).then(merge_callback)
+}
+
+// merge & report
+return { output: merge_callback() }
+
+}()
+```
+
 ## Developer Docs
 
 ### Run as developer

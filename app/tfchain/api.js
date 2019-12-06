@@ -4028,10 +4028,12 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 		}
 		else {
 		}
-		var __left0__ = jsfunc.opts_get (opts, 'message', 'sender', 'data');
+		var __left0__ = jsfunc.opts_get (opts, 'message', 'sender', 'data', 'merge', 'mergeMinOutputCount');
 		var message = __left0__ [0];
 		var sender = __left0__ [1];
 		var data = __left0__ [2];
+		var merge = __left0__ [3];
+		var merge_min_co_count = __left0__ [4];
 		if (data == null && (message != null || sender != null)) {
 			if (isinstance (message, str)) {
 				var data = FormattedSenderMessageData (__kwargtrans__ ({sender: sender, message: message})).to_bin ();
@@ -4064,7 +4066,7 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 			}
 			return result;
 		};
-		return jsasync.chain (self._builder.send (__kwargtrans__ ({data: data, balance: self._wallet.balance._tfbalance})), cb);
+		return jsasync.chain (self._builder.send (__kwargtrans__ ({data: data, balance: self._wallet.balance._tfbalance, merge: (merge ? true : false), merge_min_co_count: (merge_min_co_count ? int (merge_min_co_count) : null)})), cb);
 	});}
 });
 Object.defineProperty (CoinTransactionBuilder, 'transaction', property.call (CoinTransactionBuilder, CoinTransactionBuilder._get_transaction));;
@@ -4166,10 +4168,12 @@ export var MultiSignatureCoinTransactionBuilder =  __class__ ('MultiSignatureCoi
 		}
 		else {
 		}
-		var __left0__ = jsfunc.opts_get (opts, 'message', 'sender', 'data');
+		var __left0__ = jsfunc.opts_get (opts, 'message', 'sender', 'data', 'merge', 'mergeMinOutputCount');
 		var message = __left0__ [0];
 		var sender = __left0__ [1];
 		var data = __left0__ [2];
+		var merge = __left0__ [3];
+		var merge_min_co_count = __left0__ [4];
 		if (data == null && (message != null || sender != null)) {
 			if (isinstance (message, str)) {
 				var data = FormattedSenderMessageData (__kwargtrans__ ({sender: sender, message: message})).to_bin ();
@@ -4185,7 +4189,7 @@ export var MultiSignatureCoinTransactionBuilder =  __class__ ('MultiSignatureCoi
 		}
 		var balance = self._wallet.balance;
 		var tfbalance = balance._tfbalance;
-		var p = self._builder.send (__kwargtrans__ ({source: self._wallet.address, refund: self._wallet.address, data: data, balance: tfbalance}));
+		var p = self._builder.send (__kwargtrans__ ({source: self._wallet.address, refund: self._wallet.address, data: data, balance: tfbalance, merge: (merge ? true : false), merge_min_co_count: (merge_min_co_count ? int (merge_min_co_count) : null)}));
 		var submitted_cb = function (result) {
 			if (arguments.length) {
 				var __ilastarg0__ = arguments.length - 1;
