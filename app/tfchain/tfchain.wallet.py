@@ -19,6 +19,8 @@ from tfchain.types.PrimitiveTypes import Hash, Currency
 from tfchain.types.ConditionTypes import UnlockHash, UnlockHashType, ConditionUnlockHash, ConditionMultiSignature, ConditionCustodyFee
 from tfchain.types.FulfillmentTypes import FulfillmentMultiSignature, PublicKeySignaturePair
 
+from math import floor
+
 def assymetric_key_pair_generate(entropy, index):
     if not isinstance(entropy, (bytes, bytearray)) and not jsarr.is_uint8_array(entropy):
         raise TypeError("entropy is of an invalid type {}".format(type(entropy)))
@@ -1832,6 +1834,24 @@ class CoinTransactionBuilder():
             miner_fee = self._wallet.network_type.minimum_miner_fee()
             inputs, remainder, suggested_refund = balance.fund(amount.plus(miner_fee), source=source)
 
+            # if there is data to be added, add it as well
+            if data != None:
+                txn.data = data
+
+            # compute the amount of coin inputs we can accept, and ensure we do not have more
+            # > 16e3 is the maximum size allowed by rivine-chains
+            # > 307 is the size in bytes of a txn without arb. data, one miner fee, and no inputs/outputs
+            # > 51 bytes is required per (coin) output
+            # > 169 bytes is required per (coin) input
+            extraBytesCount = 0
+            if len(txn.coin_outputs) > 0 and txn.coin_outputs[0].condition.ctype == 3:
+                extraBytesCount = 17 # add 17 bytes for lock time condition
+            maxInputCount = floor((16e3 - 307 - (51 * len(txn.coin_outputs)) - len(txn.data) - extraBytesCount) / 169)
+            if len(inputs) > maxInputCount:
+                raise tferrors.InsufficientFunds(
+                    "insufficient big funds funds in this wallet: {} coin inputs overflow the allowed {} inputs".format(
+                        len(inputs), maxInputCount))
+
             # define the refund condition
             if refund == None: # automatically choose a refund condition if none is given
                 if suggested_refund == None:
@@ -1859,10 +1879,6 @@ class CoinTransactionBuilder():
                         raise Exception("BUG: cannot define the required custody fee if no parent output is linked to coin input {}".format(ci.parentid.__str__()))
                     total_custody_fee = total_custody_fee.plus(ci.parent_output.custody_fee)
                 txn.coin_output_add(value=total_custody_fee, condition=ConditionCustodyFee(balance.chain_time))
-
-            # if there is data to be added, add it as well
-            if data != None:
-                txn.data = data
 
             # generate the signature requests
             sig_requests = txn.signature_requests_new()
