@@ -1,3 +1,9 @@
+# v0.6.1 (2019.12.06)
+
+Features:
+
+- add support for merging of outputs using a scripted transactions (see added example in README);
+
 # v0.6.0 (2019.11.25)
 
 Features:
