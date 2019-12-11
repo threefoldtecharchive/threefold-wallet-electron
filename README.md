@@ -299,6 +299,22 @@ return { output: merge_callback() }
 
 ## Developer Docs
 
+### Debug a Production Build
+
+#### Debug a Production Build on MacOS
+
+1. open App through `lldb` (required Xcode command-line tools, which can be installed using `xcode-select --install`)
+```
+lldb /Applications/Threefold-Wallet.app
+```
+2. Using the opened debugger open a window of your app:
+```
+run --remote-debugging-port=8315
+```
+3. Open Chrome at http://localhost:8315/
+4. Click on the name of the App "Threefold Wallet"
+5. Many of the regular dev tools that you are used to in dev builds are now available. To check warnings and errors you can for example open the console.
+
 ### Run as developer
 
 **Install dependencies**
