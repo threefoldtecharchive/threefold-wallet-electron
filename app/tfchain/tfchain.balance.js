@@ -1,4 +1,5 @@
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __proxy__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, abs, all, any, assert, bool, bytearray, bytes, callable, chr, copy, deepcopy, delattr, dict, dir, divmod, enumerate, filter, float, getattr, hasattr, input, int, isinstance, issubclass, len, list, map, max, min, object, ord, pow, print, property, py_TypeError, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
+import {shuffle} from './random.js';
 import {Type} from './tfchain.chain.js';
 import {CoinInput} from './tfchain.types.IO.js';
 import {ConditionBaseClass, ConditionCustodyFee, ConditionMultiSignature, ConditionNil, UnlockHash, UnlockHashType} from './tfchain.types.ConditionTypes.js';
@@ -754,9 +755,12 @@ export var WalletBalance =  __class__ ('WalletBalance', [object], {
 		}
 		return txns;
 	});},
-	get fund () {return __get__ (this, function (self, amount, source) {
+	get fund () {return __get__ (this, function (self, amount, source, max_input_count) {
 		if (typeof source == 'undefined' || (source != null && source.hasOwnProperty ("__kwargtrans__"))) {;
 			var source = null;
+		};
+		if (typeof max_input_count == 'undefined' || (max_input_count != null && max_input_count.hasOwnProperty ("__kwargtrans__"))) {;
+			var max_input_count = null;
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -767,6 +771,7 @@ export var WalletBalance =  __class__ ('WalletBalance', [object], {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
 						case 'amount': var amount = __allkwargs0__ [__attrib0__]; break;
 						case 'source': var source = __allkwargs0__ [__attrib0__]; break;
+						case 'max_input_count': var max_input_count = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
@@ -830,7 +835,7 @@ export var WalletBalance =  __class__ ('WalletBalance', [object], {
 			var collected = __left0__ [1];
 		}
 		else {
-			var __left0__ = self._fund_individual (amount, addresses);
+			var __left0__ = self._fund_individual (amount, addresses, __kwargtrans__ ({max_input_count: max_input_count}));
 			var outputs = __left0__ [0];
 			var collected = __left0__ [1];
 		}
@@ -847,7 +852,10 @@ export var WalletBalance =  __class__ ('WalletBalance', [object], {
 		__except0__.__cause__ = null;
 		throw __except0__;
 	});},
-	get _fund_individual () {return __get__ (this, function (self, amount, addresses) {
+	get _fund_individual () {return __get__ (this, function (self, amount, addresses, max_input_count) {
+		if (typeof max_input_count == 'undefined' || (max_input_count != null && max_input_count.hasOwnProperty ("__kwargtrans__"))) {;
+			var max_input_count = null;
+		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
@@ -857,6 +865,7 @@ export var WalletBalance =  __class__ ('WalletBalance', [object], {
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
 						case 'amount': var amount = __allkwargs0__ [__attrib0__]; break;
 						case 'addresses': var addresses = __allkwargs0__ [__attrib0__]; break;
+						case 'max_input_count': var max_input_count = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
@@ -896,23 +905,33 @@ export var WalletBalance =  __class__ ('WalletBalance', [object], {
 			return 0;
 		};
 		var outputs_available = jsarr.py_sort (outputs_available, sort_output_by_value);
+		var max_input_count = max_input_count || _MAX_RIVINE_TRANSACTION_INPUTS;
 		var collected = Currency ();
 		var outputs = [];
-		for (var co of outputs_available) {
+		var last_index = null;
+		for (var [idx, co] of enumerate (outputs_available)) {
 			if (co.spendable_value.greater_than_or_equal_to (amount)) {
 				return tuple ([[co], co.spendable_value]);
 			}
 			var collected = collected.plus (co.spendable_value);
 			outputs.append (co);
-			if (len (outputs) > _MAX_RIVINE_TRANSACTION_INPUTS) {
-				var collected = collected.minus (jsarr.py_pop (outputs, 0).spendable_value);
-			}
 			if (collected.greater_than_or_equal_to (amount)) {
 				return tuple ([outputs, collected]);
 			}
+			if (len (outputs) == max_input_count) {
+				var last_index = idx;
+				break;
+			}
 		}
-		if (collected.greater_than_or_equal_to (amount)) {
-			return tuple ([outputs, collected]);
+		if (last_index) {
+			var li_stop = min (len (outputs), len (outputs_available));
+			for (var [idx, co] of py_reversed (list (enumerate (outputs_available.__getslice__ (last_index, li_stop, 1))))) {
+				var collected = collected.minus (outputs [idx].spendable_value).plus (co.spendable_value);
+				outputs [idx] = co;
+				if (collected.greater_than_or_equal_to (amount)) {
+					return tuple ([outputs, collected]);
+				}
+			}
 		}
 		var outputs_available = (function () {
 			var __accu0__ = [];
@@ -924,14 +943,30 @@ export var WalletBalance =  __class__ ('WalletBalance', [object], {
 			return __accu0__;
 		}) ();
 		var outputs_available = jsarr.py_sort (outputs_available, sort_output_by_value, __kwargtrans__ ({reverse: true}));
+		var insert_index = null;
 		for (var co of outputs_available) {
-			if (co.value.greater_than_or_equal_to (amount)) {
-				return tuple ([[co], co.value]);
+			if (len (outputs) < max_input_count) {
+				var collected = collected.plus (co.value);
+				outputs.append (co);
 			}
-			var collected = collected.plus (co.value);
-			outputs.append (co);
-			if (len (outputs) > _MAX_RIVINE_TRANSACTION_INPUTS) {
-				var collected = collected.minus (outputs.py_pop (0).value);
+			else {
+				if (!(insert_index)) {
+					for (var [idx, eco] of enumerate (outputs)) {
+						if (co.spendable_value > eco.spendable_value) {
+							var insert_index = idx;
+							break;
+						}
+					}
+					if (!(insert_index)) {
+						return tuple ([outputs, collected]);
+					}
+				}
+				else if (insert_index >= len (outputs) || outputs [insert_index].spendable_value <= co.spendable_value) {
+					return tuple ([outputs, collected]);
+				}
+				var collected = collected.minus (outputs [insert_index].spendable_value).plus (co.spendable_value);
+				outputs [insert_index] = co;
+				insert_index++;
 			}
 			if (collected.greater_than_or_equal_to (amount)) {
 				return tuple ([outputs, collected]);
@@ -1342,9 +1377,12 @@ export var MultiSigWalletBalance =  __class__ ('MultiSigWalletBalance', [WalletB
 		}
 		return __super__ (MultiSigWalletBalance, 'balance_add') (self, other);
 	});},
-	get fund () {return __get__ (this, function (self, amount, source) {
+	get fund () {return __get__ (this, function (self, amount, source, max_input_count) {
 		if (typeof source == 'undefined' || (source != null && source.hasOwnProperty ("__kwargtrans__"))) {;
 			var source = null;
+		};
+		if (typeof max_input_count == 'undefined' || (max_input_count != null && max_input_count.hasOwnProperty ("__kwargtrans__"))) {;
+			var max_input_count = null;
 		};
 		if (arguments.length) {
 			var __ilastarg0__ = arguments.length - 1;
@@ -1355,6 +1393,7 @@ export var MultiSigWalletBalance =  __class__ ('MultiSigWalletBalance', [WalletB
 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
 						case 'amount': var amount = __allkwargs0__ [__attrib0__]; break;
 						case 'source': var source = __allkwargs0__ [__attrib0__]; break;
+						case 'max_input_count': var max_input_count = __allkwargs0__ [__attrib0__]; break;
 					}
 				}
 			}
@@ -1378,7 +1417,7 @@ export var MultiSigWalletBalance =  __class__ ('MultiSigWalletBalance', [WalletB
 				throw __except0__;
 			}
 		}
-		var __left0__ = self._fund_individual (amount, [source]);
+		var __left0__ = self._fund_individual (amount, [source], __kwargtrans__ ({max_input_count: max_input_count}));
 		var outputs = __left0__ [0];
 		var collected = __left0__ [1];
 		if (collected.greater_than_or_equal_to (amount)) {

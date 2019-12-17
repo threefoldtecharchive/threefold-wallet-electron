@@ -1,5 +1,4 @@
 import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __proxy__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, abs, all, any, assert, bool, bytearray, bytes, callable, chr, copy, deepcopy, delattr, dict, dir, divmod, enumerate, filter, float, getattr, hasattr, input, int, isinstance, issubclass, len, list, map, max, min, object, ord, pow, print, property, py_TypeError, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
-import {floor} from './math.js';
 import {FulfillmentMultiSignature, PublicKeySignaturePair} from './tfchain.types.FulfillmentTypes.js';
 import {ConditionCustodyFee, ConditionMultiSignature, ConditionUnlockHash, UnlockHash, UnlockHashType} from './tfchain.types.ConditionTypes.js';
 import {Currency, Hash} from './tfchain.types.PrimitiveTypes.js';
@@ -777,7 +776,8 @@ export var TFChainMinter =  __class__ ('TFChainMinter', [object], {
 			}
 			else {
 			}
-			var __left0__ = balance.fund (amount.plus (miner_fee), __kwargtrans__ ({source: source}));
+			var max_input_count = Math.floor (((16000.0 - 307) - len (txn.data)) / 169);
+			var __left0__ = balance.fund (amount.plus (miner_fee), __kwargtrans__ ({source: source, max_input_count: max_input_count}));
 			var inputs = __left0__ [0];
 			var remainder = __left0__ [1];
 			var suggested_refund = __left0__ [2];
@@ -1323,18 +1323,18 @@ export var CoinTransactionBuilder =  __class__ ('CoinTransactionBuilder', [objec
 					return __accu0__;
 				}) ());
 				var miner_fee = self._wallet.network_type.minimum_miner_fee ();
-				var __left0__ = balance.fund (amount.plus (miner_fee), __kwargtrans__ ({source: source}));
+				var extra_bytes_count = 0;
+				if (len (txn.coin_outputs) > 0 && txn.coin_outputs [0].condition.ctype == 3) {
+					var extra_bytes_count = 17;
+				}
+				var max_input_count = Math.floor (((((16000.0 - 307) - 51 * len (txn.coin_outputs)) - len (txn.data)) - extra_bytes_count) / 169);
+				var __left0__ = balance.fund (amount.plus (miner_fee), __kwargtrans__ ({source: source, max_input_count: max_input_count}));
 				var inputs = __left0__ [0];
 				var remainder = __left0__ [1];
 				var suggested_refund = __left0__ [2];
 				if (data != null) {
 					txn.data = data;
 				}
-				var extra_bytes_count = 0;
-				if (len (txn.coin_outputs) > 0 && txn.coin_outputs [0].condition.ctype == 3) {
-					var extra_bytes_count = 17;
-				}
-				var max_input_count = floor (((((16000.0 - 307) - 51 * len (txn.coin_outputs)) - len (txn.data)) - extra_bytes_count) / 169);
 				if (len (inputs) > max_input_count) {
 					var __except0__ = tferrors.InsufficientFunds ('insufficient big funds funds in this wallet: {} coin inputs overflow the allowed {} inputs'.format (len (inputs), max_input_count));
 					__except0__.__cause__ = null;

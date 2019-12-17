@@ -19,8 +19,6 @@ from tfchain.types.PrimitiveTypes import Hash, Currency
 from tfchain.types.ConditionTypes import UnlockHash, UnlockHashType, ConditionUnlockHash, ConditionMultiSignature, ConditionCustodyFee
 from tfchain.types.FulfillmentTypes import FulfillmentMultiSignature, PublicKeySignaturePair
 
-from math import floor
-
 def assymetric_key_pair_generate(entropy, index):
     if not isinstance(entropy, (bytes, bytearray)) and not jsarr.is_uint8_array(entropy):
         raise TypeError("entropy is of an invalid type {}".format(type(entropy)))
@@ -647,8 +645,14 @@ class TFChainMinter():
             raise ValueError("a strict positive amount is required to be burned")
 
         def balance_cb(balance):
+            # compute the amount of coin inputs we can accept, and ensure we do not have more
+            # > 16e3 is the maximum size allowed by rivine-chains
+            # > 307 is the size in bytes of a txn without arb. data, one miner fee, and no inputs/outputs
+            # > 169 bytes is required per (coin) input
+            max_input_count = (16e3 - 307 - len(txn.data)) // 169
+
             # fund amount
-            inputs, remainder, suggested_refund = balance.fund(amount.plus(miner_fee), source=source)
+            inputs, remainder, suggested_refund = balance.fund(amount.plus(miner_fee), source=source, max_input_count=max_input_count)
 
             # define the refund condition
             if refund == None: # automatically choose a refund condition if none is given
@@ -1833,11 +1837,6 @@ class CoinTransactionBuilder():
                 # fund amount
                 amount = Currency.sum(*[co.value for co in txn.coin_outputs])
                 miner_fee = self._wallet.network_type.minimum_miner_fee()
-                inputs, remainder, suggested_refund = balance.fund(amount.plus(miner_fee), source=source)
-
-                # if there is data to be added, add it as well
-                if data != None:
-                    txn.data = data
 
                 # compute the amount of coin inputs we can accept, and ensure we do not have more
                 # > 16e3 is the maximum size allowed by rivine-chains
@@ -1847,7 +1846,16 @@ class CoinTransactionBuilder():
                 extra_bytes_count = 0
                 if len(txn.coin_outputs) > 0 and txn.coin_outputs[0].condition.ctype == 3:
                     extra_bytes_count = 17 # add 17 bytes for lock time condition
-                max_input_count = floor((16e3 - 307 - (51 * len(txn.coin_outputs)) - len(txn.data) - extra_bytes_count) / 169)
+                max_input_count = (16e3 - 307 - (51 * len(txn.coin_outputs)) - len(txn.data) - extra_bytes_count) // 169
+
+                # fund the txn
+                inputs, remainder, suggested_refund = balance.fund(amount.plus(miner_fee), source=source, max_input_count=max_input_count)
+
+                # if there is data to be added, add it as well
+                if data != None:
+                    txn.data = data
+
+                # check that we do not have more than the max amount of coin inputs
                 if len(inputs) > max_input_count:
                     raise tferrors.InsufficientFunds(
                         "insufficient big funds funds in this wallet: {} coin inputs overflow the allowed {} inputs".format(

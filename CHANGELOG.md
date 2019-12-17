@@ -1,3 +1,9 @@
+# v0.6.2 (2019.12.18)
+
+Features:
+
+- change funding algorithm to help reduce the amount of UTXO in an active wallet;
+
 # v0.6.1 (2019.12.06)
 
 Features:

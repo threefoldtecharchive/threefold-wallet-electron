@@ -9,6 +9,8 @@ from tfchain.types.ConditionTypes import UnlockHash, UnlockHashType, ConditionBa
 from tfchain.types.IO import CoinInput
 from tfchain.chain import Type
 
+from random import shuffle
+
 
 _MAX_RIVINE_TRANSACTION_INPUTS = 85
 
@@ -368,7 +370,7 @@ class WalletBalance(object):
         # return all created transactions, if any
         return txns
 
-    def fund(self, amount, source=None):
+    def fund(self, amount, source=None, max_input_count=None):
         """
         Fund the specified amount with the available outputs of this wallet's balance.
         """
@@ -411,15 +413,31 @@ class WalletBalance(object):
         if len(addresses) == 0:
             outputs, collected = ([], Currency()) # start with nothing
         else:
-            outputs, collected = self._fund_individual(amount, addresses)
+            outputs, collected = self._fund_individual(amount, addresses, max_input_count=max_input_count)
 
         if collected.greater_than_or_equal_to(amount):
             # if we already have sufficient, we stop now
             return ([CoinInput.from_coin_output(co) for co in outputs], collected.minus(amount), refund)
         raise tferrors.InsufficientFunds("not enough funds available in the wallet to fund the requested amount")
 
-    def _fund_individual(self, amount, addresses):
+    def _fund_individual(self, amount, addresses, max_input_count=None):
+        """
+        Funding logic works as follows...
+
+        First collect all available outputs.
+
+        Secondly try to fund using the lowest (up to the highest) confirmed outputs available.
+        If we reach the limit and still didn't fund enough, try to replace from smallest to highest with
+        the remaining available unconfirmed outputs.
+
+        Lastly if we still couldn't fund, or perhaps we never reached the limit, we'll try to
+        fund using unconfirmed, starting from highest to lowest, and overwriting as long as we have higher
+        ones available to overwrite lower ones with.
+
+        If this last step failed than funding is simply not possible.
+        """
         outputs_available = [co for co in self.outputs_available if co.condition.unlockhash.__str__() in addresses]
+        # THIS SEEMS BUGGY: TO FIX!!!
         def sort_output_by_value(a, b):
             if a.spendable_value.less_than(b.spendable_value):
                 return -1
@@ -427,42 +445,56 @@ class WalletBalance(object):
                 return 1
             return 0
         outputs_available = jsarr.sort(outputs_available, sort_output_by_value)
+        max_input_count = max_input_count or _MAX_RIVINE_TRANSACTION_INPUTS # hardcode it at a low enough value
 
         collected = Currency()
         outputs = []
         # try to fund only with confirmed outputs, if possible
-        for co in outputs_available:
+        last_index = None
+        for idx, co in enumerate(outputs_available):
             if co.spendable_value.greater_than_or_equal_to(amount):
                 return [co], co.spendable_value
             collected = collected.plus(co.spendable_value)
             outputs.append(co)
-            if len(outputs) > _MAX_RIVINE_TRANSACTION_INPUTS:
-                # to not reach the input limit
-                collected = collected.minus(jsarr.pop(outputs, 0).spendable_value)
             if collected.greater_than_or_equal_to(amount):
                 return outputs, collected
-
-        if collected.greater_than_or_equal_to(amount):
-            # if we already have sufficient, we stop now
-            return outputs, collected
+            if len(outputs) == max_input_count:
+                last_index = idx
+                break
+        # overwrite smallest to highest outputs with big ones
+        if last_index:
+            li_stop = min(len(outputs), len(outputs_available))
+            for idx, co in reversed(list(enumerate(outputs_available[last_index:li_stop]))):
+                collected = collected.minus(outputs[idx].spendable_value).plus(co.spendable_value)
+                outputs[idx] = co
+                if collected.greater_than_or_equal_to(amount):
+                    return outputs, collected
 
         # use unconfirmed balance, not ideal, but acceptable
         outputs_available = [co for co in self.outputs_unconfirmed_available if co.condition.unlockhash.__str__() in addresses]
-        outputs_available = jsarr.sort(outputs_available, sort_output_by_value, reverse=True)
+        outputs_available = jsarr.sort(outputs_available, sort_output_by_value, reverse=True) # highest to lowest
+        insert_index = None
         for co in outputs_available:
-            if co.value.greater_than_or_equal_to(amount):
-                return [co], co.value
-            collected = collected.plus(co.value)
-            outputs.append(co)
-            if len(outputs) > _MAX_RIVINE_TRANSACTION_INPUTS:
-                # to not reach the input limit
-                collected = collected.minus(outputs.pop(0).value)
+            if len(outputs) < max_input_count:
+                collected = collected.plus(co.value)
+                outputs.append(co)
+            else:
+                if not insert_index: # find place to insert
+                    for idx, eco in enumerate(outputs):
+                        if co.spendable_value > eco.spendable_value:
+                            insert_index = idx
+                            break
+                    if not insert_index:
+                        return outputs, collected # nothing to do any further
+                elif insert_index >= len(outputs) or outputs[insert_index].spendable_value <= co.spendable_value:
+                    return outputs, collected # nothing to do any further
+                collected = collected.minus(outputs[insert_index].spendable_value).plus(co.spendable_value)
+                outputs[insert_index] = co
+                insert_index += 1
             if collected.greater_than_or_equal_to(amount):
                 return outputs, collected
-
         # we return whatever we have collected, no matter if it is sufficient
         return outputs, collected
-
 
 class SingleSigWalletBalance(WalletBalance):
     def __init__(self, *args, **kwargs):
@@ -610,7 +642,7 @@ class MultiSigWalletBalance(WalletBalance):
         # piggy-back on the super class for the actual merge logic
         return super().balance_add(other)
 
-    def fund(self, amount, source=None):
+    def fund(self, amount, source=None, max_input_count=None):
         """
         Fund the specified amount with the available outputs of this wallet's balance.
         """
@@ -624,7 +656,7 @@ class MultiSigWalletBalance(WalletBalance):
             if source != address:
                 raise ValueError("source is of an address different than this multisig' balance' address: {} != {}".format(source, address))
 
-        outputs, collected = self._fund_individual(amount, [source])
+        outputs, collected = self._fund_individual(amount, [source], max_input_count=max_input_count)
         if collected.greater_than_or_equal_to(amount):
             # if we already have sufficient, we stop now
             return ([CoinInput.from_coin_output(co) for co in outputs], collected.minus(amount), refund)
