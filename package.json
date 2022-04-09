@@ -272,7 +272,7 @@
     "history": "^4.7.2",
     "lodash": "^4.17.15",
     "lodash-es": "^4.17.15",
-    "moment": "^2.24.0",
+    "moment": "^2.29.2",
     "moment-timezone": "^0.5.25",
     "node-notifier": "^5.4.0",
     "qrcode.react": "^0.9.3",
